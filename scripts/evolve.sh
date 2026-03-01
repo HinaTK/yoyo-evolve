@@ -135,7 +135,12 @@ fi
 # Increment day counter
 echo "$((DAY + 1))" > DAY_COUNT
 
-# Commit any remaining uncommitted changes (journal, roadmap, day counter, etc.)
+# Rebuild website
+echo "→ Rebuilding website..."
+python3 scripts/build_site.py
+echo "  Site rebuilt."
+
+# Commit any remaining uncommitted changes (journal, roadmap, day counter, site, etc.)
 git add -A
 if ! git diff --cached --quiet; then
     git commit -m "Day $DAY: session wrap-up"
