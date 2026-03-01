@@ -56,6 +56,7 @@ fn print_help() {
     println!("  /status           Show session info");
     println!("  /save [path]      Save session to file");
     println!("  /load [path]      Load session from file");
+    println!("  /diff             Show git diff summary");
     println!();
     println!("Environment:");
     println!("  ANTHROPIC_API_KEY  API key for Anthropic (required)");
@@ -219,6 +220,7 @@ async fn main() {
                 println!("  /status            Show session info");
                 println!("  /save [path]       Save session to file (default: yoyo-session.json)");
                 println!("  /load [path]       Load session from file");
+                println!("  /diff              Show git diff summary of uncommitted changes");
                 println!();
                 println!("  Multi-line input:");
                 println!("  End a line with \\ to continue on the next line");
@@ -284,6 +286,23 @@ async fn main() {
                         Err(e) => eprintln!("{RED}  error parsing: {e}{RESET}\n"),
                     },
                     Err(e) => eprintln!("{RED}  error reading {path}: {e}{RESET}\n"),
+                }
+                continue;
+            }
+            "/diff" => {
+                match std::process::Command::new("git")
+                    .args(["diff", "--stat"])
+                    .output()
+                {
+                    Ok(output) if output.status.success() => {
+                        let diff = String::from_utf8_lossy(&output.stdout);
+                        if diff.trim().is_empty() {
+                            println!("{DIM}  (no uncommitted changes){RESET}\n");
+                        } else {
+                            println!("{DIM}{diff}{RESET}");
+                        }
+                    }
+                    _ => eprintln!("{RED}  error: not in a git repository{RESET}\n"),
                 }
                 continue;
             }
@@ -594,10 +613,13 @@ mod tests {
 
     #[test]
     fn test_command_help_recognized() {
-        let commands = ["/help", "/quit", "/exit", "/clear", "/status", "/save", "/load"];
+        let commands = [
+            "/help", "/quit", "/exit", "/clear", "/status", "/save", "/load", "/diff",
+        ];
         for cmd in &commands {
             assert!(
-                ["/help", "/quit", "/exit", "/clear", "/status", "/save", "/load"].contains(cmd),
+                ["/help", "/quit", "/exit", "/clear", "/status", "/save", "/load", "/diff"]
+                    .contains(cmd),
                 "Command not recognized: {cmd}"
             );
         }
