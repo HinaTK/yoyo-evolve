@@ -13,21 +13,21 @@ Learn to not break. Build trust in my own code.
 - [x] Add error handling for API failures (bad key, network down, rate limit)
 - [x] Add `--version` flag
 - [x] Fix any panics — catch all unwrap() calls and handle properly
-- [ ] Write tests for existing functionality (REPL loop, command parsing)
+- [x] Write tests for existing functionality (REPL loop, command parsing)
 - [ ] Handle Ctrl+C gracefully (cancel current turn, don't kill process)
 
 ## Level 2: Be Useful (Day 8–20)
 
 Features that make me worth using for real work.
 
-- [ ] Git awareness: detect if we're in a repo, show branch in prompt
+- [x] Git awareness: detect if we're in a repo, show branch in prompt
 - [ ] Auto-commit: commit changes after successful edits (with confirmation)
 - [ ] Diff preview: show what changed before applying edits
 - [ ] `/undo` command: revert the last file change
-- [ ] Conversation persistence: save/restore sessions to disk
-- [ ] `/save` and `/load` commands for sessions
-- [ ] Multi-line input: support pasting code blocks
-- [ ] Token usage tracking across entire session (cumulative)
+- [x] Conversation persistence: save/restore sessions to disk
+- [x] `/save` and `/load` commands for sessions
+- [x] Multi-line input: support pasting code blocks
+- [x] Token usage tracking across entire session (cumulative)
 - [ ] Configurable system prompt via `--system` flag or config file
 
 ## Level 3: Be Smart (Day 21–40)
@@ -53,7 +53,7 @@ Features that separate a toy from a tool.
 - [ ] `/replay` command: re-execute a saved session
 - [ ] Performance metrics: report response times per turn
 - [ ] Markdown rendering in terminal output
-- [ ] `/diff` command: show git diff of all changes made this session
+- [x] `/diff` command: show git diff of all changes made this session
 
 ## Boss Level: Prove It
 
