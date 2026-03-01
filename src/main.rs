@@ -75,6 +75,15 @@ fn print_usage(usage: &Usage) {
     }
 }
 
+fn build_agent(model: &str, api_key: &str, skills: &SkillSet) -> Agent {
+    Agent::new(AnthropicProvider)
+        .with_system_prompt(SYSTEM_PROMPT)
+        .with_model(model)
+        .with_api_key(api_key)
+        .with_skills(skills.clone())
+        .with_tools(default_tools())
+}
+
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -125,12 +134,7 @@ async fn main() {
         }
     };
 
-    let mut agent = Agent::new(AnthropicProvider)
-        .with_system_prompt(SYSTEM_PROMPT)
-        .with_model(&model)
-        .with_api_key(&api_key)
-        .with_skills(skills.clone())
-        .with_tools(default_tools());
+    let mut agent = build_agent(&model, &api_key, &skills);
 
     // Piped mode: read all of stdin as a single prompt, run once, exit
     if !io::stdin().is_terminal() {
@@ -179,23 +183,13 @@ async fn main() {
         match input {
             "/quit" | "/exit" => break,
             "/clear" => {
-                agent = Agent::new(AnthropicProvider)
-                    .with_system_prompt(SYSTEM_PROMPT)
-                    .with_model(&model)
-                    .with_api_key(&api_key)
-                    .with_skills(skills.clone())
-                    .with_tools(default_tools());
+                agent = build_agent(&model, &api_key, &skills);
                 println!("{DIM}  (conversation cleared){RESET}\n");
                 continue;
             }
             s if s.starts_with("/model ") => {
                 let new_model = s.trim_start_matches("/model ").trim();
-                agent = Agent::new(AnthropicProvider)
-                    .with_system_prompt(SYSTEM_PROMPT)
-                    .with_model(new_model)
-                    .with_api_key(&api_key)
-                    .with_skills(skills.clone())
-                    .with_tools(default_tools());
+                agent = build_agent(new_model, &api_key, &skills);
                 println!("{DIM}  (switched to {new_model}, conversation cleared){RESET}\n");
                 continue;
             }
