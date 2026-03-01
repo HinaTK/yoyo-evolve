@@ -7,6 +7,8 @@
 //!   ANTHROPIC_API_KEY=sk-... cargo run
 //!   ANTHROPIC_API_KEY=sk-... cargo run -- --model claude-opus-4-6
 //!   ANTHROPIC_API_KEY=sk-... cargo run -- --skills ./skills
+//!   ANTHROPIC_API_KEY=sk-... cargo run -- --system "You are a Rust expert."
+//!   ANTHROPIC_API_KEY=sk-... cargo run -- --system-file prompt.txt
 //!   echo "prompt" | cargo run  (piped mode: single prompt, no REPL)
 //!
 //! Commands:
@@ -46,6 +48,8 @@ fn print_help() {
     println!("Options:");
     println!("  --model <name>    Model to use (default: claude-opus-4-6)");
     println!("  --skills <dir>    Directory containing skill files");
+    println!("  --system <text>   Custom system prompt (overrides default)");
+    println!("  --system-file <f> Read system prompt from file");
     println!("  --help, -h        Show this help message");
     println!("  --version, -V     Show version");
     println!();
@@ -87,9 +91,9 @@ fn print_usage(usage: &Usage, total: &Usage) {
     }
 }
 
-fn build_agent(model: &str, api_key: &str, skills: &SkillSet) -> Agent {
+fn build_agent(model: &str, api_key: &str, skills: &SkillSet, system_prompt: &str) -> Agent {
     Agent::new(AnthropicProvider)
-        .with_system_prompt(SYSTEM_PROMPT)
+        .with_system_prompt(system_prompt)
         .with_model(model)
         .with_api_key(api_key)
         .with_skills(skills.clone())
@@ -146,7 +150,30 @@ async fn main() {
         }
     };
 
-    let mut agent = build_agent(&model, &api_key, &skills);
+    // Custom system prompt: --system "text" or --system-file path
+    let custom_system = args
+        .iter()
+        .position(|a| a == "--system")
+        .and_then(|i| args.get(i + 1))
+        .cloned();
+
+    let system_from_file = args
+        .iter()
+        .position(|a| a == "--system-file")
+        .and_then(|i| args.get(i + 1))
+        .map(|path| {
+            std::fs::read_to_string(path).unwrap_or_else(|e| {
+                eprintln!("{RED}error:{RESET} Failed to read system prompt file '{path}': {e}");
+                std::process::exit(1);
+            })
+        });
+
+    // --system-file takes precedence over --system, both override default
+    let system_prompt = system_from_file
+        .or(custom_system)
+        .unwrap_or_else(|| SYSTEM_PROMPT.to_string());
+
+    let mut agent = build_agent(&model, &api_key, &skills, &system_prompt);
 
     // Piped mode: read all of stdin as a single prompt, run once, exit
     if !io::stdin().is_terminal() {
@@ -240,14 +267,14 @@ async fn main() {
                 continue;
             }
             "/clear" => {
-                agent = build_agent(&model, &api_key, &skills);
+                agent = build_agent(&model, &api_key, &skills, &system_prompt);
                 println!("{DIM}  (conversation cleared){RESET}\n");
                 continue;
             }
             s if s.starts_with("/model ") => {
                 let new_model = s.trim_start_matches("/model ").trim();
                 model = new_model.to_string();
-                agent = build_agent(&model, &api_key, &skills);
+                agent = build_agent(&model, &api_key, &skills, &system_prompt);
                 println!("{DIM}  (switched to {new_model}, conversation cleared){RESET}\n");
                 continue;
             }
@@ -715,6 +742,49 @@ mod tests {
         assert!(needs_continuation("```"));
         assert!(!needs_continuation("some text ```"));
         assert!(!needs_continuation("normal"));
+    }
+
+    #[test]
+    fn test_system_flag_parsing() {
+        // --system "custom prompt" should be extracted from args
+        let args = vec![
+            "yoyo".to_string(),
+            "--system".to_string(),
+            "You are a Rust expert.".to_string(),
+        ];
+        let system = args
+            .iter()
+            .position(|a| a == "--system")
+            .and_then(|i| args.get(i + 1))
+            .cloned();
+        assert_eq!(system, Some("You are a Rust expert.".to_string()));
+    }
+
+    #[test]
+    fn test_system_flag_missing() {
+        let args = vec!["yoyo".to_string()];
+        let system = args
+            .iter()
+            .position(|a| a == "--system")
+            .and_then(|i| args.get(i + 1))
+            .cloned();
+        assert_eq!(system, None);
+    }
+
+    #[test]
+    fn test_system_file_flag() {
+        // --system-file path should read from file
+        let args = vec![
+            "yoyo".to_string(),
+            "--system-file".to_string(),
+            "prompt.txt".to_string(),
+        ];
+        let system_file = args
+            .iter()
+            .position(|a| a == "--system-file")
+            .and_then(|i| args.get(i + 1))
+            .cloned();
+        assert_eq!(system_file, Some("prompt.txt".to_string()));
     }
 
     #[test]
