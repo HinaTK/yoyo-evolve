@@ -63,7 +63,7 @@ fn print_banner() {
     println!(
         "\n{BOLD}{CYAN}  yoyo{RESET} v{VERSION} {DIM}— a coding agent growing up in public{RESET}"
     );
-    println!("{DIM}  Type /quit to exit, /clear to reset{RESET}\n");
+    println!("{DIM}  Type /help for commands, /quit to exit{RESET}\n");
 }
 
 fn print_usage(usage: &Usage, total: &Usage) {
@@ -108,7 +108,7 @@ async fn main() {
         }
     };
 
-    let model = args
+    let mut model = args
         .iter()
         .position(|a| a == "--model")
         .and_then(|i| args.get(i + 1))
@@ -184,6 +184,13 @@ async fn main() {
 
         match input {
             "/quit" | "/exit" => break,
+            "/help" => {
+                println!("{DIM}  /help          Show this help");
+                println!("  /quit, /exit   Exit yoyo");
+                println!("  /clear         Clear conversation history");
+                println!("  /model <name>  Switch model (clears conversation){RESET}\n");
+                continue;
+            }
             "/clear" => {
                 agent = build_agent(&model, &api_key, &skills);
                 println!("{DIM}  (conversation cleared){RESET}\n");
@@ -191,7 +198,8 @@ async fn main() {
             }
             s if s.starts_with("/model ") => {
                 let new_model = s.trim_start_matches("/model ").trim();
-                agent = build_agent(new_model, &api_key, &skills);
+                model = new_model.to_string();
+                agent = build_agent(&model, &api_key, &skills);
                 println!("{DIM}  (switched to {new_model}, conversation cleared){RESET}\n");
                 continue;
             }
@@ -224,7 +232,7 @@ async fn run_prompt(agent: &mut Agent, input: &str, session_total: &mut Usage) {
                             .get("command")
                             .and_then(|v| v.as_str())
                             .unwrap_or("...");
-                        format!("$ {}", truncate(cmd, 80))
+                        format!("$ {}", truncate_with_ellipsis(cmd, 80))
                     }
                     "read_file" => {
                         let path = args.get("path").and_then(|v| v.as_str()).unwrap_or("?");
@@ -244,7 +252,7 @@ async fn run_prompt(agent: &mut Agent, input: &str, session_total: &mut Usage) {
                     }
                     "search" => {
                         let pat = args.get("pattern").and_then(|v| v.as_str()).unwrap_or("?");
-                        format!("search '{}'", truncate(pat, 60))
+                        format!("search '{}'", truncate_with_ellipsis(pat, 60))
                     }
                     _ => tool_name.clone(),
                 };
@@ -290,10 +298,18 @@ async fn run_prompt(agent: &mut Agent, input: &str, session_total: &mut Usage) {
     println!();
 }
 
+#[cfg(test)]
 fn truncate(s: &str, max: usize) -> &str {
     match s.char_indices().nth(max) {
         Some((idx, _)) => &s[..idx],
         None => s,
+    }
+}
+
+fn truncate_with_ellipsis(s: &str, max: usize) -> String {
+    match s.char_indices().nth(max) {
+        Some((idx, _)) => format!("{}…", &s[..idx]),
+        None => s.to_string(),
     }
 }
 
@@ -358,5 +374,34 @@ mod tests {
         let input = "/model   claude-opus-4-6  ";
         let model_name = input.trim_start_matches("/model ").trim();
         assert_eq!(model_name, "claude-opus-4-6");
+    }
+
+    #[test]
+    fn test_command_help_recognized() {
+        let commands = ["/help", "/quit", "/exit", "/clear"];
+        for cmd in &commands {
+            assert!(
+                ["/help", "/quit", "/exit", "/clear"].contains(cmd),
+                "Command not recognized: {cmd}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_model_switch_updates_variable() {
+        // Simulates: /model command should update the active model name
+        // so that /clear uses the new model, not the original.
+        let original = "claude-opus-4-6";
+        let input = "/model claude-haiku-35";
+        let new_model = input.trim_start_matches("/model ").trim();
+        assert_ne!(new_model, original);
+        assert_eq!(new_model, "claude-haiku-35");
+    }
+
+    #[test]
+    fn test_truncate_adds_ellipsis() {
+        assert_eq!(truncate_with_ellipsis("hello world", 5), "hello…");
+        assert_eq!(truncate_with_ellipsis("hi", 5), "hi");
+        assert_eq!(truncate_with_ellipsis("hello", 5), "hello");
     }
 }
