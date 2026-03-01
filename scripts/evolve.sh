@@ -8,13 +8,13 @@
 #   ANTHROPIC_API_KEY  — required
 #   REPO               — GitHub repo (default: yologdev/yoyo-evolve)
 #   MODEL              — LLM model (default: claude-opus-4-6)
-#   TIMEOUT            — Max session time in seconds (default: 600)
+#   TIMEOUT            — Max session time in seconds (default: 3600)
 
 set -euo pipefail
 
 REPO="${REPO:-yologdev/yoyo-evolve}"
 MODEL="${MODEL:-claude-opus-4-6}"
-TIMEOUT="${TIMEOUT:-600}"
+TIMEOUT="${TIMEOUT:-3600}"
 DAY=$(cat DAY_COUNT 2>/dev/null || echo 1)
 DATE=$(date +%Y-%m-%d)
 
