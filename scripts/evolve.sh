@@ -185,43 +185,59 @@ echo ""
 echo "→ Session complete. Checking results..."
 
 # ── Step 6: Verify build ──
-# Agent is told to run fmt + clippy + build + test before each commit.
-# But if it didn't, we auto-fix what we can and revert what we can't.
+# Run all checks. If anything fails, let the agent fix its own mistakes
+# instead of reverting. Only revert as absolute last resort.
 
-# Auto-fix formatting (never worth reverting over)
-if ! cargo fmt -- --check 2>/dev/null; then
-    echo "  Formatting issues — auto-fixing with cargo fmt..."
-    cargo fmt
-    git add -A && git commit -m "Day $DAY ($SESSION_TIME): cargo fmt" || true
-fi
+FIX_ATTEMPTS=3
+for FIX_ROUND in $(seq 1 $FIX_ATTEMPTS); do
+    ERRORS=""
 
-if cargo build --quiet 2>/dev/null && cargo test --quiet 2>/dev/null && cargo clippy --quiet --all-targets -- -D warnings 2>/dev/null; then
-    echo "  Build: PASS"
-else
-    echo "  Build: FAIL — finding last good commit..."
-    # Walk through session commits to find the last one that passes
-    GOOD_SHA=""
-    for SHA in $(git log --reverse --format="%H" "$SESSION_START_SHA"..HEAD); do
-        git checkout --quiet "$SHA" -- src/
-        cargo fmt --quiet
-        if cargo build --quiet 2>/dev/null && cargo test --quiet 2>/dev/null && cargo clippy --quiet --all-targets -- -D warnings 2>/dev/null; then
-            GOOD_SHA="$SHA"
+    # Try auto-fixing formatting first (no agent needed)
+    if ! cargo fmt -- --check 2>/dev/null; then
+        if cargo fmt 2>/dev/null; then
+            git add -A && git commit -m "Day $DAY ($SESSION_TIME): cargo fmt" || true
         else
-            break
+            ERRORS="$ERRORS$(cargo fmt 2>&1)\n"
         fi
-    done
-
-    if [ -n "$GOOD_SHA" ]; then
-        echo "  Keeping good commits up to $(git log --oneline -1 "$GOOD_SHA" | head -c 60)"
-        git checkout "$GOOD_SHA" -- src/
-        cargo fmt --quiet
-        git add -A && git commit -m "Day $DAY ($SESSION_TIME): revert broken changes, keep passing commits" || true
-    else
-        echo "  No good commits found — resetting to pre-session state"
-        git checkout "$SESSION_START_SHA" -- src/
-        git add -A && git commit -m "Day $DAY ($SESSION_TIME): revert all session changes (build failed)" || true
     fi
-fi
+
+    # Collect any remaining errors
+    BUILD_OUT=$(cargo build 2>&1) || ERRORS="$ERRORS$BUILD_OUT\n"
+    TEST_OUT=$(cargo test 2>&1) || ERRORS="$ERRORS$TEST_OUT\n"
+    CLIPPY_OUT=$(cargo clippy --all-targets -- -D warnings 2>&1) || ERRORS="$ERRORS$CLIPPY_OUT\n"
+
+    if [ -z "$ERRORS" ]; then
+        echo "  Build: PASS"
+        break
+    fi
+
+    if [ "$FIX_ROUND" -lt "$FIX_ATTEMPTS" ]; then
+        echo "  Build issues (attempt $FIX_ROUND/$FIX_ATTEMPTS) — running agent to fix..."
+        FIX_PROMPT=$(mktemp)
+        cat > "$FIX_PROMPT" <<FIXEOF
+Your code has errors. Fix them NOW. Do not add features — only fix these errors.
+
+$(echo -e "$ERRORS")
+
+Steps:
+1. Read src/main.rs
+2. Fix the errors above
+3. Run: cargo fmt && cargo clippy --all-targets -- -D warnings && cargo build && cargo test
+4. Keep fixing until all checks pass
+5. Commit: git add -A && git commit -m "Day $DAY ($SESSION_TIME): fix build errors"
+FIXEOF
+        ${TIMEOUT_CMD:+$TIMEOUT_CMD 300} cargo run -- \
+            --model "$MODEL" \
+            --skills ./skills \
+            < "$FIX_PROMPT" || true
+        rm -f "$FIX_PROMPT"
+    else
+        echo "  Build: FAIL after $FIX_ATTEMPTS fix attempts — reverting to pre-session state"
+        git checkout "$SESSION_START_SHA" -- src/
+        cargo fmt 2>/dev/null || true
+        git add -A && git commit -m "Day $DAY ($SESSION_TIME): revert session changes (could not fix build)" || true
+    fi
+done
 
 # ── Step 6b: Ensure journal was written ──
 if ! grep -q "## Day $DAY.*$SESSION_TIME" JOURNAL.md 2>/dev/null; then
