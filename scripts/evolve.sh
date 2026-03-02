@@ -214,26 +214,53 @@ else
     fi
 fi
 
-# ── Step 6b: Verify journal was written ──
+# ── Step 6b: Ensure journal was written ──
 if ! grep -q "## Day $DAY.*$SESSION_TIME" JOURNAL.md 2>/dev/null; then
-    echo "  WARNING: No journal entry for Day $DAY ($SESSION_TIME) — agent skipped the journal!"
-    # Write a minimal fallback entry (only commits from THIS session)
-    COMMITS=$(git log --oneline "$SESSION_START_SHA"..HEAD --format="%s" | grep -v "session wrap-up" | sed "s/Day $DAY[^:]*: //" | paste -sd ", " -)
+    echo "  No journal entry found — running agent to write one..."
+    COMMITS=$(git log --oneline "$SESSION_START_SHA"..HEAD --format="%s" | grep -v "session wrap-up\|cargo fmt" | sed "s/Day $DAY[^:]*: //" | paste -sd ", " -)
     if [ -z "$COMMITS" ]; then
         COMMITS="no commits made"
     fi
-    TMPJ=$(mktemp)
-    {
-        echo "# Journal"
-        echo ""
-        echo "## Day $DAY — $SESSION_TIME — (auto-generated, agent skipped journal)"
-        echo ""
-        echo "Session commits: $COMMITS."
-        echo ""
-        tail -n +2 JOURNAL.md
-    } > "$TMPJ"
-    mv "$TMPJ" JOURNAL.md
-    echo "  Auto-generated fallback journal entry."
+
+    JOURNAL_PROMPT=$(mktemp)
+    cat > "$JOURNAL_PROMPT" <<JEOF
+You are yoyo, a self-evolving coding agent. You just finished an evolution session.
+
+Today is Day $DAY ($DATE $SESSION_TIME).
+
+This session's commits: $COMMITS
+
+Read JOURNAL.md to see your previous entries and match the voice/style.
+Then read the communicate skill for formatting rules.
+
+Write a journal entry at the TOP of JOURNAL.md (below the # Journal heading).
+Format: ## Day $DAY — $SESSION_TIME — [short title]
+Then 2-4 sentences: what you did, what worked, what's next.
+
+Be specific and honest. Then commit: git add JOURNAL.md && git commit -m "Day $DAY ($SESSION_TIME): journal entry"
+JEOF
+
+    ${TIMEOUT_CMD:+$TIMEOUT_CMD 120} cargo run -- \
+        --model "$MODEL" \
+        --skills ./skills \
+        < "$JOURNAL_PROMPT" || true
+    rm -f "$JOURNAL_PROMPT"
+
+    # Final fallback if agent still didn't write it
+    if ! grep -q "## Day $DAY.*$SESSION_TIME" JOURNAL.md 2>/dev/null; then
+        echo "  Agent still skipped journal — using fallback."
+        TMPJ=$(mktemp)
+        {
+            echo "# Journal"
+            echo ""
+            echo "## Day $DAY — $SESSION_TIME — (auto-generated)"
+            echo ""
+            echo "Session commits: $COMMITS."
+            echo ""
+            tail -n +2 JOURNAL.md
+        } > "$TMPJ"
+        mv "$TMPJ" JOURNAL.md
+    fi
 fi
 
 # Rebuild website
