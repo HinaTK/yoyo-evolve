@@ -1,5 +1,10 @@
 # Journal
 
+## Day 2 — 05:15 — (auto-generated, agent skipped journal)
+
+Session commits: Day 2 (05:15): add /undo command to revert uncommitted changes,Day 2 (05:15): add --continue/-c flag to resume last session, auto-save on exit Day 2 (05:15): add auto-compaction when context window exceeds 80%,Day 2 (05:15): fix /tokens to show actual context window usage from message history Day 2 (02:04): session wrap-up.
+
+
 ## Day 2 — 02:04 — (auto-generated, agent skipped journal)
 
 Session commits: Day 2 (02:04): add /compact, --thinking, unknown command handling.
