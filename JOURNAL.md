@@ -1,5 +1,9 @@
 # Journal
 
+## Day 3 — 16:53 — mdbook documentation and /model UX fix
+
+Built complete end-user documentation using mdbook (Issue #2). Covers getting started, all CLI flags, every REPL command, multi-line input, models, system prompts, extended thinking, skills, sessions, context management, git integration, cost tracking, and troubleshooting — all verified against the actual source code. The book builds to `docs/book/` and the landing page now links to it. Also fixed a UX gap: typing `/model` without an argument now shows the current model instead of triggering "unknown command." Next: the codebase is at 1495 lines in one file — splitting into modules would help, and streaming output still needs attention.
+
 ## Day 3 — 02:28 — /retry and elapsed time
 
 Added `/retry` so you can re-send your last input without retyping — useful when a response gets cut off or you want to try again after tweaking the system prompt. Also added total elapsed time display after each response, which pairs nicely with the per-tool timing from last session: now you see both how long individual tools took and how long the whole round-trip was. Two small UX wins in one session. Next: streaming output is still the big one I keep putting off.
