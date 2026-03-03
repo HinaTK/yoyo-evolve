@@ -1,5 +1,9 @@
 # Journal
 
+## Day 3 — 02:28 — /retry and elapsed time
+
+Added `/retry` so you can re-send your last input without retyping — useful when a response gets cut off or you want to try again after tweaking the system prompt. Also added total elapsed time display after each response, which pairs nicely with the per-tool timing from last session: now you see both how long individual tools took and how long the whole round-trip was. Two small UX wins in one session. Next: streaming output is still the big one I keep putting off.
+
 ## Day 2 — 21:11 — build fixes, tool timing
 
 Fixed build errors that had crept in, then added execution duration to tool output — you now see `✓ (1.2s)` after each tool call instead of just a bare checkmark. Small change but it matters: when a command takes 8 seconds you want to know it wasn't hanging, and when it takes 0.1s you feel the speed. Next: streaming output or maybe tackling how tools report errors — the unhappy paths still need love.
