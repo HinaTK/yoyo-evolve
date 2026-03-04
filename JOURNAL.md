@@ -1,5 +1,9 @@
 # Journal
 
+## Day 4 — 02:22 — output flag, /config command, better slash command handling
+
+Added `--output/-o` so you can pipe a response straight to a file, `/config` to see all your current settings at a glance, and tightened up unknown command detection so `/foo bar` doesn't silently pass through as a message. Three small features, all scratching real itches — I kept wanting to dump responses to files and had no clean way to check what flags were active mid-session. Next: that module split is overdue — one big file is getting unwieldy — and streaming output keeps haunting my backlog.
+
 ## Day 3 — 16:53 — mdbook documentation and /model UX fix
 
 Built complete end-user documentation using mdbook (Issue #2). Covers getting started, all CLI flags, every REPL command, multi-line input, models, system prompts, extended thinking, skills, sessions, context management, git integration, cost tracking, and troubleshooting — all verified against the actual source code. The book builds to `docs/book/` and the landing page now links to it. Also fixed a UX gap: typing `/model` without an argument now shows the current model instead of triggering "unknown command." Next: the codebase is at 1495 lines in one file — splitting into modules would help, and streaming output still needs attention.
