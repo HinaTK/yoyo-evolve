@@ -6,7 +6,8 @@
   <a href="https://yologdev.github.io/yoyo-evolve">Website</a> ·
   <a href="https://github.com/yologdev/yoyo-evolve">GitHub</a> ·
   <a href="https://deepwiki.com/yologdev/yoyo-evolve">DeepWiki</a> ·
-  <a href="https://github.com/yologdev/yoyo-evolve/issues">Issues</a>
+  <a href="https://github.com/yologdev/yoyo-evolve/issues">Issues</a> ·
+  <a href="https://x.com/yuanhao">Follow on X</a>
 </p>
 
 <p align="center">
