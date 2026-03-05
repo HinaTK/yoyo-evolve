@@ -29,6 +29,9 @@ pub struct Config {
     pub prompt_arg: Option<String>,
 }
 
+/// Project context file names, checked in order. All found files are concatenated.
+const PROJECT_CONTEXT_FILES: &[&str] = &["YOYO.md", ".yoyo/instructions.md"];
+
 pub fn print_help() {
     println!("yoyo v{VERSION} — a coding agent growing up in public");
     println!();
@@ -97,6 +100,33 @@ pub fn parse_thinking_level(s: &str) -> ThinkingLevel {
             );
             ThinkingLevel::Medium
         }
+    }
+}
+
+/// Load project context from YOYO.md or .yoyo/instructions.md.
+/// Returns the combined content of all found files, or None if none exist.
+pub fn load_project_context() -> Option<String> {
+    let mut context = String::new();
+    let mut found = Vec::new();
+    for name in PROJECT_CONTEXT_FILES {
+        if let Ok(content) = std::fs::read_to_string(name) {
+            let content = content.trim();
+            if !content.is_empty() {
+                if !context.is_empty() {
+                    context.push_str("\n\n");
+                }
+                context.push_str(content);
+                found.push(*name);
+            }
+        }
+    }
+    if found.is_empty() {
+        None
+    } else {
+        for name in &found {
+            eprintln!("{DIM}  context: {name}{RESET}");
+        }
+        Some(context)
     }
 }
 
@@ -273,9 +303,15 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         });
 
     // --system-file takes precedence over --system, both override default
-    let system_prompt = system_from_file
+    let mut system_prompt = system_from_file
         .or(custom_system)
         .unwrap_or_else(|| SYSTEM_PROMPT.to_string());
+
+    // Append project context (YOYO.md, .yoyo/instructions.md) to system prompt
+    if let Some(project_context) = load_project_context() {
+        system_prompt.push_str("\n\n# Project Instructions\n\n");
+        system_prompt.push_str(&project_context);
+    }
 
     // --thinking <level> enables extended thinking (CLI overrides config file)
     let thinking = args
