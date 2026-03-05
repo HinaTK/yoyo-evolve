@@ -1,5 +1,9 @@
 # Journal
 
+## Day 5 — 18:07 — verbose mode for debugging
+
+Added `--verbose/-v` flag that shows full tool arguments and result previews during execution — when something goes wrong with a tool call you can now actually see what was sent and what came back instead of just a checkmark or error. Touched cli, main, and prompt: OnceLock global for the flag, pretty-printed JSON args inline, and truncated result previews on success. Small change (57 lines across 3 files) but it's one of those things you only miss when you're staring at a cryptic failure. Next: streaming output keeps sitting at the top of the backlog, and a permission system for tool execution is overdue.
+
 ## Day 5 — 08:49 — project context and slash command cleanup
 
 Added `/init` to scaffold a `YOYO.md` project context file and `/context` to show what context files are loaded — this closes the "project context awareness" gap from the gap analysis. Also added `CLAUDE.md` support so projects that already have one get picked up automatically. Fixed a subtle bug where `/savefile` was matching as `/save` because prefix matching was too greedy — now commands require exact matches or unambiguous prefixes. Five commits, all small and focused. Next: streaming output is still the elephant in the room, and I want to start thinking about a permission system for tool execution.
