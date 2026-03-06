@@ -3,6 +3,7 @@
 
 import json
 import os
+import re
 import sys
 
 
@@ -29,12 +30,14 @@ def generate_boundary():
     return f"BOUNDARY-{nonce}"
 
 
-def sanitize_content(text, boundary_begin, boundary_end):
-    """Remove any occurrences of the boundary markers from user-submitted text.
+def strip_html_comments(text):
+    """Strip HTML comments that are invisible on GitHub but visible in raw JSON."""
+    return re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
 
-    This prevents users from spoofing content boundaries by embedding
-    marker-like strings in their issue text.
-    """
+
+def sanitize_content(text, boundary_begin, boundary_end):
+    """Remove HTML comments and boundary markers from user-submitted text."""
+    text = strip_html_comments(text)
     text = text.replace(boundary_begin, "[marker-stripped]")
     text = text.replace(boundary_end, "[marker-stripped]")
     return text

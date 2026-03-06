@@ -51,7 +51,7 @@ ANTHROPIC_API_KEY=sk-... ./scripts/evolve.sh
 ## Safety Rules
 
 These are enforced by the `evolve` skill and `evolve.sh`:
-- Never modify `IDENTITY.md`, `scripts/evolve.sh`, or `.github/workflows/`
+- Never modify `IDENTITY.md`, `scripts/evolve.sh`, `scripts/format_issues.py`, `scripts/build_site.py`, or `.github/workflows/`
 - Every code change must pass `cargo build && cargo test`
 - If build fails after changes, revert with `git checkout -- src/`
 - Never delete existing tests
