@@ -31,6 +31,7 @@ pub struct Config {
     pub prompt_arg: Option<String>,
     pub verbose: bool,
     pub mcp_servers: Vec<String>,
+    pub auto_approve: bool,
 }
 
 /// Whether verbose output is enabled. Set once at startup.
@@ -69,6 +70,7 @@ pub fn print_help() {
     println!("  --mcp <cmd>       Connect to an MCP server via stdio (repeatable)");
     println!("  --no-color        Disable colored output (also respects NO_COLOR env)");
     println!("  --verbose, -v     Show debug info (API errors, request details)");
+    println!("  --yes, -y         Auto-approve all tool executions (skip confirmation prompts)");
     println!("  --continue, -c    Resume last saved session");
     println!("  --help, -h        Show this help message");
     println!("  --version, -V     Show version");
@@ -169,6 +171,8 @@ const KNOWN_FLAGS: &[&str] = &[
     "--no-color",
     "--verbose",
     "-v",
+    "--yes",
+    "-y",
     "--continue",
     "-c",
     "--help",
@@ -524,6 +528,8 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
 
     let verbose = args.iter().any(|a| a == "--verbose" || a == "-v");
 
+    let auto_approve = args.iter().any(|a| a == "--yes" || a == "-y");
+
     // --mcp <command> flags: collect all MCP server commands (repeatable)
     let mcp_servers: Vec<String> = args
         .iter()
@@ -546,6 +552,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         prompt_arg,
         verbose,
         mcp_servers,
+        auto_approve,
     })
 }
 

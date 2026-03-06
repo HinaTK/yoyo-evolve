@@ -33,8 +33,46 @@ use std::io::{self, BufRead, IsTerminal, Read, Write};
 use yoagent::agent::Agent;
 use yoagent::context::{compact_messages, total_tokens, ContextConfig, ExecutionLimits};
 use yoagent::provider::AnthropicProvider;
-use yoagent::tools::default_tools;
+use yoagent::tools::bash::BashTool;
+use yoagent::tools::edit::EditFileTool;
+use yoagent::tools::file::{ReadFileTool, WriteFileTool};
+use yoagent::tools::list::ListFilesTool;
+use yoagent::tools::search::SearchTool;
+use yoagent::types::AgentTool;
 use yoagent::*;
+
+/// Build the tool set, optionally with a bash confirmation prompt.
+/// When `auto_approve` is false (default), bash commands require user approval.
+fn build_tools(auto_approve: bool) -> Vec<Box<dyn AgentTool>> {
+    let bash = if auto_approve {
+        BashTool::default()
+    } else {
+        BashTool::default().with_confirm(|cmd: &str| {
+            use std::io::BufRead;
+            // Show the command and ask for approval
+            eprint!(
+                "{YELLOW}  ⚠ Allow: {RESET}{}{YELLOW} ? {RESET}({GREEN}y{RESET}/{RED}n{RESET}/{GREEN}a{RESET}lways) ",
+                truncate_with_ellipsis(cmd, 120)
+            );
+            io::stderr().flush().ok();
+            let mut response = String::new();
+            let stdin = io::stdin();
+            if stdin.lock().read_line(&mut response).is_err() {
+                return false;
+            }
+            let response = response.trim().to_lowercase();
+            matches!(response.as_str(), "y" | "yes" | "a" | "always")
+        })
+    };
+    vec![
+        Box::new(bash),
+        Box::new(ReadFileTool::default()),
+        Box::new(WriteFileTool::new()),
+        Box::new(EditFileTool::new()),
+        Box::new(ListFilesTool::default()),
+        Box::new(SearchTool::default()),
+    ]
+}
 
 #[allow(clippy::too_many_arguments)]
 fn build_agent(
@@ -46,6 +84,7 @@ fn build_agent(
     max_tokens: Option<u32>,
     temperature: Option<f32>,
     max_turns: Option<usize>,
+    auto_approve: bool,
 ) -> Agent {
     let mut agent = Agent::new(AnthropicProvider)
         .with_system_prompt(system_prompt)
@@ -53,7 +92,7 @@ fn build_agent(
         .with_api_key(api_key)
         .with_thinking(thinking)
         .with_skills(skills.clone())
-        .with_tools(default_tools());
+        .with_tools(build_tools(auto_approve));
     if let Some(max) = max_tokens {
         agent = agent.with_max_tokens(max);
     }
@@ -98,6 +137,9 @@ async fn main() {
     let continue_session = config.continue_session;
     let output_path = config.output_path;
     let mcp_servers = config.mcp_servers;
+    // Auto-approve in non-interactive modes (piped, --prompt) or when --yes is set
+    let is_interactive = io::stdin().is_terminal() && config.prompt_arg.is_none();
+    let auto_approve = config.auto_approve || !is_interactive;
 
     let mut agent = build_agent(
         &model,
@@ -108,6 +150,7 @@ async fn main() {
         max_tokens,
         temperature,
         max_turns,
+        auto_approve,
     );
 
     // Connect to MCP servers (--mcp flags)
@@ -143,6 +186,7 @@ async fn main() {
                     max_tokens,
                     temperature,
                     max_turns,
+                    auto_approve,
                 );
                 eprintln!("{DIM}  mcp: agent rebuilt (previous MCP connections lost){RESET}");
             }
@@ -212,6 +256,9 @@ async fn main() {
     }
     if is_verbose() {
         println!("{DIM}  verbose: on{RESET}");
+    }
+    if !auto_approve {
+        println!("{DIM}  tools: confirmation required (use --yes to skip){RESET}");
     }
     if let Some(branch) = git_branch() {
         println!("{DIM}  git:   {branch}{RESET}");
@@ -388,6 +435,7 @@ async fn main() {
                     max_tokens,
                     temperature,
                     max_turns,
+                    auto_approve,
                 );
                 println!("{DIM}  (conversation cleared){RESET}\n");
                 continue;
@@ -416,6 +464,7 @@ async fn main() {
                     max_tokens,
                     temperature,
                     max_turns,
+                    auto_approve,
                 );
                 if let Some(json) = saved {
                     let _ = agent.restore_messages(&json);
@@ -455,6 +504,7 @@ async fn main() {
                     max_tokens,
                     temperature,
                     max_turns,
+                    auto_approve,
                 );
                 if let Some(json) = saved {
                     let _ = agent.restore_messages(&json);
