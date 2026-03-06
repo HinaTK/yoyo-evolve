@@ -8,6 +8,7 @@
 //!   ANTHROPIC_API_KEY=sk-... cargo run -- --model claude-opus-4-6
 //!   ANTHROPIC_API_KEY=sk-... cargo run -- --thinking high
 //!   ANTHROPIC_API_KEY=sk-... cargo run -- --skills ./skills
+//!   ANTHROPIC_API_KEY=sk-... cargo run -- --mcp "npx -y @modelcontextprotocol/server-filesystem /tmp"
 //!   ANTHROPIC_API_KEY=sk-... cargo run -- --system "You are a Rust expert."
 //!   ANTHROPIC_API_KEY=sk-... cargo run -- --system-file prompt.txt
 //!   ANTHROPIC_API_KEY=sk-... cargo run -- -p "explain this code"
@@ -87,6 +88,7 @@ async fn main() {
     let temperature = config.temperature;
     let continue_session = config.continue_session;
     let output_path = config.output_path;
+    let mcp_servers = config.mcp_servers;
 
     let mut agent = build_agent(
         &model,
@@ -97,6 +99,44 @@ async fn main() {
         max_tokens,
         temperature,
     );
+
+    // Connect to MCP servers (--mcp flags)
+    let mut mcp_count = 0u32;
+    for mcp_cmd in &mcp_servers {
+        let parts: Vec<&str> = mcp_cmd.split_whitespace().collect();
+        if parts.is_empty() {
+            eprintln!("{YELLOW}warning:{RESET} Empty --mcp command, skipping");
+            continue;
+        }
+        let command = parts[0];
+        let args_slice: Vec<&str> = parts[1..].to_vec();
+        eprintln!("{DIM}  mcp: connecting to {mcp_cmd}...{RESET}");
+        // with_mcp_server_stdio consumes self; we must always update agent
+        let result = agent
+            .with_mcp_server_stdio(command, &args_slice, None)
+            .await;
+        match result {
+            Ok(updated) => {
+                agent = updated;
+                mcp_count += 1;
+                eprintln!("{GREEN}  ✓ mcp: {command} connected{RESET}");
+            }
+            Err(e) => {
+                eprintln!("{RED}  ✗ mcp: failed to connect to '{mcp_cmd}': {e}{RESET}");
+                // Agent was consumed on error — rebuild it with previous MCP connections lost
+                agent = build_agent(
+                    &model,
+                    &api_key,
+                    &skills,
+                    &system_prompt,
+                    thinking,
+                    max_tokens,
+                    temperature,
+                );
+                eprintln!("{DIM}  mcp: agent rebuilt (previous MCP connections lost){RESET}");
+            }
+        }
+    }
 
     // --continue / -c: resume last saved session
     if continue_session {
@@ -155,6 +195,9 @@ async fn main() {
     }
     if !skills.is_empty() {
         println!("{DIM}  skills: {} loaded{RESET}", skills.len());
+    }
+    if mcp_count > 0 {
+        println!("{DIM}  mcp: {mcp_count} server(s) connected{RESET}");
     }
     if is_verbose() {
         println!("{DIM}  verbose: on{RESET}");
@@ -596,6 +639,9 @@ async fn main() {
                 let system_preview =
                     truncate_with_ellipsis(system_prompt.lines().next().unwrap_or("(empty)"), 60);
                 println!("    system:     {system_preview}");
+                if mcp_count > 0 {
+                    println!("    mcp:        {mcp_count} server(s)");
+                }
                 println!(
                     "    verbose:    {}",
                     if is_verbose() { "on" } else { "off" }

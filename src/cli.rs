@@ -29,6 +29,7 @@ pub struct Config {
     pub output_path: Option<String>,
     pub prompt_arg: Option<String>,
     pub verbose: bool,
+    pub mcp_servers: Vec<String>,
 }
 
 /// Whether verbose output is enabled. Set once at startup.
@@ -63,6 +64,7 @@ pub fn print_help() {
     println!("  --prompt, -p <t>  Run a single prompt and exit (no REPL)");
     println!("  --output, -o <f>  Write final response text to a file");
     println!("  --api-key <key>   API key (overrides ANTHROPIC_API_KEY env var)");
+    println!("  --mcp <cmd>       Connect to an MCP server via stdio (repeatable)");
     println!("  --no-color        Disable colored output (also respects NO_COLOR env)");
     println!("  --verbose, -v     Show debug info (API errors, request details)");
     println!("  --continue, -c    Resume last saved session");
@@ -159,6 +161,7 @@ const KNOWN_FLAGS: &[&str] = &[
     "--output",
     "-o",
     "--api-key",
+    "--mcp",
     "--no-color",
     "--verbose",
     "-v",
@@ -331,6 +334,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         "--output",
         "-o",
         "--api-key",
+        "--mcp",
     ];
     for flag in &flags_needing_values {
         if let Some(pos) = args.iter().position(|a| a == flag) {
@@ -499,6 +503,14 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
 
     let verbose = args.iter().any(|a| a == "--verbose" || a == "-v");
 
+    // --mcp <command> flags: collect all MCP server commands (repeatable)
+    let mcp_servers: Vec<String> = args
+        .iter()
+        .enumerate()
+        .filter(|(_, a)| a.as_str() == "--mcp")
+        .filter_map(|(i, _)| args.get(i + 1).cloned())
+        .collect();
+
     Some(Config {
         model,
         api_key,
@@ -511,6 +523,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         output_path,
         prompt_arg,
         verbose,
+        mcp_servers,
     })
 }
 
