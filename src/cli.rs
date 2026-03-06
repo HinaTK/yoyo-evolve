@@ -102,6 +102,7 @@ pub fn print_help() {
     println!("  model = \"claude-sonnet-4-20250514\"");
     println!("  thinking = \"medium\"");
     println!("  max_tokens = 4096");
+    println!("  api_key = \"sk-ant-...\"");
     println!();
     println!("CLI flags override config file values.");
 }
@@ -355,7 +356,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     // Warn about unknown flags
     warn_unknown_flags(args, &flags_needing_values);
 
-    // API key: --api-key flag > ANTHROPIC_API_KEY env > API_KEY env
+    // API key: --api-key flag > ANTHROPIC_API_KEY env > API_KEY env > config file
     let api_key_from_flag = args
         .iter()
         .position(|a| a == "--api-key")
@@ -366,12 +367,17 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         Some(key) if !key.is_empty() => key,
         _ => match std::env::var("ANTHROPIC_API_KEY").or_else(|_| std::env::var("API_KEY")) {
             Ok(key) if !key.is_empty() => key,
-            _ => {
-                eprintln!("{RED}error:{RESET} No API key found.");
-                eprintln!("Set ANTHROPIC_API_KEY or API_KEY env var, or use --api-key <key>.");
-                eprintln!("Example: ANTHROPIC_API_KEY=sk-ant-... cargo run");
-                std::process::exit(1);
-            }
+            _ => match file_config.get("api_key").cloned() {
+                Some(key) if !key.is_empty() => key,
+                _ => {
+                    eprintln!("{RED}error:{RESET} No API key found.");
+                    eprintln!(
+                        "Set ANTHROPIC_API_KEY env var, use --api-key <key>, or add api_key to .yoyo.toml."
+                    );
+                    eprintln!("Example: ANTHROPIC_API_KEY=sk-ant-... cargo run");
+                    std::process::exit(1);
+                }
+            },
         },
     };
 
@@ -942,5 +948,12 @@ thinking = "high"
             KNOWN_FLAGS.contains(&"--api-key"),
             "--api-key should be in KNOWN_FLAGS"
         );
+    }
+
+    #[test]
+    fn test_api_key_from_config_file() {
+        let content = "api_key = \"sk-ant-test-from-config\"";
+        let config = parse_config_file(content);
+        assert_eq!(config.get("api_key").unwrap(), "sk-ant-test-from-config");
     }
 }
