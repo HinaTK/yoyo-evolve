@@ -62,6 +62,7 @@ pub fn print_help() {
     println!("  --system-file <f> Read system prompt from file");
     println!("  --prompt, -p <t>  Run a single prompt and exit (no REPL)");
     println!("  --output, -o <f>  Write final response text to a file");
+    println!("  --api-key <key>   API key (overrides ANTHROPIC_API_KEY env var)");
     println!("  --no-color        Disable colored output (also respects NO_COLOR env)");
     println!("  --verbose, -v     Show debug info (API errors, request details)");
     println!("  --continue, -c    Resume last saved session");
@@ -90,7 +91,7 @@ pub fn print_help() {
     println!("  /version          Show yoyo version");
     println!();
     println!("Environment:");
-    println!("  ANTHROPIC_API_KEY  API key for Anthropic (required)");
+    println!("  ANTHROPIC_API_KEY  API key for Anthropic (required unless --api-key is set)");
     println!("  API_KEY            Alternative env var for API key");
     println!();
     println!("Config files (searched in order, first found wins):");
@@ -156,6 +157,7 @@ const KNOWN_FLAGS: &[&str] = &[
     "-p",
     "--output",
     "-o",
+    "--api-key",
     "--no-color",
     "--verbose",
     "-v",
@@ -327,6 +329,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         "-p",
         "--output",
         "-o",
+        "--api-key",
     ];
     for flag in &flags_needing_values {
         if let Some(pos) = args.iter().position(|a| a == flag) {
@@ -352,14 +355,24 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     // Warn about unknown flags
     warn_unknown_flags(args, &flags_needing_values);
 
-    let api_key = match std::env::var("ANTHROPIC_API_KEY").or_else(|_| std::env::var("API_KEY")) {
-        Ok(key) if !key.is_empty() => key,
-        _ => {
-            eprintln!("{RED}error:{RESET} No API key found.");
-            eprintln!("Set ANTHROPIC_API_KEY or API_KEY environment variable.");
-            eprintln!("Example: ANTHROPIC_API_KEY=sk-ant-... cargo run");
-            std::process::exit(1);
-        }
+    // API key: --api-key flag > ANTHROPIC_API_KEY env > API_KEY env
+    let api_key_from_flag = args
+        .iter()
+        .position(|a| a == "--api-key")
+        .and_then(|i| args.get(i + 1))
+        .cloned();
+
+    let api_key = match api_key_from_flag {
+        Some(key) if !key.is_empty() => key,
+        _ => match std::env::var("ANTHROPIC_API_KEY").or_else(|_| std::env::var("API_KEY")) {
+            Ok(key) if !key.is_empty() => key,
+            _ => {
+                eprintln!("{RED}error:{RESET} No API key found.");
+                eprintln!("Set ANTHROPIC_API_KEY or API_KEY env var, or use --api-key <key>.");
+                eprintln!("Example: ANTHROPIC_API_KEY=sk-ant-... cargo run");
+                std::process::exit(1);
+            }
+        },
     };
 
     let model = args
@@ -868,6 +881,7 @@ thinking = "high"
             "-p",
             "--output",
             "-o",
+            "--api-key",
         ];
         for flag in &flags_with_values {
             assert!(
@@ -894,5 +908,39 @@ thinking = "high"
             &flags_needing_values,
         );
         warn_unknown_flags(&["yoyo".to_string()], &flags_needing_values);
+    }
+
+    #[test]
+    fn test_api_key_flag_parsing() {
+        let args = [
+            "yoyo".to_string(),
+            "--api-key".to_string(),
+            "sk-test-key".to_string(),
+        ];
+        let api_key = args
+            .iter()
+            .position(|a| a == "--api-key")
+            .and_then(|i| args.get(i + 1))
+            .cloned();
+        assert_eq!(api_key, Some("sk-test-key".to_string()));
+    }
+
+    #[test]
+    fn test_api_key_flag_missing() {
+        let args = ["yoyo".to_string()];
+        let api_key = args
+            .iter()
+            .position(|a| a == "--api-key")
+            .and_then(|i| args.get(i + 1))
+            .cloned();
+        assert_eq!(api_key, None);
+    }
+
+    #[test]
+    fn test_api_key_flag_in_known_flags() {
+        assert!(
+            KNOWN_FLAGS.contains(&"--api-key"),
+            "--api-key should be in KNOWN_FLAGS"
+        );
     }
 }
