@@ -41,68 +41,45 @@ pub static YELLOW: Color = Color("\x1b[33m");
 pub static CYAN: Color = Color("\x1b[36m");
 pub static RED: Color = Color("\x1b[31m");
 
-/// Estimate cost in USD for a given usage and model.
-/// Returns None if the model pricing is unknown.
-pub fn estimate_cost(usage: &yoagent::Usage, model: &str) -> Option<f64> {
-    // Pricing per million tokens (MTok) from https://docs.anthropic.com/en/about-claude/pricing
-    let (input_per_m, cache_write_per_m, cache_read_per_m, output_per_m) = if model.contains("opus")
-    {
+/// Get pricing rates (per MTok) for a model.
+/// Returns (input, cache_write, cache_read, output) or None if model is unknown.
+fn model_pricing(model: &str) -> Option<(f64, f64, f64, f64)> {
+    // Pricing from https://docs.anthropic.com/en/about-claude/pricing
+    if model.contains("opus") {
         if model.contains("4-6")
             || model.contains("4-5")
             || model.contains("4.6")
             || model.contains("4.5")
         {
-            (5.0, 6.25, 0.50, 25.0)
+            Some((5.0, 6.25, 0.50, 25.0))
         } else {
             // Opus 4, 4.1 etc.
-            (15.0, 18.75, 1.50, 75.0)
+            Some((15.0, 18.75, 1.50, 75.0))
         }
     } else if model.contains("sonnet") {
-        (3.0, 3.75, 0.30, 15.0)
+        Some((3.0, 3.75, 0.30, 15.0))
     } else if model.contains("haiku") {
         if model.contains("4-5") || model.contains("4.5") {
-            (1.0, 1.25, 0.10, 5.0)
+            Some((1.0, 1.25, 0.10, 5.0))
         } else {
-            (0.80, 1.0, 0.08, 4.0)
+            Some((0.80, 1.0, 0.08, 4.0))
         }
     } else {
-        return None;
-    };
+        None
+    }
+}
 
-    let cost = (usage.input as f64 * input_per_m
-        + usage.cache_write as f64 * cache_write_per_m
-        + usage.cache_read as f64 * cache_read_per_m
-        + usage.output as f64 * output_per_m)
-        / 1_000_000.0;
-
-    Some(cost)
+/// Estimate cost in USD for a given usage and model.
+/// Returns None if the model pricing is unknown.
+pub fn estimate_cost(usage: &yoagent::Usage, model: &str) -> Option<f64> {
+    let (input_cost, cw_cost, cr_cost, output_cost) = cost_breakdown(usage, model)?;
+    Some(input_cost + cw_cost + cr_cost + output_cost)
 }
 
 /// Get individual cost components for a usage and model.
 /// Returns (input_cost, cache_write_cost, cache_read_cost, output_cost) or None if model unknown.
 pub fn cost_breakdown(usage: &yoagent::Usage, model: &str) -> Option<(f64, f64, f64, f64)> {
-    let (input_per_m, cache_write_per_m, cache_read_per_m, output_per_m) = if model.contains("opus")
-    {
-        if model.contains("4-6")
-            || model.contains("4-5")
-            || model.contains("4.6")
-            || model.contains("4.5")
-        {
-            (5.0, 6.25, 0.50, 25.0)
-        } else {
-            (15.0, 18.75, 1.50, 75.0)
-        }
-    } else if model.contains("sonnet") {
-        (3.0, 3.75, 0.30, 15.0)
-    } else if model.contains("haiku") {
-        if model.contains("4-5") || model.contains("4.5") {
-            (1.0, 1.25, 0.10, 5.0)
-        } else {
-            (0.80, 1.0, 0.08, 4.0)
-        }
-    } else {
-        return None;
-    };
+    let (input_per_m, cache_write_per_m, cache_read_per_m, output_per_m) = model_pricing(model)?;
 
     let input_cost = usage.input as f64 * input_per_m / 1_000_000.0;
     let cache_write_cost = usage.cache_write as f64 * cache_write_per_m / 1_000_000.0;
