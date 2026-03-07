@@ -3,6 +3,7 @@
 
 import json
 import os
+import random
 import re
 import sys
 
@@ -44,11 +45,11 @@ def sanitize_content(text, boundary_begin, boundary_end):
 
 
 def select_issues(issues, sponsor_logins=None, pick=3, day=0):
-    """Select a rotating subset of issues per session.
+    """Select issues for a session: all sponsors + top 1 by score + random from rest.
 
-    Sponsor issues are always included. Remaining slots are filled by
-    rotating through non-sponsor issues sorted by net score, using the
-    day number as offset so different issues surface each session.
+    Sponsor issues are always included. The highest-scored non-sponsor issue
+    is always included. Remaining slots are filled randomly from the top 10
+    scored issues, seeded by day for reproducibility.
     """
     if not issues or pick <= 0:
         return issues or []
@@ -63,20 +64,25 @@ def select_issues(issues, sponsor_logins=None, pick=3, day=0):
         else:
             rest.append(issue)
 
-    # If sponsors fill all slots, just return sponsors
-    if len(sponsors) >= pick:
-        return sponsors[:pick]
+    # All sponsors always included
+    selected = list(sponsors)
+    remaining_slots = pick - len(selected)
+    if remaining_slots <= 0:
+        return selected[:pick]
 
-    # Rotate through non-sponsor issues using day as offset
-    remaining_slots = pick - len(sponsors)
+    # Top 1 by score (rest is already sorted by score descending from caller)
     if rest:
-        offset = day % len(rest)
-        rotated = rest[offset:] + rest[:offset]
-        selected = rotated[:remaining_slots]
-    else:
-        selected = []
+        selected.append(rest[0])
+        rest = rest[1:]
+        remaining_slots -= 1
 
-    return sponsors + selected
+    # Random pick from top 10 scored for remaining slots (seeded by day)
+    if rest and remaining_slots > 0:
+        top_pool = rest[:10]
+        rng = random.Random(day)
+        selected.extend(rng.sample(top_pool, min(remaining_slots, len(top_pool))))
+
+    return selected
 
 
 def format_issues(issues, sponsor_logins=None, pick=3, day=0):
