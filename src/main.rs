@@ -63,18 +63,91 @@ impl Completer for YoyoHelper {
         pos: usize,
         _ctx: &rustyline::Context<'_>,
     ) -> rustyline::Result<(usize, Vec<String>)> {
-        // Only complete if the line starts with '/' and cursor is in the command word
         let prefix = &line[..pos];
-        if !prefix.starts_with('/') || prefix.contains(' ') {
-            return Ok((0, Vec::new()));
+
+        // Slash command completion: starts with '/' and no space yet
+        if prefix.starts_with('/') && !prefix.contains(' ') {
+            let matches: Vec<String> = KNOWN_COMMANDS
+                .iter()
+                .filter(|cmd| cmd.starts_with(prefix))
+                .map(|cmd| cmd.to_string())
+                .collect();
+            return Ok((0, matches));
         }
-        let matches: Vec<String> = KNOWN_COMMANDS
-            .iter()
-            .filter(|cmd| cmd.starts_with(prefix))
-            .map(|cmd| cmd.to_string())
-            .collect();
-        Ok((0, matches))
+
+        // File path completion: extract the last whitespace-delimited word
+        let word_start = prefix.rfind(char::is_whitespace).map_or(0, |i| i + 1);
+        let word = &prefix[word_start..];
+        if word.is_empty() {
+            return Ok((pos, Vec::new()));
+        }
+
+        let matches = complete_file_path(word);
+        Ok((word_start, matches))
     }
+}
+
+/// Complete a partial file path by listing directory entries that match.
+/// Appends `/` to directory names for easy continued completion.
+fn complete_file_path(partial: &str) -> Vec<String> {
+    use std::path::Path;
+
+    let path = Path::new(partial);
+
+    // Determine the directory to scan and the filename prefix to match
+    let (dir, file_prefix) =
+        if partial.ends_with('/') || partial.ends_with(std::path::MAIN_SEPARATOR) {
+            // User typed "src/" — list everything inside src/
+            (partial.to_string(), String::new())
+        } else if let Some(parent) = path.parent() {
+            let parent_str = if parent.as_os_str().is_empty() {
+                ".".to_string()
+            } else {
+                parent.to_string_lossy().to_string()
+            };
+            let file_prefix = path
+                .file_name()
+                .map(|f| f.to_string_lossy().to_string())
+                .unwrap_or_default();
+            (parent_str, file_prefix)
+        } else {
+            (".".to_string(), partial.to_string())
+        };
+
+    let entries = match std::fs::read_dir(&dir) {
+        Ok(entries) => entries,
+        Err(_) => return Vec::new(),
+    };
+
+    let dir_prefix = if dir == "." && !partial.contains('/') {
+        String::new()
+    } else if partial.ends_with('/') || partial.ends_with(std::path::MAIN_SEPARATOR) {
+        partial.to_string()
+    } else {
+        let parent = path.parent().unwrap_or(Path::new(""));
+        if parent.as_os_str().is_empty() {
+            String::new()
+        } else {
+            format!("{}/", parent.display())
+        }
+    };
+
+    let mut matches = Vec::new();
+    for entry in entries.flatten() {
+        let name = entry.file_name().to_string_lossy().to_string();
+        if !name.starts_with(&file_prefix) {
+            continue;
+        }
+        let is_dir = entry.file_type().map(|ft| ft.is_dir()).unwrap_or(false);
+        let candidate = if is_dir {
+            format!("{}{}/", dir_prefix, name)
+        } else {
+            format!("{}{}", dir_prefix, name)
+        };
+        matches.push(candidate);
+    }
+    matches.sort();
+    matches
 }
 
 impl Hinter for YoyoHelper {
@@ -1642,9 +1715,88 @@ mod tests {
         let (_, candidates) = helper.complete("/model claude", 13, &ctx).unwrap();
         assert!(candidates.is_empty());
 
-        // Regular text (no slash) should return no completions
-        let (_, candidates) = helper.complete("hello", 5, &ctx).unwrap();
+        // Regular text that doesn't match any files returns no completions
+        let (_, candidates) = helper.complete("zzz_nonexistent_xyz", 19, &ctx).unwrap();
         assert!(candidates.is_empty());
+    }
+
+    #[test]
+    fn test_file_path_completion_current_dir() {
+        use rustyline::history::DefaultHistory;
+        let helper = YoyoHelper;
+        let history = DefaultHistory::new();
+        let ctx = rustyline::Context::new(&history);
+
+        // "Cargo" should match Cargo.toml (and possibly Cargo.lock)
+        let (start, candidates) = helper.complete("Cargo", 5, &ctx).unwrap();
+        assert_eq!(start, 0);
+        assert!(candidates.iter().any(|c| c == "Cargo.toml"));
+    }
+
+    #[test]
+    fn test_file_path_completion_with_directory_prefix() {
+        use rustyline::history::DefaultHistory;
+        let helper = YoyoHelper;
+        let history = DefaultHistory::new();
+        let ctx = rustyline::Context::new(&history);
+
+        // "src/ma" should match "src/main.rs"
+        let (start, candidates) = helper.complete("src/ma", 6, &ctx).unwrap();
+        assert_eq!(start, 0);
+        assert!(candidates.contains(&"src/main.rs".to_string()));
+    }
+
+    #[test]
+    fn test_file_path_completion_no_completions_for_empty() {
+        use rustyline::history::DefaultHistory;
+        let helper = YoyoHelper;
+        let history = DefaultHistory::new();
+        let ctx = rustyline::Context::new(&history);
+
+        // Empty input should return no completions
+        let (_, candidates) = helper.complete("", 0, &ctx).unwrap();
+        assert!(candidates.is_empty());
+    }
+
+    #[test]
+    fn test_file_path_completion_after_text() {
+        use rustyline::history::DefaultHistory;
+        let helper = YoyoHelper;
+        let history = DefaultHistory::new();
+        let ctx = rustyline::Context::new(&history);
+
+        // "read the src/ma" should complete "src/ma" as the last word
+        let input = "read the src/ma";
+        let (start, candidates) = helper.complete(input, input.len(), &ctx).unwrap();
+        assert_eq!(start, 9); // "read the " is 9 chars
+        assert!(candidates.contains(&"src/main.rs".to_string()));
+    }
+
+    #[test]
+    fn test_file_path_completion_directories_have_slash() {
+        use rustyline::history::DefaultHistory;
+        let helper = YoyoHelper;
+        let history = DefaultHistory::new();
+        let ctx = rustyline::Context::new(&history);
+
+        // "sr" should match "src/" (directory with trailing slash)
+        let (start, candidates) = helper.complete("sr", 2, &ctx).unwrap();
+        assert_eq!(start, 0);
+        assert!(candidates.contains(&"src/".to_string()));
+    }
+
+    #[test]
+    fn test_file_path_slash_commands_still_work() {
+        use rustyline::history::DefaultHistory;
+        let helper = YoyoHelper;
+        let history = DefaultHistory::new();
+        let ctx = rustyline::Context::new(&history);
+
+        // Slash commands should still complete normally
+        let (start, candidates) = helper.complete("/he", 3, &ctx).unwrap();
+        assert_eq!(start, 0);
+        assert!(candidates.contains(&"/help".to_string()));
+        assert!(candidates.contains(&"/health".to_string()));
     }
 
     #[test]
