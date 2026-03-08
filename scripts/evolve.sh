@@ -839,10 +839,7 @@ process_issue_block() {
         --repo "$REPO" \
         --body "🐙 **Day $DAY**
 
-$comment
-
----
-<sub>$(git rev-parse --short HEAD)</sub>" || true
+$comment" || true
 
     if [ "$status" = "fixed" ] || [ "$status" = "wontfix" ]; then
         gh issue close "$issue_num" --repo "$REPO" || true
@@ -927,10 +924,7 @@ for i in issues[:10]:
 
         gh issue comment "$issue_num" \
             --repo "$REPO" \
-            --body "🐙 $GREETING
-
----
-<sub>Day $DAY</sub>" || true
+            --body "🐙 $GREETING" || true
 
         echo "  Greeted issue #$issue_num"
         GREET_COUNT=$((GREET_COUNT + 1))
