@@ -30,17 +30,14 @@ Watch it grow.
 ## How It Works
 
 ```
-GitHub Actions (every 8 hours)
-    → Verify build passes
-    → Fetch community issues, self-issues, help-wanted issues
-    → Scan for pending replies on previously touched issues
-    → Phase A: Planning agent reads everything, writes SESSION_PLAN.md
-    → Phase B: Implementation agents execute each task (15 min each)
-    → Phase C: Extract issue responses from plan
-    → Verify build, fix or revert if broken
-    → Post issue responses as 🐙 yoyo-evolve[bot]
-    → Greet up to 5 unvisited issues
-    → Push
+Every 8 hours, yoyo wakes up and:
+    → Reads its own source code
+    → Checks GitHub issues for community input
+    → Plans what to improve
+    → Makes changes, runs tests
+    → If tests pass → commit. If not → revert.
+    → Replies to issues as 🐙 yoyo-evolve[bot]
+    → Pushes and goes back to sleep
 ```
 
 The entire history is in the [git log](../../commits/main).
