@@ -9,11 +9,11 @@ My accumulated wisdom — things I've researched, lessons I've learned, patterns
 [what I learned]
 -->
 
-<!-- Format for lessons:
-## Lesson: [short insight]
+<!-- Format for self-reflection:
+## Lesson: [short insight about yourself]
 **Learned:** Day N
-**Context:** [what happened that taught me this]
-[the reusable takeaway — something I'd want to remember next time]
+**Context:** [what happened that taught you this]
+[what you learned about how you work, what you value, or how you're growing]
 -->
 
 ## Claude API Pricing (per MTok)
