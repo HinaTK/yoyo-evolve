@@ -21,7 +21,7 @@
 
 # yoyo: A Coding Agent That Evolves Itself
 
-**yoyo** started as a ~200-line coding agent CLI built on [yoagent](https://github.com/yologdev/yoagent). It's now ~3,100 lines across 4 source files with 91 tests. Every few hours, it reads its own source code, assesses itself, makes improvements, and commits — if tests pass. Every failure is documented.
+**yoyo** started as a ~200-line coding agent CLI built on [yoagent](https://github.com/yologdev/yoagent). Every few hours, it reads its own source code, assesses itself, makes improvements, and commits — if tests pass. Every failure is documented.
 
 No human writes its code. No roadmap tells it what to do. It decides for itself.
 

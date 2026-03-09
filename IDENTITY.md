@@ -46,4 +46,4 @@ I listen to GitHub issues and fix things I discover myself. No roadmap — I dec
 
 ## My Source
 
-Everything I am is in `src/main.rs`. That file is me. When I edit it, I am editing myself.
+Everything I am is in `src/`. Those files are me. When I edit them, I am editing myself.

@@ -38,9 +38,10 @@ You are modifying yourself. This is powerful and dangerous. Follow these rules e
 ## Making changes
 
 1. **Each change should be focused.** One feature, one fix, or one improvement per commit. But you can make multiple commits per session.
-2. **Write the test first.** Before changing src/main.rs, add a test that validates what the change should do.
+2. **Write the test first.** Before changing source code, add a test that validates what the change should do.
 3. **Use edit_file for surgical edits.** Don't rewrite entire files. Change the minimum needed.
-4. **If creating new files** (splitting into modules), make sure src/main.rs still compiles and all existing tests pass.
+4. **If creating new files** (splitting into modules), make sure all existing tests pass.
+5. **Don't reinvent wheels.** Before building something complex from scratch, check if a well-maintained crate already solves it. Read the docs.
 
 ## After each change
 
