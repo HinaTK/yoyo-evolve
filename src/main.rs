@@ -47,6 +47,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use yoagent::agent::Agent;
 use yoagent::context::{compact_messages, total_tokens, ContextConfig, ExecutionLimits};
+use yoagent::openapi::{OpenApiConfig, OperationFilter};
 use yoagent::provider::{
     AnthropicProvider, GoogleProvider, ModelConfig, OpenAiCompat, OpenAiCompatProvider,
 };
@@ -412,6 +413,7 @@ async fn main() {
     let continue_session = config.continue_session;
     let output_path = config.output_path;
     let mcp_servers = config.mcp_servers;
+    let openapi_specs = config.openapi_specs;
     // Auto-approve in non-interactive modes (piped, --prompt) or when --yes is set
     let is_interactive = io::stdin().is_terminal() && config.prompt_arg.is_none();
     let auto_approve = config.auto_approve || !is_interactive;
@@ -471,6 +473,41 @@ async fn main() {
                     &permissions,
                 );
                 eprintln!("{DIM}  mcp: agent rebuilt (previous MCP connections lost){RESET}");
+            }
+        }
+    }
+
+    // Load OpenAPI specs (--openapi flags)
+    let mut openapi_count = 0u32;
+    for spec_path in &openapi_specs {
+        eprintln!("{DIM}  openapi: loading {spec_path}...{RESET}");
+        let result = agent
+            .with_openapi_file(spec_path, OpenApiConfig::default(), &OperationFilter::All)
+            .await;
+        match result {
+            Ok(updated) => {
+                agent = updated;
+                openapi_count += 1;
+                eprintln!("{GREEN}  ✓ openapi: {spec_path} loaded{RESET}");
+            }
+            Err(e) => {
+                eprintln!("{RED}  ✗ openapi: failed to load '{spec_path}': {e}{RESET}");
+                // Agent was consumed on error — rebuild it
+                agent = build_agent(
+                    &model,
+                    &api_key,
+                    &provider,
+                    base_url.as_deref(),
+                    &skills,
+                    &system_prompt,
+                    thinking,
+                    max_tokens,
+                    temperature,
+                    max_turns,
+                    auto_approve,
+                    &permissions,
+                );
+                eprintln!("{DIM}  openapi: agent rebuilt (previous connections lost){RESET}");
             }
         }
     }
@@ -545,6 +582,9 @@ async fn main() {
     }
     if mcp_count > 0 {
         println!("{DIM}  mcp: {mcp_count} server(s) connected{RESET}");
+    }
+    if openapi_count > 0 {
+        println!("{DIM}  openapi: {openapi_count} spec(s) loaded{RESET}");
     }
     if is_verbose() {
         println!("{DIM}  verbose: on{RESET}");
@@ -1153,6 +1193,9 @@ async fn main() {
                 println!("    system:     {system_preview}");
                 if mcp_count > 0 {
                     println!("    mcp:        {mcp_count} server(s)");
+                }
+                if openapi_count > 0 {
+                    println!("    openapi:    {openapi_count} spec(s)");
                 }
                 println!(
                     "    verbose:    {}",

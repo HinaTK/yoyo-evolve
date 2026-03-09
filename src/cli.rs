@@ -181,6 +181,7 @@ pub struct Config {
     pub prompt_arg: Option<String>,
     pub verbose: bool,
     pub mcp_servers: Vec<String>,
+    pub openapi_specs: Vec<String>,
     pub auto_approve: bool,
     pub permissions: PermissionConfig,
 }
@@ -224,6 +225,7 @@ pub fn print_help() {
     println!("  --output, -o <f>  Write final response text to a file");
     println!("  --api-key <key>   API key (overrides provider-specific env var)");
     println!("  --mcp <cmd>       Connect to an MCP server via stdio (repeatable)");
+    println!("  --openapi <spec>  Load OpenAPI spec file and register API tools (repeatable)");
     println!("  --no-color        Disable colored output (also respects NO_COLOR env)");
     println!("  --verbose, -v     Show debug info (API errors, request details)");
     println!("  --yes, -y         Auto-approve all tool executions (skip confirmation prompts)");
@@ -346,6 +348,7 @@ const KNOWN_FLAGS: &[&str] = &[
     "-o",
     "--api-key",
     "--mcp",
+    "--openapi",
     "--allow",
     "--deny",
     "--no-color",
@@ -621,6 +624,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         "-o",
         "--api-key",
         "--mcp",
+        "--openapi",
         "--allow",
         "--deny",
     ];
@@ -890,6 +894,14 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         .filter_map(|(i, _)| args.get(i + 1).cloned())
         .collect();
 
+    // --openapi <spec-path> flags: collect all OpenAPI spec paths (repeatable)
+    let openapi_specs: Vec<String> = args
+        .iter()
+        .enumerate()
+        .filter(|(_, a)| a.as_str() == "--openapi")
+        .filter_map(|(i, _)| args.get(i + 1).cloned())
+        .collect();
+
     Some(Config {
         model,
         api_key,
@@ -906,6 +918,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         prompt_arg,
         verbose,
         mcp_servers,
+        openapi_specs,
         auto_approve,
         permissions,
     })
@@ -1324,6 +1337,7 @@ thinking = "high"
             "--output",
             "-o",
             "--api-key",
+            "--openapi",
             "--allow",
             "--deny",
         ];
@@ -1745,5 +1759,49 @@ key = "value"
             .collect();
         assert_eq!(allow, vec!["git *", "cargo *"]);
         assert_eq!(deny, vec!["rm -rf *"]);
+    }
+
+    #[test]
+    fn test_openapi_flag_parsing_single() {
+        let args = [
+            "yoyo".to_string(),
+            "--openapi".to_string(),
+            "petstore.yaml".to_string(),
+        ];
+        let specs: Vec<String> = args
+            .iter()
+            .enumerate()
+            .filter(|(_, a)| a.as_str() == "--openapi")
+            .filter_map(|(i, _)| args.get(i + 1).cloned())
+            .collect();
+        assert_eq!(specs, vec!["petstore.yaml"]);
+    }
+
+    #[test]
+    fn test_openapi_flag_parsing_multiple() {
+        let args = [
+            "yoyo".to_string(),
+            "--openapi".to_string(),
+            "api1.yaml".to_string(),
+            "--openapi".to_string(),
+            "api2.json".to_string(),
+            "--model".to_string(),
+            "claude-opus-4-6".to_string(),
+        ];
+        let specs: Vec<String> = args
+            .iter()
+            .enumerate()
+            .filter(|(_, a)| a.as_str() == "--openapi")
+            .filter_map(|(i, _)| args.get(i + 1).cloned())
+            .collect();
+        assert_eq!(specs, vec!["api1.yaml", "api2.json"]);
+    }
+
+    #[test]
+    fn test_openapi_flag_in_known_flags() {
+        assert!(
+            KNOWN_FLAGS.contains(&"--openapi"),
+            "--openapi should be in KNOWN_FLAGS"
+        );
     }
 }
