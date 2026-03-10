@@ -735,3 +735,507 @@ fn piped_input_with_bad_api_key_shows_auth_error_gracefully() {
         "should show auth error, got: {combined}"
     );
 }
+
+// ── Error message quality ───────────────────────────────────────────
+
+#[test]
+fn invalid_provider_warns_and_exits_nonzero() {
+    // A completely bogus provider should warn about the unknown provider
+    // and then fail with a missing API key error (no env var for "bogusprovider")
+    let output = yoyo_cmd()
+        .arg("--provider")
+        .arg("bogusprovider")
+        .stdin(Stdio::piped())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        !output.status.success(),
+        "invalid provider with no API key should exit non-zero"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("bogusprovider"),
+        "should mention the invalid provider name: {stderr}"
+    );
+    assert!(
+        !stderr.contains("panicked at"),
+        "should not panic on invalid provider: {stderr}"
+    );
+}
+
+#[test]
+fn invalid_max_tokens_value_warns_gracefully() {
+    // --max-tokens with a non-numeric value should produce a warning, not a panic
+    let output = yoyo_cmd()
+        .arg("--provider")
+        .arg("ollama")
+        .arg("--max-tokens")
+        .arg("not_a_number")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    // --help still makes it exit 0 even with bad max-tokens
+    assert!(
+        output.status.success(),
+        "should exit 0 because --help is present"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("panicked at"),
+        "should not panic on invalid --max-tokens: {stderr}"
+    );
+}
+
+#[test]
+fn invalid_temperature_value_warns_gracefully() {
+    // --temperature with a non-numeric value should produce a warning, not a panic
+    let output = yoyo_cmd()
+        .arg("--provider")
+        .arg("ollama")
+        .arg("--temperature")
+        .arg("hot")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "should exit 0 because --help is present"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("panicked at"),
+        "should not panic on invalid --temperature: {stderr}"
+    );
+}
+
+#[test]
+fn missing_api_key_error_is_human_readable() {
+    // Default provider (anthropic) with no API key should produce a readable error,
+    // not a raw stack trace or panic
+    let output = yoyo_cmd()
+        .stdin(Stdio::piped())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    // Must contain "error:" prefix — not a raw exception
+    assert!(
+        stderr.contains("error:"),
+        "error message should have 'error:' prefix: {stderr}"
+    );
+    // Must NOT be a raw panic/backtrace
+    assert!(
+        !stderr.contains("thread 'main' panicked"),
+        "should not show raw panic: {stderr}"
+    );
+    assert!(
+        !stderr.contains("RUST_BACKTRACE"),
+        "should not mention RUST_BACKTRACE: {stderr}"
+    );
+}
+
+// ── Flag combinations ───────────────────────────────────────────────
+
+#[test]
+fn model_and_provider_flags_work_together() {
+    // --model and --provider should both be accepted without conflict
+    let output = yoyo_cmd()
+        .arg("--model")
+        .arg("llama3.2")
+        .arg("--provider")
+        .arg("ollama")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "--model + --provider + --help should exit 0"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("Unknown flag"),
+        "combined --model/--provider should not trigger unknown flag warning: {stderr}"
+    );
+}
+
+#[test]
+fn all_boolean_flags_combine_without_conflict() {
+    // Boolean flags should all be accepted together
+    let output = yoyo_cmd()
+        .arg("--no-color")
+        .arg("--verbose")
+        .arg("--yes")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "--no-color + --verbose + --yes + --help should exit 0"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("Unknown flag"),
+        "combined boolean flags should not trigger unknown flag warning: {stderr}"
+    );
+}
+
+#[test]
+fn multiple_value_flags_combine_without_conflict() {
+    // Multiple value-taking flags together should all work
+    let output = yoyo_cmd()
+        .arg("--model")
+        .arg("gpt-4o")
+        .arg("--provider")
+        .arg("ollama")
+        .arg("--max-tokens")
+        .arg("4096")
+        .arg("--max-turns")
+        .arg("10")
+        .arg("--temperature")
+        .arg("0.5")
+        .arg("--thinking")
+        .arg("medium")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "many value flags + --help should exit 0"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("Unknown flag"),
+        "combined value flags should not trigger unknown flag warning: {stderr}"
+    );
+}
+
+// ── Exit codes ──────────────────────────────────────────────────────
+
+#[test]
+fn help_flag_exits_with_code_zero() {
+    let output = yoyo_cmd()
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    let code = output.status.code().expect("should have exit code");
+    assert_eq!(code, 0, "--help should exit with code 0, got {code}");
+}
+
+#[test]
+fn version_flag_exits_with_code_zero() {
+    let output = yoyo_cmd()
+        .arg("--version")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    let code = output.status.code().expect("should have exit code");
+    assert_eq!(code, 0, "--version should exit with code 0, got {code}");
+}
+
+#[test]
+fn missing_flag_value_exits_with_nonzero_code() {
+    // --provider without a value should exit with a specific non-zero code
+    let output = yoyo_cmd()
+        .arg("--provider")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    let code = output.status.code().expect("should have exit code");
+    assert_ne!(
+        code, 0,
+        "--provider without value should exit non-zero, got {code}"
+    );
+}
+
+#[test]
+fn empty_piped_stdin_exits_with_nonzero_code() {
+    let output = yoyo_cmd()
+        .env("ANTHROPIC_API_KEY", "sk-ant-fake-for-test")
+        .stdin(Stdio::piped())
+        .output()
+        .expect("failed to run yoyo");
+
+    let code = output.status.code().expect("should have exit code");
+    assert_ne!(
+        code, 0,
+        "empty piped stdin should exit non-zero, got {code}"
+    );
+}
+
+// ── Output format ───────────────────────────────────────────────────
+
+#[test]
+fn version_output_matches_semver_pattern() {
+    let output = yoyo_cmd()
+        .arg("--version")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let trimmed = stdout.trim();
+    // Should match "yoyo vX.Y.Z" pattern
+    assert!(
+        trimmed.starts_with("yoyo v"),
+        "version should start with 'yoyo v': {trimmed}"
+    );
+    let version_part = &trimmed["yoyo v".len()..];
+    let parts: Vec<&str> = version_part.split('.').collect();
+    assert!(
+        parts.len() >= 2,
+        "version should have at least major.minor: {version_part}"
+    );
+    // Each part should be numeric
+    for part in &parts {
+        assert!(
+            part.chars().all(|c| c.is_ascii_digit()),
+            "version component '{part}' should be numeric in '{version_part}'"
+        );
+    }
+}
+
+#[test]
+fn help_output_covers_all_value_flags() {
+    let output = yoyo_cmd()
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+
+    // Every value-taking flag should be documented in help
+    let value_flags = [
+        "--model",
+        "--provider",
+        "--base-url",
+        "--thinking",
+        "--max-tokens",
+        "--max-turns",
+        "--temperature",
+        "--skills",
+        "--system",
+        "--system-file",
+        "--prompt",
+        "--output",
+        "--api-key",
+        "--mcp",
+        "--openapi",
+        "--allow",
+        "--deny",
+    ];
+    for flag in &value_flags {
+        assert!(
+            stdout.contains(flag),
+            "help should document value flag {flag}: {stdout}"
+        );
+    }
+
+    // Every boolean flag should be documented
+    let bool_flags = [
+        "--no-color",
+        "--verbose",
+        "--yes",
+        "--continue",
+        "--help",
+        "--version",
+    ];
+    for flag in &bool_flags {
+        assert!(
+            stdout.contains(flag),
+            "help should document boolean flag {flag}: {stdout}"
+        );
+    }
+}
+
+// ── Edge cases ──────────────────────────────────────────────────────
+
+#[test]
+fn very_long_model_name_does_not_crash() {
+    // A ridiculously long model name should be accepted gracefully
+    let long_model = "a".repeat(1000);
+    let output = yoyo_cmd()
+        .arg("--model")
+        .arg(&long_model)
+        .arg("--provider")
+        .arg("ollama")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "very long model name + --help should exit 0"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("panicked at"),
+        "should not panic on very long model name: {stderr}"
+    );
+}
+
+#[test]
+fn unicode_in_system_prompt_does_not_crash() {
+    // Unicode characters in --system should be handled gracefully
+    let output = yoyo_cmd()
+        .arg("--system")
+        .arg("あなたは日本語のアシスタントです 🐙🎉")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "unicode in --system + --help should exit 0"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("panicked at"),
+        "should not panic on unicode system prompt: {stderr}"
+    );
+}
+
+#[test]
+fn empty_string_model_value_does_not_crash() {
+    // --model "" (empty string) should not crash
+    let output = yoyo_cmd()
+        .arg("--model")
+        .arg("")
+        .arg("--provider")
+        .arg("ollama")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "empty model string + --help should exit 0"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("panicked at"),
+        "should not panic on empty model string: {stderr}"
+    );
+}
+
+#[test]
+fn empty_string_provider_value_does_not_crash() {
+    // --provider "" (empty string) should not crash — it may warn but shouldn't panic
+    let output = yoyo_cmd()
+        .arg("--provider")
+        .arg("")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "empty provider string + --help should exit 0"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("panicked at"),
+        "should not panic on empty provider string: {stderr}"
+    );
+}
+
+#[test]
+fn unicode_flag_value_does_not_crash() {
+    // Unicode in a flag value should not crash the parser
+    let output = yoyo_cmd()
+        .arg("--provider")
+        .arg("ollama")
+        .arg("--model")
+        .arg("模型-名前-🤖")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "unicode model name + --help should exit 0"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("panicked at"),
+        "should not panic on unicode model name: {stderr}"
+    );
+}
+
+#[test]
+fn special_characters_in_system_prompt_do_not_crash() {
+    // Newlines, quotes, backslashes — all should survive
+    let output = yoyo_cmd()
+        .arg("--system")
+        .arg("line1\nline2\ttab \"quoted\" 'single' \\backslash $dollar")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "special chars in --system + --help should exit 0"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("panicked at"),
+        "should not panic on special characters in system prompt: {stderr}"
+    );
+}
+
+#[test]
+fn multiple_providers_missing_keys_all_show_provider_specific_hints() {
+    // Each cloud provider should mention its specific env var when key is missing
+    let providers_and_envs = [
+        ("openai", "OPENAI_API_KEY"),
+        ("google", "GOOGLE_API_KEY"),
+        ("groq", "GROQ_API_KEY"),
+        ("xai", "XAI_API_KEY"),
+        ("deepseek", "DEEPSEEK_API_KEY"),
+    ];
+
+    for (provider, expected_env) in &providers_and_envs {
+        let output = yoyo_cmd()
+            .arg("--provider")
+            .arg(provider)
+            .stdin(Stdio::piped())
+            .output()
+            .expect("failed to run yoyo");
+
+        assert!(
+            !output.status.success(),
+            "missing key for {provider} should exit non-zero"
+        );
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(
+            stderr.contains(expected_env),
+            "missing key for --provider {provider} should hint about {expected_env}: {stderr}"
+        );
+        assert!(
+            !stderr.contains("panicked at"),
+            "should not panic for provider {provider}: {stderr}"
+        );
+    }
+}
