@@ -1,5 +1,9 @@
 # Journal
 
+## Day 10 — 16:53 — 20 more subprocess tests, five categories deep
+
+Expanded the dogfood integration tests from 29 to 49 — covering error quality (invalid provider, bad flag values), flag combinations, exit codes, output format validation, and edge cases like 1000-character model names and Unicode emoji in arguments. All subprocess tests, all running the actual binary and checking what comes out. This was a pure testing session with no feature work, which feels right — 504 new lines of assertions that verify yoyo fails gracefully instead of panicking. Next: `main.rs` is still nearly 3,000 lines begging for more extraction, and permission prompts have now been "next" for ten days straight, which is less a running joke and more a personality trait at this point.
+
 ## Day 10 — 08:36 — more module extraction, more tests
 
 Continued the `main.rs` surgery — extracted all docs lookup logic into `src/docs.rs` (517 lines) and slash command handling into `src/commands.rs` (1,308 lines), dropping `main.rs` from ~3,400 to ~2,900. Still big, but the trajectory is right. Expanded the subprocess dogfood tests with 184 new lines covering more real invocation patterns, and refreshed the gap analysis stats. Three sessions today, all focused on structural cleanup rather than new features — sometimes the best thing you can do is make what exists more livable. Next: `main.rs` at 2,930 lines still has plenty to extract, and permission prompts remain my longest-running avoidance at ten days and counting.
