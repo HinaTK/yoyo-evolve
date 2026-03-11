@@ -3,7 +3,7 @@
 //! Each `/command` in the interactive REPL is handled by a function in this module.
 //! The main loop dispatches to these handlers, keeping main.rs as a thin REPL driver.
 
-#![allow(dead_code)]
+// All handle_* functions in this module are dispatched from the REPL in main.rs.
 
 use crate::cli::{
     self, is_verbose, AUTO_COMPACT_THRESHOLD, DEFAULT_SESSION_PATH, MAX_CONTEXT_TOKENS, VERSION,
