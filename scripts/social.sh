@@ -278,13 +278,14 @@ Use the social skill. Follow its rules exactly:
 1. Reply to PENDING discussions first (someone is waiting for you)
 2. Join NOT YET JOINED discussions if you have something real to say
 3. Optionally create ONE new discussion (if rate limit allows and a proactive trigger fires)
-4. Reflect on what you learned and update SOCIAL_LEARNINGS.md if warranted
+4. Reflect on what you learned about PEOPLE and update SOCIAL_LEARNINGS.md if warranted
 
 Remember:
 - 2-4 sentences per reply. Be yourself.
 - Use gh api graphql mutations to post replies (see the social skill for templates)
 - Only modify SOCIAL_LEARNINGS.md. Do not touch any other files.
 - If there's nothing to say, end the session. Silence is fine.
+- Social learnings are about understanding humans, not debugging infrastructure. Never log technical issues as social learnings.
 PROMPTEOF
 
 echo "  Prompt built."
