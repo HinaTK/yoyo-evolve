@@ -30,6 +30,7 @@
 //!   /retry          Re-send the last user input
 
 mod cli;
+mod commands;
 mod docs;
 mod format;
 mod git;
@@ -1456,7 +1457,7 @@ async fn main() {
                 if cmd.is_empty() {
                     println!("{DIM}  usage: /run <command>  or  !<command>{RESET}\n");
                 } else {
-                    run_shell_command(cmd);
+                    commands::run_shell_command(cmd);
                 }
                 continue;
             }
@@ -1466,132 +1467,11 @@ async fn main() {
                 continue;
             }
             s if s == "/pr" || s.starts_with("/pr ") => {
-                let arg = s.strip_prefix("/pr").unwrap_or("").trim();
-                match parse_pr_args(arg) {
-                    PrSubcommand::List => {
-                        match std::process::Command::new("gh")
-                            .args(["pr", "list", "--limit", "10"])
-                            .output()
-                        {
-                            Ok(output) if output.status.success() => {
-                                let text = String::from_utf8_lossy(&output.stdout);
-                                if text.trim().is_empty() {
-                                    println!("{DIM}  (no open pull requests){RESET}\n");
-                                } else {
-                                    println!("{DIM}  Open pull requests:");
-                                    for line in text.lines() {
-                                        println!("    {line}");
-                                    }
-                                    println!("{RESET}");
-                                }
-                            }
-                            Ok(output) => {
-                                let stderr = String::from_utf8_lossy(&output.stderr);
-                                eprintln!("{RED}  error: {}{RESET}\n", stderr.trim());
-                            }
-                            Err(_) => {
-                                eprintln!("{RED}  error: `gh` CLI not found. Install it from https://cli.github.com{RESET}\n");
-                            }
-                        }
-                    }
-                    PrSubcommand::View(number) => {
-                        let num_str = number.to_string();
-                        match std::process::Command::new("gh")
-                            .args(["pr", "view", &num_str])
-                            .output()
-                        {
-                            Ok(output) if output.status.success() => {
-                                let text = String::from_utf8_lossy(&output.stdout);
-                                println!("{DIM}{text}{RESET}");
-                            }
-                            Ok(output) => {
-                                let stderr = String::from_utf8_lossy(&output.stderr);
-                                eprintln!("{RED}  error: {}{RESET}\n", stderr.trim());
-                            }
-                            Err(_) => {
-                                eprintln!("{RED}  error: `gh` CLI not found. Install it from https://cli.github.com{RESET}\n");
-                            }
-                        }
-                    }
-                    PrSubcommand::Diff(number) => {
-                        let num_str = number.to_string();
-                        match std::process::Command::new("gh")
-                            .args(["pr", "diff", &num_str])
-                            .output()
-                        {
-                            Ok(output) if output.status.success() => {
-                                let text = String::from_utf8_lossy(&output.stdout);
-                                if text.trim().is_empty() {
-                                    println!("{DIM}  (no diff for PR #{number}){RESET}\n");
-                                } else {
-                                    println!("{DIM}{text}{RESET}");
-                                }
-                            }
-                            Ok(output) => {
-                                let stderr = String::from_utf8_lossy(&output.stderr);
-                                eprintln!("{RED}  error: {}{RESET}\n", stderr.trim());
-                            }
-                            Err(_) => {
-                                eprintln!("{RED}  error: `gh` CLI not found. Install it from https://cli.github.com{RESET}\n");
-                            }
-                        }
-                    }
-                    PrSubcommand::Comment(number, text) => {
-                        let num_str = number.to_string();
-                        match std::process::Command::new("gh")
-                            .args(["pr", "comment", &num_str, "--body", &text])
-                            .output()
-                        {
-                            Ok(output) if output.status.success() => {
-                                println!("{GREEN}  ✓ comment added to PR #{number}{RESET}\n");
-                            }
-                            Ok(output) => {
-                                let stderr = String::from_utf8_lossy(&output.stderr);
-                                eprintln!("{RED}  error: {}{RESET}\n", stderr.trim());
-                            }
-                            Err(_) => {
-                                eprintln!("{RED}  error: `gh` CLI not found. Install it from https://cli.github.com{RESET}\n");
-                            }
-                        }
-                    }
-                    PrSubcommand::Checkout(number) => {
-                        let num_str = number.to_string();
-                        match std::process::Command::new("gh")
-                            .args(["pr", "checkout", &num_str])
-                            .output()
-                        {
-                            Ok(output) if output.status.success() => {
-                                println!("{GREEN}  ✓ checked out PR #{number}{RESET}\n");
-                            }
-                            Ok(output) => {
-                                let stderr = String::from_utf8_lossy(&output.stderr);
-                                eprintln!("{RED}  error: {}{RESET}\n", stderr.trim());
-                            }
-                            Err(_) => {
-                                eprintln!("{RED}  error: `gh` CLI not found. Install it from https://cli.github.com{RESET}\n");
-                            }
-                        }
-                    }
-                    PrSubcommand::Help => {
-                        println!(
-                            "{DIM}  usage: /pr                         List open pull requests"
-                        );
-                        println!(
-                            "         /pr <number>                View details of a specific PR"
-                        );
-                        println!("         /pr <number> diff           Show the diff of a PR");
-                        println!("         /pr <number> comment <text> Add a comment to a PR");
-                        println!(
-                            "         /pr <number> checkout       Checkout a PR locally{RESET}\n"
-                        );
-                    }
-                }
+                commands::handle_pr(input);
                 continue;
             }
             s if s == "/git" || s.starts_with("/git ") => {
-                let arg = s.strip_prefix("/git").unwrap_or("").trim();
-                let subcmd = parse_git_args(arg);
-                run_git_subcommand(&subcmd);
+                commands::handle_git(input);
                 continue;
             }
             s if s.starts_with('/') && is_unknown_command(s) => {
@@ -1662,89 +1542,6 @@ fn auto_compact_if_needed(agent: &mut Agent) {
                 format_token_count(before_tokens),
                 format_token_count(after_tokens)
             );
-        }
-    }
-}
-
-/// Represents a parsed `/pr` subcommand.
-#[derive(Debug, PartialEq)]
-enum PrSubcommand {
-    /// `/pr` — list open pull requests
-    List,
-    /// `/pr <number>` — view details of a specific PR
-    View(u32),
-    /// `/pr <number> diff` — show the diff of a PR
-    Diff(u32),
-    /// `/pr <number> comment <text>` — add a comment to a PR
-    Comment(u32, String),
-    /// `/pr <number> checkout` — checkout a PR locally
-    Checkout(u32),
-    /// Invalid usage — show help
-    Help,
-}
-
-/// Parse the argument string after `/pr` into a `PrSubcommand`.
-fn parse_pr_args(arg: &str) -> PrSubcommand {
-    let arg = arg.trim();
-    if arg.is_empty() {
-        return PrSubcommand::List;
-    }
-
-    let parts: Vec<&str> = arg.splitn(3, char::is_whitespace).collect();
-    let number = match parts[0].parse::<u32>() {
-        Ok(n) => n,
-        Err(_) => return PrSubcommand::Help,
-    };
-
-    if parts.len() == 1 {
-        return PrSubcommand::View(number);
-    }
-
-    match parts[1].to_lowercase().as_str() {
-        "diff" => PrSubcommand::Diff(number),
-        "checkout" => PrSubcommand::Checkout(number),
-        "comment" => {
-            let text = if parts.len() == 3 {
-                parts[2].trim().to_string()
-            } else {
-                String::new()
-            };
-            if text.is_empty() {
-                PrSubcommand::Help
-            } else {
-                PrSubcommand::Comment(number, text)
-            }
-        }
-        _ => PrSubcommand::Help,
-    }
-}
-
-/// Run a shell command directly and print its output.
-/// Used by the /run command to execute without going through the AI.
-fn run_shell_command(cmd: &str) {
-    let start = std::time::Instant::now();
-    let output = std::process::Command::new("sh").args(["-c", cmd]).output();
-    let elapsed = format_duration(start.elapsed());
-
-    match output {
-        Ok(o) => {
-            let stdout = String::from_utf8_lossy(&o.stdout);
-            let stderr = String::from_utf8_lossy(&o.stderr);
-            if !stdout.is_empty() {
-                print!("{stdout}");
-            }
-            if !stderr.is_empty() {
-                eprint!("{RED}{stderr}{RESET}");
-            }
-            let code = o.status.code().unwrap_or(-1);
-            if code == 0 {
-                println!("{DIM}  ✓ exit {code} ({elapsed}){RESET}\n");
-            } else {
-                println!("{RED}  ✗ exit {code} ({elapsed}){RESET}\n");
-            }
-        }
-        Err(e) => {
-            eprintln!("{RED}  error running command: {e}{RESET}\n");
         }
     }
 }
@@ -2343,13 +2140,13 @@ mod tests {
     fn test_run_shell_command_basic() {
         // Verify run_shell_command doesn't panic on basic commands
         // (output goes to stdout/stderr, we just check it doesn't crash)
-        run_shell_command("echo hello");
+        commands::run_shell_command("echo hello");
     }
 
     #[test]
     fn test_run_shell_command_failing() {
         // Non-zero exit should not panic
-        run_shell_command("false");
+        commands::run_shell_command("false");
     }
 
     #[test]
@@ -2516,12 +2313,14 @@ mod tests {
 
     #[test]
     fn test_pr_subcommand_list() {
+        use commands::{parse_pr_args, PrSubcommand};
         assert_eq!(parse_pr_args(""), PrSubcommand::List);
         assert_eq!(parse_pr_args("  "), PrSubcommand::List);
     }
 
     #[test]
     fn test_pr_subcommand_view() {
+        use commands::{parse_pr_args, PrSubcommand};
         assert_eq!(parse_pr_args("42"), PrSubcommand::View(42));
         assert_eq!(parse_pr_args("123"), PrSubcommand::View(123));
         assert_eq!(parse_pr_args("1"), PrSubcommand::View(1));
@@ -2529,18 +2328,21 @@ mod tests {
 
     #[test]
     fn test_pr_subcommand_diff() {
+        use commands::{parse_pr_args, PrSubcommand};
         assert_eq!(parse_pr_args("42 diff"), PrSubcommand::Diff(42));
         assert_eq!(parse_pr_args("7 diff"), PrSubcommand::Diff(7));
     }
 
     #[test]
     fn test_pr_subcommand_checkout() {
+        use commands::{parse_pr_args, PrSubcommand};
         assert_eq!(parse_pr_args("42 checkout"), PrSubcommand::Checkout(42));
         assert_eq!(parse_pr_args("99 checkout"), PrSubcommand::Checkout(99));
     }
 
     #[test]
     fn test_pr_subcommand_comment() {
+        use commands::{parse_pr_args, PrSubcommand};
         assert_eq!(
             parse_pr_args("42 comment looks good!"),
             PrSubcommand::Comment(42, "looks good!".to_string())
@@ -2553,6 +2355,7 @@ mod tests {
 
     #[test]
     fn test_pr_subcommand_comment_requires_text() {
+        use commands::{parse_pr_args, PrSubcommand};
         // comment without text should show help
         assert_eq!(parse_pr_args("42 comment"), PrSubcommand::Help);
         assert_eq!(parse_pr_args("42 comment  "), PrSubcommand::Help);
@@ -2560,6 +2363,7 @@ mod tests {
 
     #[test]
     fn test_pr_subcommand_invalid() {
+        use commands::{parse_pr_args, PrSubcommand};
         assert_eq!(parse_pr_args("abc"), PrSubcommand::Help);
         assert_eq!(parse_pr_args("42 unknown"), PrSubcommand::Help);
         assert_eq!(parse_pr_args("42 merge"), PrSubcommand::Help);
@@ -2567,6 +2371,7 @@ mod tests {
 
     #[test]
     fn test_pr_subcommand_case_insensitive() {
+        use commands::{parse_pr_args, PrSubcommand};
         assert_eq!(parse_pr_args("42 DIFF"), PrSubcommand::Diff(42));
         assert_eq!(parse_pr_args("42 Checkout"), PrSubcommand::Checkout(42));
         assert_eq!(

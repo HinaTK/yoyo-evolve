@@ -3,7 +3,11 @@
 //! Each `/command` in the interactive REPL is handled by a function in this module.
 //! The main loop dispatches to these handlers, keeping main.rs as a thin REPL driver.
 
-use crate::cli;
+#![allow(dead_code)]
+
+use crate::cli::{
+    self, is_verbose, AUTO_COMPACT_THRESHOLD, DEFAULT_SESSION_PATH, MAX_CONTEXT_TOKENS, VERSION,
+};
 use crate::docs;
 use crate::format::*;
 use crate::git::*;
@@ -47,9 +51,7 @@ pub fn handle_help() {
     println!("{DIM}  /help              Show this help");
     println!("  /quit, /exit       Exit yoyo");
     println!("  /clear             Clear conversation history");
-    println!(
-        "  /commit [msg]      Commit staged changes (AI-generates message if no msg)"
-    );
+    println!("  /commit [msg]      Commit staged changes (AI-generates message if no msg)");
     println!("  /compact           Compact conversation to save context space");
     println!("  /config            Show all current settings");
     println!("  /context           Show loaded project context files");
@@ -57,28 +59,18 @@ pub fn handle_help() {
     println!("  /docs <crate> [item] Look up docs.rs documentation for a Rust crate");
     println!("  /init              Create a starter YOYO.md project context file");
     println!("  /model <name>      Switch model (preserves conversation)");
-    println!(
-        "  /think [level]     Show or change thinking level (off/low/medium/high)"
-    );
+    println!("  /think [level]     Show or change thinking level (off/low/medium/high)");
     println!("  /status            Show session info");
     println!("  /tokens            Show token usage and context window");
     println!("  /save [path]       Save session to file (default: yoyo-session.json)");
     println!("  /load [path]       Load session from file");
     println!("  /diff              Show git diff summary of uncommitted changes");
-    println!(
-        "  /fix               Auto-fix build/lint errors (runs checks, sends failures to AI)"
-    );
+    println!("  /fix               Auto-fix build/lint errors (runs checks, sends failures to AI)");
     println!("  /git <subcmd>      Quick git: status, log, add, diff, branch, stash");
     println!("  /undo              Revert all uncommitted changes (git checkout)");
-    println!(
-        "  /pr [number]       List open PRs, view, diff, comment, or checkout a PR"
-    );
-    println!(
-        "                     /pr <n> diff | /pr <n> comment <text> | /pr <n> checkout"
-    );
-    println!(
-        "  /health            Run project health checks (auto-detects project type)"
-    );
+    println!("  /pr [number]       List open PRs, view, diff, comment, or checkout a PR");
+    println!("                     /pr <n> diff | /pr <n> comment <text> | /pr <n> checkout");
+    println!("  /health            Run project health checks (auto-detects project type)");
     println!("  /retry             Re-send the last user input");
     println!("  /run <cmd>         Run a shell command directly (no AI, no tokens)");
     println!("  !<cmd>             Shortcut for /run");
@@ -129,9 +121,7 @@ pub fn handle_tokens(agent: &Agent, session_total: &Usage, model: &str) {
     );
     println!("    {bar}");
     if context_used as f64 / max_context as f64 > 0.75 {
-        println!(
-            "    {YELLOW}⚠ Context is getting full. Consider /clear or /compact.{RESET}"
-        );
+        println!("    {YELLOW}⚠ Context is getting full. Consider /clear or /compact.{RESET}");
     }
     println!();
     println!("  Session totals:");
@@ -339,9 +329,7 @@ pub fn handle_undo() {
 
     let has_diff = diff_output
         .as_ref()
-        .map(|o| {
-            o.status.success() && !String::from_utf8_lossy(&o.stdout).trim().is_empty()
-        })
+        .map(|o| o.status.success() && !String::from_utf8_lossy(&o.stdout).trim().is_empty())
         .unwrap_or(false);
     let untracked_files: Vec<String> = untracked
         .as_ref()
@@ -436,15 +424,9 @@ pub fn handle_commit(input: &str) {
                                 } else {
                                     let (ok, output) = run_git_commit(custom_msg);
                                     if ok {
-                                        println!(
-                                            "{GREEN}  ✓ {}{RESET}\n",
-                                            output.trim()
-                                        );
+                                        println!("{GREEN}  ✓ {}{RESET}\n", output.trim());
                                     } else {
-                                        eprintln!(
-                                            "{RED}  ✗ {}{RESET}\n",
-                                            output.trim()
-                                        );
+                                        eprintln!("{RED}  ✗ {}{RESET}\n", output.trim());
                                     }
                                 }
                             }
@@ -466,9 +448,7 @@ pub fn handle_context() {
     if files.is_empty() {
         println!("{DIM}  No project context files found.");
         println!("  Create a YOYO.md to give yoyo project context.");
-        println!(
-            "  Also supports: CLAUDE.md (compatibility alias), .yoyo/instructions.md"
-        );
+        println!("  Also supports: CLAUDE.md (compatibility alias), .yoyo/instructions.md");
         println!("  Run /init to create a starter YOYO.md.{RESET}\n");
     } else {
         println!("{DIM}  Project context files:");
@@ -486,12 +466,8 @@ pub fn handle_init() {
     if std::path::Path::new(path).exists() {
         println!("{DIM}  {path} already exists — not overwriting.{RESET}\n");
     } else if std::path::Path::new("CLAUDE.md").exists() {
-        println!(
-            "{DIM}  CLAUDE.md already exists — yoyo reads it as a compatibility alias."
-        );
-        println!(
-            "  Rename it to YOYO.md when you're ready: mv CLAUDE.md YOYO.md{RESET}\n"
-        );
+        println!("{DIM}  CLAUDE.md already exists — yoyo reads it as a compatibility alias.");
+        println!("  Rename it to YOYO.md when you're ready: mv CLAUDE.md YOYO.md{RESET}\n");
     } else {
         let template = concat!(
             "# Project Context\n",
@@ -516,9 +492,9 @@ pub fn handle_init() {
             "<!-- List key files and directories the agent should know about. -->\n",
         );
         match std::fs::write(path, template) {
-            Ok(_) => println!(
-                "{GREEN}  ✓ Created {path} — edit it to add project context.{RESET}\n"
-            ),
+            Ok(_) => {
+                println!("{GREEN}  ✓ Created {path} — edit it to add project context.{RESET}\n")
+            }
             Err(e) => eprintln!("{RED}  error creating {path}: {e}{RESET}\n"),
         }
     }
@@ -782,7 +758,9 @@ pub fn detect_project_type(dir: &std::path::Path) -> ProjectType {
 
 /// Return health check commands for a given project type.
 #[allow(clippy::vec_init_then_push, unused_mut)]
-pub fn health_checks_for_project(project_type: &ProjectType) -> Vec<(&'static str, Vec<&'static str>)> {
+pub fn health_checks_for_project(
+    project_type: &ProjectType,
+) -> Vec<(&'static str, Vec<&'static str>)> {
     match project_type {
         ProjectType::Rust => {
             let mut checks = vec![("build", vec!["cargo", "build"])];
@@ -828,7 +806,9 @@ pub fn health_checks_for_project(project_type: &ProjectType) -> Vec<(&'static st
 }
 
 /// Run health checks for a specific project type. Returns (name, passed, detail) tuples.
-pub fn run_health_check_for_project(project_type: &ProjectType) -> Vec<(&'static str, bool, String)> {
+pub fn run_health_check_for_project(
+    project_type: &ProjectType,
+) -> Vec<(&'static str, bool, String)> {
     let checks = health_checks_for_project(project_type);
 
     let mut results = Vec::new();
@@ -863,7 +843,9 @@ pub fn run_health_check_for_project(project_type: &ProjectType) -> Vec<(&'static
 }
 
 /// Run health checks and capture full error output for failures.
-pub fn run_health_checks_full_output(project_type: &ProjectType) -> Vec<(&'static str, bool, String)> {
+pub fn run_health_checks_full_output(
+    project_type: &ProjectType,
+) -> Vec<(&'static str, bool, String)> {
     let checks = health_checks_for_project(project_type);
 
     let mut results = Vec::new();
@@ -916,8 +898,7 @@ pub fn build_fix_prompt(failures: &[(&str, &str)]) -> String {
 }
 
 pub fn handle_health() {
-    let project_type =
-        detect_project_type(&std::env::current_dir().unwrap_or_default());
+    let project_type = detect_project_type(&std::env::current_dir().unwrap_or_default());
     println!("{DIM}  Detected project: {project_type}{RESET}");
     if project_type == ProjectType::Unknown {
         println!(
@@ -953,8 +934,7 @@ pub async fn handle_fix(
     session_total: &mut Usage,
     model: &str,
 ) -> Option<String> {
-    let project_type =
-        detect_project_type(&std::env::current_dir().unwrap_or_default());
+    let project_type = detect_project_type(&std::env::current_dir().unwrap_or_default());
     if project_type == ProjectType::Unknown {
         println!(
             "{DIM}  No recognized project found. Looked for: Cargo.toml, package.json, pyproject.toml, setup.py, go.mod, Makefile{RESET}\n"
@@ -987,9 +967,7 @@ pub async fn handle_fix(
         return None;
     }
     let fail_count = failures.len();
-    println!(
-        "\n{YELLOW}  Sending {fail_count} failure(s) to AI for fixing...{RESET}\n"
-    );
+    println!("\n{YELLOW}  Sending {fail_count} failure(s) to AI for fixing...{RESET}\n");
     let fix_prompt = build_fix_prompt(&failures);
     run_prompt(agent, &fix_prompt, session_total, model).await;
     auto_compact_if_needed(agent);
@@ -1284,17 +1262,11 @@ pub fn handle_pr(input: &str) {
             }
         }
         PrSubcommand::Help => {
-            println!(
-                "{DIM}  usage: /pr                         List open pull requests"
-            );
-            println!(
-                "         /pr <number>                View details of a specific PR"
-            );
+            println!("{DIM}  usage: /pr                         List open pull requests");
+            println!("         /pr <number>                View details of a specific PR");
             println!("         /pr <number> diff           Show the diff of a PR");
             println!("         /pr <number> comment <text> Add a comment to a PR");
-            println!(
-                "         /pr <number> checkout       Checkout a PR locally{RESET}\n"
-            );
+            println!("         /pr <number> checkout       Checkout a PR locally{RESET}\n");
         }
     }
 }
