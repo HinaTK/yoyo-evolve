@@ -13,7 +13,6 @@ Environment:
   BOT_USERNAME — bot identity for reply detection (default: yoyo-evolve[bot])
 
 Outputs formatted markdown to stdout.
-Writes /tmp/discussion_categories.json (category ID mapping for create mutation).
 """
 
 import json
@@ -43,7 +42,7 @@ def sanitize_content(text, boundary_begin, boundary_end):
     return text
 
 
-def run_graphql(query, repo):
+def run_graphql(query):
     """Run a GraphQL query via gh api."""
     result = subprocess.run(
         ["gh", "api", "graphql", "-f", f"query={query}"],
@@ -59,9 +58,18 @@ def run_graphql(query, repo):
         return None
 
 
-def fetch_discussions(repo, bot_username):
+def fetch_discussions(repo):
     """Fetch last 50 discussions by updated_at with comments and replies."""
-    owner, name = repo.split("/")
+    if "/" not in repo:
+        print(f"Error: REPO must be in 'owner/name' format, got: '{repo}'", file=sys.stderr)
+        return [], [], None
+    owner, name = repo.split("/", 1)
+
+    # Validate repo components to prevent GraphQL injection
+    if not re.match(r'^[a-zA-Z0-9._-]+$', owner) or not re.match(r'^[a-zA-Z0-9._-]+$', name):
+        print(f"Error: invalid repo format: '{repo}'", file=sys.stderr)
+        return [], [], None
+
     query = """
     {
       repository(owner: "%s", name: "%s") {
@@ -114,23 +122,29 @@ def fetch_discussions(repo, bot_username):
     }
     """ % (owner, name)
 
-    data = run_graphql(query, repo)
-    if not data or "data" not in data:
+    data = run_graphql(query)
+    if not data:
+        return [], [], None
+
+    # Check for GraphQL errors
+    if "errors" in data:
+        for err in data["errors"]:
+            print(f"GraphQL error: {err.get('message', str(err))}", file=sys.stderr)
+        if "data" not in data or data["data"] is None:
+            return [], [], None
+        print("Warning: continuing with partial GraphQL data", file=sys.stderr)
+
+    if "data" not in data or data["data"] is None:
         return [], [], None
 
     repo_data = data["data"]["repository"]
+    if repo_data is None:
+        print("Error: repository not found in GraphQL response", file=sys.stderr)
+        return [], [], None
+
     discussions = repo_data.get("discussions", {}).get("nodes", [])
     categories = repo_data.get("discussionCategories", {}).get("nodes", [])
     repo_id = repo_data.get("id")
-
-    # Write category mapping for create mutation
-    cat_map = {c["slug"]: {"id": c["id"], "name": c["name"]} for c in categories}
-    cat_map["_repositoryId"] = repo_id
-    try:
-        with open("/tmp/discussion_categories.json", "w") as f:
-            json.dump(cat_map, f, indent=2)
-    except OSError as e:
-        print(f"Warning: could not write categories file: {e}", file=sys.stderr)
 
     return discussions, categories, repo_id
 
@@ -139,7 +153,7 @@ def classify_discussion(discussion, bot_username):
     """Classify a discussion's status relative to the bot.
 
     Returns one of:
-      'PENDING REPLY'    — someone replied to bot's comment, waiting for response
+      'PENDING REPLY'    — bot participated but a human commented most recently
       'NOT YET JOINED'   — bot hasn't participated yet
       'ALREADY REPLIED'  — bot's comment is the last, no human follow-up
     """
@@ -162,7 +176,7 @@ def classify_discussion(discussion, bot_username):
             if is_bot_reply:
                 bot_participated = True
 
-        # Track last commenter across all comments and replies
+        # Overwrites each iteration; final value reflects the chronologically last comment/reply
         if replies:
             last_author = (replies[-1].get("author") or {}).get("login", "")
             last_commenter_is_bot = (last_author == bot_username)
@@ -183,7 +197,7 @@ def select_discussions(discussions, bot_username, day=0):
     Priority 1: PENDING REPLY (someone replied to bot, waiting for response)
     Priority 2: NOT YET JOINED (bot hasn't participated yet)
     Priority 3: ALREADY REPLIED (bot's last, no pending)
-    Slot 5 reserved: Random unseen old discussion bot previously skipped
+    Slot 5: Random discussion not in top 4, preferring older unjoined ones (ensures variety)
     """
     if not discussions:
         return []
@@ -224,18 +238,15 @@ def select_discussions(discussions, bot_username, day=0):
         else:
             selected.extend(rng.sample(already_replied, remaining))
 
-    # Slot 5: Random old unseen discussion (ensures older discussions surface)
-    # Pick from not_joined that weren't already selected, preferring older ones
+    # Slot 5: Random discussion not in top 4 (ensures variety)
+    # Prefer unjoined, fall back to any unselected discussion
     selected_ids = {d["id"] for d in selected}
     old_unseen = [d for d in not_joined if d["id"] not in selected_ids]
     if not old_unseen:
-        # Fallback: any discussion not selected
         old_unseen = [d for d in discussions if d["id"] not in selected_ids]
     if old_unseen:
-        # Prefer older discussions (end of the list, sorted by updated_at desc)
+        # Discussions ordered by UPDATED_AT DESC from query; tail items are oldest
         pick = rng.choice(old_unseen[-min(10, len(old_unseen)):])
-        if pick["_status"] == "":
-            pick["_status"] = classify_discussion(pick, bot_username)
         selected.append(pick)
 
     return selected[:5]
@@ -278,8 +289,10 @@ def format_discussions(discussions, bot_username):
         lines.append(f"Node ID: {disc_id}")
         lines.append("")
 
+        if len(body) > 2000:
+            body = body[:2000] + "\n[... truncated]"
         if body:
-            lines.append(sanitize_content(body, boundary_begin, boundary_end))
+            lines.append(body)
             lines.append("")
 
         # Format comments
@@ -293,6 +306,8 @@ def format_discussions(discussions, bot_username):
                     comment.get("body", "").strip(),
                     boundary_begin, boundary_end
                 )
+                if len(c_body) > 1000:
+                    c_body = c_body[:1000] + "\n[... truncated]"
                 c_id = comment.get("id", "")
                 lines.append(f"**@{c_author}** (comment ID: {c_id}):")
                 lines.append(c_body)
@@ -306,6 +321,8 @@ def format_discussions(discussions, bot_username):
                         reply.get("body", "").strip(),
                         boundary_begin, boundary_end
                     )
+                    if len(r_body) > 1000:
+                        r_body = r_body[:1000] + "\n[... truncated]"
                     r_id = reply.get("id", "")
                     lines.append(f"  ↳ **@{r_author}** (reply ID: {r_id}):")
                     lines.append(f"  {r_body}")
@@ -334,7 +351,7 @@ if __name__ == "__main__":
     bot_username = os.environ.get("BOT_USERNAME", "yoyo-evolve[bot]")
 
     try:
-        discussions, categories, repo_id = fetch_discussions(repo, bot_username)
+        discussions, categories, repo_id = fetch_discussions(repo)
         if not discussions:
             print("No discussions today.")
             sys.exit(0)
@@ -342,7 +359,5 @@ if __name__ == "__main__":
         selected = select_discussions(discussions, bot_username, day=day)
         print(format_discussions(selected, bot_username))
     except subprocess.TimeoutExpired:
-        print("No discussions today (query timed out).")
-    except Exception as e:
-        print(f"No discussions today ({e}).", file=sys.stderr)
+        print("No discussions today (query timed out).", file=sys.stderr)
         print("No discussions today.")

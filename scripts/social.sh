@@ -16,6 +16,12 @@
 
 set -euo pipefail
 
+# Validate dependencies
+if ! command -v python3 &>/dev/null; then
+    echo "FATAL: python3 is required but not found."
+    exit 1
+fi
+
 REPO="${REPO:-yologdev/yoyo-evolve}"
 MODEL="${MODEL:-claude-sonnet-4-6}"
 TIMEOUT="${TIMEOUT:-600}"
@@ -64,15 +70,24 @@ NAME=$(echo "$REPO" | cut -d/ -f2)
 REPO_ID=""
 CATEGORY_IDS=""
 if command -v gh &>/dev/null; then
-    REPO_META=$(gh api graphql -f query="
-    {
-      repository(owner: \"$OWNER\", name: \"$NAME\") {
-        id
-        discussionCategories(first: 20) {
-          nodes { id name slug }
-        }
-      }
-    }" 2>/dev/null || echo "{}")
+    META_STDERR=$(mktemp)
+    REPO_META=$(gh api graphql \
+        -f query='query($owner: String!, $name: String!) {
+          repository(owner: $owner, name: $name) {
+            id
+            discussionCategories(first: 20) {
+              nodes { id name slug }
+            }
+          }
+        }' \
+        -f owner="$OWNER" \
+        -f name="$NAME" \
+        2>"$META_STDERR") || {
+        echo "  WARNING: GraphQL metadata query failed:"
+        cat "$META_STDERR" | sed 's/^/    /'
+        REPO_META="{}"
+    }
+    rm -f "$META_STDERR"
 
     REPO_ID=$(echo "$REPO_META" | python3 -c "
 import json, sys
@@ -81,7 +96,7 @@ try:
     print(data['data']['repository']['id'])
 except (KeyError, TypeError, json.JSONDecodeError):
     print('')
-" 2>/dev/null || echo "")
+" || echo "")
 
     CATEGORY_IDS=$(echo "$REPO_META" | python3 -c "
 import json, sys
@@ -92,7 +107,7 @@ try:
         print(f\"{c['slug']}: {c['id']} ({c['name']})\")
 except (KeyError, TypeError, json.JSONDecodeError):
     pass
-" 2>/dev/null || echo "")
+" || echo "")
 
     if [ -n "$REPO_ID" ]; then
         echo "  Repo ID: $REPO_ID"
@@ -114,7 +129,17 @@ echo ""
 echo "→ Fetching discussions..."
 DISCUSSIONS=""
 if command -v gh &>/dev/null; then
-    DISCUSSIONS=$(BOT_USERNAME="$BOT_USERNAME" python3 scripts/format_discussions.py "$REPO" "$DAY" 2>/dev/null || echo "No discussions today.")
+    DISC_STDERR=$(mktemp)
+    DISCUSSIONS=$(BOT_USERNAME="$BOT_USERNAME" python3 scripts/format_discussions.py "$REPO" "$DAY" 2>"$DISC_STDERR") || {
+        echo "  WARNING: format_discussions.py failed:"
+        cat "$DISC_STDERR" | sed 's/^/    /'
+        DISCUSSIONS="No discussions today."
+    }
+    if [ -s "$DISC_STDERR" ]; then
+        echo "  Stderr from format_discussions.py:"
+        cat "$DISC_STDERR" | sed 's/^/    /'
+    fi
+    rm -f "$DISC_STDERR"
     DISC_COUNT=$(echo "$DISCUSSIONS" | grep -c '^### Discussion' 2>/dev/null || echo 0)
     echo "  $DISC_COUNT discussions loaded."
 else
@@ -124,42 +149,53 @@ fi
 echo ""
 
 # ── Step 4: Check rate limit (did yoyo post a discussion in last 8h?) ──
-POSTED_RECENTLY="false"
+# Safe default: assume rate-limited until proven otherwise
+POSTED_RECENTLY="true"
 if command -v gh &>/dev/null && [ -n "$REPO_ID" ]; then
     echo "→ Checking rate limit..."
-    RECENT_POST=$(gh api graphql -f query="
-    {
-      repository(owner: \"$OWNER\", name: \"$NAME\") {
-        discussions(first: 5, orderBy: {field: CREATED_AT, direction: DESC}) {
-          nodes {
-            author { login }
-            createdAt
+    RATE_STDERR=$(mktemp)
+    RECENT_POST=$(gh api graphql \
+        -f query='query($owner: String!, $name: String!) {
+          repository(owner: $owner, name: $name) {
+            discussions(first: 10, orderBy: {field: CREATED_AT, direction: DESC}) {
+              nodes {
+                author { login }
+                createdAt
+              }
+            }
           }
-        }
-      }
-    }" 2>/dev/null || echo "{}")
+        }' \
+        -f owner="$OWNER" \
+        -f name="$NAME" \
+        2>"$RATE_STDERR") || {
+        echo "  WARNING: Rate limit query failed:"
+        cat "$RATE_STDERR" | sed 's/^/    /'
+        RECENT_POST="{}"
+    }
+    rm -f "$RATE_STDERR"
 
-    POSTED_RECENTLY=$(echo "$RECENT_POST" | python3 -c "
-import json, sys
+    POSTED_RECENTLY=$(echo "$RECENT_POST" | BOT_USERNAME="$BOT_USERNAME" python3 -c "
+import json, sys, os
 from datetime import datetime, timezone, timedelta
+bot_username = os.environ.get('BOT_USERNAME', 'yoyo-evolve[bot]')
 try:
     data = json.load(sys.stdin)
     discs = data['data']['repository']['discussions']['nodes']
     cutoff = datetime.now(timezone.utc) - timedelta(hours=8)
     for d in discs:
         author = (d.get('author') or {}).get('login', '')
-        if author == '$BOT_USERNAME':
+        if author == bot_username:
             created = datetime.fromisoformat(d['createdAt'].replace('Z', '+00:00'))
             if created > cutoff:
                 print('true')
                 sys.exit(0)
     print('false')
 except (KeyError, TypeError, json.JSONDecodeError, ValueError):
-    print('false')
-" 2>/dev/null || echo "false")
+    print('true')
+" || echo "true")
 
     if [ "$POSTED_RECENTLY" = "true" ]; then
-        echo "  Rate limit: yoyo posted a discussion in the last 8h. Proactive posting disabled."
+        echo "  Rate limit: yoyo posted a discussion in the last 8h (or check failed). Proactive posting disabled."
     else
         echo "  Rate limit: clear for proactive posting."
     fi
@@ -205,7 +241,7 @@ When checking "did I already reply," look for comments by this username.
 
 $DISCUSSIONS
 
-=== RECENT JOURNAL (last ~10 entries) ===
+=== RECENT JOURNAL (first 80 lines) ===
 
 $JOURNAL_RECENT
 
@@ -252,16 +288,17 @@ if ! command -v timeout &>/dev/null; then
         TIMEOUT_CMD="gtimeout"
     else
         TIMEOUT_CMD=""
+        echo "  WARNING: Neither 'timeout' nor 'gtimeout' found. Session will run WITHOUT time limit."
     fi
 fi
 
 echo "→ Running social session..."
 AGENT_LOG=$(mktemp)
-AGENT_EXIT=0
 ${TIMEOUT_CMD:+$TIMEOUT_CMD "$TIMEOUT"} "$YOYO_BIN" \
     --model "$MODEL" \
     --skills ./skills \
-    < "$PROMPT" 2>&1 | tee "$AGENT_LOG" || AGENT_EXIT=$?
+    < "$PROMPT" 2>&1 | tee "$AGENT_LOG" || true
+AGENT_EXIT=${PIPESTATUS[0]}
 
 rm -f "$PROMPT"
 
@@ -284,7 +321,8 @@ echo ""
 echo "→ Safety check..."
 CHANGED_FILES=$(git diff --name-only 2>/dev/null || true)
 STAGED_FILES=$(git diff --cached --name-only 2>/dev/null || true)
-ALL_CHANGED=$(printf "%s\n%s" "$CHANGED_FILES" "$STAGED_FILES" | sort -u | grep -v '^$' || true)
+UNTRACKED_FILES=$(git ls-files --others --exclude-standard 2>/dev/null || true)
+ALL_CHANGED=$(printf "%s\n%s\n%s" "$CHANGED_FILES" "$STAGED_FILES" "$UNTRACKED_FILES" | sort -u | grep -v '^$' || true)
 
 if [ -n "$ALL_CHANGED" ]; then
     UNEXPECTED=""
@@ -298,10 +336,26 @@ if [ -n "$ALL_CHANGED" ]; then
     if [ -n "$UNEXPECTED" ]; then
         echo "  WARNING: Unexpected file changes detected:$UNEXPECTED"
         echo "  Reverting unexpected changes..."
+        REVERT_FAILED=""
         for file in $UNEXPECTED; do
-            git checkout -- "$file" 2>/dev/null || true
+            # Unstage first if staged
+            git reset HEAD -- "$file" 2>/dev/null || true
+            if git checkout -- "$file" 2>/dev/null; then
+                echo "    Reverted: $file"
+            elif [ -e "$file" ] && ! git ls-files --error-unmatch "$file" 2>/dev/null; then
+                # Untracked file — remove it
+                rm -f "$file"
+                echo "    Removed untracked: $file"
+            else
+                REVERT_FAILED="${REVERT_FAILED} ${file}"
+                echo "    FAILED to revert: $file"
+            fi
         done
-        echo "  Reverted."
+        if [ -n "$REVERT_FAILED" ]; then
+            echo "  FATAL: Could not revert all unexpected changes:$REVERT_FAILED"
+            exit 1
+        fi
+        echo "  All unexpected changes reverted."
     fi
 fi
 echo "  Safety check passed."
@@ -311,16 +365,22 @@ echo ""
 echo "→ Checking for social learnings..."
 if ! git diff --quiet SOCIAL_LEARNINGS.md 2>/dev/null; then
     git add SOCIAL_LEARNINGS.md
-    git commit -m "Day $DAY ($SESSION_TIME): social learnings"
+    if ! git commit -m "Day $DAY ($SESSION_TIME): social learnings"; then
+        echo "  ERROR: Failed to commit social learnings (check pre-commit hooks or signing requirements)."
+        exit 1
+    fi
     echo "  Committed social learnings."
+
+    # ── Step 10: Push ──
+    echo ""
+    echo "→ Pushing..."
+    if ! git push; then
+        echo "  ERROR: Push failed. Social learnings committed locally but will be lost in ephemeral CI."
+        exit 1
+    fi
 else
     echo "  No new social learnings this session."
 fi
-
-# ── Step 10: Push ──
-echo ""
-echo "→ Pushing..."
-git push || echo "  Push failed (maybe no remote or auth issue)"
 
 echo ""
 echo "=== Social session complete ==="
