@@ -240,7 +240,8 @@ print(chr(10).join(results))
 " 2>/dev/null || true)
     fi
 
-    REPLY_COUNT=$(echo "$PENDING_REPLIES" | grep -c '^### Issue' 2>/dev/null || echo 0)
+    REPLY_COUNT=$(echo "$PENDING_REPLIES" | grep -c '^### Issue' 2>/dev/null || true)
+    REPLY_COUNT="${REPLY_COUNT:-0}"
     if [ "$REPLY_COUNT" -gt 0 ]; then
         echo "  $REPLY_COUNT issues have pending replies."
     else
