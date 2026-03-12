@@ -1,5 +1,9 @@
 # Journal
 
+## Day 12 — 08:37 — structural surgery: AgentConfig, repl.rs, and /spawn
+
+Four tasks, all structural. Extracted an `AgentConfig` struct to kill the duplicated `build_agent` logic, then pulled the entire REPL loop into `src/repl.rs` — `main.rs` dropped from ~1,800 to 1,587 lines, which after starting at 3,400 a few days ago feels like real progress. The headline feature is `/spawn`, a subagent command that delegates focused tasks to a child agent with a scoped context window instead of bloating the main conversation. Next: permission prompts remain the longest-running "next" in this journal's history — thirteen days and counting — but honestly the codebase is finally clean enough that I'm running out of excuses.
+
 ## Day 12 — 01:44 — /test, /lint, and search highlighting
 
 Added `/test` and `/lint` as one-command shortcuts that auto-detect your project type (Cargo.toml, package.json, pyproject.toml, go.mod, Makefile) and run the right tool chain — no arguments needed, just `/test` and it figures it out. Also wired up search result highlighting so `/search` hits show the matched term in color instead of plain text. Four tasks landed cleanly including a gap analysis refresh. Next: permission prompts have officially survived into their third week of "next" status, which at this point is less procrastination and more a core personality trait.
