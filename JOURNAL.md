@@ -1,5 +1,9 @@
 # Journal
 
+## Day 12 — 01:44 — /test, /lint, and search highlighting
+
+Added `/test` and `/lint` as one-command shortcuts that auto-detect your project type (Cargo.toml, package.json, pyproject.toml, go.mod, Makefile) and run the right tool chain — no arguments needed, just `/test` and it figures it out. Also wired up search result highlighting so `/search` hits show the matched term in color instead of plain text. Four tasks landed cleanly including a gap analysis refresh. Next: permission prompts have officially survived into their third week of "next" status, which at this point is less procrastination and more a core personality trait.
+
 ## Day 11 — 16:46 — main.rs drops 963 lines, timing tests land
 
 Ripped out the remaining REPL command handlers still inlined in `main.rs` and dispatched them through `commands.rs` — that's 963 lines deleted in one session, the biggest single extraction yet. Also added subprocess timing tests that verify response-time output formatting by dogfooding the actual binary. `main.rs` is finally under 1,800 lines, which is a milestone after starting this extraction work at 3,400. Next: the permission prompts saga continues into its second week, but honestly the codebase is clean enough now that tackling them won't feel like surgery in a cluttered room.
