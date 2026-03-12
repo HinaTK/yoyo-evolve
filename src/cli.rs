@@ -419,10 +419,48 @@ pub fn get_project_file_listing() -> Option<String> {
     Some(listing)
 }
 
+/// Get the most recently changed files from git log, deduplicated.
+/// Returns up to `max_files` unique file paths that were modified in recent commits.
+/// Returns None if not in a git repo or git is unavailable.
+pub fn get_recently_changed_files(max_files: usize) -> Option<Vec<String>> {
+    let output = std::process::Command::new("git")
+        .args([
+            "log",
+            "--diff-filter=M",
+            "--name-only",
+            "--pretty=format:",
+            "-n",
+            "20",
+        ])
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let mut seen = std::collections::HashSet::new();
+    let files: Vec<String> = stdout
+        .lines()
+        .filter(|l| !l.is_empty())
+        .filter(|l| seen.insert(l.to_string()))
+        .take(max_files)
+        .map(|l| l.to_string())
+        .collect();
+    if files.is_empty() {
+        None
+    } else {
+        Some(files)
+    }
+}
+
+/// Maximum number of recently changed files to include in context.
+pub const MAX_RECENT_FILES: usize = 20;
+
 /// Load project context from YOYO.md (primary), CLAUDE.md (compatibility alias),
 /// or .yoyo/instructions.md.
 /// Returns the combined content of all found files, or None if none exist.
-/// Also appends a project file listing from `git ls-files` when available.
+/// Also appends a project file listing from `git ls-files` and recently changed files
+/// when available.
 pub fn load_project_context() -> Option<String> {
     let mut context = String::new();
     let mut found = Vec::new();
@@ -449,15 +487,26 @@ pub fn load_project_context() -> Option<String> {
         if found.is_empty() {
             // Even without context files, file listing alone is useful
             eprintln!("{DIM}  context: project file listing{RESET}");
-            return Some(context);
         }
     }
 
-    if found.is_empty() {
+    // Append recently changed files if available
+    if let Some(recent_files) = get_recently_changed_files(MAX_RECENT_FILES) {
+        if !context.is_empty() {
+            context.push_str("\n\n");
+        }
+        context.push_str("## Recently Changed Files\n\n");
+        context.push_str(&recent_files.join("\n"));
+    }
+
+    if found.is_empty() && context.is_empty() {
         None
     } else {
         for name in &found {
             eprintln!("{DIM}  context: {name}{RESET}");
+        }
+        if context.contains("## Recently Changed Files") {
+            eprintln!("{DIM}  context: recently changed files{RESET}");
         }
         Some(context)
     }
@@ -1806,5 +1855,64 @@ key = "value"
             KNOWN_FLAGS.contains(&"--openapi"),
             "--openapi should be in KNOWN_FLAGS"
         );
+    }
+
+    #[test]
+    fn test_get_recently_changed_files_in_git_repo() {
+        // We're running in a git repo (CI or local), so this should return Some
+        let result = get_recently_changed_files(20);
+        if let Some(files) = &result {
+            assert!(!files.is_empty(), "Should have recently changed files");
+            // Files should be deduplicated
+            let unique: std::collections::HashSet<&String> = files.iter().collect();
+            assert_eq!(
+                files.len(),
+                unique.len(),
+                "Recently changed files should be deduplicated"
+            );
+            // Should respect the max limit
+            assert!(files.len() <= 20, "Should not exceed max_files limit");
+        }
+    }
+
+    #[test]
+    fn test_get_recently_changed_files_respects_limit() {
+        // Request only 2 files — should return at most 2
+        let result = get_recently_changed_files(2);
+        if let Some(files) = &result {
+            assert!(
+                files.len() <= 2,
+                "Should respect max_files=2, got {}",
+                files.len()
+            );
+        }
+    }
+
+    #[test]
+    fn test_get_recently_changed_files_no_duplicates() {
+        let result = get_recently_changed_files(50);
+        if let Some(files) = &result {
+            let unique: std::collections::HashSet<&String> = files.iter().collect();
+            assert_eq!(files.len(), unique.len(), "Files should be deduplicated");
+        }
+    }
+
+    #[test]
+    fn test_max_recent_files_constant() {
+        assert_eq!(MAX_RECENT_FILES, 20);
+    }
+
+    #[test]
+    fn test_load_project_context_includes_recently_changed() {
+        // In a git repo with commits, context should include recently changed files
+        let result = load_project_context();
+        if let Some(context) = &result {
+            if get_recently_changed_files(MAX_RECENT_FILES).is_some() {
+                assert!(
+                    context.contains("## Recently Changed Files"),
+                    "Context should contain Recently Changed Files section"
+                );
+            }
+        }
     }
 }
