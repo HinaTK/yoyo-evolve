@@ -71,6 +71,7 @@ This document tracks the feature gap between yoyo and Claude Code, used to infor
 |---------|------|-------------|-------|
 | Project context files | ✅ | ✅ | yoyo reads YOYO.md, CLAUDE.md, and .yoyo/instructions.md |
 | Auto-detect project type | ✅ | ✅ | `detect_project_type` used by `/test`, `/lint`, `/health`, `/fix` (Rust, Node, Python, Go, Make) |
+| Project scaffolding | ✅ | ✅ | `/init` scans project and generates a YOYO.md context file (Day 13) |
 | Git-aware file selection | ✅ | ✅ | `get_recently_changed_files` appended to project context (Day 12) |
 | Codebase indexing | ❌ | ✅ | Claude Code indexes for faster search |
 
@@ -118,6 +119,7 @@ Based on this analysis, the highest-impact missing features are:
 4. **Directory restrictions** — Restrict file access to specific directories
 
 Recently completed:
+- ✅ `/init` command (Day 13) — Scans project and generates a YOYO.md context file
 - ✅ `/pr create` command (Day 13) — AI-generated PR descriptions with `--draft` support
 - ✅ `/review` command (Day 13) — AI-powered code review of staged/unstaged changes
 - ✅ Fuzzy file search (Day 12) — `/find` with scoring, git-aware file listing, ranked results
@@ -144,9 +146,9 @@ Recently completed:
 
 ## Stats
 
-- yoyo: ~10,600 lines of Rust across 8 source files
-- 459 tests passing (397 unit + 62 integration)
-- 34 REPL commands (including /spawn, /find, /docs, /fix, /lint, /pr, /review)
+- yoyo: ~13,100 lines of Rust across 8 source files + integration tests
+- 487 tests passing (425 unit + 62 integration)
+- 34 REPL commands (including /spawn, /find, /docs, /fix, /lint, /pr, /review, /init)
 - 23 CLI flags (+ short aliases)
 - 10+ provider backends
 - MCP server support
