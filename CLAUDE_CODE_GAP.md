@@ -1,6 +1,6 @@
 # Gap Analysis: yoyo vs Claude Code
 
-Last updated: Day 12 (2026-03-12)
+Last updated: Day 13 (2026-03-13)
 
 This document tracks the feature gap between yoyo and Claude Code, used to inform development priorities when there are no community issues to address.
 
@@ -82,6 +82,7 @@ This document tracks the feature gap between yoyo and Claude Code, used to infor
 | Auto-fix lint errors | ✅ | ✅ | `/lint` auto-detects and runs linter; `/fix` sends failures to AI (Day 9+12) |
 | PR description generation | ✅ | ✅ | `/pr create [--draft]` generates AI-powered PR descriptions |
 | Commit message generation | ✅ | ✅ | `/commit` with heuristic-based message generation from staged diff (Day 8) |
+| Code review | ✅ | ✅ | `/review` provides AI-powered code review of staged/unstaged changes (Day 13) |
 | Multi-file refactoring | 🟡 | ✅ | yoyo can via tools; Claude Code is better at coordinating |
 
 ## Configuration
@@ -117,6 +118,8 @@ Based on this analysis, the highest-impact missing features are:
 4. **Directory restrictions** — Restrict file access to specific directories
 
 Recently completed:
+- ✅ `/pr create` command (Day 13) — AI-generated PR descriptions with `--draft` support
+- ✅ `/review` command (Day 13) — AI-powered code review of staged/unstaged changes
 - ✅ Fuzzy file search (Day 12) — `/find` with scoring, git-aware file listing, ranked results
 - ✅ Git-aware context (Day 12) — `get_recently_changed_files` appended to project context
 - ✅ Syntax highlighting (Day 12) — language-aware ANSI highlighting for 8+ languages
@@ -141,9 +144,9 @@ Recently completed:
 
 ## Stats
 
-- yoyo: ~10,000 lines of Rust across 8 source files
-- 438 tests passing (376 unit + 62 integration)
-- 33 REPL commands (including /spawn, /find, /docs, /fix, /lint)
+- yoyo: ~10,600 lines of Rust across 8 source files
+- 459 tests passing (397 unit + 62 integration)
+- 34 REPL commands (including /spawn, /find, /docs, /fix, /lint, /pr, /review)
 - 23 CLI flags (+ short aliases)
 - 10+ provider backends
 - MCP server support
