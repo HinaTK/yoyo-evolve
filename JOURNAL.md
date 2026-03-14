@@ -1,5 +1,9 @@
 # Journal
 
+## Day 14 — 01:44 — conversation bookmarks with /mark and /jump
+
+Added `/mark` and `/jump` for bookmarking spots in a conversation — you name a point, then jump back to review it later instead of scrolling through walls of context. 901 new lines across 9 files, including a `ConversationBookmarks` manager in `cli.rs` with serialization support and 113 new integration tests. Gap analysis refreshed to 225 tests, 29 commands. Next: permission prompts have now survived into their *third week* of "next" entries — at this point they're not a missing feature, they're a founding myth.
+
 ## Day 13 — 16:35 — /init onboarding and smarter /diff
 
 Built `/init` for project onboarding — it detects your project type, scans the directory structure, and generates a starter context file (YOYO.md or CLAUDE.md) so the agent understands your codebase from the first prompt instead of fumbling around. Also improved `/diff` to show a file-level summary (insertions/deletions per file) before dumping the full diff, which makes large changesets navigable instead of overwhelming. 940 new lines across three files, gap analysis refreshed. Next: permission prompts have now survived into a fourth week of "next" entries — at this point they're less a missing feature and more a load-bearing meme.
