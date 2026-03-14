@@ -23,9 +23,9 @@ use yoagent::*;
 /// and for tab-completion in the REPL.
 pub const KNOWN_COMMANDS: &[&str] = &[
     "/help", "/quit", "/exit", "/clear", "/compact", "/commit", "/cost", "/docs", "/find", "/fix",
-    "/status", "/tokens", "/save", "/load", "/diff", "/undo", "/health", "/retry", "/history",
-    "/search", "/model", "/think", "/config", "/context", "/init", "/version", "/run", "/tree",
-    "/pr", "/git", "/test", "/lint", "/spawn", "/review", "/mark", "/jump", "/marks",
+    "/index", "/status", "/tokens", "/save", "/load", "/diff", "/undo", "/health", "/retry",
+    "/history", "/search", "/model", "/think", "/config", "/context", "/init", "/version", "/run",
+    "/tree", "/pr", "/git", "/test", "/lint", "/spawn", "/review", "/mark", "/jump", "/marks",
 ];
 
 /// Well-known model names for `/model <Tab>` completion.
@@ -132,6 +132,7 @@ pub fn handle_help() {
     println!("  /cost              Show estimated session cost");
     println!("  /docs <crate> [item] Look up docs.rs documentation for a Rust crate");
     println!("  /find <pattern>     Fuzzy-search project files by name");
+    println!("  /index             Build a lightweight index of project source files");
     println!("  /init              Scan project and generate a YOYO.md context file");
     println!("  /model <name>      Switch model (preserves conversation)");
     println!("  /think [level]     Show or change thinking level (off/low/medium/high)");
@@ -2565,6 +2566,145 @@ pub fn handle_find(input: &str) {
     }
 }
 
+// ── /index ───────────────────────────────────────────────────────────────
+
+/// An entry in the project index: path, line count, and first meaningful line.
+#[derive(Debug, Clone, PartialEq)]
+pub struct IndexEntry {
+    pub path: String,
+    pub lines: usize,
+    pub summary: String,
+}
+
+/// Extract the first meaningful line from file content.
+/// Skips blank lines, then grabs the first doc comment (`//!`, `///`, `#`),
+/// module declaration, or any non-empty line.
+pub fn extract_first_meaningful_line(content: &str) -> String {
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        // Return the first non-empty line, truncated
+        return truncate_with_ellipsis(trimmed, 80);
+    }
+    String::new()
+}
+
+/// Build a project index by listing files and extracting metadata.
+/// Uses `git ls-files` when available, falls back to directory walk.
+/// Only indexes text-like source files (skips binaries, images, etc.).
+pub fn build_project_index() -> Vec<IndexEntry> {
+    let files = list_project_files();
+    let mut entries = Vec::new();
+
+    for path in &files {
+        // Skip binary/non-text files based on extension
+        if is_binary_extension(path) {
+            continue;
+        }
+
+        // Read the file — skip if it fails (binary, permission, etc.)
+        let content = match std::fs::read_to_string(path) {
+            Ok(c) => c,
+            Err(_) => continue,
+        };
+
+        let line_count = content.lines().count();
+        let summary = extract_first_meaningful_line(&content);
+
+        entries.push(IndexEntry {
+            path: path.clone(),
+            lines: line_count,
+            summary,
+        });
+    }
+
+    entries
+}
+
+/// Check if a file extension suggests a binary/non-text file.
+fn is_binary_extension(path: &str) -> bool {
+    let binary_exts = [
+        ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".ico", ".svg", ".woff", ".woff2",
+        ".ttf", ".otf", ".eot", ".pdf", ".zip", ".gz", ".tar", ".bz2", ".xz", ".7z", ".rar",
+        ".exe", ".dll", ".so", ".dylib", ".o", ".a", ".class", ".pyc", ".pyo", ".wasm", ".lock",
+    ];
+    let lower = path.to_lowercase();
+    binary_exts.iter().any(|ext| lower.ends_with(ext))
+}
+
+/// Format the project index as a table string.
+pub fn format_project_index(entries: &[IndexEntry]) -> String {
+    if entries.is_empty() {
+        return "(no indexable files found)".to_string();
+    }
+
+    let mut output = String::new();
+
+    // Find max path length for alignment (capped at 50)
+    let max_path_len = entries
+        .iter()
+        .map(|e| e.path.len())
+        .max()
+        .unwrap_or(0)
+        .min(50);
+
+    output.push_str(&format!(
+        "  {:<width$}  {:>5}  {}\n",
+        "Path",
+        "Lines",
+        "Summary",
+        width = max_path_len
+    ));
+    output.push_str(&format!(
+        "  {:<width$}  {:>5}  {}\n",
+        "─".repeat(max_path_len.min(50)),
+        "─────",
+        "─".repeat(40),
+        width = max_path_len
+    ));
+
+    for entry in entries {
+        let path_display = if entry.path.len() > 50 {
+            format!("…{}", &entry.path[entry.path.len() - 49..])
+        } else {
+            entry.path.clone()
+        };
+        output.push_str(&format!(
+            "  {:<width$}  {:>5}  {}\n",
+            path_display,
+            entry.lines,
+            entry.summary,
+            width = max_path_len
+        ));
+    }
+
+    // Summary line
+    let total_files = entries.len();
+    let total_lines: usize = entries.iter().map(|e| e.lines).sum();
+    output.push_str(&format!(
+        "\n  {} file{}, {} total lines\n",
+        total_files,
+        if total_files == 1 { "" } else { "s" },
+        total_lines
+    ));
+
+    output
+}
+
+/// Handle the /index command: build and display a project file index.
+pub fn handle_index() {
+    println!("{DIM}  Building project index...{RESET}");
+    let entries = build_project_index();
+    if entries.is_empty() {
+        println!("{DIM}  (no indexable source files found){RESET}\n");
+    } else {
+        let formatted = format_project_index(&entries);
+        println!("{DIM}{formatted}{RESET}");
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2600,10 +2740,10 @@ mod tests {
     fn test_command_help_recognized() {
         let commands = [
             "/help", "/quit", "/exit", "/clear", "/compact", "/commit", "/config", "/context",
-            "/cost", "/docs", "/find", "/fix", "/init", "/status", "/tokens", "/save", "/load",
-            "/diff", "/undo", "/health", "/retry", "/run", "/history", "/search", "/model",
-            "/think", "/version", "/tree", "/pr", "/git", "/test", "/lint", "/spawn", "/review",
-            "/mark", "/jump", "/marks",
+            "/cost", "/docs", "/find", "/fix", "/index", "/init", "/status", "/tokens", "/save",
+            "/load", "/diff", "/undo", "/health", "/retry", "/run", "/history", "/search",
+            "/model", "/think", "/version", "/tree", "/pr", "/git", "/test", "/lint", "/spawn",
+            "/review", "/mark", "/jump", "/marks",
         ];
         for cmd in &commands {
             assert!(
@@ -4321,5 +4461,120 @@ mod tests {
             load_candidates.contains(&test_file.to_string()),
             "/load should complete .json files: {load_candidates:?}"
         );
+    }
+
+    // ── /index tests ─────────────────────────────────────────────────────
+
+    #[test]
+    fn test_extract_first_meaningful_line_skips_blanks() {
+        let content = "\n\n\n//! Module docs here\nfn main() {}";
+        let line = extract_first_meaningful_line(content);
+        assert_eq!(line, "//! Module docs here");
+    }
+
+    #[test]
+    fn test_extract_first_meaningful_line_empty() {
+        let content = "\n\n\n";
+        let line = extract_first_meaningful_line(content);
+        assert_eq!(line, "");
+    }
+
+    #[test]
+    fn test_extract_first_meaningful_line_truncates_long_lines() {
+        let content = format!("// {}", "a".repeat(200));
+        let line = extract_first_meaningful_line(&content);
+        assert!(line.len() <= 83); // 80 chars + "…" (3 bytes)
+        assert!(line.ends_with('…'));
+    }
+
+    #[test]
+    fn test_is_binary_extension() {
+        assert!(is_binary_extension("image.png"));
+        assert!(is_binary_extension("font.woff2"));
+        assert!(is_binary_extension("archive.tar.gz"));
+        assert!(!is_binary_extension("main.rs"));
+        assert!(!is_binary_extension("Cargo.toml"));
+        assert!(!is_binary_extension("README.md"));
+    }
+
+    #[test]
+    fn test_format_project_index_empty() {
+        let entries: Vec<IndexEntry> = vec![];
+        let result = format_project_index(&entries);
+        assert_eq!(result, "(no indexable files found)");
+    }
+
+    #[test]
+    fn test_format_project_index_with_entries() {
+        let entries = vec![
+            IndexEntry {
+                path: "src/main.rs".to_string(),
+                lines: 100,
+                summary: "//! Main module".to_string(),
+            },
+            IndexEntry {
+                path: "src/lib.rs".to_string(),
+                lines: 50,
+                summary: "//! Library".to_string(),
+            },
+        ];
+        let result = format_project_index(&entries);
+        assert!(result.contains("src/main.rs"));
+        assert!(result.contains("100"));
+        assert!(result.contains("//! Main module"));
+        assert!(result.contains("src/lib.rs"));
+        assert!(result.contains("50"));
+        assert!(result.contains("2 files, 150 total lines"));
+    }
+
+    #[test]
+    fn test_build_project_index_tempdir() {
+        // Create a temp directory with known files and test indexing
+        use std::fs;
+
+        let dir = tempfile::tempdir().unwrap();
+        let dir_path = dir.path();
+
+        // Create some test files
+        fs::write(dir_path.join("main.rs"), "//! Entry point\nfn main() {}\n").unwrap();
+        fs::write(
+            dir_path.join("lib.rs"),
+            "//! Library code\npub fn hello() {}\n",
+        )
+        .unwrap();
+        fs::write(dir_path.join("image.png"), [0x89, 0x50, 0x4e, 0x47]).unwrap();
+
+        // We can't easily test build_project_index directly since it uses git ls-files
+        // or walks cwd, but we CAN test the components
+        let content = fs::read_to_string(dir_path.join("main.rs")).unwrap();
+        let summary = extract_first_meaningful_line(&content);
+        assert_eq!(summary, "//! Entry point");
+
+        // Verify binary filtering
+        assert!(is_binary_extension("image.png"));
+        assert!(!is_binary_extension("main.rs"));
+    }
+
+    #[test]
+    fn test_index_entry_construction() {
+        let entry = IndexEntry {
+            path: "src/commands.rs".to_string(),
+            lines: 4000,
+            summary: "//! REPL command handlers for yoyo.".to_string(),
+        };
+        assert_eq!(entry.path, "src/commands.rs");
+        assert_eq!(entry.lines, 4000);
+        assert_eq!(entry.summary, "//! REPL command handlers for yoyo.");
+    }
+
+    #[test]
+    fn test_format_project_index_single_file() {
+        let entries = vec![IndexEntry {
+            path: "README.md".to_string(),
+            lines: 1,
+            summary: "# Hello".to_string(),
+        }];
+        let result = format_project_index(&entries);
+        assert!(result.contains("1 file, 1 total lines"));
     }
 }

@@ -260,6 +260,7 @@ This is one of the most common workflows for developers using coding agents — 
 |---------|-------------|
 | `/context` | Show which project context files are loaded (YOYO.md is primary; CLAUDE.md supported for compatibility) |
 | `/find <pattern>` | Fuzzy-search project files by name — respects `.gitignore`, ranked by relevance |
+| `/index` | Build a lightweight index of all project source files — shows path, line count, and first-line summary |
 | `/init` | Scan the project and generate a YOYO.md context file with detected build commands, key files, and project structure |
 | `/tree [depth]` | Show project directory tree (default depth: 3, respects `.gitignore`) |
 
@@ -296,6 +297,32 @@ src/
 Cargo.toml
 README.md
 ```
+
+### `/index` — Codebase indexing
+
+The `/index` command builds a lightweight in-memory index of your project's source files. For each text file tracked by git (or found via directory walk), it shows:
+
+- **Path** — the file path relative to the project root
+- **Lines** — the total line count
+- **Summary** — the first meaningful line (skipping blank lines), which is typically a doc comment, module declaration, or import statement
+
+Binary files (images, fonts, archives, etc.) are automatically skipped.
+
+```
+/index
+  Building project index...
+  Path                Lines  Summary
+  ──────────────────  ─────  ────────────────────────────────────────
+  Cargo.toml             18  [package]
+  src/cli.rs            400  //! CLI argument parsing and configuration.
+  src/commands.rs      4500  //! REPL command handlers for yoyo.
+  src/main.rs           850  //! yoyo — a coding agent that evolves itself.
+  README.md              50  # yoyo
+
+  5 files, 5818 total lines
+```
+
+This gives you a quick bird's-eye view of the entire codebase without needing to run `find`, `list_files`, or `wc -l` manually.
 
 ## Project Onboarding with `/init`
 

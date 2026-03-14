@@ -486,6 +486,10 @@ pub async fn run_repl(
                 commands::handle_init();
                 continue;
             }
+            "/index" => {
+                commands::handle_index();
+                continue;
+            }
             "/retry" => {
                 commands::handle_retry(agent, &last_input, &mut session_total, &agent_config.model)
                     .await;
