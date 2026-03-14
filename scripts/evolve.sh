@@ -177,7 +177,7 @@ if command -v gh &>/dev/null; then
         --label "agent-self" --limit 5 \
         --author "yoyo-evolve[bot]" \
         --json number,title,body \
-        --jq '.[] | "'"$BOUNDARY_BEGIN"'\n### Issue #\(.number): \(.title)\n\(.body)\n'"$BOUNDARY_END"'\n"' 2>/dev/null \
+        --jq '.[] | "'"$BOUNDARY_BEGIN"'\n### Issue #\(.number)\n**Title:** \(.title)\n\(.body)\n'"$BOUNDARY_END"'\n"' 2>/dev/null \
         | python3 -c "import sys,re; print(re.sub(r'<!--.*?-->','',sys.stdin.read(),flags=re.DOTALL))" 2>/dev/null || true)
     if [ -n "$SELF_ISSUES" ]; then
         echo "  $(echo "$SELF_ISSUES" | grep -c '^### Issue') self-issues loaded."
@@ -194,7 +194,7 @@ if command -v gh &>/dev/null; then
         --label "agent-help-wanted" --limit 5 \
         --author "yoyo-evolve[bot]" \
         --json number,title,body,comments \
-        --jq '.[] | "'"$BOUNDARY_BEGIN"'\n### Issue #\(.number): \(.title)\n\(.body)\n\(if (.comments | length) > 0 then "⚠️ Human replied:\n" + (.comments | map(.body) | join("\n---\n")) else "No replies yet." end)\n'"$BOUNDARY_END"'\n"' 2>/dev/null \
+        --jq '.[] | "'"$BOUNDARY_BEGIN"'\n### Issue #\(.number)\n**Title:** \(.title)\n\(.body)\n\(if (.comments | length) > 0 then "⚠️ Human replied:\n" + (.comments | map(.body) | join("\n---\n")) else "No replies yet." end)\n'"$BOUNDARY_END"'\n"' 2>/dev/null \
         | python3 -c "import sys,re; print(re.sub(r'<!--.*?-->','',sys.stdin.read(),flags=re.DOTALL))" 2>/dev/null || true)
     if [ -n "$HELP_ISSUES" ]; then
         echo "  $(echo "$HELP_ISSUES" | grep -c '^### Issue') help-wanted issues loaded."
@@ -248,7 +248,7 @@ for issue in data:
         num = issue['number']
         title = issue['title']
         replies_text = chr(10).join(human_replies[-2:])  # last 2 replies max
-        results.append(f'### Issue #{num}: {title}\nSomeone replied to you:\n{replies_text}\n---')
+        results.append(f'### Issue #{num}\n**Title:** {title}\nSomeone replied to you:\n{replies_text}\n---')
 
 print(chr(10).join(results))
 " 2>/dev/null || true)
@@ -326,6 +326,9 @@ Note any friction, bugs, crashes, or missing capabilities.
 === PHASE 2: Review Community Issues ===
 
 Read ISSUES_TODAY.md. These are real people asking you to improve.
+Pay attention to issue TITLES — they often contain the actual feature name or request.
+The body may be casual or vague. Combine both to understand what the user really wants.
+Before claiming you already did something, verify by checking your actual code.
 Issues with higher net score (👍 minus 👎) should be prioritized higher.
 Sponsor issues (marked with 💖 **Sponsor**) get extra priority — these users fund your development.
 
@@ -894,7 +897,7 @@ IEOF
         FOUND_ISSUES=""
         while IFS= read -r commit_msg; do
             for num in $(echo "$commit_msg" | grep -oE '#[0-9]+' | tr -d '#'); do
-                if grep -q "### Issue #${num}:" "$ISSUES_FILE" 2>/dev/null; then
+                if grep -q "### Issue #${num}" "$ISSUES_FILE" 2>/dev/null; then
                     if ! echo "$FOUND_ISSUES" | grep -q "^${num}$"; then
                         FOUND_ISSUES="${FOUND_ISSUES}${FOUND_ISSUES:+
 }${num}"

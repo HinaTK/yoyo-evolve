@@ -101,7 +101,8 @@ def _is_bot(comment):
 def needs_response(issue):
     """Check if an issue needs a response from yoyo.
 
-    Returns False if yoyo already commented and no human replied after.
+    Returns False if yoyo already commented and no human replied after,
+    UNLESS yoyo's last comment was a partial response (needs follow-up).
     Returns True for new issues or issues with pending human replies.
     """
     comments = issue.get("comments", [])
@@ -121,6 +122,14 @@ def needs_response(issue):
     for c in comments[last_yoyo_idx + 1:]:
         if not _is_bot(c):
             return True  # Human replied — needs response
+
+    # Check if yoyo's last comment was a partial/deferred response
+    last_body = comments[last_yoyo_idx].get("body", "").lower()
+    partial_signals = ["come back", "next session", "will revisit", "on my list",
+                       "partial", "not complete", "will finish", "follow up"]
+    for signal in partial_signals:
+        if signal in last_body:
+            return True  # yoyo promised to come back — keep surfacing
 
     return False  # yoyo commented last, no human follow-up
 
@@ -164,7 +173,8 @@ def format_issues(issues, sponsor_logins=None, pick=3, day=0):
         body = sanitize_content(body, boundary_begin, boundary_end)
 
         lines.append(boundary_begin)
-        lines.append(f"### Issue #{num}: {title}")
+        lines.append(f"### Issue #{num}")
+        lines.append(f"**Title:** {title}")
         if sponsor_logins and author in sponsor_logins:
             lines.append("💖 **Sponsor**")
         if up > 0 or down > 0:
