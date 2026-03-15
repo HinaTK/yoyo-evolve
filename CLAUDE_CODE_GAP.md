@@ -1,6 +1,6 @@
 # Gap Analysis: yoyo vs Claude Code
 
-Last updated: Day 14 (2026-03-14)
+Last updated: Day 15 (2026-03-15)
 
 This document tracks the feature gap between yoyo and Claude Code, used to inform development priorities when there are no community issues to address.
 
@@ -62,7 +62,7 @@ This document tracks the feature gap between yoyo and Claude Code, used to infor
 
 | Feature | yoyo | Claude Code | Notes |
 |---------|------|-------------|-------|
-| Tool approval prompts | ✅ | ✅ | `--yes`/`-y` to auto-approve; `with_confirm` for interactive bash approval |
+| Tool approval prompts | ✅ | ✅ | `--yes`/`-y` to auto-approve; interactive confirm for bash, write_file, and edit_file; "always" persists per-session (Day 15) |
 | Allowlist/blocklist | ✅ | ✅ | `--allow`/`--deny` flags with glob matching; `[permissions]` config section; deny overrides allow |
 | Directory restrictions | ✅ | ✅ | `--allow-dir`/`--deny-dir` flags + `[directories]` config; canonicalized path checks prevent traversal (Day 14) |
 | Auto-approve patterns | ✅ | ✅ | `--allow` glob patterns + config file `allow` array; "always" option during confirm |
@@ -120,6 +120,7 @@ Based on this analysis, the highest-impact missing features are:
 3. **Full graceful degradation** — Fallback behavior on partial tool failures
 
 Recently completed:
+- ✅ Permission prompts for all tool types (Day 15) — interactive confirm for write_file and edit_file, not just bash
 - ✅ Argument-aware tab completion (Day 14) — `--model` values, git subcommands, `/pr` subcommands
 - ✅ Codebase indexing (Day 14) — `/index` builds lightweight project index with language breakdown
 - ✅ Edit diff display (Day 14) — Colored inline diffs for `edit_file` tool output
@@ -152,15 +153,15 @@ Recently completed:
 
 ## Stats
 
-- yoyo: ~13,000 lines of Rust across 8 source files + integration tests
-- 562 tests passing (495 unit + 67 integration)
+- yoyo: ~15,000 lines of Rust across 8 source files + integration tests
+- 576 tests passing (508 unit + 68 integration)
 - 38 REPL commands (including /spawn, /find, /docs, /fix, /lint, /pr, /review, /init, /mark, /jump, /marks, /index)
 - 25 CLI flags (+ short aliases)
 - 10+ provider backends
 - MCP server support
 - OpenAPI tool loading
 - Config file support (.yoyo.toml)
-- Permission system (allow/deny globs)
+- Permission system (allow/deny globs + interactive prompts for all tools)
 - Directory restrictions (allow-dir/deny-dir)
 - Subagent spawning (/spawn)
 - Fuzzy file search (/find)
