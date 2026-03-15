@@ -53,6 +53,15 @@ jobs:
           git config user.name "yoyo-evolve[bot]"
           git config user.email "yoyo-evolve[bot]@users.noreply.github.com"
 
+      - name: Notify dashboard (start)
+        env:
+          GH_TOKEN: ${{ secrets.DASHBOARD_TOKEN }}
+        run: |
+          gh api repos/yuanhao/yoyo-dashboard/dispatches \
+            -f event_type=activity-update \
+            -f 'client_payload[action]=start' \
+            -f 'client_payload[workflow]=Social' || true
+
       - name: Run social session
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -61,3 +70,14 @@ jobs:
         run: |
           chmod +x scripts/social.sh
           ./scripts/social.sh
+
+      - name: Notify dashboard (end)
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.DASHBOARD_TOKEN }}
+        run: |
+          gh api repos/yuanhao/yoyo-dashboard/dispatches \
+            -f event_type=activity-update \
+            -f 'client_payload[action]=end' \
+            -f 'client_payload[workflow]=Social' \
+            -f 'client_payload[conclusion]=${{ job.status }}' || true

@@ -53,6 +53,15 @@ jobs:
           git config user.name "yoyo-evolve[bot]"
           git config user.email "yoyo-evolve[bot]@users.noreply.github.com"
 
+      - name: Notify dashboard (start)
+        env:
+          GH_TOKEN: ${{ secrets.DASHBOARD_TOKEN }}
+        run: |
+          gh api repos/yuanhao/yoyo-dashboard/dispatches \
+            -f event_type=activity-update \
+            -f 'client_payload[action]=start' \
+            -f 'client_payload[workflow]=Evolution' || true
+
       - name: Run evolution session
         id: attempt1
         continue-on-error: true
@@ -97,3 +106,14 @@ jobs:
       - name: Check for clippy warnings
         if: always()
         run: cargo clippy --quiet --all-targets 2>&1 || true
+
+      - name: Notify dashboard (end)
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.DASHBOARD_TOKEN }}
+        run: |
+          gh api repos/yuanhao/yoyo-dashboard/dispatches \
+            -f event_type=activity-update \
+            -f 'client_payload[action]=end' \
+            -f 'client_payload[workflow]=Evolution' \
+            -f 'client_payload[conclusion]=${{ job.status }}' || true
