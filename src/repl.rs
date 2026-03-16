@@ -248,6 +248,13 @@ pub async fn run_repl(
     }
     println!("{DIM}  cwd:   {cwd}{RESET}\n");
 
+    // Hint about previous session if one exists and --continue wasn't used
+    if !continue_session && commands::last_session_exists() {
+        println!(
+            "{DIM}  💡 Previous session found. Use {YELLOW}--continue{RESET}{DIM} or {YELLOW}/load .yoyo/last-session.json{RESET}{DIM} to resume.{RESET}\n"
+        );
+    }
+
     // Set up rustyline editor with slash-command tab-completion
     let mut rl = Editor::new().expect("Failed to initialize readline");
     rl.set_helper(Some(YoyoHelper));
@@ -462,7 +469,6 @@ pub async fn run_repl(
                     mcp_count,
                     openapi_count,
                     agent,
-                    continue_session,
                     &cwd,
                 );
                 continue;
@@ -585,17 +591,8 @@ pub async fn run_repl(
         let _ = rl.save_history(&history_path);
     }
 
-    // Auto-save session on exit when --continue was used
-    if continue_session {
-        if let Ok(json) = agent.save_messages() {
-            if std::fs::write(DEFAULT_SESSION_PATH, &json).is_ok() {
-                eprintln!(
-                    "{DIM}  session saved to {DEFAULT_SESSION_PATH} ({} messages){RESET}",
-                    agent.messages().len()
-                );
-            }
-        }
-    }
+    // Auto-save session on exit (always — crash recovery for everyone)
+    commands::auto_save_on_exit(agent);
 
     println!("\n{DIM}  bye 👋{RESET}\n");
 }

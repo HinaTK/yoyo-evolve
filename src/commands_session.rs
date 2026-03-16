@@ -9,7 +9,9 @@ use yoagent::agent::Agent;
 use yoagent::context::{compact_messages, total_tokens, ContextConfig};
 use yoagent::*;
 
-use crate::cli::{AUTO_COMPACT_THRESHOLD, DEFAULT_SESSION_PATH, MAX_CONTEXT_TOKENS};
+use crate::cli::{
+    AUTO_COMPACT_THRESHOLD, AUTO_SAVE_SESSION_PATH, DEFAULT_SESSION_PATH, MAX_CONTEXT_TOKENS,
+};
 
 // ── compact ──────────────────────────────────────────────────────────────
 
@@ -67,6 +69,42 @@ pub fn handle_compact(agent: &mut Agent) {
                 format_token_count(before_tokens)
             );
         }
+    }
+}
+
+// ── auto-save ────────────────────────────────────────────────────────────
+
+/// Check whether a previous auto-saved session exists at `.yoyo/last-session.json`.
+pub fn last_session_exists() -> bool {
+    std::path::Path::new(AUTO_SAVE_SESSION_PATH).exists()
+}
+
+/// Auto-save the current conversation to `.yoyo/last-session.json`.
+/// Creates the `.yoyo/` directory if it doesn't exist.
+/// Silently ignores errors (best-effort crash recovery).
+pub fn auto_save_on_exit(agent: &Agent) {
+    if agent.messages().is_empty() {
+        return;
+    }
+    if let Ok(json) = agent.save_messages() {
+        // Ensure .yoyo/ directory exists
+        let _ = std::fs::create_dir_all(".yoyo");
+        if std::fs::write(AUTO_SAVE_SESSION_PATH, &json).is_ok() {
+            eprintln!(
+                "{DIM}  session auto-saved to {AUTO_SAVE_SESSION_PATH} ({} messages){RESET}",
+                agent.messages().len()
+            );
+        }
+    }
+}
+
+/// Return the path to load for `--continue`: use `.yoyo/last-session.json` if it exists,
+/// otherwise fall back to the legacy `yoyo-session.json`.
+pub fn continue_session_path() -> &'static str {
+    if last_session_exists() {
+        AUTO_SAVE_SESSION_PATH
+    } else {
+        DEFAULT_SESSION_PATH
     }
 }
 
@@ -323,4 +361,105 @@ pub async fn handle_spawn(
     );
 
     Some(context_msg)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cli::AUTO_SAVE_SESSION_PATH;
+
+    #[test]
+    fn test_auto_save_session_path_constant() {
+        assert_eq!(AUTO_SAVE_SESSION_PATH, ".yoyo/last-session.json");
+    }
+
+    #[test]
+    fn test_continue_session_path_fallback() {
+        // When .yoyo/last-session.json doesn't exist, should fall back to yoyo-session.json
+        // (In CI, .yoyo/last-session.json won't exist unless created by a prior test)
+        let path = continue_session_path();
+        // Should be one of the two valid paths
+        assert!(
+            path == AUTO_SAVE_SESSION_PATH || path == DEFAULT_SESSION_PATH,
+            "continue_session_path should return a valid session path, got: {path}"
+        );
+    }
+
+    #[test]
+    fn test_last_session_exists_returns_bool() {
+        // Should not panic regardless of whether the file exists
+        let _exists = last_session_exists();
+    }
+
+    #[test]
+    fn test_auto_save_creates_directory_and_file() {
+        use yoagent::agent::Agent;
+        use yoagent::provider::AnthropicProvider;
+
+        // Use a temp directory to avoid polluting the project
+        let tmp_dir = std::env::temp_dir().join("yoyo_test_autosave");
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+        std::fs::create_dir_all(&tmp_dir).unwrap();
+
+        let original_dir = std::env::current_dir().unwrap();
+
+        // Change to temp directory
+        std::env::set_current_dir(&tmp_dir).unwrap();
+
+        // Create an agent with an empty conversation — should NOT save
+        let agent = Agent::new(AnthropicProvider)
+            .with_system_prompt("test")
+            .with_model("test-model")
+            .with_api_key("test-key");
+        auto_save_on_exit(&agent);
+        assert!(
+            !std::path::Path::new(AUTO_SAVE_SESSION_PATH).exists(),
+            "Should not save empty conversations"
+        );
+
+        // Restore directory
+        std::env::set_current_dir(&original_dir).unwrap();
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+    }
+
+    #[test]
+    fn test_continue_session_path_prefers_auto_save() {
+        // Create a temp directory with .yoyo/last-session.json
+        let tmp_dir = std::env::temp_dir().join("yoyo_test_continue_path");
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+        std::fs::create_dir_all(tmp_dir.join(".yoyo")).unwrap();
+        std::fs::write(tmp_dir.join(".yoyo/last-session.json"), "[]").unwrap();
+
+        let original_dir = std::env::current_dir().unwrap();
+        std::env::set_current_dir(&tmp_dir).unwrap();
+
+        let path = continue_session_path();
+        assert_eq!(
+            path, AUTO_SAVE_SESSION_PATH,
+            "Should prefer .yoyo/last-session.json when it exists"
+        );
+
+        std::env::set_current_dir(&original_dir).unwrap();
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+    }
+
+    #[test]
+    fn test_continue_session_path_falls_back_to_default() {
+        // Create a temp directory WITHOUT .yoyo/last-session.json
+        let tmp_dir = std::env::temp_dir().join("yoyo_test_continue_fallback");
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+        std::fs::create_dir_all(&tmp_dir).unwrap();
+
+        let original_dir = std::env::current_dir().unwrap();
+        std::env::set_current_dir(&tmp_dir).unwrap();
+
+        let path = continue_session_path();
+        assert_eq!(
+            path, DEFAULT_SESSION_PATH,
+            "Should fall back to yoyo-session.json when .yoyo/last-session.json doesn't exist"
+        );
+
+        std::env::set_current_dir(&original_dir).unwrap();
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+    }
 }

@@ -8,3 +8,4 @@ ISSUE_RESPONSE.md
 .worktrees/
 mutants.out/
 mutants.out.old/
+.yoyo/last-session.json

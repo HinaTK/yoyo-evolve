@@ -641,17 +641,18 @@ async fn main() {
 
     // --continue / -c: resume last saved session
     if continue_session {
-        match std::fs::read_to_string(DEFAULT_SESSION_PATH) {
+        let session_path = commands_session::continue_session_path();
+        match std::fs::read_to_string(session_path) {
             Ok(json) => match agent.restore_messages(&json) {
                 Ok(_) => {
                     eprintln!(
-                        "{DIM}  resumed session: {} messages from {DEFAULT_SESSION_PATH}{RESET}",
+                        "{DIM}  resumed session: {} messages from {session_path}{RESET}",
                         agent.messages().len()
                     );
                 }
                 Err(e) => eprintln!("{YELLOW}warning:{RESET} Failed to restore session: {e}"),
             },
-            Err(_) => eprintln!("{DIM}  no previous session found ({DEFAULT_SESSION_PATH}){RESET}"),
+            Err(_) => eprintln!("{DIM}  no previous session found ({session_path}){RESET}"),
         }
     }
 

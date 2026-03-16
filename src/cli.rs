@@ -9,6 +9,7 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const MAX_CONTEXT_TOKENS: u64 = 200_000;
 pub const AUTO_COMPACT_THRESHOLD: f64 = 0.80;
 pub const DEFAULT_SESSION_PATH: &str = "yoyo-session.json";
+pub const AUTO_SAVE_SESSION_PATH: &str = ".yoyo/last-session.json";
 
 pub const SYSTEM_PROMPT: &str = r#"You are a coding assistant working in the user's terminal.
 You have access to the filesystem and shell. Be direct and concise.

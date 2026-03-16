@@ -6,9 +6,7 @@
 // All handle_* functions in this module are dispatched from the REPL in main.rs.
 
 use crate::cli::{default_model_for_provider, KNOWN_PROVIDERS};
-use crate::cli::{
-    is_verbose, AUTO_COMPACT_THRESHOLD, DEFAULT_SESSION_PATH, MAX_CONTEXT_TOKENS, VERSION,
-};
+use crate::cli::{is_verbose, AUTO_COMPACT_THRESHOLD, MAX_CONTEXT_TOKENS, VERSION};
 use crate::format::*;
 use crate::git::*;
 use crate::prompt::*;
@@ -430,7 +428,6 @@ pub fn handle_config(
     mcp_count: u32,
     openapi_count: u32,
     agent: &Agent,
-    continue_session: bool,
     cwd: &str,
 ) {
     println!("{DIM}  Configuration:");
@@ -492,9 +489,10 @@ pub fn handle_config(
         AUTO_COMPACT_THRESHOLD * 100.0
     );
     println!("    messages:   {}", agent.messages().len());
-    if continue_session {
-        println!("    session:    auto-save on exit ({DEFAULT_SESSION_PATH})");
-    }
+    println!(
+        "    session:    auto-save on exit ({})",
+        crate::cli::AUTO_SAVE_SESSION_PATH
+    );
     println!("{RESET}");
 }
 
@@ -515,8 +513,9 @@ pub use crate::commands_project::{
 
 // Session-related handlers
 pub use crate::commands_session::{
-    auto_compact_if_needed, handle_compact, handle_history, handle_jump, handle_load, handle_mark,
-    handle_marks, handle_save, handle_search, handle_spawn, Bookmarks,
+    auto_compact_if_needed, auto_save_on_exit, handle_compact, handle_history, handle_jump,
+    handle_load, handle_mark, handle_marks, handle_save, handle_search, handle_spawn,
+    last_session_exists, Bookmarks,
 };
 
 // Memory-related handlers
