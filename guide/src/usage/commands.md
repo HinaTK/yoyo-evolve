@@ -346,6 +346,36 @@ The `/init` command scans your project and generates a `YOYO.md` context file au
 
 If `YOYO.md` or `CLAUDE.md` already exists, `/init` won't overwrite it. The generated file is a starting point — edit it to add your project's specific conventions and instructions.
 
+## Project Memory
+
+| Command | Description |
+|---------|-------------|
+| `/remember <note>` | Save a project-specific note that persists across sessions |
+| `/memories` | List all saved project memories |
+| `/forget <number>` | Remove a memory by its number |
+
+Project memories let you teach yoyo things about your project that it should always know — build quirks, team conventions, infrastructure requirements. Memories are stored in `.yoyo/memory.json` in your project root and are automatically injected into the system prompt at the start of every session.
+
+### Example workflow
+
+```
+> /remember this project uses sqlx for database access
+  ✓ Remembered: "this project uses sqlx for database access" (1 total memories)
+
+> /remember tests require docker running
+  ✓ Remembered: "tests require docker running" (2 total memories)
+
+> /memories
+  Project memories (2):
+    [0] this project uses sqlx for database access (2026-03-15 08:32)
+    [1] tests require docker running (2026-03-15 08:33)
+
+> /forget 0
+  ✓ Forgot: "this project uses sqlx for database access" (1 memories remaining)
+```
+
+Use `/remember` any time you find yourself repeating the same instruction to the agent. The memory will be there next time you start a session in this project directory.
+
 ## Unknown commands
 
 If you type a `/command` that yoyo doesn't recognize, it will tell you:
