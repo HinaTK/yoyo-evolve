@@ -342,7 +342,7 @@ cargo install cargo-mutants
 cargo mutants
 ```
 
-See `mutants.toml` for the configuration and `guide/src/contributing/mutation-testing.md` for the full guide.
+See `mutants.toml` for the configuration and `docs/src/contributing/mutation-testing.md` for the full guide.
 
 ## Built On
 

@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DOCS = ROOT / "docs"
+DOCS = ROOT / "site"
 
 
 def read_file(name):
@@ -519,7 +519,7 @@ def build():
     (DOCS / "style.css").write_text(CSS)
     (DOCS / ".nojekyll").touch()
 
-    print(f"Site built: docs/index.html (Day {day_count})")
+    print(f"Site built: site/index.html (Day {day_count})")
 
 
 if __name__ == "__main__":

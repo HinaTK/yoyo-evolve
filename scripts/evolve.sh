@@ -498,7 +498,7 @@ Follow the evolve skill rules:
 - If any check fails, read the error and fix it. Keep trying until it passes.
 - Only if you've tried 3+ times and are stuck, revert with: git checkout -- . (keeps previous commits)
 - After ALL checks pass, commit: git add -A && git commit -m "Day $DAY ($SESSION_TIME): $task_title (Task $TASK_NUM)"
-- If you added a new feature or command, update the relevant docs in guide/src/
+- If you added a new feature or command, update the relevant docs in docs/src/
 - Do NOT work on anything else. This is your only task.
 TEOF
 
@@ -1017,21 +1017,7 @@ if [ -f ISSUE_RESPONSE.md ]; then
     rm -f ISSUE_RESPONSE.md
 fi
 
-# Rebuild website
-echo "→ Rebuilding website..."
-python3 scripts/build_site.py
-echo "  Site rebuilt."
-
-# Rebuild mdbook docs (skip gracefully if mdbook not installed)
-if command -v mdbook &>/dev/null; then
-    echo "→ Rebuilding docs..."
-    mdbook build guide/ || echo "  mdbook build failed (non-fatal)"
-    echo "  Docs rebuilt."
-else
-    echo "  mdbook not installed — skipping docs rebuild."
-fi
-
-# Commit any remaining uncommitted changes (journal, day counter, site, etc.)
+# Commit any remaining uncommitted changes (journal, day counter, etc.)
 git add -A
 if ! git diff --cached --quiet; then
     git commit -m "Day $DAY ($SESSION_TIME): session wrap-up"

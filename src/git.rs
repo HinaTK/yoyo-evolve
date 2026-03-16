@@ -70,7 +70,7 @@ pub fn generate_commit_message(diff: &str) -> String {
         "test"
     } else if files_changed
         .iter()
-        .any(|f| f.ends_with(".md") || f.starts_with("docs/") || f.starts_with("guide/"))
+        .any(|f| f.ends_with(".md") || f.starts_with("site/") || f.starts_with("docs/"))
     {
         "docs"
     } else if files_changed

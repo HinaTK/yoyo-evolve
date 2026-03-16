@@ -5,7 +5,7 @@ language = "en"
 src = "src"
 
 [build]
-build-dir = "../docs/book"
+build-dir = "../site/book"
 
 [output.html]
 git-repository-url = "https://github.com/yologdev/yoyo-evolve"

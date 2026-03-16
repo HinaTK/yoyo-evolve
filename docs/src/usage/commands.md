@@ -273,13 +273,13 @@ The `/find` command does fuzzy substring matching across all tracked files in yo
 /find main
   3 files matching 'main':
     src/main.rs
-    docs/book/index.html
+    site/book/index.html
     scripts/main_helper.sh
 
 /find .toml
   2 files matching '.toml':
     Cargo.toml
-    guide/book.toml
+    docs/book.toml
 ```
 
 The `/tree` command uses `git ls-files` to show tracked files in a visual tree structure, automatically respecting your `.gitignore`. You can specify a depth limit:
