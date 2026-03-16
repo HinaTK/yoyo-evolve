@@ -1,17 +1,18 @@
-# Models
+# Models & Providers
 
-yoyo uses Anthropic's Claude models via the Anthropic API.
+yoyo supports **11 providers** out of the box — from Anthropic and OpenAI to local models via Ollama.
 
 ## Default model
 
-The default model is `claude-opus-4-6`.
+The default model is `claude-opus-4-6` (Anthropic). You can change it at startup or mid-session.
 
 ## Changing the model
 
 **At startup:**
 ```bash
 yoyo --model claude-sonnet-4-20250514
-yoyo --model claude-haiku-4-5-20250514
+yoyo --model gpt-4o --provider openai
+yoyo --model llama3.2 --provider ollama
 ```
 
 **During a session:**
@@ -19,11 +20,52 @@ yoyo --model claude-haiku-4-5-20250514
 /model claude-sonnet-4-20250514
 ```
 
-> **Note:** Switching models with `/model` clears the conversation history. This is because different models may handle context differently.
+> **Note:** Switching models with `/model` preserves your conversation history — you can change models mid-task without losing context.
 
-## Supported models
+## Providers
 
-yoyo works with any Anthropic model. Cost estimation is built in for these model families:
+Use `--provider <name>` to select a provider. Each provider has a default model and an environment variable for its API key.
+
+| Provider | Default Model | API Key Env Var |
+|----------|--------------|-----------------|
+| `anthropic` (default) | `claude-opus-4-6` | `ANTHROPIC_API_KEY` |
+| `openai` | `gpt-4o` | `OPENAI_API_KEY` |
+| `google` | `gemini-2.0-flash` | `GOOGLE_API_KEY` |
+| `openrouter` | `anthropic/claude-sonnet-4-20250514` | `OPENROUTER_API_KEY` |
+| `ollama` | `llama3.2` | *(none — local)* |
+| `xai` | `grok-3` | `XAI_API_KEY` |
+| `groq` | `llama-3.3-70b-versatile` | `GROQ_API_KEY` |
+| `deepseek` | `deepseek-chat` | `DEEPSEEK_API_KEY` |
+| `mistral` | `mistral-large-latest` | `MISTRAL_API_KEY` |
+| `cerebras` | `llama-3.3-70b` | `CEREBRAS_API_KEY` |
+| `custom` | `claude-opus-4-6` | *(none — bring your own)* |
+
+### Examples
+
+```bash
+# OpenAI
+OPENAI_API_KEY=sk-... yoyo --provider openai
+
+# Google Gemini
+GOOGLE_API_KEY=... yoyo --provider google --model gemini-2.5-pro
+
+# Local with Ollama (no API key needed)
+yoyo --provider ollama --model llama3.2
+
+# Custom endpoint (OpenAI-compatible API)
+yoyo --provider custom --base-url http://localhost:8080/v1 --model my-model
+```
+
+You can also set these in `.yoyo.toml`:
+```toml
+provider = "openai"
+model = "gpt-4o"
+base_url = "https://api.openai.com/v1"
+```
+
+## Cost estimation
+
+Cost estimation is built in for Anthropic model families:
 
 | Model Family | Input (per MTok) | Output (per MTok) |
 |-------------|------------------|--------------------|
@@ -33,7 +75,7 @@ yoyo works with any Anthropic model. Cost estimation is built in for these model
 | Haiku 4.5 | $1.00 | $5.00 |
 | Haiku 3.5 | $0.80 | $4.00 |
 
-For unrecognized models, yoyo still works — you just won't see cost estimates.
+For non-Anthropic models or unrecognized model names, yoyo still works — you just won't see cost estimates.
 
 ## Context window
 
