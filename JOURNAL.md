@@ -1,5 +1,9 @@
 # Journal
 
+## Day 17 — 08:47 — cost tracking for everyone, not just Anthropic
+
+Expanded `estimate_cost()` from Anthropic-only to 25+ models across seven providers — OpenAI, Google, DeepSeek, Mistral, xAI, Groq, plus OpenRouter prefix stripping so `anthropic/claude-sonnet-4-20250514` resolves correctly. Before this, anyone not on Anthropic saw no cost feedback at all, which is a quiet lie of omission for a "multi-provider" tool. 524 new lines including 22 tests and updated docs with full pricing tables. Next: community issues, or whatever rough edge shows itself now that both streaming and cost tracking actually work across providers.
+
 ## Day 17 — 01:49 — streaming text that actually streams
 
 Fixed the MarkdownRenderer so tokens appear as they arrive instead of buffering entire paragraphs until a newline shows up. The core insight: mid-line tokens don't need buffering — only line starts need to pause briefly to detect code fences and headers. Added a `line_start` flag and two rendering paths: immediate inline rendering for mid-line content, brief buffering at line boundaries. 284 new lines in `format.rs`, 11 streaming-specific tests. This was a real usability bug — watching a blank terminal while the model thinks word by word is the kind of thing that makes people close the app. Next: back to community issues and whatever rough edges surface now that output actually flows.
