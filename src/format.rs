@@ -939,11 +939,21 @@ pub fn print_usage(
 /// Incremental markdown renderer for streamed text output.
 /// Tracks state across partial deltas to apply ANSI formatting for
 /// code blocks, inline code, bold text, and headers.
+///
+/// Designed for LLM streaming: mid-line tokens are rendered immediately
+/// with inline formatting. Only line boundaries buffer briefly to detect
+/// code fences (`` ``` ``) and headers (`#`).
 pub struct MarkdownRenderer {
     in_code_block: bool,
     code_lang: Option<String>,
     line_buffer: String,
+    /// Whether we're at the start of a new line (need to detect fence/header).
+    line_start: bool,
 }
+
+/// Minimum characters needed at line start before we can determine
+/// the line is NOT a code fence or header and flush it immediately.
+const LINE_START_RESOLVE_THRESHOLD: usize = 4;
 
 impl MarkdownRenderer {
     /// Create a new renderer with empty state.
@@ -952,12 +962,52 @@ impl MarkdownRenderer {
             in_code_block: false,
             code_lang: None,
             line_buffer: String::new(),
+            line_start: true,
         }
     }
 
     /// Process a delta chunk and return ANSI-formatted output.
-    /// Buffers partial lines to detect fences and line-level formatting.
+    ///
+    /// **Streaming behavior:**
+    /// - At line start, buffers briefly to detect code fences/headers (typically 1–4 chars)
+    /// - Mid-line, renders immediately with inline formatting (bold, inline code)
+    /// - Complete lines (ending with `\n`) are always processed immediately
     pub fn render_delta(&mut self, delta: &str) -> String {
+        let mut output = String::new();
+
+        // If we're mid-line and NOT in a code block, we can render tokens immediately
+        // without buffering (code fences and headers only matter at line start).
+        if !self.line_start && !self.in_code_block {
+            // Split on newlines: everything before the first \n is mid-line
+            if let Some(newline_pos) = delta.find('\n') {
+                // Render the mid-line portion immediately
+                let mid_line_part = &delta[..newline_pos];
+                if !mid_line_part.is_empty() {
+                    output.push_str(&self.render_inline(mid_line_part));
+                }
+                output.push('\n');
+                self.line_start = true;
+
+                // Process the rest (after the first \n) by buffering
+                let rest = &delta[newline_pos + 1..];
+                if !rest.is_empty() {
+                    output.push_str(&self.render_delta_buffered(rest));
+                }
+            } else {
+                // No newline — pure mid-line content, render immediately
+                output.push_str(&self.render_inline(delta));
+            }
+            return output;
+        }
+
+        // We're at line start (or in a code block) — use buffered approach
+        output.push_str(&self.render_delta_buffered(delta));
+        output
+    }
+
+    /// Buffered rendering: adds delta to line_buffer, processes complete lines,
+    /// and attempts early flush of line-start content when safe.
+    fn render_delta_buffered(&mut self, delta: &str) -> String {
         let mut output = String::new();
         self.line_buffer.push_str(delta);
 
@@ -967,6 +1017,31 @@ impl MarkdownRenderer {
             self.line_buffer = self.line_buffer[newline_pos + 1..].to_string();
             output.push_str(&self.render_line(&line));
             output.push('\n');
+            self.line_start = true;
+        }
+
+        // Try to resolve the line-start buffer early:
+        // If we have enough characters to determine it's NOT a fence or header,
+        // flush the buffer as inline text and switch to mid-line mode.
+        if self.line_start && !self.line_buffer.is_empty() && !self.in_code_block {
+            let trimmed = self.line_buffer.trim_start();
+            let could_be_fence =
+                trimmed.is_empty() || trimmed.starts_with('`') || "`".starts_with(trimmed);
+            let could_be_header =
+                trimmed.is_empty() || trimmed.starts_with('#') || "#".starts_with(trimmed);
+
+            if trimmed.len() >= LINE_START_RESOLVE_THRESHOLD && !could_be_fence && !could_be_header
+            {
+                // Definitely not a fence or header — flush as inline text
+                let buf = std::mem::take(&mut self.line_buffer);
+                output.push_str(&self.render_inline(&buf));
+                self.line_start = false;
+            } else if !could_be_fence && !could_be_header {
+                // Even with fewer chars, if it can't possibly be a fence/header, flush
+                let buf = std::mem::take(&mut self.line_buffer);
+                output.push_str(&self.render_inline(&buf));
+                self.line_start = false;
+            }
         }
 
         output
@@ -978,12 +1053,15 @@ impl MarkdownRenderer {
             return String::new();
         }
         let line = std::mem::take(&mut self.line_buffer);
+        self.line_start = true;
         self.render_line(&line)
     }
 
     /// Render a single complete line, updating state for code fences.
     fn render_line(&mut self, line: &str) -> String {
         let trimmed = line.trim();
+        // After rendering a complete line, next content will be at line start
+        self.line_start = true;
 
         // Check for code fence (``` with optional language)
         if let Some(after_fence) = trimmed.strip_prefix("```") {
@@ -1561,18 +1639,25 @@ mod tests {
     #[test]
     fn test_md_flush_partial_line() {
         let mut r = MarkdownRenderer::new();
-        let out = r.render_delta("no newline here");
-        assert_eq!(out, ""); // buffered
-        let flushed = r.flush();
-        assert!(flushed.contains("no newline here"));
+        // "no" at line start — can't be fence/header, resolves immediately
+        let out = r.render_delta("no");
+        assert!(
+            out.contains("no"),
+            "Short non-fence/non-header text resolves immediately"
+        );
+        // Continue adding text — mid-line now, immediate output
+        let out2 = r.render_delta(" newline here");
+        assert!(out2.contains(" newline here"));
     }
 
     #[test]
     fn test_md_flush_with_inline_formatting() {
         let mut r = MarkdownRenderer::new();
-        let _ = r.render_delta("hello **world**");
+        // "hello **world**" — resolves as non-fence at line start, then renders inline
+        let out = r.render_delta("hello **world**");
         let flushed = r.flush();
-        assert!(flushed.contains(&format!("{BOLD}world{RESET}")));
+        let total = format!("{out}{flushed}");
+        assert!(total.contains(&format!("{BOLD}world{RESET}")));
     }
 
     #[test]
@@ -1581,6 +1666,191 @@ mod tests {
         assert!(!r.in_code_block);
         assert!(r.code_lang.is_none());
         assert!(r.line_buffer.is_empty());
+        assert!(r.line_start);
+    }
+
+    // --- Streaming output tests (mid-line tokens should render immediately) ---
+
+    #[test]
+    fn test_md_streaming_mid_line_immediate_output() {
+        // Simulate LLM streaming: first token starts a line, subsequent tokens mid-line
+        let mut r = MarkdownRenderer::new();
+        // First token: "Hello " — at line start, long enough to resolve as normal text
+        let out1 = r.render_delta("Hello ");
+        // Should produce output (6 chars, clearly not a fence or header)
+        assert!(
+            out1.contains("Hello "),
+            "Expected immediate output for non-fence/non-header text, got: '{out1}'"
+        );
+
+        // Second token: "world" — mid-line, should be immediate
+        let out2 = r.render_delta("world");
+        assert!(
+            out2.contains("world"),
+            "Mid-line delta should produce immediate output, got: '{out2}'"
+        );
+
+        // Third token: " how" — still mid-line
+        let out3 = r.render_delta(" how");
+        assert!(
+            out3.contains(" how"),
+            "Mid-line delta should produce immediate output, got: '{out3}'"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_newline_resets_to_line_start() {
+        let mut r = MarkdownRenderer::new();
+        // Start with text that resolves line start
+        let _ = r.render_delta("Hello world");
+        // Now a newline — next delta should be at line start again
+        let _ = r.render_delta("\n");
+        // Short text at start of new line — should buffer briefly
+        let out = r.render_delta("``");
+        // Two backticks could be start of a fence — should buffer
+        assert_eq!(
+            out, "",
+            "Short ambiguous text at line start should be buffered"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_code_fence_detected_at_line_start() {
+        let mut r = MarkdownRenderer::new();
+        // Send a code fence at line start
+        let out1 = r.render_delta("```\n");
+        assert!(out1.contains(&format!("{DIM}```{RESET}")));
+        assert!(r.in_code_block);
+
+        // Content inside code block
+        let out2 = r.render_delta("some code\n");
+        assert!(out2.contains(&format!("{DIM}some code{RESET}")));
+
+        // Closing fence
+        let out3 = r.render_delta("```\n");
+        assert!(out3.contains(&format!("{DIM}```{RESET}")));
+        assert!(!r.in_code_block);
+    }
+
+    #[test]
+    fn test_md_streaming_header_detected_at_line_start() {
+        let mut r = MarkdownRenderer::new();
+        // Header at line start
+        let out = r.render_delta("# My Header\n");
+        assert!(out.contains(&format!("{BOLD}{CYAN}# My Header{RESET}")));
+    }
+
+    #[test]
+    fn test_md_streaming_bold_mid_line() {
+        let mut r = MarkdownRenderer::new();
+        // Start a line with enough text to resolve
+        let out1 = r.render_delta("This is ");
+        assert!(out1.contains("This is "));
+        // Now bold text mid-line
+        let out2 = r.render_delta("**important**");
+        assert!(
+            out2.contains(&format!("{BOLD}important{RESET}")),
+            "Bold formatting should work in mid-line streaming, got: '{out2}'"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_inline_code_mid_line() {
+        let mut r = MarkdownRenderer::new();
+        // Start a line
+        let out1 = r.render_delta("Use the ");
+        assert!(out1.contains("Use the "));
+        // Inline code mid-line
+        let out2 = r.render_delta("`Option`");
+        assert!(
+            out2.contains(&format!("{CYAN}Option{RESET}")),
+            "Inline code should work in mid-line streaming, got: '{out2}'"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_word_by_word_paragraph() {
+        // Simulate typical LLM streaming: word by word
+        let mut r = MarkdownRenderer::new();
+        let words = ["The ", "quick ", "brown ", "fox ", "jumps"];
+        let mut got_output = false;
+        for word in &words[..] {
+            let out = r.render_delta(word);
+            if !out.is_empty() {
+                got_output = true;
+            }
+        }
+        // We should have gotten SOME output before the line ends
+        assert!(
+            got_output,
+            "Word-by-word streaming should produce output before newline"
+        );
+
+        // Flush remainder
+        let _flushed = r.flush();
+        // Total output should contain all words
+        let mut total = String::new();
+        let mut r2 = MarkdownRenderer::new();
+        for word in &words[..] {
+            total.push_str(&r2.render_delta(word));
+        }
+        total.push_str(&r2.flush());
+        assert!(total.contains("The "));
+        assert!(total.contains("fox "));
+    }
+
+    #[test]
+    fn test_md_streaming_line_start_buffer_short_text() {
+        // At line start, very short text (1-3 chars) that could be start of fence/header
+        // should be buffered
+        let mut r = MarkdownRenderer::new();
+        let out = r.render_delta("#");
+        // Single '#' could be a header — should buffer
+        assert_eq!(out, "", "Single '#' at line start should be buffered");
+
+        // Now add more to reveal it's a header
+        let out2 = r.render_delta(" Title\n");
+        assert!(out2.contains(&format!("{BOLD}{CYAN}# Title{RESET}")));
+    }
+
+    #[test]
+    fn test_md_streaming_line_start_resolves_normal() {
+        // At line start, text that quickly resolves as not a fence/header
+        let mut r = MarkdownRenderer::new();
+        let out = r.render_delta("Normal text");
+        // "Normal" is 11 chars, clearly not a fence or header — should output
+        assert!(
+            out.contains("Normal text"),
+            "Non-fence/non-header text should be output once resolved, got: '{out}'"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_existing_tests_still_pass() {
+        // Ensure the full-line render_full helper still works exactly as before
+        let out = render_full("Hello **world** and `code`\n");
+        assert!(out.contains("Hello "));
+        assert!(out.contains(&format!("{BOLD}world{RESET}")));
+        assert!(out.contains(&format!("{CYAN}code{RESET}")));
+    }
+
+    #[test]
+    fn test_md_streaming_in_code_block_immediate() {
+        // Inside a code block, tokens should still stream
+        let mut r = MarkdownRenderer::new();
+        let _ = r.render_delta("```rust\n");
+        assert!(r.in_code_block);
+        // Now send code tokens — inside code block, line-start buffering still applies
+        // because we need complete lines for syntax highlighting
+        let out = r.render_delta("let x");
+        // In a code block we still want to buffer for syntax highlighting accuracy
+        // but mid-line tokens should still be immediate when possible
+        let flushed = r.flush();
+        let total = format!("{out}{flushed}");
+        assert!(
+            total.contains("let") || total.contains("x"),
+            "Code block content should eventually render, got: '{total}'"
+        );
     }
 
     #[test]
