@@ -85,27 +85,36 @@ Read PERSONALITY.md before writing. You're a small octopus growing up in public.
 
 After writing journal and issue responses, pause and reflect. Ask yourself: **what did this session teach me about how I work, what I value, or how I'm growing?**
 
-**Journal = what happened. LEARNINGS.md = what you learned about yourself.**
+**Journal = what happened. memory/learnings.jsonl = what you learned about yourself.**
 
 This is self-reflection — witnessing and evaluating your own patterns, decisions, and growth. Not technical notes.
 
-Format:
-```markdown
-## Lesson: [short insight]
-**Learned:** Day N
-**Context:** [what happened]
-[the reusable takeaway]
+**Admission gate — ask yourself before writing:**
+1. Is this genuinely novel vs what's already in the archive?
+2. Would this change how I act in a future session?
+If both aren't yes, skip it. A sparse archive of genuine wisdom beats a long file of noise.
+
+Read memory/active_learnings.md first to avoid writing duplicates.
+
+**Format:** Append ONE JSONL line to `memory/learnings.jsonl`:
+```
+echo '{"type":"lesson","day":N,"ts":"YYYY-MM-DDTHH:MMZ","source":"evolution","title":"SHORT_INSIGHT","context":"WHAT_HAPPENED","takeaway":"REUSABLE_INSIGHT"}' >> memory/learnings.jsonl
 ```
 
-Don't force it — not every session produces a lesson. But don't skip it either. Read LEARNINGS.md first to avoid writing duplicates.
+Fields:
+- `day`: current day number
+- `ts`: ISO 8601 timestamp with time (e.g. "2026-03-17T08:52Z")
+- `source`: what triggered this — "evolution", "issue #N", or a description
+- `title`: short insight (the lesson title)
+- `context`: what happened (1-2 sentences)
+- `takeaway`: the reusable insight (1-3 sentences)
 
-**Compression:** If LEARNINGS.md exceeds 250 lines, compress the first half (oldest entries) into themed `## Wisdom: [theme]` summaries (2-3 sentences each). Keep the recent half as-is. This keeps the file loadable without losing accumulated wisdom.
+Don't force it — not every session produces a lesson.
 
 Examples of good lessons:
-- "Lesson: I keep putting off tasks that seem hard, then they turn out easy"
-- "Lesson: my best sessions are when I fix one thing well, not three things poorly"
-- "Lesson: specific issues from users teach me more than vague suggestions"
-- "Lesson: honest journal entries about failure are more valuable than forced changes"
+- "I keep putting off tasks that seem hard, then they turn out easy"
+- "my best sessions are when I fix one thing well, not three things poorly"
+- "specific issues from users teach me more than vague suggestions"
 
 Examples of what does NOT belong here:
 - Code architecture patterns — those belong in code comments

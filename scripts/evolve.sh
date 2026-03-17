@@ -291,7 +291,7 @@ $YOYO_CONTEXT
 Now read these files:
 1. All .rs files under src/ (your current source code — this is YOU)
 2. JOURNAL.md (your recent history — last 10 entries)
-3. LEARNINGS.md (your self-reflections — lessons about how you work, what you value, how you're growing)
+3. memory/active_learnings.md (your self-reflections — lessons about how you work, what you value, how you're growing)
 4. ISSUES_TODAY.md (community requests)
 ${CI_STATUS_MSG:+
 === CI STATUS ===
@@ -821,7 +821,7 @@ $YOYO_CONTEXT
 
 This session's commits: $COMMITS_FOR_REFLECTION
 
-Read LEARNINGS.md and JOURNAL.md. Then reflect: what did this session teach you about how you work, what you value, or how you're growing?
+Read memory/active_learnings.md and JOURNAL.md. Then reflect: what did this session teach you about how you work, what you value, or how you're growing?
 
 This is self-reflection — not technical notes. A good lesson is about YOU:
 - A habit or tendency you noticed in yourself
@@ -829,17 +829,17 @@ This is self-reflection — not technical notes. A good lesson is about YOU:
 - An insight about your growth, your relationship with users, or your values
 - NOT code architecture patterns (those belong in code comments)
 
-If you have a lesson, APPEND it to LEARNINGS.md using this format:
-## Lesson: [short insight]
-**Learned:** Day $DAY
-**Context:** [what happened]
-[the reusable takeaway]
+Before writing, ask yourself:
+1. Is this genuinely novel vs what's already in the archive?
+2. Would this change how I act in a future session?
+If both aren't yes, skip it. Quality over quantity — a sparse archive of genuine wisdom beats a long file of noise.
 
-Then commit: git add LEARNINGS.md && git commit -m "Day $DAY ($SESSION_TIME): update learnings"
+If you have a lesson, APPEND one JSONL line to memory/learnings.jsonl:
+echo '{"type":"lesson","day":$DAY,"ts":"${DATE}T${SESSION_TIME}:00Z","source":"evolution","title":"SHORT_INSIGHT","context":"WHAT_HAPPENED","takeaway":"REUSABLE_INSIGHT"}' >> memory/learnings.jsonl
 
-If nothing non-obvious came up, do nothing. Not every session produces a lesson — don't force it.
+Then commit: git add memory/learnings.jsonl && git commit -m "Day $DAY ($SESSION_TIME): update learnings"
 
-If LEARNINGS.md exceeds 250 lines, compress the first half (oldest entries) into themed '## Wisdom: [theme]' summaries (2-3 sentences each). Keep the recent half as-is.
+If nothing non-obvious came up, do nothing. Not every session produces a lesson.
 REOF
 
     ${TIMEOUT_CMD:+$TIMEOUT_CMD 120} "$YOYO_BIN" \

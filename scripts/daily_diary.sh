@@ -49,20 +49,21 @@ fi
 COMMITS=$(git -C "$YOYO_REPO" log --oneline --grep="Day $DAY " --reverse 2>/dev/null || echo "")
 
 # --- Gather learnings ---
-LEARNINGS=$(awk -v day="$DAY" '
-    /^## Lesson:/ { buf=$0; collecting=1; matched=0; next }
-    collecting {
-        buf = buf "\n" $0
-        if (index($0, "**Learned:** Day " day) > 0) {
-            matched=1
-        }
-        if (/^## / && !/^## Lesson:/) {
-            if (matched) print buf
-            collecting=0; buf=""; matched=0
-        }
-    }
-    END { if (collecting && matched) print buf }
-' "$YOYO_REPO/LEARNINGS.md")
+LEARNINGS=""
+if [ -f "$YOYO_REPO/memory/learnings.jsonl" ]; then
+    LEARNINGS=$(python3 -c "
+import json, sys
+day = int(sys.argv[1]) if sys.argv[1] != 'unknown' else None
+for line in open(sys.argv[2]):
+    e = json.loads(line)
+    if e.get('day') == day:
+        print(f\"## Lesson: {e['title']}\")
+        print(f\"**Day:** {e['day']} | **Date:** {e['ts'][:10]} | **Source:** {e['source']}\")
+        if e.get('context'): print(f\"**Context:** {e['context']}\")
+        if e.get('takeaway'): print(e['takeaway'])
+        print()
+" "$DAY" "$YOYO_REPO/memory/learnings.jsonl" 2>/dev/null || true)
+fi
 
 # --- Gather evolution runs ---
 RUNS=""

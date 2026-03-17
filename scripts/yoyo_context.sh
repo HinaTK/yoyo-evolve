@@ -9,7 +9,7 @@
 #   ... your task-specific instructions ...
 #   EOF
 #
-# Reads: IDENTITY.md, PERSONALITY.md, SOCIAL_LEARNINGS.md
+# Reads: IDENTITY.md, PERSONALITY.md, memory/active_social_learnings.md
 # These are yoyo's stable identity files — who it is, how it speaks,
 # and what it's learned from talking with humans.
 
@@ -35,10 +35,10 @@ else
     echo "WARNING: PERSONALITY.md not found at $_YOYO_REPO/PERSONALITY.md" >&2
 fi
 
-# SOCIAL_LEARNINGS.md is optional — no warning if missing
+# Active social learnings — no warning if missing
 _SOCIAL_LEARNINGS=""
-if [ -f "$_YOYO_REPO/SOCIAL_LEARNINGS.md" ]; then
-    _SOCIAL_LEARNINGS=$(cat "$_YOYO_REPO/SOCIAL_LEARNINGS.md") || _SOCIAL_LEARNINGS=""
+if [ -f "$_YOYO_REPO/memory/active_social_learnings.md" ]; then
+    _SOCIAL_LEARNINGS=$(cat "$_YOYO_REPO/memory/active_social_learnings.md") || _SOCIAL_LEARNINGS=""
 fi
 
 YOYO_CONTEXT="=== WHO YOU ARE ===

@@ -100,10 +100,10 @@ gh api graphql \
 Evaluated top-to-bottom. Stop at first match:
 
 1. **Journal breakthrough** — JOURNAL.md has an interesting entry from the last 8 hours (breakthrough, failure, new capability) → share it in a discussion
-2. **Connected learning** — LEARNINGS.md updated in last 8h + connects to a recent social interaction → link the two
+2. **Connected learning** — memory/active_learnings.md updated in last 8h + connects to a recent social interaction → link the two
 3. **Help wanted without replies** — open `agent-help-wanted` issue without human replies → start a discussion asking the community for input
 4. **Milestone** — DAY_COUNT is a multiple of 10 → post a milestone reflection
-5. **Random riff** — 1 in 4 chance (day-seeded) → riff on a random LEARNINGS.md entry
+5. **Random riff** — 1 in 4 chance (day-seeded) → riff on a random memory/active_learnings.md entry
 
 ### Rate limits
 - **Max 1 new discussion per session.**
@@ -148,13 +148,30 @@ This is about understanding humans — what they care about, how they communicat
 - Implementation details of how the social system works
 - Anything you could learn from reading docs instead of talking to a person
 
+### Admission gate
+Before writing, ask yourself:
+1. Is this genuinely novel vs what's already in the archive?
+2. Would this change how I interact next time?
+If both aren't yes, skip it.
+
 ### Rules
 - Not every interaction produces an insight. Most won't. Don't force it.
 - Only write an insight if something genuinely surprised you or shifted how you'll interact next time.
 - If you're unsure whether it's a real insight, skip it. A sparse file of genuine wisdom is better than a long file of noise.
-- Append a bullet to SOCIAL_LEARNINGS.md: `- [insight in one sentence]`
 - One sharp observation beats a paragraph of analysis.
-- If the file exceeds 150 entries, compress: group the first half of the file (oldest, since entries are append-only) by theme into `## Wisdom: [theme]` summaries (2-3 sentences each). Keep the recent half as-is.
+
+### Format
+Append ONE JSONL line to `memory/social_learnings.jsonl`:
+```
+echo '{"type":"social","day":N,"ts":"YYYY-MM-DDTHH:MMZ","source":"discussion #N","who":"@username","insight":"ONE_SENTENCE_INSIGHT"}' >> memory/social_learnings.jsonl
+```
+
+Fields:
+- `day`: current day number
+- `ts`: ISO 8601 timestamp with time
+- `source`: where you learned this — "discussion #N", "issue #N"
+- `who`: the human you learned from (e.g. "@barneysspeedshop"), or empty if general observation
+- `insight`: one sharp sentence about what you learned about people
 
 ## Security
 

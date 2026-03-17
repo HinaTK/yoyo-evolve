@@ -1,0 +1,100 @@
+name: Synthesize Memory
+
+on:
+  schedule:
+    - cron: '0 12 * * *'  # Daily at noon UTC
+  workflow_dispatch:       # Manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  synthesize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if synthesis needed
+        id: check
+        run: |
+          LEARNINGS_COUNT=$(wc -l < memory/learnings.jsonl 2>/dev/null || echo 0)
+          SOCIAL_COUNT=$(wc -l < memory/social_learnings.jsonl 2>/dev/null || echo 0)
+          echo "learnings=$LEARNINGS_COUNT" >> "$GITHUB_OUTPUT"
+          echo "social=$SOCIAL_COUNT" >> "$GITHUB_OUTPUT"
+          echo "Learnings: $LEARNINGS_COUNT entries, Social: $SOCIAL_COUNT entries"
+
+      - name: Install yoyo
+        run: |
+          cargo build --release
+          echo "$PWD/target/release" >> "$GITHUB_PATH"
+
+      - name: Configure git
+        run: |
+          git config user.name "yoyo-evolve[bot]"
+          git config user.email "yoyo-evolve[bot]@users.noreply.github.com"
+
+      - name: Synthesize active learnings
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          ARCHIVE=$(cat memory/learnings.jsonl)
+          CURRENT_ACTIVE=$(cat memory/active_learnings.md 2>/dev/null || echo "")
+
+          PROMPT=$(mktemp)
+          cat > "$PROMPT" <<'SYNTHEOF'
+          You are synthesizing yoyo's learning archive into an active context file.
+
+          Read memory/learnings.jsonl (the full archive) and regenerate memory/active_learnings.md.
+
+          Apply time-weighted compression tiers:
+          - **Recent (last 2 weeks):** Render each entry as full markdown (## Lesson: title, **Day:** N | **Date:** date | **Source:** source, **Context:** context, takeaway)
+          - **Medium (2-8 weeks old):** Condense each entry to 1-2 sentences under its title
+          - **Old (8+ weeks):** Group entries by theme into ## Wisdom: [theme] summaries (2-3 sentences per group)
+
+          Keep total under ~200 lines. Preserve the most actionable and unique insights.
+
+          Write the result to memory/active_learnings.md. Start with:
+          # Active Learnings
+
+          Self-reflection — what I've learned about how I work, what I value, and how I'm growing.
+          SYNTHEOF
+
+          timeout 180 yoyo --model claude-sonnet-4-20250514 < "$PROMPT" || true
+          rm -f "$PROMPT"
+
+      - name: Synthesize active social learnings
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          PROMPT=$(mktemp)
+          cat > "$PROMPT" <<'SYNTHEOF'
+          You are synthesizing yoyo's social learning archive into an active context file.
+
+          Read memory/social_learnings.jsonl (the full archive) and regenerate memory/active_social_learnings.md.
+
+          Apply time-weighted compression tiers:
+          - **Recent (last 2 weeks):** Render each entry as a full bullet with metadata
+          - **Medium (2-8 weeks old):** Keep insight only, drop metadata
+          - **Old (8+ weeks):** Group by theme into ## Wisdom: [theme] summaries (2-3 sentences per group)
+
+          Keep total under ~100 lines.
+
+          Write the result to memory/active_social_learnings.md. Start with:
+          # Active Social Learnings
+
+          What I've learned about people from talking with them.
+          SYNTHEOF
+
+          timeout 180 yoyo --model claude-sonnet-4-20250514 < "$PROMPT" || true
+          rm -f "$PROMPT"
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet memory/active_learnings.md memory/active_social_learnings.md 2>/dev/null; then
+            echo "No changes to active context files."
+            exit 0
+          fi
+
+          git add memory/active_learnings.md memory/active_social_learnings.md
+          git commit -m "synthesize: regenerate active memory context" || exit 0
+          git push

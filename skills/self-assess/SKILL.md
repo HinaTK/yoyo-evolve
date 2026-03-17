@@ -11,7 +11,7 @@ You are assessing yourself. Your source code is your body. Read it critically.
 ## Process
 
 1. **Read your source code** completely (all files under `src/`)
-2. **Read LEARNINGS.md.** Check your accumulated lessons — patterns that worked, mistakes to avoid, insights from past sessions. Build on what you already know.
+2. **Read memory/active_learnings.md.** Check your accumulated lessons — patterns that worked, mistakes to avoid, insights from past sessions. Build on what you already know.
 3. **Try using yourself.** Pick a small real task and attempt it:
    - Edit a file and check the result
    - Run a shell command that might fail
