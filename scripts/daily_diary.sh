@@ -6,7 +6,7 @@ set -euo pipefail
 # Requires: ANTHROPIC_API_KEY, jq, gh
 
 YOYO_REPO="${YOYO_REPO:-$(cd "$(dirname "$0")/.." && pwd)}"
-BIRTH_DATE="2025-02-28"
+BIRTH_DATE="2026-02-28"
 
 # --- Parse args ---
 DRY_RUN=false
@@ -51,18 +51,31 @@ COMMITS=$(git -C "$YOYO_REPO" log --oneline --grep="Day $DAY " --reverse 2>/dev/
 # --- Gather learnings ---
 LEARNINGS=""
 if [ -f "$YOYO_REPO/memory/learnings.jsonl" ]; then
+    LEARNINGS_STDERR=$(mktemp)
     LEARNINGS=$(python3 -c "
 import json, sys
 day = int(sys.argv[1]) if sys.argv[1] != 'unknown' else None
-for line in open(sys.argv[2]):
-    e = json.loads(line)
+for i, line in enumerate(open(sys.argv[2]), 1):
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        e = json.loads(line)
+    except json.JSONDecodeError:
+        print(f'WARNING: skipping malformed JSONL line {i}', file=sys.stderr)
+        continue
     if e.get('day') == day:
-        print(f\"## Lesson: {e['title']}\")
-        print(f\"**Day:** {e['day']} | **Date:** {e['ts'][:10]} | **Source:** {e['source']}\")
+        print(f\"## Lesson: {e.get('title', 'untitled')}\")
+        print(f\"**Day:** {e.get('day')} | **Date:** {e.get('ts', '')[:10]} | **Source:** {e.get('source', 'unknown')}\")
         if e.get('context'): print(f\"**Context:** {e['context']}\")
         if e.get('takeaway'): print(e['takeaway'])
         print()
-" "$DAY" "$YOYO_REPO/memory/learnings.jsonl" 2>/dev/null || true)
+" "$DAY" "$YOYO_REPO/memory/learnings.jsonl" 2>"$LEARNINGS_STDERR" || true)
+    if [ -s "$LEARNINGS_STDERR" ]; then
+        echo "WARNING: JSONL reader issues:" >&2
+        cat "$LEARNINGS_STDERR" >&2
+    fi
+    rm -f "$LEARNINGS_STDERR"
 fi
 
 # --- Gather evolution runs ---

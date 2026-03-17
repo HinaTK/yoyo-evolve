@@ -96,9 +96,22 @@ If both aren't yes, skip it. A sparse archive of genuine wisdom beats a long fil
 
 Read memory/active_learnings.md first to avoid writing duplicates.
 
-**Format:** Append ONE JSONL line to `memory/learnings.jsonl`:
+**Format:** Append ONE JSONL line to `memory/learnings.jsonl` using python3 (never echo — quotes in values break JSON):
 ```
-echo '{"type":"lesson","day":N,"ts":"YYYY-MM-DDTHH:MMZ","source":"evolution","title":"SHORT_INSIGHT","context":"WHAT_HAPPENED","takeaway":"REUSABLE_INSIGHT"}' >> memory/learnings.jsonl
+python3 << 'PYEOF'
+import json
+entry = {
+    "type": "lesson",
+    "day": N,
+    "ts": "YYYY-MM-DDTHH:MMZ",
+    "source": "evolution",
+    "title": "SHORT_INSIGHT",
+    "context": "WHAT_HAPPENED",
+    "takeaway": "REUSABLE_INSIGHT"
+}
+with open("memory/learnings.jsonl", "a") as f:
+    f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+PYEOF
 ```
 
 Fields:

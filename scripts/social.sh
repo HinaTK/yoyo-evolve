@@ -50,6 +50,9 @@ else
     YOYO_CONTEXT=""
 fi
 
+# Ensure memory directory exists
+mkdir -p memory
+
 # ── Step 1: Find yoyo binary ──
 YOYO_BIN=""
 if [ -f "./target/release/yoyo" ]; then
@@ -389,7 +392,14 @@ echo ""
 
 # ── Step 9: Commit if social learnings archive changed ──
 echo "→ Checking for social learnings..."
+# Check both tracked changes (git diff) and untracked new file
+SOCIAL_CHANGED=false
 if ! git diff --quiet memory/social_learnings.jsonl 2>/dev/null; then
+    SOCIAL_CHANGED=true
+elif [ -f memory/social_learnings.jsonl ] && ! git ls-files --error-unmatch memory/social_learnings.jsonl >/dev/null 2>&1; then
+    SOCIAL_CHANGED=true
+fi
+if [ "$SOCIAL_CHANGED" = "true" ]; then
     git add memory/social_learnings.jsonl
     if ! git commit -m "Day $DAY ($SESSION_TIME): social learnings"; then
         echo "  ERROR: Failed to commit social learnings (check pre-commit hooks or signing requirements)."

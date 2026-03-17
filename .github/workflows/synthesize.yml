@@ -17,29 +17,45 @@ jobs:
       - name: Check if synthesis needed
         id: check
         run: |
-          LEARNINGS_COUNT=$(wc -l < memory/learnings.jsonl 2>/dev/null || echo 0)
-          SOCIAL_COUNT=$(wc -l < memory/social_learnings.jsonl 2>/dev/null || echo 0)
+          LEARNINGS_COUNT=$(grep -c '.' memory/learnings.jsonl 2>/dev/null) || LEARNINGS_COUNT=0
+          SOCIAL_COUNT=$(grep -c '.' memory/social_learnings.jsonl 2>/dev/null) || SOCIAL_COUNT=0
           echo "learnings=$LEARNINGS_COUNT" >> "$GITHUB_OUTPUT"
           echo "social=$SOCIAL_COUNT" >> "$GITHUB_OUTPUT"
-          echo "Learnings: $LEARNINGS_COUNT entries, Social: $SOCIAL_COUNT entries"
+          if [ "$LEARNINGS_COUNT" -eq 0 ] && [ "$SOCIAL_COUNT" -eq 0 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No archive entries — skipping synthesis."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "Learnings: $LEARNINGS_COUNT entries, Social: $SOCIAL_COUNT entries"
+          fi
+
+      - name: Install Rust toolchain
+        if: steps.check.outputs.skip != 'true'
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Install yoyo
+        if: steps.check.outputs.skip != 'true'
         run: |
           cargo build --release
           echo "$PWD/target/release" >> "$GITHUB_PATH"
 
       - name: Configure git
+        if: steps.check.outputs.skip != 'true'
         run: |
           git config user.name "yoyo-evolve[bot]"
           git config user.email "yoyo-evolve[bot]@users.noreply.github.com"
 
+      - name: Backup active files
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          cp memory/active_learnings.md memory/active_learnings.md.bak 2>/dev/null || true
+          cp memory/active_social_learnings.md memory/active_social_learnings.md.bak 2>/dev/null || true
+
       - name: Synthesize active learnings
+        if: steps.check.outputs.skip != 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          ARCHIVE=$(cat memory/learnings.jsonl)
-          CURRENT_ACTIVE=$(cat memory/active_learnings.md 2>/dev/null || echo "")
-
           PROMPT=$(mktemp)
           cat > "$PROMPT" <<'SYNTHEOF'
           You are synthesizing yoyo's learning archive into an active context file.
@@ -59,10 +75,20 @@ jobs:
           Self-reflection — what I've learned about how I work, what I value, and how I'm growing.
           SYNTHEOF
 
-          timeout 180 yoyo --model claude-sonnet-4-20250514 < "$PROMPT" || true
+          if ! timeout 180 yoyo --model claude-sonnet-4-20250514 < "$PROMPT"; then
+            echo "WARNING: Learnings synthesis failed."
+            if [ -f memory/active_learnings.md.bak ]; then
+              cp memory/active_learnings.md.bak memory/active_learnings.md
+              echo "Restored from backup."
+            else
+              echo "No backup exists — removing potentially corrupt output."
+              rm -f memory/active_learnings.md
+            fi
+          fi
           rm -f "$PROMPT"
 
       - name: Synthesize active social learnings
+        if: steps.check.outputs.skip != 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
@@ -85,10 +111,25 @@ jobs:
           What I've learned about people from talking with them.
           SYNTHEOF
 
-          timeout 180 yoyo --model claude-sonnet-4-20250514 < "$PROMPT" || true
+          if ! timeout 180 yoyo --model claude-sonnet-4-20250514 < "$PROMPT"; then
+            echo "WARNING: Social synthesis failed."
+            if [ -f memory/active_social_learnings.md.bak ]; then
+              cp memory/active_social_learnings.md.bak memory/active_social_learnings.md
+              echo "Restored from backup."
+            else
+              echo "No backup exists — removing potentially corrupt output."
+              rm -f memory/active_social_learnings.md
+            fi
+          fi
           rm -f "$PROMPT"
 
+      - name: Cleanup backups
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          rm -f memory/active_learnings.md.bak memory/active_social_learnings.md.bak
+
       - name: Commit and push if changed
+        if: steps.check.outputs.skip != 'true'
         run: |
           if git diff --quiet memory/active_learnings.md memory/active_social_learnings.md 2>/dev/null; then
             echo "No changes to active context files."
@@ -97,4 +138,5 @@ jobs:
 
           git add memory/active_learnings.md memory/active_social_learnings.md
           git commit -m "synthesize: regenerate active memory context" || exit 0
+          git pull --rebase || { echo "ERROR: Rebase failed — likely a concurrent push. Will retry next run."; git rebase --abort 2>/dev/null; exit 1; }
           git push

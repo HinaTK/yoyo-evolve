@@ -108,6 +108,9 @@ if [ "$SKIP_RUN" = "true" ] && [ "${FORCE_RUN:-}" != "true" ]; then
 fi
 echo ""
 
+# Ensure memory directory exists
+mkdir -p memory
+
 # ── Step 0b: Load identity context ──
 if [ -f scripts/yoyo_context.sh ]; then
     source scripts/yoyo_context.sh
@@ -833,8 +836,24 @@ Before writing, ask yourself:
 2. Would this change how I act in a future session?
 If both aren't yes, skip it. Quality over quantity — a sparse archive of genuine wisdom beats a long file of noise.
 
-If you have a lesson, APPEND one JSONL line to memory/learnings.jsonl:
-echo '{"type":"lesson","day":$DAY,"ts":"${DATE}T${SESSION_TIME}:00Z","source":"evolution","title":"SHORT_INSIGHT","context":"WHAT_HAPPENED","takeaway":"REUSABLE_INSIGHT"}' >> memory/learnings.jsonl
+If you have a lesson, APPEND one JSONL line to memory/learnings.jsonl.
+Use python3 heredoc to ensure valid JSON (never use echo — quotes in values break it):
+
+python3 << 'PYEOF'
+import json
+entry = {
+    "type": "lesson",
+    "day": $DAY,
+    "ts": "${DATE}T${SESSION_TIME}:00Z",
+    "source": "evolution",
+    "title": "SHORT_INSIGHT",
+    "context": "WHAT_HAPPENED",
+    "takeaway": "REUSABLE_INSIGHT"
+}
+with open("memory/learnings.jsonl", "a") as f:
+    f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+print("Appended learning:", entry["title"])
+PYEOF
 
 Then commit: git add memory/learnings.jsonl && git commit -m "Day $DAY ($SESSION_TIME): update learnings"
 

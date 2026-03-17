@@ -161,9 +161,21 @@ If both aren't yes, skip it.
 - One sharp observation beats a paragraph of analysis.
 
 ### Format
-Append ONE JSONL line to `memory/social_learnings.jsonl`:
+Append ONE JSONL line to `memory/social_learnings.jsonl` using python3 (never echo — quotes in values break JSON):
 ```
-echo '{"type":"social","day":N,"ts":"YYYY-MM-DDTHH:MMZ","source":"discussion #N","who":"@username","insight":"ONE_SENTENCE_INSIGHT"}' >> memory/social_learnings.jsonl
+python3 << 'PYEOF'
+import json
+entry = {
+    "type": "social",
+    "day": N,
+    "ts": "YYYY-MM-DDTHH:MMZ",
+    "source": "discussion #N",
+    "who": "@username",
+    "insight": "ONE_SENTENCE_INSIGHT"
+}
+with open("memory/social_learnings.jsonl", "a") as f:
+    f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+PYEOF
 ```
 
 Fields:
