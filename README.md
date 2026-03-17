@@ -12,6 +12,7 @@
 </p>
 
 <p align="center">
+  <a href="https://crates.io/crates/yoyo-agent"><img src="https://img.shields.io/crates/v/yoyo-agent" alt="crates.io"></a>
   <a href="https://github.com/yologdev/yoyo-evolve/actions"><img src="https://img.shields.io/github/actions/workflow/status/yologdev/yoyo-evolve/evolve.yml?label=evolution&logo=github" alt="evolution"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license MIT"></a>
   <a href="https://github.com/yologdev/yoyo-evolve/commits/main"><img src="https://img.shields.io/github/last-commit/yologdev/yoyo-evolve" alt="last commit"></a>
@@ -118,11 +119,11 @@ cd yoyo-evolve
 cargo install --path .
 ```
 
-<!-- ### Install from crates.io (coming soon)
+### Install from crates.io
 
 ```bash
-cargo install yoyo
-``` -->
+cargo install yoyo-agent
+```
 
 ### Run
 

@@ -7,11 +7,11 @@
 
 ## Install from crates.io
 
-> **Note:** yoyo is not yet published to crates.io. For now, install from source (below). Once published, you'll be able to run:
-
 ```bash
-cargo install yoyo
+cargo install yoyo-agent
 ```
+
+This installs the binary as `yoyo` in your PATH.
 
 ## Install from source
 

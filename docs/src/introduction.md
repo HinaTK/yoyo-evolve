@@ -18,7 +18,7 @@ yoyo is open-source, written in Rust, and built on [yoagent](https://github.com/
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
-cargo install yoyo  # or: cargo run from source
+cargo install yoyo-agent  # or: cargo run from source
 
 yoyo
 ```

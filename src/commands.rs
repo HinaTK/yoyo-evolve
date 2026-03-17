@@ -1970,12 +1970,12 @@ mod tests {
 
     #[test]
     fn test_detect_project_name_rust() {
-        // Current project has Cargo.toml with a name field
+        // Current project has Cargo.toml with name = "yoyo-agent"
         let cwd = std::env::current_dir().unwrap();
         let name = detect_project_name(&cwd);
         assert_eq!(
-            name, "yoyo",
-            "Should detect project name 'yoyo' from Cargo.toml"
+            name, "yoyo-agent",
+            "Should detect project name 'yoyo-agent' from Cargo.toml"
         );
     }
 
