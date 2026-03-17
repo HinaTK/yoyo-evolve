@@ -60,6 +60,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/remember",
     "/memories",
     "/provider",
+    "/changes",
 ];
 
 /// Well-known model names for `/model <Tab>` completion.
@@ -181,6 +182,7 @@ pub fn help_text() -> String {
         "  /jump <name>       Restore conversation to a bookmark (discards messages after it)\n",
     );
     out.push_str("  /marks             List all saved bookmarks\n");
+    out.push_str("  /changes           Show files modified (written/edited) during this session\n");
     out.push('\n');
 
     // ── Git ──
@@ -496,6 +498,21 @@ pub fn handle_config(
     println!("{RESET}");
 }
 
+// ── /changes ─────────────────────────────────────────────────────────────
+
+pub fn handle_changes(changes: &crate::prompt::SessionChanges) {
+    use crate::prompt::format_changes;
+    let output = format_changes(changes);
+    if output.is_empty() {
+        println!("{DIM}  No files modified yet this session.");
+        println!(
+            "  Files touched by write_file or edit_file tool calls will appear here.{RESET}\n"
+        );
+    } else {
+        println!("{DIM}{output}{RESET}");
+    }
+}
+
 // ── Re-exports from submodules ────────────────────────────────────────────
 // These re-exports keep the public API stable so repl.rs continues to work
 // with `commands::handle_*` calls unchanged.
@@ -701,6 +718,7 @@ mod tests {
             "/remember",
             "/memories",
             "/provider",
+            "/changes",
         ];
         for cmd in &commands {
             assert!(
@@ -2820,6 +2838,7 @@ mod tests {
             "/memories",
             "/forget",
             "/provider",
+            "/changes",
         ];
         for cmd in &expected {
             assert!(text.contains(cmd), "help text should contain {cmd}");
@@ -2854,7 +2873,7 @@ mod tests {
         for cmd in &[
             "/help", "/quit", "/clear", "/compact", "/save", "/load", "/retry", "/status",
             "/tokens", "/cost", "/config", "/version", "/history", "/search", "/mark", "/jump",
-            "/marks",
+            "/marks", "/changes",
         ] {
             assert!(
                 session_section.contains(cmd),
@@ -2929,5 +2948,41 @@ mod tests {
             input_section.contains("```"),
             "Input section should mention fenced code blocks"
         );
+    }
+
+    // ── /changes command tests ───────────────────────────────────────────
+
+    #[test]
+    fn test_changes_command_recognized() {
+        assert!(!is_unknown_command("/changes"));
+        assert!(
+            KNOWN_COMMANDS.contains(&"/changes"),
+            "/changes should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_changes_command_not_confused_with_other_commands() {
+        // /changes should match exactly, /changelog etc. should be unknown
+        assert!(is_unknown_command("/changelog"));
+        assert!(is_unknown_command("/changed"));
+    }
+
+    #[test]
+    fn test_handle_changes_empty_does_not_panic() {
+        use crate::prompt::SessionChanges;
+        let changes = SessionChanges::new();
+        // Should not panic — just prints a message
+        handle_changes(&changes);
+    }
+
+    #[test]
+    fn test_handle_changes_with_entries_does_not_panic() {
+        use crate::prompt::{ChangeKind, SessionChanges};
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        changes.record("src/cli.rs", ChangeKind::Edit);
+        // Should not panic
+        handle_changes(&changes);
     }
 }

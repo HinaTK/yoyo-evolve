@@ -146,7 +146,8 @@ pub fn describe_file_operation(tool_name: &str, params: &serde_json::Value) -> S
                 .and_then(|v| v.as_str())
                 .map(|c| c.lines().count())
                 .unwrap_or(0);
-            format!("write: {path} ({line_count} lines)")
+            let word = crate::format::pluralize(line_count, "line", "lines");
+            format!("write: {path} ({line_count} {word})")
         }
         "edit_file" => {
             let path = params
@@ -1153,7 +1154,7 @@ mod tests {
             deny: vec!["*.key".to_string()],
         };
         let result =
-            confirm_file_operation("write: secrets.key (1 lines)", "secrets.key", &flag, &perms);
+            confirm_file_operation("write: secrets.key (1 line)", "secrets.key", &flag, &perms);
         assert!(!result, "Should deny paths matching deny pattern");
     }
 
@@ -1166,7 +1167,7 @@ mod tests {
             deny: vec!["*.key".to_string()],
         };
         let result =
-            confirm_file_operation("write: secrets.key (1 lines)", "secrets.key", &flag, &perms);
+            confirm_file_operation("write: secrets.key (1 line)", "secrets.key", &flag, &perms);
         assert!(!result, "Deny should override allow");
     }
 

@@ -916,6 +916,18 @@ pub fn context_bar(used: u64, max: u64) -> String {
 }
 
 /// Truncate a string with an ellipsis if it exceeds `max` characters.
+/// Return the correct singular or plural form of a word based on count.
+///
+/// `pluralize(1, "line", "lines")` → `"line"`
+/// `pluralize(3, "line", "lines")` → `"lines"`
+pub fn pluralize<'a>(count: usize, singular: &'a str, plural: &'a str) -> &'a str {
+    if count == 1 {
+        singular
+    } else {
+        plural
+    }
+}
+
 pub fn truncate_with_ellipsis(s: &str, max: usize) -> String {
     match s.char_indices().nth(max) {
         Some((idx, _)) => format!("{}…", &s[..idx]),
@@ -990,7 +1002,8 @@ pub fn format_tool_summary(tool_name: &str, args: &serde_json::Value) -> String 
                 .and_then(|v| v.as_str())
                 .map(|c| {
                     let count = c.lines().count();
-                    format!(" ({count} lines)")
+                    let word = pluralize(count, "line", "lines");
+                    format!(" ({count} {word})")
                 })
                 .unwrap_or_default();
             format!("write {path}{line_info}")
@@ -2989,7 +3002,7 @@ mod tests {
     fn test_format_tool_summary_write_file_single_line() {
         let args = serde_json::json!({"path": "out.txt", "content": "hello"});
         let result = format_tool_summary("write_file", &args);
-        assert_eq!(result, "write out.txt (1 lines)");
+        assert_eq!(result, "write out.txt (1 line)");
     }
 
     #[test]
@@ -2997,5 +3010,20 @@ mod tests {
         let args = serde_json::json!({"path": "out.txt"});
         let result = format_tool_summary("write_file", &args);
         assert_eq!(result, "write out.txt");
+    }
+
+    // --- pluralize ---
+
+    #[test]
+    fn test_pluralize_singular() {
+        assert_eq!(pluralize(1, "line", "lines"), "line");
+        assert_eq!(pluralize(1, "file", "files"), "file");
+    }
+
+    #[test]
+    fn test_pluralize_plural() {
+        assert_eq!(pluralize(0, "line", "lines"), "lines");
+        assert_eq!(pluralize(2, "line", "lines"), "lines");
+        assert_eq!(pluralize(100, "file", "files"), "files");
     }
 }

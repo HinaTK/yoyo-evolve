@@ -22,7 +22,8 @@ pub fn handle_context() {
     } else {
         println!("{DIM}  Project context files:");
         for (name, lines) in &files {
-            println!("    {name} ({lines} lines)");
+            let word = crate::format::pluralize(*lines, "line", "lines");
+            println!("    {name} ({lines} {word})");
         }
         println!("{RESET}");
     }
@@ -303,7 +304,8 @@ pub fn handle_init() {
         match std::fs::write(path, &content) {
             Ok(_) => {
                 let line_count = content.lines().count();
-                println!("{GREEN}  ✓ Created {path} ({line_count} lines) — edit it to add project context.{RESET}");
+                let word = crate::format::pluralize(line_count, "line", "lines");
+                println!("{GREEN}  ✓ Created {path} ({line_count} {word}) — edit it to add project context.{RESET}");
                 println!("{DIM}  Tip: Use /remember to save project-specific notes that persist across sessions.{RESET}\n");
             }
             Err(e) => eprintln!("{RED}  error creating {path}: {e}{RESET}\n"),

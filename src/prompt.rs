@@ -4,9 +4,85 @@ use crate::cli::is_verbose;
 use crate::format::*;
 use std::collections::HashMap;
 use std::io::{self, Write};
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use yoagent::agent::Agent;
 use yoagent::*;
+
+/// Tracks files modified during a session via write_file and edit_file tool calls.
+/// Thread-safe via Arc<Mutex<...>> so it can be shared across async tasks.
+#[derive(Debug, Clone)]
+pub struct SessionChanges {
+    inner: Arc<Mutex<Vec<FileChange>>>,
+}
+
+/// A single file modification event.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FileChange {
+    pub path: String,
+    pub kind: ChangeKind,
+}
+
+/// The kind of file modification.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ChangeKind {
+    Write,
+    Edit,
+}
+
+impl std::fmt::Display for ChangeKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ChangeKind::Write => write!(f, "write"),
+            ChangeKind::Edit => write!(f, "edit"),
+        }
+    }
+}
+
+impl SessionChanges {
+    /// Create a new empty tracker.
+    pub fn new() -> Self {
+        Self {
+            inner: Arc::new(Mutex::new(Vec::new())),
+        }
+    }
+
+    /// Record a file modification.
+    pub fn record(&self, path: &str, kind: ChangeKind) {
+        let mut changes = self.inner.lock().unwrap();
+        // Update existing entry if same path, or add new
+        if let Some(existing) = changes.iter_mut().find(|c| c.path == path) {
+            existing.kind = kind;
+        } else {
+            changes.push(FileChange {
+                path: path.to_string(),
+                kind,
+            });
+        }
+    }
+
+    /// Get a snapshot of all changes, in order of first modification.
+    pub fn snapshot(&self) -> Vec<FileChange> {
+        self.inner.lock().unwrap().clone()
+    }
+
+    /// Return the number of unique files changed.
+    #[allow(dead_code)]
+    pub fn len(&self) -> usize {
+        self.inner.lock().unwrap().len()
+    }
+
+    /// Return true if no files have been changed.
+    #[allow(dead_code)]
+    pub fn is_empty(&self) -> bool {
+        self.inner.lock().unwrap().is_empty()
+    }
+
+    /// Clear all tracked changes.
+    pub fn clear(&self) {
+        self.inner.lock().unwrap().clear();
+    }
+}
 
 /// Maximum number of automatic retries for transient API errors.
 const MAX_RETRIES: u32 = 3;
@@ -274,7 +350,7 @@ enum PromptResult {
 
 /// Execute a single prompt attempt and process all events.
 /// Returns whether we got a retriable error (so the caller can retry).
-async fn run_prompt_once(agent: &mut Agent, input: &str) -> PromptResult {
+async fn run_prompt_once(agent: &mut Agent, input: &str, changes: &SessionChanges) -> PromptResult {
     let mut rx = agent.prompt(input).await;
     let mut usage = Usage::default();
     let mut in_text = false;
@@ -292,6 +368,20 @@ async fn run_prompt_once(agent: &mut Agent, input: &str) -> PromptResult {
                     AgentEvent::ToolExecutionStart {
                         tool_call_id, tool_name, args, ..
                     } => {
+                        // Track file modifications from write_file and edit_file
+                        match tool_name.as_str() {
+                            "write_file" => {
+                                if let Some(path) = args.get("path").and_then(|v| v.as_str()) {
+                                    changes.record(path, ChangeKind::Write);
+                                }
+                            }
+                            "edit_file" => {
+                                if let Some(path) = args.get("path").and_then(|v| v.as_str()) {
+                                    changes.record(path, ChangeKind::Edit);
+                                }
+                            }
+                            _ => {}
+                        }
                         // Stop spinner on first activity
                         if let Some(s) = spinner.take() { s.stop(); }
                         if in_text {
@@ -468,6 +558,20 @@ pub async fn run_prompt(
     session_total: &mut Usage,
     model: &str,
 ) -> String {
+    // Default: create a throwaway changes tracker (for callers that don't need tracking)
+    let changes = SessionChanges::new();
+    run_prompt_with_changes(agent, input, session_total, model, &changes).await
+}
+
+/// Run a prompt with file change tracking.
+/// Like `run_prompt`, but records write_file/edit_file calls into the given tracker.
+pub async fn run_prompt_with_changes(
+    agent: &mut Agent,
+    input: &str,
+    session_total: &mut Usage,
+    model: &str,
+    changes: &SessionChanges,
+) -> String {
     let prompt_start = Instant::now();
     let mut total_usage = Usage::default();
     let mut collected_text = String::new();
@@ -483,7 +587,7 @@ pub async fn run_prompt(
             }
         }
 
-        match run_prompt_once(agent, input).await {
+        match run_prompt_once(agent, input, changes).await {
             PromptResult::Done {
                 collected_text: text,
                 usage,
@@ -527,6 +631,28 @@ pub async fn run_prompt(
     print_usage(&total_usage, session_total, model, prompt_start.elapsed());
     println!();
     collected_text
+}
+
+/// Format the list of session changes for display.
+/// Returns an empty string if no changes have been recorded.
+pub fn format_changes(changes: &SessionChanges) -> String {
+    let snapshot = changes.snapshot();
+    if snapshot.is_empty() {
+        return String::new();
+    }
+    let mut out = String::new();
+    out.push_str(&format!(
+        "  {} file(s) modified this session:\n",
+        snapshot.len()
+    ));
+    for change in &snapshot {
+        let icon = match change.kind {
+            ChangeKind::Write => "✏",
+            ChangeKind::Edit => "🔧",
+        };
+        out.push_str(&format!("    {icon} {} ({})\n", change.path, change.kind));
+    }
+    out
 }
 
 #[cfg(test)]
@@ -850,5 +976,119 @@ mod tests {
         assert_eq!(results.len(), 1);
         // The preview should contain BOLD highlighting around "hello"
         assert!(results[0].2.contains(&format!("{BOLD}hello{RESET}")));
+    }
+
+    // --- SessionChanges tests ---
+
+    #[test]
+    fn test_session_changes_new_is_empty() {
+        let changes = SessionChanges::new();
+        assert!(changes.is_empty());
+        assert_eq!(changes.len(), 0);
+        assert!(changes.snapshot().is_empty());
+    }
+
+    #[test]
+    fn test_session_changes_record_write() {
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        assert_eq!(changes.len(), 1);
+        assert!(!changes.is_empty());
+        let snapshot = changes.snapshot();
+        assert_eq!(snapshot[0].path, "src/main.rs");
+        assert_eq!(snapshot[0].kind, ChangeKind::Write);
+    }
+
+    #[test]
+    fn test_session_changes_record_edit() {
+        let changes = SessionChanges::new();
+        changes.record("src/cli.rs", ChangeKind::Edit);
+        assert_eq!(changes.len(), 1);
+        let snapshot = changes.snapshot();
+        assert_eq!(snapshot[0].path, "src/cli.rs");
+        assert_eq!(snapshot[0].kind, ChangeKind::Edit);
+    }
+
+    #[test]
+    fn test_session_changes_deduplicates_same_path() {
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        changes.record("src/main.rs", ChangeKind::Edit);
+        // Should still be 1 entry, updated to Edit
+        assert_eq!(changes.len(), 1);
+        let snapshot = changes.snapshot();
+        assert_eq!(snapshot[0].kind, ChangeKind::Edit);
+    }
+
+    #[test]
+    fn test_session_changes_multiple_files() {
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        changes.record("src/cli.rs", ChangeKind::Edit);
+        changes.record("README.md", ChangeKind::Write);
+        assert_eq!(changes.len(), 3);
+        let snapshot = changes.snapshot();
+        assert_eq!(snapshot[0].path, "src/main.rs");
+        assert_eq!(snapshot[1].path, "src/cli.rs");
+        assert_eq!(snapshot[2].path, "README.md");
+    }
+
+    #[test]
+    fn test_session_changes_clear() {
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        changes.record("src/cli.rs", ChangeKind::Edit);
+        assert_eq!(changes.len(), 2);
+        changes.clear();
+        assert!(changes.is_empty());
+        assert_eq!(changes.len(), 0);
+    }
+
+    #[test]
+    fn test_session_changes_clone_is_independent() {
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        let cloned = changes.clone();
+        // They share the same inner Arc, so they should be linked
+        changes.record("src/cli.rs", ChangeKind::Edit);
+        assert_eq!(cloned.len(), 2);
+    }
+
+    #[test]
+    fn test_change_kind_display() {
+        assert_eq!(format!("{}", ChangeKind::Write), "write");
+        assert_eq!(format!("{}", ChangeKind::Edit), "edit");
+    }
+
+    #[test]
+    fn test_format_changes_empty() {
+        let changes = SessionChanges::new();
+        let output = format_changes(&changes);
+        assert!(output.is_empty());
+    }
+
+    #[test]
+    fn test_format_changes_single_write() {
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        let output = format_changes(&changes);
+        assert!(output.contains("1 file(s) modified"));
+        assert!(output.contains("src/main.rs"));
+        assert!(output.contains("write"));
+        assert!(output.contains("✏"));
+    }
+
+    #[test]
+    fn test_format_changes_multiple_files() {
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        changes.record("src/cli.rs", ChangeKind::Edit);
+        let output = format_changes(&changes);
+        assert!(output.contains("2 file(s) modified"));
+        assert!(output.contains("src/main.rs"));
+        assert!(output.contains("src/cli.rs"));
+        assert!(output.contains("write"));
+        assert!(output.contains("edit"));
+        assert!(output.contains("🔧"));
     }
 }

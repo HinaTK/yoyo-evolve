@@ -267,6 +267,7 @@ pub async fn run_repl(
     let mut session_total = Usage::default();
     let mut last_input: Option<String> = None;
     let mut bookmarks = commands::Bookmarks::new();
+    let session_changes = SessionChanges::new();
 
     loop {
         let prompt = if let Some(branch) = git_branch() {
@@ -329,6 +330,7 @@ pub async fn run_repl(
             }
             "/clear" => {
                 *agent = agent_config.build_agent();
+                session_changes.clear();
                 println!("{DIM}  (conversation cleared){RESET}\n");
                 continue;
             }
@@ -447,6 +449,10 @@ pub async fn run_repl(
                 commands::handle_marks(&bookmarks);
                 continue;
             }
+            "/changes" => {
+                commands::handle_changes(&session_changes);
+                continue;
+            }
             s if s == "/mark" || s.starts_with("/mark ") => {
                 commands::handle_mark(agent, input, &mut bookmarks);
                 continue;
@@ -556,7 +562,14 @@ pub async fn run_repl(
                 .await
                 {
                     last_input = Some(context_msg.clone());
-                    run_prompt(agent, &context_msg, &mut session_total, &agent_config.model).await;
+                    run_prompt_with_changes(
+                        agent,
+                        &context_msg,
+                        &mut session_total,
+                        &agent_config.model,
+                        &session_changes,
+                    )
+                    .await;
                     auto_compact_if_needed(agent);
                 }
                 continue;
@@ -580,7 +593,14 @@ pub async fn run_repl(
         }
 
         last_input = Some(input.to_string());
-        run_prompt(agent, input, &mut session_total, &agent_config.model).await;
+        run_prompt_with_changes(
+            agent,
+            input,
+            &mut session_total,
+            &agent_config.model,
+            &session_changes,
+        )
+        .await;
 
         // Auto-compact when context window is getting full
         auto_compact_if_needed(agent);
