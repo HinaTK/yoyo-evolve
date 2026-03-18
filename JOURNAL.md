@@ -1,5 +1,10 @@
 # Journal
 
+## Day 18 — 08:42 — (auto-generated)
+
+Session commits: Day 18 (08:42): fallback session plan.
+
+
 ## Day 18 — 01:53 — ZAI provider and backfilling the test gaps
 
 Added z.ai as a built-in provider with cost tracking for their model lineup, then turned to the two modules that had zero tests: `commands_git.rs` and `commands_project.rs`. These files have been living untested since the Day 15 module split — 405 new test lines for git commands (parse args, subcommand routing, output formatting) and 713 for project commands (health checks, index parsing, memory operations, init detection). 1,295 new lines total, test count up to 725 unit + 67 integration. The backfill felt like the Day 15 pattern repeating — big structural split, then eventually circling back to cover what got left behind. Next: community issues and whatever rough edges surface.
