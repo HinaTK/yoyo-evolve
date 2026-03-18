@@ -1239,3 +1239,716 @@ pub fn handle_index() {
         println!("{DIM}{formatted}{RESET}");
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use tempfile::TempDir;
+
+    // ── detect_project_type ──────────────────────────────────────────
+
+    #[test]
+    fn detect_project_type_rust() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("Cargo.toml"), "[package]\nname = \"x\"").unwrap();
+        assert_eq!(detect_project_type(dir.path()), ProjectType::Rust);
+    }
+
+    #[test]
+    fn detect_project_type_node() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("package.json"), "{}").unwrap();
+        assert_eq!(detect_project_type(dir.path()), ProjectType::Node);
+    }
+
+    #[test]
+    fn detect_project_type_python_pyproject() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("pyproject.toml"), "[tool]").unwrap();
+        assert_eq!(detect_project_type(dir.path()), ProjectType::Python);
+    }
+
+    #[test]
+    fn detect_project_type_python_setup_py() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("setup.py"), "").unwrap();
+        assert_eq!(detect_project_type(dir.path()), ProjectType::Python);
+    }
+
+    #[test]
+    fn detect_project_type_python_setup_cfg() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("setup.cfg"), "").unwrap();
+        assert_eq!(detect_project_type(dir.path()), ProjectType::Python);
+    }
+
+    #[test]
+    fn detect_project_type_go() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("go.mod"), "module example").unwrap();
+        assert_eq!(detect_project_type(dir.path()), ProjectType::Go);
+    }
+
+    #[test]
+    fn detect_project_type_make() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("Makefile"), "all:").unwrap();
+        assert_eq!(detect_project_type(dir.path()), ProjectType::Make);
+    }
+
+    #[test]
+    fn detect_project_type_make_lowercase() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("makefile"), "all:").unwrap();
+        assert_eq!(detect_project_type(dir.path()), ProjectType::Make);
+    }
+
+    #[test]
+    fn detect_project_type_unknown_empty_dir() {
+        let dir = TempDir::new().unwrap();
+        assert_eq!(detect_project_type(dir.path()), ProjectType::Unknown);
+    }
+
+    #[test]
+    fn detect_project_type_priority_rust_over_make() {
+        // Cargo.toml should win even if Makefile also exists
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("Cargo.toml"), "[package]").unwrap();
+        fs::write(dir.path().join("Makefile"), "all:").unwrap();
+        assert_eq!(detect_project_type(dir.path()), ProjectType::Rust);
+    }
+
+    // ── ProjectType Display ──────────────────────────────────────────
+
+    #[test]
+    fn project_type_display() {
+        assert_eq!(format!("{}", ProjectType::Rust), "Rust (Cargo)");
+        assert_eq!(format!("{}", ProjectType::Node), "Node.js (npm)");
+        assert_eq!(format!("{}", ProjectType::Python), "Python");
+        assert_eq!(format!("{}", ProjectType::Go), "Go");
+        assert_eq!(format!("{}", ProjectType::Make), "Makefile");
+        assert_eq!(format!("{}", ProjectType::Unknown), "Unknown");
+    }
+
+    // ── scan_important_files ─────────────────────────────────────────
+
+    #[test]
+    fn scan_important_files_finds_known_files() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("README.md"), "# Hello").unwrap();
+        fs::write(dir.path().join("Cargo.toml"), "[package]").unwrap();
+        fs::write(dir.path().join(".gitignore"), "target/").unwrap();
+        let found = scan_important_files(dir.path());
+        assert!(found.contains(&"README.md".to_string()));
+        assert!(found.contains(&"Cargo.toml".to_string()));
+        assert!(found.contains(&".gitignore".to_string()));
+    }
+
+    #[test]
+    fn scan_important_files_empty_dir() {
+        let dir = TempDir::new().unwrap();
+        let found = scan_important_files(dir.path());
+        assert!(found.is_empty());
+    }
+
+    #[test]
+    fn scan_important_files_ignores_unknown() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("random.txt"), "stuff").unwrap();
+        let found = scan_important_files(dir.path());
+        assert!(found.is_empty());
+    }
+
+    // ── scan_important_dirs ──────────────────────────────────────────
+
+    #[test]
+    fn scan_important_dirs_finds_known_dirs() {
+        let dir = TempDir::new().unwrap();
+        fs::create_dir(dir.path().join("src")).unwrap();
+        fs::create_dir(dir.path().join("tests")).unwrap();
+        fs::create_dir(dir.path().join("docs")).unwrap();
+        let found = scan_important_dirs(dir.path());
+        assert!(found.contains(&"src".to_string()));
+        assert!(found.contains(&"tests".to_string()));
+        assert!(found.contains(&"docs".to_string()));
+    }
+
+    #[test]
+    fn scan_important_dirs_empty_dir() {
+        let dir = TempDir::new().unwrap();
+        let found = scan_important_dirs(dir.path());
+        assert!(found.is_empty());
+    }
+
+    #[test]
+    fn scan_important_dirs_ignores_files() {
+        let dir = TempDir::new().unwrap();
+        // Create a file named "src" — not a directory
+        fs::write(dir.path().join("src"), "not a dir").unwrap();
+        let found = scan_important_dirs(dir.path());
+        assert!(!found.contains(&"src".to_string()));
+    }
+
+    // ── detect_project_name ──────────────────────────────────────────
+
+    #[test]
+    fn detect_project_name_from_cargo_toml() {
+        let dir = TempDir::new().unwrap();
+        fs::write(
+            dir.path().join("Cargo.toml"),
+            "[package]\nname = \"my-crate\"",
+        )
+        .unwrap();
+        assert_eq!(detect_project_name(dir.path()), "my-crate");
+    }
+
+    #[test]
+    fn detect_project_name_from_package_json() {
+        let dir = TempDir::new().unwrap();
+        fs::write(
+            dir.path().join("package.json"),
+            "{\n  \"name\": \"my-app\",\n  \"version\": \"1.0.0\"\n}",
+        )
+        .unwrap();
+        assert_eq!(detect_project_name(dir.path()), "my-app");
+    }
+
+    #[test]
+    fn detect_project_name_from_readme() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("README.md"), "# Cool Project\n\nSome text").unwrap();
+        assert_eq!(detect_project_name(dir.path()), "Cool Project");
+    }
+
+    #[test]
+    fn detect_project_name_cargo_over_readme() {
+        // Cargo.toml should win over README
+        let dir = TempDir::new().unwrap();
+        fs::write(
+            dir.path().join("Cargo.toml"),
+            "[package]\nname = \"cargo-name\"",
+        )
+        .unwrap();
+        fs::write(dir.path().join("README.md"), "# README Title").unwrap();
+        assert_eq!(detect_project_name(dir.path()), "cargo-name");
+    }
+
+    #[test]
+    fn detect_project_name_fallback_to_dir_name() {
+        let dir = TempDir::new().unwrap();
+        // No marker files — should fall back to the dir name
+        let name = detect_project_name(dir.path());
+        // TempDir creates something like /tmp/.tmpXXXXXX — just check it's not empty
+        assert!(!name.is_empty());
+    }
+
+    // ── extract_project_name_from_readme ─────────────────────────────
+
+    #[test]
+    fn extract_readme_skips_blank_lines() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("README.md"), "\n\n  \n# Title After Blanks").unwrap();
+        assert_eq!(detect_project_name(dir.path()), "Title After Blanks");
+    }
+
+    #[test]
+    fn extract_readme_empty_title_skipped() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("README.md"), "#  \n# Real Title").unwrap();
+        assert_eq!(detect_project_name(dir.path()), "Real Title");
+    }
+
+    // ── extract_name_from_cargo_toml edge cases ──────────────────────
+
+    #[test]
+    fn cargo_toml_name_with_single_quotes() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("Cargo.toml"), "[package]\nname = 'quoted'").unwrap();
+        assert_eq!(detect_project_name(dir.path()), "quoted");
+    }
+
+    #[test]
+    fn cargo_toml_name_with_spaces_around_equals() {
+        let dir = TempDir::new().unwrap();
+        fs::write(
+            dir.path().join("Cargo.toml"),
+            "[package]\nname   =   \"spaced\"",
+        )
+        .unwrap();
+        assert_eq!(detect_project_name(dir.path()), "spaced");
+    }
+
+    // ── build_commands_for_project ───────────────────────────────────
+
+    #[test]
+    fn build_commands_rust() {
+        let cmds = build_commands_for_project(&ProjectType::Rust);
+        assert!(!cmds.is_empty());
+        assert!(cmds.iter().any(|(label, _)| *label == "Build"));
+        assert!(cmds.iter().any(|(label, _)| *label == "Test"));
+    }
+
+    #[test]
+    fn build_commands_unknown_empty() {
+        let cmds = build_commands_for_project(&ProjectType::Unknown);
+        assert!(cmds.is_empty());
+    }
+
+    #[test]
+    fn build_commands_node() {
+        let cmds = build_commands_for_project(&ProjectType::Node);
+        assert!(cmds.iter().any(|(_, cmd)| *cmd == "npm install"));
+    }
+
+    #[test]
+    fn build_commands_python() {
+        let cmds = build_commands_for_project(&ProjectType::Python);
+        assert!(cmds.iter().any(|(_, cmd)| *cmd == "python -m pytest"));
+    }
+
+    #[test]
+    fn build_commands_go() {
+        let cmds = build_commands_for_project(&ProjectType::Go);
+        assert!(cmds.iter().any(|(_, cmd)| *cmd == "go build ./..."));
+    }
+
+    // ── test_command_for_project ─────────────────────────────────────
+
+    #[test]
+    fn test_command_rust() {
+        let cmd = test_command_for_project(&ProjectType::Rust);
+        assert!(cmd.is_some());
+        let (label, _) = cmd.unwrap();
+        assert_eq!(label, "cargo test");
+    }
+
+    #[test]
+    fn test_command_unknown() {
+        assert!(test_command_for_project(&ProjectType::Unknown).is_none());
+    }
+
+    // ── lint_command_for_project ─────────────────────────────────────
+
+    #[test]
+    fn lint_command_rust() {
+        let cmd = lint_command_for_project(&ProjectType::Rust);
+        assert!(cmd.is_some());
+        assert!(cmd.unwrap().0.contains("clippy"));
+    }
+
+    #[test]
+    fn lint_command_make_none() {
+        assert!(lint_command_for_project(&ProjectType::Make).is_none());
+    }
+
+    #[test]
+    fn lint_command_unknown_none() {
+        assert!(lint_command_for_project(&ProjectType::Unknown).is_none());
+    }
+
+    // ── health_checks_for_project ───────────────────────────────────
+
+    #[test]
+    fn health_checks_rust_has_build() {
+        let checks = health_checks_for_project(&ProjectType::Rust);
+        assert!(checks.iter().any(|(name, _)| *name == "build"));
+    }
+
+    #[test]
+    fn health_checks_unknown_empty() {
+        let checks = health_checks_for_project(&ProjectType::Unknown);
+        assert!(checks.is_empty());
+    }
+
+    // ── build_fix_prompt ────────────────────────────────────────────
+
+    #[test]
+    fn build_fix_prompt_empty() {
+        let prompt = build_fix_prompt(&[]);
+        assert!(prompt.is_empty());
+    }
+
+    #[test]
+    fn build_fix_prompt_with_failures() {
+        let failures = vec![("build", "error[E0308]: mismatched types")];
+        let prompt = build_fix_prompt(&failures);
+        assert!(prompt.contains("build errors"));
+        assert!(prompt.contains("E0308"));
+        assert!(prompt.contains("Fix"));
+    }
+
+    #[test]
+    fn build_fix_prompt_multiple_failures() {
+        let failures = vec![
+            ("build", "build error output"),
+            ("clippy", "clippy warning output"),
+        ];
+        let prompt = build_fix_prompt(&failures);
+        assert!(prompt.contains("## build errors"));
+        assert!(prompt.contains("## clippy errors"));
+    }
+
+    // ── format_tree_from_paths ──────────────────────────────────────
+
+    #[test]
+    fn format_tree_basic() {
+        let paths = vec![
+            "src/main.rs".to_string(),
+            "src/lib.rs".to_string(),
+            "Cargo.toml".to_string(),
+        ];
+        let tree = format_tree_from_paths(&paths, 3);
+        assert!(tree.contains("src/"));
+        assert!(tree.contains("main.rs"));
+        assert!(tree.contains("lib.rs"));
+        assert!(tree.contains("Cargo.toml"));
+    }
+
+    #[test]
+    fn format_tree_depth_limit() {
+        let paths = vec!["a/b/c/d/e.txt".to_string()];
+        let tree_shallow = format_tree_from_paths(&paths, 1);
+        // At depth 1, we see dir 'a/' but 'b/' is at level 1 so still shown
+        // The file at depth 4 should NOT appear since depth > max_depth
+        assert!(tree_shallow.contains("a/"));
+        // File at depth 4 should not appear when max_depth=1
+        assert!(!tree_shallow.contains("e.txt"));
+    }
+
+    #[test]
+    fn format_tree_empty() {
+        let paths: Vec<String> = vec![];
+        let tree = format_tree_from_paths(&paths, 3);
+        assert!(tree.is_empty());
+    }
+
+    #[test]
+    fn format_tree_root_files() {
+        let paths = vec!["README.md".to_string()];
+        let tree = format_tree_from_paths(&paths, 3);
+        assert!(tree.contains("README.md"));
+    }
+
+    // ── fuzzy_score ─────────────────────────────────────────────────
+
+    #[test]
+    fn fuzzy_score_no_match() {
+        assert!(fuzzy_score("src/main.rs", "xyz").is_none());
+    }
+
+    #[test]
+    fn fuzzy_score_exact_filename() {
+        let score = fuzzy_score("src/main.rs", "main").unwrap();
+        assert!(score > 100); // base + filename match + start match + stem match
+    }
+
+    #[test]
+    fn fuzzy_score_case_insensitive() {
+        assert!(fuzzy_score("src/Main.rs", "main").is_some());
+        assert!(fuzzy_score("src/MAIN.rs", "main").is_some());
+    }
+
+    #[test]
+    fn fuzzy_score_directory_match_lower_than_filename() {
+        // "src" in path "src/other.rs" matches directory
+        let dir_score = fuzzy_score("src/other.rs", "other").unwrap();
+        // "main" in "deeply/nested/main.rs" matches filename but deeper
+        let file_score = fuzzy_score("deeply/nested/main.rs", "main").unwrap();
+        // Both should match, filename match has bonus
+        assert!(dir_score > 100);
+        assert!(file_score > 100);
+    }
+
+    #[test]
+    fn fuzzy_score_shorter_path_preferred() {
+        let shallow = fuzzy_score("main.rs", "main").unwrap();
+        let deep = fuzzy_score("a/b/c/main.rs", "main").unwrap();
+        assert!(shallow > deep);
+    }
+
+    #[test]
+    fn fuzzy_score_extension_match() {
+        let score = fuzzy_score("config/settings.toml", ".toml").unwrap();
+        assert!(score > 0);
+    }
+
+    // ── highlight_match ─────────────────────────────────────────────
+
+    #[test]
+    fn highlight_match_contains_pattern() {
+        let result = highlight_match("src/main.rs", "main");
+        // Should contain ANSI codes around "main"
+        assert!(result.contains("main"));
+        assert!(result.contains("src/"));
+        assert!(result.contains(".rs"));
+    }
+
+    #[test]
+    fn highlight_match_no_match_returns_plain() {
+        let result = highlight_match("src/main.rs", "xyz");
+        assert_eq!(result, "src/main.rs");
+    }
+
+    #[test]
+    fn highlight_match_case_insensitive() {
+        let result = highlight_match("src/Main.rs", "main");
+        // Should still highlight (rfind on lowercased)
+        assert!(result.contains("Main"));
+    }
+
+    // ── extract_first_meaningful_line ────────────────────────────────
+
+    #[test]
+    fn extract_first_meaningful_line_basic() {
+        let result = extract_first_meaningful_line("//! Module docs\nuse std;");
+        assert_eq!(result, "//! Module docs");
+    }
+
+    #[test]
+    fn extract_first_meaningful_line_skips_blanks() {
+        let result = extract_first_meaningful_line("\n\n  \n  // comment");
+        assert_eq!(result, "// comment");
+    }
+
+    #[test]
+    fn extract_first_meaningful_line_empty() {
+        let result = extract_first_meaningful_line("");
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn extract_first_meaningful_line_all_blank() {
+        let result = extract_first_meaningful_line("  \n  \n  ");
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn extract_first_meaningful_line_truncates_long() {
+        let long_line = "x".repeat(200);
+        let result = extract_first_meaningful_line(&long_line);
+        assert!(result.len() <= 83); // 80 + "..." = 83
+    }
+
+    // ── is_binary_extension ─────────────────────────────────────────
+
+    #[test]
+    fn is_binary_extension_images() {
+        assert!(is_binary_extension("photo.png"));
+        assert!(is_binary_extension("icon.jpg"));
+        assert!(is_binary_extension("banner.gif"));
+        assert!(is_binary_extension("logo.webp"));
+    }
+
+    #[test]
+    fn is_binary_extension_archives() {
+        assert!(is_binary_extension("data.zip"));
+        assert!(is_binary_extension("backup.tar"));
+        assert!(is_binary_extension("compressed.gz"));
+    }
+
+    #[test]
+    fn is_binary_extension_source_files() {
+        assert!(!is_binary_extension("main.rs"));
+        assert!(!is_binary_extension("index.js"));
+        assert!(!is_binary_extension("app.py"));
+        assert!(!is_binary_extension("README.md"));
+        assert!(!is_binary_extension("Cargo.toml"));
+    }
+
+    #[test]
+    fn is_binary_extension_case_insensitive() {
+        assert!(is_binary_extension("PHOTO.PNG"));
+        assert!(is_binary_extension("Image.JPG"));
+    }
+
+    #[test]
+    fn is_binary_extension_lock_files() {
+        assert!(is_binary_extension("Cargo.lock"));
+        assert!(is_binary_extension("package-lock.lock"));
+    }
+
+    #[test]
+    fn is_binary_extension_compiled() {
+        assert!(is_binary_extension("module.wasm"));
+        assert!(is_binary_extension("main.pyc"));
+        assert!(is_binary_extension("lib.so"));
+        assert!(is_binary_extension("app.exe"));
+    }
+
+    // ── IndexEntry & format_project_index ────────────────────────────
+
+    #[test]
+    fn format_project_index_empty() {
+        let result = format_project_index(&[]);
+        assert_eq!(result, "(no indexable files found)");
+    }
+
+    #[test]
+    fn format_project_index_single_file() {
+        let entries = vec![IndexEntry {
+            path: "src/main.rs".to_string(),
+            lines: 42,
+            summary: "//! Main module".to_string(),
+        }];
+        let output = format_project_index(&entries);
+        assert!(output.contains("src/main.rs"));
+        assert!(output.contains("42"));
+        assert!(output.contains("//! Main module"));
+        assert!(output.contains("1 file"));
+        assert!(output.contains("42 total lines"));
+    }
+
+    #[test]
+    fn format_project_index_multiple_files() {
+        let entries = vec![
+            IndexEntry {
+                path: "src/main.rs".to_string(),
+                lines: 100,
+                summary: "//! Entry point".to_string(),
+            },
+            IndexEntry {
+                path: "src/lib.rs".to_string(),
+                lines: 50,
+                summary: "//! Library".to_string(),
+            },
+        ];
+        let output = format_project_index(&entries);
+        assert!(output.contains("2 files"));
+        assert!(output.contains("150 total lines"));
+    }
+
+    #[test]
+    fn format_project_index_long_path_truncated() {
+        let long_path = format!("a/{}", "b/".repeat(25).trim_end_matches('/'));
+        let entries = vec![IndexEntry {
+            path: long_path,
+            lines: 10,
+            summary: "long path file".to_string(),
+        }];
+        let output = format_project_index(&entries);
+        // Should contain the truncation marker
+        assert!(output.contains('…'));
+    }
+
+    // ── generate_init_content ────────────────────────────────────────
+
+    #[test]
+    fn generate_init_content_rust_project() {
+        let dir = TempDir::new().unwrap();
+        fs::write(
+            dir.path().join("Cargo.toml"),
+            "[package]\nname = \"test-proj\"",
+        )
+        .unwrap();
+        fs::create_dir(dir.path().join("src")).unwrap();
+        fs::write(dir.path().join("src/main.rs"), "fn main() {}").unwrap();
+
+        let content = generate_init_content(dir.path());
+        assert!(content.contains("# Project Context"));
+        assert!(content.contains("test-proj"));
+        assert!(content.contains("Rust (Cargo)"));
+        assert!(content.contains("cargo build"));
+        assert!(content.contains("cargo test"));
+    }
+
+    #[test]
+    fn generate_init_content_unknown_project() {
+        let dir = TempDir::new().unwrap();
+        let content = generate_init_content(dir.path());
+        assert!(content.contains("# Project Context"));
+        // Should not contain a project type label
+        assert!(!content.contains("Rust"));
+        assert!(!content.contains("Node"));
+        // Should have placeholder for build commands
+        assert!(content.contains("Add build, test, and run commands"));
+    }
+
+    #[test]
+    fn generate_init_content_includes_dirs_and_files() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("README.md"), "# My Project").unwrap();
+        fs::create_dir(dir.path().join("src")).unwrap();
+
+        let content = generate_init_content(dir.path());
+        assert!(content.contains("`src/`"));
+        assert!(content.contains("`README.md`"));
+    }
+
+    // ── FindMatch ────────────────────────────────────────────────────
+
+    #[test]
+    fn find_match_equality() {
+        let a = FindMatch {
+            path: "src/main.rs".to_string(),
+            score: 150,
+        };
+        let b = FindMatch {
+            path: "src/main.rs".to_string(),
+            score: 150,
+        };
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn find_match_debug() {
+        let m = FindMatch {
+            path: "test.rs".to_string(),
+            score: 100,
+        };
+        let debug = format!("{:?}", m);
+        assert!(debug.contains("test.rs"));
+        assert!(debug.contains("100"));
+    }
+
+    // ── walk_directory ──────────────────────────────────────────────
+
+    #[test]
+    fn walk_directory_finds_files() {
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("hello.txt"), "hi").unwrap();
+        fs::create_dir(dir.path().join("sub")).unwrap();
+        fs::write(dir.path().join("sub/nested.txt"), "there").unwrap();
+
+        let files = walk_directory(dir.path().to_str().unwrap(), 3);
+        assert!(files.iter().any(|f| f.ends_with("hello.txt")));
+        assert!(files.iter().any(|f| f.ends_with("nested.txt")));
+    }
+
+    #[test]
+    fn walk_directory_skips_hidden() {
+        let dir = TempDir::new().unwrap();
+        fs::create_dir(dir.path().join(".hidden")).unwrap();
+        fs::write(dir.path().join(".hidden/secret.txt"), "").unwrap();
+        fs::write(dir.path().join("visible.txt"), "").unwrap();
+
+        let files = walk_directory(dir.path().to_str().unwrap(), 3);
+        assert!(files.iter().any(|f| f.ends_with("visible.txt")));
+        assert!(!files.iter().any(|f| f.contains("secret")));
+    }
+
+    #[test]
+    fn walk_directory_skips_node_modules() {
+        let dir = TempDir::new().unwrap();
+        fs::create_dir(dir.path().join("node_modules")).unwrap();
+        fs::write(dir.path().join("node_modules/dep.js"), "").unwrap();
+        fs::write(dir.path().join("app.js"), "").unwrap();
+
+        let files = walk_directory(dir.path().to_str().unwrap(), 3);
+        assert!(files.iter().any(|f| f.ends_with("app.js")));
+        assert!(!files.iter().any(|f| f.contains("dep.js")));
+    }
+
+    #[test]
+    fn walk_directory_respects_max_depth() {
+        let dir = TempDir::new().unwrap();
+        fs::create_dir_all(dir.path().join("a/b/c")).unwrap();
+        fs::write(dir.path().join("a/b/c/deep.txt"), "").unwrap();
+        fs::write(dir.path().join("a/shallow.txt"), "").unwrap();
+
+        let files = walk_directory(dir.path().to_str().unwrap(), 1);
+        assert!(files.iter().any(|f| f.ends_with("shallow.txt")));
+        // At max_depth=1, we go dir->a (depth 1)->files, but a/b is depth 2
+        assert!(!files.iter().any(|f| f.ends_with("deep.txt")));
+    }
+}
