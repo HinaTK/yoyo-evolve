@@ -108,6 +108,62 @@ impl AgentTool for GuardedTool {
     }
 }
 
+/// A wrapper tool that truncates large tool output to save context window tokens.
+/// When tool output exceeds `TOOL_OUTPUT_MAX_CHARS`, preserves the first ~100 and
+/// last ~50 lines with a clear truncation marker in between.
+struct TruncatingTool {
+    inner: Box<dyn AgentTool>,
+}
+
+/// Truncate the text content of a ToolResult if it exceeds the threshold.
+fn truncate_result(mut result: yoagent::types::ToolResult) -> yoagent::types::ToolResult {
+    use yoagent::Content;
+    result.content = result
+        .content
+        .into_iter()
+        .map(|c| match c {
+            Content::Text { text } => Content::Text {
+                text: truncate_tool_output(&text, TOOL_OUTPUT_MAX_CHARS),
+            },
+            other => other,
+        })
+        .collect();
+    result
+}
+
+#[async_trait::async_trait]
+impl AgentTool for TruncatingTool {
+    fn name(&self) -> &str {
+        self.inner.name()
+    }
+
+    fn label(&self) -> &str {
+        self.inner.label()
+    }
+
+    fn description(&self) -> &str {
+        self.inner.description()
+    }
+
+    fn parameters_schema(&self) -> serde_json::Value {
+        self.inner.parameters_schema()
+    }
+
+    async fn execute(
+        &self,
+        params: serde_json::Value,
+        ctx: yoagent::types::ToolContext,
+    ) -> Result<yoagent::types::ToolResult, yoagent::types::ToolError> {
+        let result = self.inner.execute(params, ctx).await?;
+        Ok(truncate_result(result))
+    }
+}
+
+/// Wrap a tool with output truncation for large results.
+fn with_truncation(tool: Box<dyn AgentTool>) -> Box<dyn AgentTool> {
+    Box::new(TruncatingTool { inner: tool })
+}
+
 /// Wrap a tool with directory restrictions if any are configured.
 fn maybe_guard(
     tool: Box<dyn AgentTool>,
@@ -369,12 +425,21 @@ pub fn build_tools(
     };
 
     vec![
-        Box::new(bash),
-        maybe_guard(Box::new(ReadFileTool::default()), dir_restrictions),
-        write_tool,
-        edit_tool,
-        maybe_guard(Box::new(ListFilesTool::default()), dir_restrictions),
-        maybe_guard(Box::new(SearchTool::default()), dir_restrictions),
+        with_truncation(Box::new(bash)),
+        with_truncation(maybe_guard(
+            Box::new(ReadFileTool::default()),
+            dir_restrictions,
+        )),
+        with_truncation(write_tool),
+        with_truncation(edit_tool),
+        with_truncation(maybe_guard(
+            Box::new(ListFilesTool::default()),
+            dir_restrictions,
+        )),
+        with_truncation(maybe_guard(
+            Box::new(SearchTool::default()),
+            dir_restrictions,
+        )),
     ]
 }
 

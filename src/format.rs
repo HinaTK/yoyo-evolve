@@ -953,6 +953,62 @@ pub fn truncate_with_ellipsis(s: &str, max: usize) -> String {
     }
 }
 
+/// Default character threshold for tool output truncation.
+/// Outputs longer than this get the head/tail treatment.
+pub const TOOL_OUTPUT_MAX_CHARS: usize = 30_000;
+
+/// Number of lines to keep from the start of truncated output.
+const TRUNCATION_HEAD_LINES: usize = 100;
+
+/// Number of lines to keep from the end of truncated output.
+const TRUNCATION_TAIL_LINES: usize = 50;
+
+/// Intelligently truncate large tool output to save context window tokens.
+///
+/// When output exceeds `max_chars`, keeps the first ~100 lines and last ~50 lines
+/// with a clear `[... truncated N lines ...]` marker in between. This preserves
+/// the beginning of output (usually the most informative — headers, first errors)
+/// and the end (summary lines, final status).
+///
+/// Output under the threshold is returned unchanged.
+pub fn truncate_tool_output(output: &str, max_chars: usize) -> String {
+    // Under threshold — return unchanged
+    if output.len() <= max_chars {
+        return output.to_string();
+    }
+
+    let lines: Vec<&str> = output.lines().collect();
+    let total_lines = lines.len();
+
+    // If not enough lines to meaningfully truncate, return as-is
+    // (edge case: very long single lines or very few lines)
+    if total_lines <= TRUNCATION_HEAD_LINES + TRUNCATION_TAIL_LINES {
+        return output.to_string();
+    }
+
+    let head = &lines[..TRUNCATION_HEAD_LINES];
+    let tail = &lines[total_lines - TRUNCATION_TAIL_LINES..];
+    let omitted = total_lines - TRUNCATION_HEAD_LINES - TRUNCATION_TAIL_LINES;
+
+    let mut result = String::with_capacity(max_chars);
+    for line in head {
+        result.push_str(line);
+        result.push('\n');
+    }
+    result.push_str(&format!(
+        "\n[... truncated {omitted} {} ...]\n\n",
+        pluralize(omitted, "line", "lines")
+    ));
+    for (i, line) in tail.iter().enumerate() {
+        result.push_str(line);
+        if i < tail.len() - 1 {
+            result.push('\n');
+        }
+    }
+
+    result
+}
+
 /// Truncate a string to `max` characters (no ellipsis).
 #[cfg(test)]
 pub fn truncate(s: &str, max: usize) -> &str {
@@ -3101,5 +3157,121 @@ mod tests {
         assert_eq!(pluralize(0, "line", "lines"), "lines");
         assert_eq!(pluralize(2, "line", "lines"), "lines");
         assert_eq!(pluralize(100, "file", "files"), "files");
+    }
+
+    // --- truncate_tool_output tests ---
+
+    #[test]
+    fn test_truncate_tool_output_under_threshold_unchanged() {
+        let short = "hello world\nsecond line\nthird line";
+        let result = truncate_tool_output(short, 30_000);
+        assert_eq!(result, short);
+    }
+
+    #[test]
+    fn test_truncate_tool_output_empty_string() {
+        let result = truncate_tool_output("", 30_000);
+        assert_eq!(result, "");
+    }
+
+    #[test]
+    fn test_truncate_tool_output_exactly_at_threshold() {
+        // Create output exactly at the threshold
+        let line = "x".repeat(100);
+        let lines: Vec<String> = (0..300).map(|_| line.clone()).collect();
+        let output = lines.join("\n");
+        // If it's at or under threshold length, it should be unchanged
+        let result = truncate_tool_output(&output, output.len());
+        assert_eq!(result, output);
+    }
+
+    #[test]
+    fn test_truncate_tool_output_over_threshold_has_marker() {
+        // Create output with 200 lines, each long enough to exceed 30k chars
+        let line = "x".repeat(200);
+        let lines: Vec<String> = (0..200).map(|i| format!("line{i}: {line}")).collect();
+        let output = lines.join("\n");
+        assert!(output.len() > 30_000);
+
+        let result = truncate_tool_output(&output, 30_000);
+        assert!(result.contains("[... truncated"));
+        assert!(result.contains("lines ...]"));
+        // Should contain head lines
+        assert!(result.contains("line0:"));
+        assert!(result.contains("line99:"));
+        // Should contain tail lines
+        assert!(result.contains("line199:"));
+        assert!(result.contains("line150:"));
+        // Should NOT contain middle lines
+        assert!(!result.contains("line100:"));
+        assert!(!result.contains("line120:"));
+    }
+
+    #[test]
+    fn test_truncate_tool_output_preserves_head_and_tail_count() {
+        // 300 lines, each 200 chars → ~60k chars, well over 30k threshold
+        let lines: Vec<String> = (0..300).map(|i| format!("{:>200}", i)).collect();
+        let output = lines.join("\n");
+
+        let result = truncate_tool_output(&output, 30_000);
+        let _result_lines: Vec<&str> = result.lines().collect();
+
+        // Head: first 100 lines should be present
+        for i in 0..100 {
+            let expected = format!("{:>200}", i);
+            assert!(result.contains(&expected), "Missing head line {i}");
+        }
+
+        // Tail: last 50 lines should be present
+        for i in 250..300 {
+            let expected = format!("{:>200}", i);
+            assert!(result.contains(&expected), "Missing tail line {i}");
+        }
+
+        // Middle should be omitted
+        assert!(!result.contains(&format!("{:>200}", 150)));
+
+        // Marker should show correct count
+        // 300 - 100 - 50 = 150 omitted lines
+        assert!(result.contains("[... truncated 150 lines ...]"));
+
+        // Result should be shorter than original
+        assert!(result.len() < output.len());
+    }
+
+    #[test]
+    fn test_truncate_tool_output_few_long_lines_not_truncated() {
+        // Only 140 lines (< head + tail = 150), even if over char threshold
+        // Should NOT be truncated because there aren't enough lines
+        let line = "x".repeat(500);
+        let lines: Vec<String> = (0..140).map(|_| line.clone()).collect();
+        let output = lines.join("\n");
+        assert!(output.len() > 30_000);
+
+        let result = truncate_tool_output(&output, 30_000);
+        assert_eq!(
+            result, output,
+            "Too few lines to truncate, should be unchanged"
+        );
+    }
+
+    #[test]
+    fn test_truncate_tool_output_single_truncated_line_in_marker() {
+        // 152 lines → head 100 + tail 50 + 2 omitted
+        // But 2 omitted uses "lines" (plural)
+        // 151 lines → 1 omitted → "line" (singular)
+        let line = "x".repeat(300);
+        let lines: Vec<String> = (0..151).map(|_| line.clone()).collect();
+        let output = lines.join("\n");
+        assert!(output.len() > 30_000);
+
+        let result = truncate_tool_output(&output, 30_000);
+        assert!(result.contains("[... truncated 1 line ...]"));
+    }
+
+    #[test]
+    fn test_truncate_tool_output_default_threshold_constant() {
+        // Verify the default constant is 30,000
+        assert_eq!(TOOL_OUTPUT_MAX_CHARS, 30_000);
     }
 }
