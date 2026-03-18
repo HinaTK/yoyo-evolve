@@ -781,3 +781,408 @@ pub async fn handle_review(
         None => None,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ── parse_diff_stat tests ───────────────────────────────────────────
+
+    #[test]
+    fn parse_diff_stat_single_file() {
+        let input =
+            " src/main.rs | 10 +++++++---\n 1 file changed, 7 insertions(+), 3 deletions(-)\n";
+        let summary = parse_diff_stat(input);
+        assert_eq!(summary.entries.len(), 1);
+        assert_eq!(summary.entries[0].file, "src/main.rs");
+        assert_eq!(summary.entries[0].insertions, 7);
+        assert_eq!(summary.entries[0].deletions, 3);
+        assert_eq!(summary.total_insertions, 7);
+        assert_eq!(summary.total_deletions, 3);
+    }
+
+    #[test]
+    fn parse_diff_stat_multiple_files() {
+        let input = "\
+ src/commands.rs | 42 +++++++++++++++++++++---------------------
+ src/main.rs     |  5 ++---
+ src/cli.rs      | 12 ++++++++++++
+ 3 files changed, 25 insertions(+), 10 deletions(-)
+";
+        let summary = parse_diff_stat(input);
+        assert_eq!(summary.entries.len(), 3);
+
+        assert_eq!(summary.entries[0].file, "src/commands.rs");
+        assert_eq!(summary.entries[1].file, "src/main.rs");
+        assert_eq!(summary.entries[2].file, "src/cli.rs");
+
+        // The visual bar has + and - characters, so counts come from those
+        assert!(summary.entries[0].insertions > 0);
+        assert!(summary.entries[0].deletions > 0);
+        assert!(
+            summary.entries[2].deletions == 0,
+            "cli.rs is insertions only"
+        );
+
+        // Summary line totals
+        assert_eq!(summary.total_insertions, 25);
+        assert_eq!(summary.total_deletions, 10);
+    }
+
+    #[test]
+    fn parse_diff_stat_insertions_only() {
+        let input = " new_file.rs | 20 ++++++++++++++++++++\n 1 file changed, 20 insertions(+)\n";
+        let summary = parse_diff_stat(input);
+        assert_eq!(summary.entries.len(), 1);
+        assert_eq!(summary.entries[0].file, "new_file.rs");
+        assert_eq!(summary.entries[0].insertions, 20);
+        assert_eq!(summary.entries[0].deletions, 0);
+        assert_eq!(summary.total_insertions, 20);
+        assert_eq!(summary.total_deletions, 0);
+    }
+
+    #[test]
+    fn parse_diff_stat_deletions_only() {
+        let input = " old_file.rs | 8 --------\n 1 file changed, 8 deletions(-)\n";
+        let summary = parse_diff_stat(input);
+        assert_eq!(summary.entries.len(), 1);
+        assert_eq!(summary.entries[0].file, "old_file.rs");
+        assert_eq!(summary.entries[0].insertions, 0);
+        assert_eq!(summary.entries[0].deletions, 8);
+        assert_eq!(summary.total_insertions, 0);
+        assert_eq!(summary.total_deletions, 8);
+    }
+
+    #[test]
+    fn parse_diff_stat_empty_input() {
+        let summary = parse_diff_stat("");
+        assert_eq!(summary.entries.len(), 0);
+        assert_eq!(summary.total_insertions, 0);
+        assert_eq!(summary.total_deletions, 0);
+    }
+
+    #[test]
+    fn parse_diff_stat_whitespace_only() {
+        let summary = parse_diff_stat("   \n  \n\n");
+        assert_eq!(summary.entries.len(), 0);
+        assert_eq!(summary.total_insertions, 0);
+        assert_eq!(summary.total_deletions, 0);
+    }
+
+    #[test]
+    fn parse_diff_stat_no_summary_line() {
+        // Sometimes git output might not include the summary line
+        let input = " src/lib.rs | 3 +++\n";
+        let summary = parse_diff_stat(input);
+        assert_eq!(summary.entries.len(), 1);
+        assert_eq!(summary.entries[0].insertions, 3);
+        assert_eq!(summary.entries[0].deletions, 0);
+        // Without a summary line, totals are computed from entries
+        assert_eq!(summary.total_insertions, 3);
+        assert_eq!(summary.total_deletions, 0);
+    }
+
+    #[test]
+    fn parse_diff_stat_binary_file() {
+        let input = " assets/logo.png | Bin 0 -> 1234 bytes\n 1 file changed, 0 insertions(+), 0 deletions(-)\n";
+        let summary = parse_diff_stat(input);
+        // Binary file lines still have a pipe, so they're parsed as entries
+        assert_eq!(summary.entries.len(), 1);
+        assert_eq!(summary.entries[0].file, "assets/logo.png");
+        // "Bin 0 -> 1234 bytes" — the parser counts literal + and - chars
+        // The "->" contains one '-', so deletions=1
+        assert_eq!(summary.entries[0].insertions, 0);
+        assert_eq!(summary.entries[0].deletions, 1);
+        // Summary line says 0/0, but the fallback path recomputes from entries
+        // when both summary totals are zero, so total_deletions picks up the entry's 1
+        assert_eq!(summary.total_insertions, 0);
+        assert_eq!(summary.total_deletions, 1);
+    }
+
+    // ── format_diff_stat tests ──────────────────────────────────────────
+
+    #[test]
+    fn format_diff_stat_empty_entries() {
+        let summary = DiffStatSummary {
+            entries: vec![],
+            total_insertions: 0,
+            total_deletions: 0,
+        };
+        let output = format_diff_stat(&summary);
+        assert!(
+            output.is_empty(),
+            "Empty entries should produce empty output"
+        );
+    }
+
+    #[test]
+    fn format_diff_stat_single_entry_insertions_only() {
+        let summary = DiffStatSummary {
+            entries: vec![DiffStatEntry {
+                file: "src/main.rs".to_string(),
+                insertions: 10,
+                deletions: 0,
+            }],
+            total_insertions: 10,
+            total_deletions: 0,
+        };
+        let output = format_diff_stat(&summary);
+        assert!(output.contains("src/main.rs"), "Should contain filename");
+        assert!(output.contains("+10"), "Should show insertions count");
+        assert!(!output.contains("-0"), "Should not show zero deletions");
+        assert!(output.contains("1 file changed"), "Should show summary");
+        assert!(output.contains("+10"), "Summary should show insertions");
+    }
+
+    #[test]
+    fn format_diff_stat_single_entry_deletions_only() {
+        let summary = DiffStatSummary {
+            entries: vec![DiffStatEntry {
+                file: "old.rs".to_string(),
+                insertions: 0,
+                deletions: 5,
+            }],
+            total_insertions: 0,
+            total_deletions: 5,
+        };
+        let output = format_diff_stat(&summary);
+        assert!(output.contains("old.rs"), "Should contain filename");
+        assert!(output.contains("-5"), "Should show deletions count");
+        assert!(!output.contains("+0"), "Should not show zero insertions");
+    }
+
+    #[test]
+    fn format_diff_stat_mixed_changes() {
+        let summary = DiffStatSummary {
+            entries: vec![
+                DiffStatEntry {
+                    file: "src/a.rs".to_string(),
+                    insertions: 20,
+                    deletions: 5,
+                },
+                DiffStatEntry {
+                    file: "src/b.rs".to_string(),
+                    insertions: 3,
+                    deletions: 0,
+                },
+            ],
+            total_insertions: 23,
+            total_deletions: 5,
+        };
+        let output = format_diff_stat(&summary);
+        assert!(output.contains("src/a.rs"), "Should contain first file");
+        assert!(output.contains("src/b.rs"), "Should contain second file");
+        assert!(
+            output.contains("2 files changed"),
+            "Should pluralize 'files'"
+        );
+        assert!(
+            output.contains("+23"),
+            "Summary should show total insertions"
+        );
+        assert!(output.contains("-5"), "Summary should show total deletions");
+    }
+
+    #[test]
+    fn format_diff_stat_singular_file() {
+        let summary = DiffStatSummary {
+            entries: vec![DiffStatEntry {
+                file: "f.rs".to_string(),
+                insertions: 1,
+                deletions: 1,
+            }],
+            total_insertions: 1,
+            total_deletions: 1,
+        };
+        let output = format_diff_stat(&summary);
+        assert!(
+            output.contains("1 file changed"),
+            "Should use singular 'file' not 'files'"
+        );
+    }
+
+    // ── parse_pr_args tests ─────────────────────────────────────────────
+
+    #[test]
+    fn parse_pr_args_empty_is_list() {
+        assert_eq!(parse_pr_args(""), PrSubcommand::List);
+        assert_eq!(parse_pr_args("  "), PrSubcommand::List);
+    }
+
+    #[test]
+    fn parse_pr_args_number_is_view() {
+        assert_eq!(parse_pr_args("42"), PrSubcommand::View(42));
+        assert_eq!(parse_pr_args("1"), PrSubcommand::View(1));
+        assert_eq!(parse_pr_args("  99  "), PrSubcommand::View(99));
+    }
+
+    #[test]
+    fn parse_pr_args_number_diff() {
+        assert_eq!(parse_pr_args("42 diff"), PrSubcommand::Diff(42));
+    }
+
+    #[test]
+    fn parse_pr_args_number_checkout() {
+        assert_eq!(parse_pr_args("7 checkout"), PrSubcommand::Checkout(7));
+    }
+
+    #[test]
+    fn parse_pr_args_number_comment() {
+        assert_eq!(
+            parse_pr_args("5 comment looks good!"),
+            PrSubcommand::Comment(5, "looks good!".to_string())
+        );
+    }
+
+    #[test]
+    fn parse_pr_args_comment_without_text_is_help() {
+        assert_eq!(parse_pr_args("5 comment"), PrSubcommand::Help);
+    }
+
+    #[test]
+    fn parse_pr_args_create() {
+        assert_eq!(
+            parse_pr_args("create"),
+            PrSubcommand::Create { draft: false }
+        );
+    }
+
+    #[test]
+    fn parse_pr_args_create_draft() {
+        assert_eq!(
+            parse_pr_args("create --draft"),
+            PrSubcommand::Create { draft: true }
+        );
+    }
+
+    #[test]
+    fn parse_pr_args_create_case_insensitive() {
+        assert_eq!(
+            parse_pr_args("CREATE"),
+            PrSubcommand::Create { draft: false }
+        );
+        // --Draft with capital D: trim_start_matches('-') → "Draft", eq_ignore_ascii_case("draft") → true
+        assert_eq!(
+            parse_pr_args("Create --Draft"),
+            PrSubcommand::Create { draft: true }
+        );
+        assert_eq!(
+            parse_pr_args("create -draft"),
+            PrSubcommand::Create { draft: true }
+        );
+    }
+
+    #[test]
+    fn parse_pr_args_invalid_is_help() {
+        assert_eq!(parse_pr_args("foobar"), PrSubcommand::Help);
+        assert_eq!(parse_pr_args("abc 123"), PrSubcommand::Help);
+    }
+
+    #[test]
+    fn parse_pr_args_unknown_subcommand_is_help() {
+        assert_eq!(parse_pr_args("42 merge"), PrSubcommand::Help);
+        assert_eq!(parse_pr_args("42 close"), PrSubcommand::Help);
+    }
+
+    // ── build_review_prompt tests ───────────────────────────────────────
+
+    #[test]
+    fn build_review_prompt_contains_label() {
+        let prompt = build_review_prompt("staged changes", "fn main() {}");
+        assert!(
+            prompt.contains("staged changes"),
+            "Prompt should include the label"
+        );
+    }
+
+    #[test]
+    fn build_review_prompt_contains_content() {
+        let code = "fn add(a: i32, b: i32) -> i32 { a + b }";
+        let prompt = build_review_prompt("test.rs", code);
+        assert!(prompt.contains(code), "Prompt should include the code");
+    }
+
+    #[test]
+    fn build_review_prompt_contains_review_criteria() {
+        let prompt = build_review_prompt("file.rs", "let x = 1;");
+        assert!(prompt.contains("Bugs"), "Should mention bugs");
+        assert!(prompt.contains("Security"), "Should mention security");
+        assert!(prompt.contains("Style"), "Should mention style");
+        assert!(prompt.contains("Performance"), "Should mention performance");
+        assert!(prompt.contains("Suggestions"), "Should mention suggestions");
+    }
+
+    #[test]
+    fn build_review_prompt_truncates_large_content() {
+        let large_content = "x".repeat(50_000);
+        let prompt = build_review_prompt("big.rs", &large_content);
+        assert!(
+            prompt.contains("truncated"),
+            "Large content should be truncated"
+        );
+        assert!(
+            prompt.contains("20000 more chars"),
+            "Should show remaining char count"
+        );
+        // The prompt should be shorter than the original content
+        assert!(
+            prompt.len() < large_content.len(),
+            "Prompt should be shorter than 50k"
+        );
+    }
+
+    #[test]
+    fn build_review_prompt_does_not_truncate_small_content() {
+        let small_content = "fn hello() { println!(\"hi\"); }";
+        let prompt = build_review_prompt("small.rs", small_content);
+        assert!(
+            !prompt.contains("truncated"),
+            "Small content should not be truncated"
+        );
+        assert!(
+            prompt.contains(small_content),
+            "Full content should be present"
+        );
+    }
+
+    #[test]
+    fn build_review_prompt_wraps_in_code_block() {
+        let prompt = build_review_prompt("test.rs", "let x = 42;");
+        assert!(prompt.contains("```"), "Content should be in a code block");
+    }
+
+    // ── DiffStatEntry / DiffStatSummary equality ────────────────────────
+
+    #[test]
+    fn diff_stat_entry_equality() {
+        let a = DiffStatEntry {
+            file: "a.rs".to_string(),
+            insertions: 5,
+            deletions: 3,
+        };
+        let b = DiffStatEntry {
+            file: "a.rs".to_string(),
+            insertions: 5,
+            deletions: 3,
+        };
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn diff_stat_summary_round_trip() {
+        // Parse real git output, format it, verify structure
+        let input = "\
+ src/main.rs | 15 +++++++++------
+ Cargo.toml  |  2 +-
+ 2 files changed, 10 insertions(+), 5 deletions(-)
+";
+        let summary = parse_diff_stat(input);
+        let formatted = format_diff_stat(&summary);
+
+        // Formatted output should contain both filenames
+        assert!(formatted.contains("src/main.rs"));
+        assert!(formatted.contains("Cargo.toml"));
+        // Should contain "2 files changed"
+        assert!(formatted.contains("2 files changed"));
+    }
+}
