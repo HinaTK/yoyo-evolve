@@ -777,7 +777,7 @@ async fn main() {
             &agent_config.model,
         )
         .await;
-        write_output_file(&output_path, &response);
+        write_output_file(&output_path, &response.text);
         return;
     }
 
@@ -797,7 +797,7 @@ async fn main() {
         );
         let mut session_total = Usage::default();
         let response = run_prompt(&mut agent, input, &mut session_total, &agent_config.model).await;
-        write_output_file(&output_path, &response);
+        write_output_file(&output_path, &response.text);
         return;
     }
 

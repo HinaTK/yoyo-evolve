@@ -596,7 +596,7 @@ pub async fn handle_pr(input: &str, agent: &mut Agent, session_total: &mut Usage
 
             // 4. Ask AI to generate title + description
             let prompt = build_pr_description_prompt(&branch, &base, &commits, &diff);
-            let response = run_prompt(agent, &prompt, session_total, model).await;
+            let response = run_prompt(agent, &prompt, session_total, model).await.text;
 
             // 5. Parse the AI's response
             let (title, body) = match parse_pr_description(&response) {

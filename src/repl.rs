@@ -266,6 +266,7 @@ pub async fn run_repl(
 
     let mut session_total = Usage::default();
     let mut last_input: Option<String> = None;
+    let mut last_error: Option<String> = None;
     let mut bookmarks = commands::Bookmarks::new();
     let session_changes = SessionChanges::new();
 
@@ -528,8 +529,14 @@ pub async fn run_repl(
                 continue;
             }
             "/retry" => {
-                commands::handle_retry(agent, &last_input, &mut session_total, &agent_config.model)
-                    .await;
+                last_error = commands::handle_retry(
+                    agent,
+                    &last_input,
+                    &last_error,
+                    &mut session_total,
+                    &agent_config.model,
+                )
+                .await;
                 continue;
             }
             s if s == "/tree" || s.starts_with("/tree ") => {
@@ -562,7 +569,7 @@ pub async fn run_repl(
                 .await
                 {
                     last_input = Some(context_msg.clone());
-                    run_prompt_with_changes(
+                    let outcome = run_prompt_with_changes(
                         agent,
                         &context_msg,
                         &mut session_total,
@@ -570,6 +577,7 @@ pub async fn run_repl(
                         &session_changes,
                     )
                     .await;
+                    last_error = outcome.last_tool_error;
                     auto_compact_if_needed(agent);
                 }
                 continue;
@@ -593,7 +601,7 @@ pub async fn run_repl(
         }
 
         last_input = Some(input.to_string());
-        run_prompt_with_changes(
+        let outcome = run_prompt_with_changes(
             agent,
             input,
             &mut session_total,
@@ -601,6 +609,7 @@ pub async fn run_repl(
             &session_changes,
         )
         .await;
+        last_error = outcome.last_tool_error;
 
         // Auto-compact when context window is getting full
         auto_compact_if_needed(agent);

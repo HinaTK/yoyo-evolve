@@ -344,7 +344,9 @@ pub async fn handle_spawn(
     let mut sub_agent = agent_config.build_agent();
 
     // Run the task as a single prompt on the subagent
-    let response = run_prompt(&mut sub_agent, &task, session_total, model).await;
+    let response = run_prompt(&mut sub_agent, &task, session_total, model)
+        .await
+        .text;
 
     println!("\n{GREEN}  ✓ subagent completed{RESET}");
     println!("{DIM}  injecting result into main conversation...{RESET}\n");

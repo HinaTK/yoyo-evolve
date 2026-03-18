@@ -352,18 +352,25 @@ pub fn handle_cost(session_total: &Usage, model: &str) {
 pub async fn handle_retry(
     agent: &mut Agent,
     last_input: &Option<String>,
+    last_error: &Option<String>,
     session_total: &mut Usage,
     model: &str,
-) {
+) -> Option<String> {
     match last_input {
         Some(prev) => {
-            println!("{DIM}  (retrying last input){RESET}");
-            let retry_input = prev.clone();
-            run_prompt(agent, &retry_input, session_total, model).await;
+            let retry_input = build_retry_prompt(prev, last_error);
+            if last_error.is_some() {
+                println!("{DIM}  (retrying with error context){RESET}");
+            } else {
+                println!("{DIM}  (retrying last input){RESET}");
+            }
+            let outcome = run_prompt(agent, &retry_input, session_total, model).await;
             auto_compact_if_needed(agent);
+            outcome.last_tool_error
         }
         None => {
             eprintln!("{DIM}  (nothing to retry — no previous input){RESET}\n");
+            None
         }
     }
 }

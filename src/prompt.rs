@@ -84,6 +84,35 @@ impl SessionChanges {
     }
 }
 
+/// Outcome of a prompt execution, including the text response and any tool error.
+#[derive(Debug, Clone, Default)]
+pub struct PromptOutcome {
+    /// The collected text output from the agent.
+    pub text: String,
+    /// The last tool error encountered during this prompt turn, if any.
+    /// Tool errors are from `ToolExecutionEnd` events where `is_error` is true.
+    pub last_tool_error: Option<String>,
+}
+
+/// Build a retry prompt that includes error context from a previous failed attempt.
+///
+/// If `last_error` is `Some`, prepends an error context note to help the model
+/// avoid repeating the same mistake. If `None`, returns the input unchanged.
+pub fn build_retry_prompt(input: &str, last_error: &Option<String>) -> String {
+    match last_error {
+        Some(err) => {
+            // Truncate very long errors to keep the prompt focused
+            let summary = if err.len() > 200 {
+                format!("{}…", &err[..200])
+            } else {
+                err.clone()
+            };
+            format!("[Previous attempt failed: {summary}. Try a different approach.]\n\n{input}")
+        }
+        None => input.to_string(),
+    }
+}
+
 /// Maximum number of automatic retries for transient API errors.
 const MAX_RETRIES: u32 = 3;
 
@@ -343,6 +372,7 @@ enum PromptResult {
     Done {
         collected_text: String,
         usage: Usage,
+        last_tool_error: Option<String>,
     },
     /// A retriable API error was detected — caller should retry.
     RetriableError { error_msg: String, usage: Usage },
@@ -357,6 +387,7 @@ async fn run_prompt_once(agent: &mut Agent, input: &str, changes: &SessionChange
     let mut tool_timers: HashMap<String, Instant> = HashMap::new();
     let mut collected_text = String::new();
     let mut retriable_error: Option<String> = None;
+    let mut last_tool_error: Option<String> = None;
     let mut md_renderer = MarkdownRenderer::new();
     let mut spinner: Option<Spinner> = Some(Spinner::start());
 
@@ -422,7 +453,16 @@ async fn run_prompt_once(agent: &mut Agent, input: &str, changes: &SessionChange
                             if !preview.is_empty() {
                                 println!("{DIM}    {preview}{RESET}");
                             }
+                            // Track the last tool error for /retry context
+                            let error_text = tool_result_preview(&result, 200);
+                            if !error_text.is_empty() {
+                                last_tool_error = Some(error_text);
+                            } else {
+                                last_tool_error = Some("tool execution failed".to_string());
+                            }
                         } else {
+                            // Successful tool clears the last error
+                            last_tool_error = None;
                             println!(" {GREEN}✓{RESET}{dur_str}");
                             if is_verbose() {
                                 let preview = tool_result_preview(&result, 200);
@@ -518,6 +558,7 @@ async fn run_prompt_once(agent: &mut Agent, input: &str, changes: &SessionChange
                 return PromptResult::Done {
                     collected_text,
                     usage,
+                    last_tool_error,
                 };
             }
         }
@@ -548,6 +589,7 @@ async fn run_prompt_once(agent: &mut Agent, input: &str, changes: &SessionChange
         PromptResult::Done {
             collected_text,
             usage,
+            last_tool_error,
         }
     }
 }
@@ -557,7 +599,7 @@ pub async fn run_prompt(
     input: &str,
     session_total: &mut Usage,
     model: &str,
-) -> String {
+) -> PromptOutcome {
     // Default: create a throwaway changes tracker (for callers that don't need tracking)
     let changes = SessionChanges::new();
     run_prompt_with_changes(agent, input, session_total, model, &changes).await
@@ -571,10 +613,11 @@ pub async fn run_prompt_with_changes(
     session_total: &mut Usage,
     model: &str,
     changes: &SessionChanges,
-) -> String {
+) -> PromptOutcome {
     let prompt_start = Instant::now();
     let mut total_usage = Usage::default();
     let mut collected_text = String::new();
+    let mut last_tool_error: Option<String> = None;
 
     // Save message state before the first attempt so we can restore on retry
     let saved_state = agent.save_messages().ok();
@@ -591,13 +634,14 @@ pub async fn run_prompt_with_changes(
             PromptResult::Done {
                 collected_text: text,
                 usage,
-                ..
+                last_tool_error: tool_err,
             } => {
                 total_usage.input += usage.input;
                 total_usage.output += usage.output;
                 total_usage.cache_read += usage.cache_read;
                 total_usage.cache_write += usage.cache_write;
                 collected_text = text;
+                last_tool_error = tool_err;
                 break;
             }
             PromptResult::RetriableError { error_msg, usage } => {
@@ -630,7 +674,10 @@ pub async fn run_prompt_with_changes(
     session_total.cache_write += total_usage.cache_write;
     print_usage(&total_usage, session_total, model, prompt_start.elapsed());
     println!();
-    collected_text
+    PromptOutcome {
+        text: collected_text,
+        last_tool_error,
+    }
 }
 
 /// Format the list of session changes for display.
