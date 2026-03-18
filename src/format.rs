@@ -827,6 +827,24 @@ fn model_pricing(model: &str) -> Option<(f64, f64, f64, f64)> {
         return Some((2.00, 0.0, 0.0, 10.00));
     }
 
+    // ── ZAI (Zhipu AI / z.ai) ────────────────────────────────────────
+    // https://open.bigmodel.cn/pricing — prices converted from CNY to USD
+    if model.contains("glm-4-plus") || model.contains("glm-4.7") {
+        return Some((0.70, 0.0, 0.0, 0.70));
+    }
+    if model.contains("glm-4-air") || model.contains("glm-4.5-air") {
+        return Some((0.07, 0.0, 0.0, 0.07));
+    }
+    if model.contains("glm-4-flash") || model.contains("glm-4.5-flash") {
+        return Some((0.01, 0.0, 0.0, 0.01));
+    }
+    if model.contains("glm-4-long") {
+        return Some((0.14, 0.0, 0.0, 0.14));
+    }
+    if model.contains("glm-5") {
+        return Some((0.70, 0.0, 0.0, 0.70));
+    }
+
     // ── Groq (hosted models) ─────────────────────────────────────────
     // https://groq.com/pricing/
     if model.contains("llama-3.3-70b") || model.contains("llama3-70b") {
@@ -1819,6 +1837,64 @@ mod tests {
         // llama-3.1-8b on Groq: $0.05/MTok input, $0.08/MTok output
         let cost = estimate_cost(&usage, "llama-3.1-8b-instant").unwrap();
         assert!((cost - 0.13).abs() < 0.001, "llama-3.1-8b cost: {cost}");
+    }
+
+    // ── ZAI (Zhipu AI) pricing tests ─────────────────────────────────
+
+    #[test]
+    fn test_estimate_cost_glm4_plus() {
+        let usage = yoagent::Usage {
+            input: 1_000_000,
+            output: 1_000_000,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        // glm-4-plus: $0.70/MTok input, $0.70/MTok output
+        let cost = estimate_cost(&usage, "glm-4-plus").unwrap();
+        assert!((cost - 1.40).abs() < 0.001, "glm-4-plus cost: {cost}");
+    }
+
+    #[test]
+    fn test_estimate_cost_glm4_air() {
+        let usage = yoagent::Usage {
+            input: 1_000_000,
+            output: 1_000_000,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        // glm-4-air: $0.07/MTok input, $0.07/MTok output
+        let cost = estimate_cost(&usage, "glm-4-air").unwrap();
+        assert!((cost - 0.14).abs() < 0.001, "glm-4-air cost: {cost}");
+    }
+
+    #[test]
+    fn test_estimate_cost_glm4_flash() {
+        let usage = yoagent::Usage {
+            input: 1_000_000,
+            output: 1_000_000,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        // glm-4-flash: $0.01/MTok input, $0.01/MTok output
+        let cost = estimate_cost(&usage, "glm-4-flash").unwrap();
+        assert!((cost - 0.02).abs() < 0.001, "glm-4-flash cost: {cost}");
+    }
+
+    #[test]
+    fn test_estimate_cost_glm5() {
+        let usage = yoagent::Usage {
+            input: 1_000_000,
+            output: 1_000_000,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        // glm-5: $0.70/MTok input, $0.70/MTok output
+        let cost = estimate_cost(&usage, "glm-5").unwrap();
+        assert!((cost - 1.40).abs() < 0.001, "glm-5 cost: {cost}");
     }
 
     // ── OpenRouter prefix stripping tests ────────────────────────────

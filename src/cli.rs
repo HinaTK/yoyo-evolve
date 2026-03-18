@@ -29,6 +29,7 @@ pub const KNOWN_PROVIDERS: &[&str] = &[
     "deepseek",
     "mistral",
     "cerebras",
+    "zai",
     "custom",
 ];
 
@@ -359,7 +360,7 @@ pub fn print_help() {
     println!("Options:");
     println!("  --model <name>    Model to use (default: claude-opus-4-6)");
     println!("  --provider <name> Provider: anthropic (default), openai, google, openrouter,");
-    println!("                    ollama, xai, groq, deepseek, mistral, cerebras, custom");
+    println!("                    ollama, xai, groq, deepseek, mistral, cerebras, zai, custom");
     println!("  --base-url <url>  Custom API endpoint (e.g., http://localhost:11434/v1)");
     println!("  --thinking <lvl>  Enable extended thinking (off, minimal, low, medium, high)");
     println!("  --max-tokens <n>  Maximum output tokens per response (default: 8192)");
@@ -429,6 +430,7 @@ pub fn print_help() {
     println!("  XAI_API_KEY       API key for xAI");
     println!("  DEEPSEEK_API_KEY  API key for DeepSeek");
     println!("  OPENROUTER_API_KEY API key for OpenRouter");
+    println!("  ZAI_API_KEY       API key for ZAI (Zhipu AI / z.ai)");
     println!("  API_KEY            Fallback API key (any provider)");
     println!();
     println!("Config files (searched in order, first found wins):");
@@ -1212,6 +1214,7 @@ pub fn provider_api_key_env(provider: &str) -> Option<&'static str> {
         "openrouter" => Some("OPENROUTER_API_KEY"),
         "mistral" => Some("MISTRAL_API_KEY"),
         "cerebras" => Some("CEREBRAS_API_KEY"),
+        "zai" => Some("ZAI_API_KEY"),
         "anthropic" => Some("ANTHROPIC_API_KEY"),
         _ => None,
     }
@@ -1229,6 +1232,7 @@ pub fn default_model_for_provider(provider: &str) -> String {
         "deepseek" => "deepseek-chat".into(),
         "mistral" => "mistral-large-latest".into(),
         "cerebras" => "llama-3.3-70b".into(),
+        "zai" => "glm-4-plus".into(),
         _ => "claude-opus-4-6".into(),
     }
 }

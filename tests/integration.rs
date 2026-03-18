@@ -23,6 +23,7 @@ fn yoyo_cmd() -> Command {
     cmd.env_remove("OPENROUTER_API_KEY");
     cmd.env_remove("MISTRAL_API_KEY");
     cmd.env_remove("CEREBRAS_API_KEY");
+    cmd.env_remove("ZAI_API_KEY");
     // Prevent config files from affecting tests
     cmd.env("HOME", "/nonexistent-yoyo-test-home");
     cmd.env_remove("XDG_CONFIG_HOME");
@@ -1216,6 +1217,7 @@ fn multiple_providers_missing_keys_all_show_provider_specific_hints() {
         ("groq", "GROQ_API_KEY"),
         ("xai", "XAI_API_KEY"),
         ("deepseek", "DEEPSEEK_API_KEY"),
+        ("zai", "ZAI_API_KEY"),
     ];
 
     for (provider, expected_env) in &providers_and_envs {

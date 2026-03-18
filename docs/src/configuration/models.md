@@ -1,6 +1,6 @@
 # Models & Providers
 
-yoyo supports **11 providers** out of the box — from Anthropic and OpenAI to local models via Ollama.
+yoyo supports **12 providers** out of the box — from Anthropic and OpenAI to local models via Ollama.
 
 ## Default model
 
@@ -38,6 +38,7 @@ Use `--provider <name>` to select a provider. Each provider has a default model 
 | `deepseek` | `deepseek-chat` | `DEEPSEEK_API_KEY` |
 | `mistral` | `mistral-large-latest` | `MISTRAL_API_KEY` |
 | `cerebras` | `llama-3.3-70b` | `CEREBRAS_API_KEY` |
+| `zai` | `glm-4-plus` | `ZAI_API_KEY` |
 | `custom` | `claude-opus-4-6` | *(none — bring your own)* |
 
 ### Examples
@@ -65,7 +66,7 @@ base_url = "https://api.openai.com/v1"
 
 ## Cost estimation
 
-Cost estimation is built in for Anthropic model families:
+Cost estimation is built in for many providers:
 
 | Model Family | Input (per MTok) | Output (per MTok) |
 |-------------|------------------|--------------------|
@@ -75,7 +76,7 @@ Cost estimation is built in for Anthropic model families:
 | Haiku 4.5 | $1.00 | $5.00 |
 | Haiku 3.5 | $0.80 | $4.00 |
 
-For non-Anthropic models or unrecognized model names, yoyo still works — you just won't see cost estimates.
+Cost estimates are also available for OpenAI, Google, DeepSeek, Mistral, xAI, Groq, ZAI and more.
 
 ## Context window
 

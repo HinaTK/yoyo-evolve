@@ -469,6 +469,13 @@ pub fn create_model_config(provider: &str, model: &str, base_url: Option<&str>) 
             config.compat = Some(OpenAiCompat::cerebras());
             config
         }
+        "zai" => {
+            let mut config = ModelConfig::zai(model, model);
+            if let Some(url) = base_url {
+                config.base_url = url.to_string();
+            }
+            config
+        }
         "custom" => {
             let url = base_url.unwrap_or("http://localhost:8080/v1");
             ModelConfig::local(url, model)
@@ -1322,6 +1329,48 @@ mod tests {
             &yoyo_user_agent(),
             "Google config should have User-Agent header"
         );
+    }
+
+    #[test]
+    fn test_create_model_config_zai_defaults() {
+        let config = create_model_config("zai", "glm-4-plus", None);
+        assert_eq!(config.provider, "zai");
+        assert_eq!(config.id, "glm-4-plus");
+        assert_eq!(config.base_url, "https://api.z.ai/api/paas/v4");
+        assert_eq!(
+            config.headers.get("User-Agent").unwrap(),
+            &yoyo_user_agent(),
+            "ZAI config should have User-Agent header"
+        );
+    }
+
+    #[test]
+    fn test_create_model_config_zai_custom_base_url() {
+        let config =
+            create_model_config("zai", "glm-4-plus", Some("https://custom.zai.example/v1"));
+        assert_eq!(config.provider, "zai");
+        assert_eq!(config.base_url, "https://custom.zai.example/v1");
+    }
+
+    #[test]
+    fn test_agent_config_build_agent_zai() {
+        let config = AgentConfig {
+            model: "glm-4-plus".to_string(),
+            api_key: "test-key".to_string(),
+            provider: "zai".to_string(),
+            base_url: None,
+            skills: yoagent::skills::SkillSet::empty(),
+            system_prompt: "Test.".to_string(),
+            thinking: ThinkingLevel::Off,
+            max_tokens: None,
+            temperature: None,
+            max_turns: None,
+            auto_approve: true,
+            permissions: cli::PermissionConfig::default(),
+            dir_restrictions: cli::DirectoryRestrictions::default(),
+        };
+        let agent = config.build_agent();
+        assert_eq!(agent.messages().len(), 0);
     }
 
     #[test]
