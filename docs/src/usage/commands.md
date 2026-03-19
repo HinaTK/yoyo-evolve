@@ -150,11 +150,68 @@ Features:
 - **Truncates** — caps output at ~5,000 characters to keep it readable
 - **No AI tokens used** — pure curl + text extraction
 
-## Subagent
+## Subagent & Planning
 
 | Command | Description |
 |---------|-------------|
+| `/plan <task>` | Create a step-by-step plan for a task without executing anything (architect mode) |
 | `/spawn <task>` | Spawn a subagent with a fresh context to handle a task |
+
+### `/plan` — Architect mode
+
+The `/plan` command asks the AI to create a detailed, structured plan for a task **without executing any tools**. This is the "architect mode" equivalent — you see exactly what the agent intends to do before it does anything.
+
+```
+> /plan add caching to the database layer
+
+  📋 Planning: add caching to the database layer
+
+  ## Files to examine
+  - src/db.rs — current database implementation
+  - src/config.rs — configuration for cache TTL
+
+  ## Files to modify
+  - src/db.rs — add cache layer
+  - src/cache.rs — new file for cache implementation
+  - tests/cache_test.rs — new tests
+
+  ## Step-by-step approach
+  1. Read src/db.rs to understand current query patterns
+  2. Create src/cache.rs with an LRU cache struct
+  3. Wrap database queries with cache lookups
+  4. Add cache invalidation on writes
+  5. Add configuration for cache size and TTL
+
+  ## Tests to write
+  - Cache hit returns cached value
+  - Cache miss falls through to database
+  - Write invalidates relevant cache entries
+
+  ## Potential risks
+  - Cache invalidation on complex queries
+  - Memory pressure with large result sets
+
+  ## Verification
+  - Run existing tests to ensure no regressions
+  - Run new cache tests
+  - Benchmark query latency before/after
+
+  💡 Review the plan above. Say "go ahead" to execute it, or refine it.
+```
+
+After reviewing the plan, you can:
+- Say **"go ahead"** to have the agent execute the plan
+- Ask the agent to **refine** specific parts ("make the cache configurable")
+- **Modify** the approach ("use Redis instead of in-memory")
+- Say **"no"** or change direction entirely
+
+This is especially useful for:
+- **Large refactors** where you want to understand the scope before committing
+- **Unfamiliar codebases** where you want the agent to map things out first
+- **Trust and transparency** — see the full plan before any files are modified
+- **Teaching moments** — the plan itself teaches you about the codebase structure
+
+### `/spawn` — Subagent
 
 The `/spawn` command creates a fresh AI agent with its own independent context window, sends it your task, runs it to completion, and injects the result back into your main conversation.
 

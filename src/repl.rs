@@ -621,6 +621,15 @@ pub async fn run_repl(
                 }
                 continue;
             }
+            s if s == "/plan" || s.starts_with("/plan ") => {
+                if let Some(plan_prompt) =
+                    commands::handle_plan(input, agent, &mut session_total, &agent_config.model)
+                        .await
+                {
+                    last_input = Some(plan_prompt);
+                }
+                continue;
+            }
             s if s.starts_with('/') && is_unknown_command(s) => {
                 let cmd = s.split_whitespace().next().unwrap_or(s);
                 eprintln!("{RED}  unknown command: {cmd}{RESET}");
@@ -631,7 +640,7 @@ pub async fn run_repl(
         }
 
         last_input = Some(input.to_string());
-        let outcome = run_prompt_with_changes(
+        let outcome = run_prompt_auto_retry(
             agent,
             input,
             &mut session_total,

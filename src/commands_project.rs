@@ -1535,6 +1535,75 @@ pub fn handle_web(input: &str) {
     }
 }
 
+// ── /plan ────────────────────────────────────────────────────────────────
+
+/// Parse a `/plan` command and extract the task description.
+/// Returns None if no task was provided.
+pub fn parse_plan_task(input: &str) -> Option<String> {
+    let task = input.strip_prefix("/plan").unwrap_or("").trim().to_string();
+    if task.is_empty() {
+        None
+    } else {
+        Some(task)
+    }
+}
+
+/// Build a planning-mode prompt that asks the agent to create a structured plan
+/// WITHOUT executing any tools. This is the "architect mode" equivalent.
+pub fn build_plan_prompt(task: &str) -> String {
+    format!(
+        r#"Create a detailed step-by-step plan for the following task. Do NOT execute any tools — this is planning only.
+
+## Task
+{task}
+
+## Instructions
+Analyze the task and produce a structured plan covering:
+
+1. **Files to examine** — which existing files need to be read to understand the current state
+2. **Files to modify** — which files will be created or changed, and what changes
+3. **Step-by-step approach** — ordered list of concrete implementation steps
+4. **Tests to write** — what tests should be added or updated
+5. **Potential risks** — what could go wrong, edge cases, backwards compatibility concerns
+6. **Verification** — how to confirm the changes work correctly
+
+Be specific: mention file paths, function names, and concrete code changes where possible.
+Keep the plan actionable — someone (or you, in the next step) should be able to execute it directly."#
+    )
+}
+
+/// Handle the `/plan` command: create a structured plan for a task without executing tools.
+/// The plan gets injected into conversation context so the user can review and say "go ahead."
+/// Returns Some(plan_prompt) if a plan was requested, None otherwise.
+pub async fn handle_plan(
+    input: &str,
+    agent: &mut Agent,
+    session_total: &mut Usage,
+    model: &str,
+) -> Option<String> {
+    let task = match parse_plan_task(input) {
+        Some(t) => t,
+        None => {
+            println!("{DIM}  usage: /plan <task description>{RESET}");
+            println!("{DIM}  Creates a step-by-step plan without executing any tools.{RESET}");
+            println!("{DIM}  Review the plan, then say \"go ahead\" to execute it.{RESET}\n");
+            return None;
+        }
+    };
+
+    println!("{DIM}  📋 Planning: {task}{RESET}\n");
+
+    let plan_prompt = build_plan_prompt(&task);
+    run_prompt(agent, &plan_prompt, session_total, model).await;
+    auto_compact_if_needed(agent);
+
+    println!(
+        "\n{DIM}  💡 Review the plan above. Say \"go ahead\" to execute it, or refine it.{RESET}\n"
+    );
+
+    Some(plan_prompt)
+}
+
 // ── /add ─────────────────────────────────────────────────────────────────
 
 /// Parse an `/add` argument into a file path and optional line range.
@@ -2651,5 +2720,77 @@ mod tests {
     fn add_read_file_not_found() {
         let result = read_file_for_add("definitely_not_a_real_file.xyz", None);
         assert!(result.is_err());
+    }
+
+    // ── parse_plan_task tests ────────────────────────────────────────────
+
+    #[test]
+    fn parse_plan_task_with_description() {
+        let result = parse_plan_task("/plan add error handling to the parser");
+        assert_eq!(result, Some("add error handling to the parser".to_string()));
+    }
+
+    #[test]
+    fn parse_plan_task_empty() {
+        let result = parse_plan_task("/plan");
+        assert!(result.is_none(), "Empty /plan should return None");
+    }
+
+    #[test]
+    fn parse_plan_task_whitespace_only() {
+        let result = parse_plan_task("/plan   ");
+        assert!(result.is_none(), "Whitespace-only /plan should return None");
+    }
+
+    #[test]
+    fn parse_plan_task_preserves_full_description() {
+        let result = parse_plan_task("/plan refactor main.rs into smaller modules with tests");
+        assert_eq!(
+            result,
+            Some("refactor main.rs into smaller modules with tests".to_string())
+        );
+    }
+
+    // ── build_plan_prompt tests ─────────────────────────────────────────
+
+    #[test]
+    fn build_plan_prompt_contains_task() {
+        let prompt = build_plan_prompt("add a /plan command");
+        assert!(
+            prompt.contains("add a /plan command"),
+            "Plan prompt should contain the task"
+        );
+    }
+
+    #[test]
+    fn build_plan_prompt_contains_no_tools_instruction() {
+        let prompt = build_plan_prompt("something");
+        assert!(
+            prompt.contains("Do NOT execute any tools"),
+            "Plan prompt should instruct not to use tools"
+        );
+    }
+
+    #[test]
+    fn build_plan_prompt_contains_structure_sections() {
+        let prompt = build_plan_prompt("add feature X");
+        assert!(
+            prompt.contains("Files to examine"),
+            "Should mention files to examine"
+        );
+        assert!(
+            prompt.contains("Files to modify"),
+            "Should mention files to modify"
+        );
+        assert!(
+            prompt.contains("Step-by-step"),
+            "Should mention step-by-step approach"
+        );
+        assert!(prompt.contains("Tests to write"), "Should mention tests");
+        assert!(prompt.contains("Potential risks"), "Should mention risks");
+        assert!(
+            prompt.contains("Verification"),
+            "Should mention verification"
+        );
     }
 }

@@ -58,6 +58,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/mark",
     "/jump",
     "/marks",
+    "/plan",
     "/remember",
     "/memories",
     "/provider",
@@ -236,6 +237,9 @@ pub fn help_text() -> String {
     out.push_str("  /model <name>      Switch model (preserves conversation)\n");
     out.push_str("  /provider <name>   Switch provider (resets model to provider default)\n");
     out.push_str("  /think [level]     Show or change thinking level (off/low/medium/high)\n");
+    out.push_str(
+        "  /plan <task>       Plan a task step-by-step without executing (architect mode)\n",
+    );
     out.push_str("  /spawn <task>      Spawn a subagent to handle a task (separate context)\n");
     out.push_str(
         "  /remember <note>   Save a project-specific memory (persists across sessions)\n",
@@ -541,7 +545,8 @@ pub use crate::commands_git::{
 // Project-related handlers
 pub use crate::commands_project::{
     handle_add, handle_context, handle_docs, handle_find, handle_fix, handle_health, handle_index,
-    handle_init, handle_lint, handle_run, handle_run_usage, handle_test, handle_tree, handle_web,
+    handle_init, handle_lint, handle_plan, handle_run, handle_run_usage, handle_test, handle_tree,
+    handle_web,
 };
 
 // Session-related handlers
@@ -649,13 +654,13 @@ mod tests {
         parse_pr_args, DiffStatEntry, DiffStatSummary, PrSubcommand,
     };
     use crate::commands_project::{
-        build_commands_for_project, build_fix_prompt, build_project_tree, detect_project_name,
-        detect_project_type, extract_first_meaningful_line, find_files, format_project_index,
-        format_tree_from_paths, fuzzy_score, generate_init_content, health_checks_for_project,
-        highlight_match, is_binary_extension, lint_command_for_project,
-        run_health_check_for_project, run_health_checks_full_output, run_shell_command,
-        scan_important_dirs, scan_important_files, test_command_for_project, IndexEntry,
-        ProjectType,
+        build_commands_for_project, build_fix_prompt, build_plan_prompt, build_project_tree,
+        detect_project_name, detect_project_type, extract_first_meaningful_line, find_files,
+        format_project_index, format_tree_from_paths, fuzzy_score, generate_init_content,
+        health_checks_for_project, highlight_match, is_binary_extension, lint_command_for_project,
+        parse_plan_task, run_health_check_for_project, run_health_checks_full_output,
+        run_shell_command, scan_important_dirs, scan_important_files, test_command_for_project,
+        IndexEntry, ProjectType,
     };
     use crate::commands_session::{parse_bookmark_name, parse_spawn_task};
     use crate::memory::{
@@ -3084,5 +3089,46 @@ mod tests {
     fn test_handle_add_multiple_files() {
         let results = handle_add("/add Cargo.toml LICENSE");
         assert_eq!(results.len(), 2, "Should return results for both files");
+    }
+
+    // ── /plan tests ─────────────────────────────────────────────────────
+
+    #[test]
+    fn test_parse_plan_task_extracts_task() {
+        let result = parse_plan_task("/plan add error handling");
+        assert_eq!(result, Some("add error handling".to_string()));
+    }
+
+    #[test]
+    fn test_parse_plan_task_empty_returns_none() {
+        assert!(parse_plan_task("/plan").is_none());
+        assert!(parse_plan_task("/plan  ").is_none());
+    }
+
+    #[test]
+    fn test_build_plan_prompt_structure() {
+        let prompt = build_plan_prompt("migrate database schema");
+        assert!(prompt.contains("migrate database schema"));
+        assert!(prompt.contains("Do NOT execute any tools"));
+        assert!(prompt.contains("Files to examine"));
+        assert!(prompt.contains("Step-by-step"));
+    }
+
+    #[test]
+    fn test_plan_in_known_commands() {
+        assert!(
+            KNOWN_COMMANDS.contains(&"/plan"),
+            "/plan should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_plan_in_help_text() {
+        let help = help_text();
+        assert!(help.contains("/plan"), "/plan should appear in help text");
+        assert!(
+            help.contains("architect"),
+            "Help text should mention architect mode"
+        );
     }
 }

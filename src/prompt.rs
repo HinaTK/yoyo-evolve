@@ -116,6 +116,26 @@ pub fn build_retry_prompt(input: &str, last_error: &Option<String>) -> String {
 /// Maximum number of automatic retries for transient API errors.
 const MAX_RETRIES: u32 = 3;
 
+/// Maximum number of automatic retries when a tool execution fails during a
+/// natural-language prompt. The agent re-runs with error context appended so
+/// it can self-correct without the user having to `/retry` manually.
+pub const MAX_AUTO_RETRIES: u32 = 2;
+
+/// Build a prompt for automatic retry after a tool error.
+/// Includes the original input plus context about what went wrong,
+/// encouraging the agent to try a different approach.
+pub fn build_auto_retry_prompt(original_input: &str, tool_error: &str, attempt: u32) -> String {
+    let summary = if tool_error.len() > 300 {
+        format!("{}…", &tool_error[..300])
+    } else {
+        tool_error.to_string()
+    };
+    format!(
+        "[Auto-retry {attempt}/{MAX_AUTO_RETRIES}: a tool failed with: {summary}. \
+         Try a different approach or fix the error.]\n\n{original_input}"
+    )
+}
+
 /// Calculate exponential backoff delay for a given retry attempt (1-indexed).
 /// Returns 1s, 2s, 4s for attempts 1, 2, 3.
 pub fn retry_delay(attempt: u32) -> Duration {
@@ -680,6 +700,42 @@ pub async fn run_prompt_with_changes(
     }
 }
 
+/// Run a prompt with automatic retry on tool errors.
+///
+/// Wraps `run_prompt_with_changes` with self-correction: if the outcome
+/// contains a `last_tool_error`, the prompt is automatically re-run with
+/// error context appended (up to `MAX_AUTO_RETRIES` times). This makes
+/// yoyo more resilient — instead of waiting for the user to `/retry`,
+/// the agent self-corrects on transient tool failures.
+///
+/// Only meant for natural-language prompts (not slash commands).
+pub async fn run_prompt_auto_retry(
+    agent: &mut Agent,
+    input: &str,
+    session_total: &mut Usage,
+    model: &str,
+    changes: &SessionChanges,
+) -> PromptOutcome {
+    let mut outcome = run_prompt_with_changes(agent, input, session_total, model, changes).await;
+
+    for attempt in 1..=MAX_AUTO_RETRIES {
+        match outcome.last_tool_error {
+            Some(ref err) => {
+                let retry_prompt = build_auto_retry_prompt(input, err, attempt);
+                eprintln!(
+                    "{DIM}  ⚡ auto-retrying after tool error (attempt {attempt}/{MAX_AUTO_RETRIES})...{RESET}"
+                );
+                outcome =
+                    run_prompt_with_changes(agent, &retry_prompt, session_total, model, changes)
+                        .await;
+            }
+            None => break,
+        }
+    }
+
+    outcome
+}
+
 /// Format the list of session changes for display.
 /// Returns an empty string if no changes have been recorded.
 pub fn format_changes(changes: &SessionChanges) -> String {
@@ -1138,5 +1194,48 @@ mod tests {
         assert!(output.contains("write"));
         assert!(output.contains("edit"));
         assert!(output.contains("🔧"));
+    }
+
+    #[test]
+    fn test_build_auto_retry_prompt_includes_error_and_input() {
+        let prompt = build_auto_retry_prompt("fix the bug", "file not found: foo.rs", 1);
+        assert!(prompt.contains("fix the bug"));
+        assert!(prompt.contains("file not found: foo.rs"));
+        assert!(prompt.contains("Auto-retry 1/2"));
+        assert!(prompt.contains("Try a different approach"));
+    }
+
+    #[test]
+    fn test_build_auto_retry_prompt_attempt_number() {
+        let prompt1 = build_auto_retry_prompt("do something", "error", 1);
+        let prompt2 = build_auto_retry_prompt("do something", "error", 2);
+        assert!(prompt1.contains("Auto-retry 1/2"));
+        assert!(prompt2.contains("Auto-retry 2/2"));
+    }
+
+    #[test]
+    fn test_build_auto_retry_prompt_truncates_long_errors() {
+        let long_error = "x".repeat(500);
+        let prompt = build_auto_retry_prompt("input", &long_error, 1);
+        // The error should be truncated to 300 chars + ellipsis
+        assert!(prompt.contains(&"x".repeat(300)));
+        assert!(prompt.contains('…'));
+        // Should NOT contain the full 500-char error
+        assert!(!prompt.contains(&"x".repeat(500)));
+    }
+
+    #[test]
+    fn test_build_auto_retry_prompt_preserves_short_errors() {
+        let short_error = "command exited with code 1";
+        let prompt = build_auto_retry_prompt("input", short_error, 1);
+        assert!(prompt.contains(short_error));
+        // Short errors should not have ellipsis
+        let error_portion = &prompt[..prompt.find("Try a").unwrap()];
+        assert!(!error_portion.ends_with("…. "));
+    }
+
+    #[test]
+    fn test_max_auto_retries_constant() {
+        assert_eq!(MAX_AUTO_RETRIES, 2);
     }
 }
