@@ -111,18 +111,28 @@ Anthropic · OpenAI · Google · Ollama · OpenRouter · xAI · Groq · DeepSeek
 
 ## Quick Start
 
-### Install from source
+### Install (macOS & Linux)
 
 ```bash
-git clone https://github.com/yologdev/yoyo-evolve
-cd yoyo-evolve
-cargo install --path .
+curl -fsSL https://raw.githubusercontent.com/yologdev/yoyo-evolve/main/install.sh | bash
 ```
 
-### Install from crates.io
+### Install (Windows PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/yologdev/yoyo-evolve/main/install.ps1 | iex
+```
+
+### Or install from crates.io
 
 ```bash
 cargo install yoyo-agent
+```
+
+### Or build from source
+
+```bash
+git clone https://github.com/yologdev/yoyo-evolve && cd yoyo-evolve && cargo install --path .
 ```
 
 ### Run
