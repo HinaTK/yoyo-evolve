@@ -1,5 +1,6 @@
 //! Formatting helpers: ANSI colors, cost, duration, tokens, context bar, truncation.
 
+use std::io::{self, Write};
 use std::sync::OnceLock;
 
 // --- Color support with NO_COLOR and --no-color ---
@@ -1200,7 +1201,10 @@ pub struct MarkdownRenderer {
 
 /// Minimum characters needed at line start before we can determine
 /// the line is NOT a code fence or header and flush it immediately.
-const LINE_START_RESOLVE_THRESHOLD: usize = 4;
+/// Reduced from 4 to 3: most LLM tokens are 3-5 chars, and a threshold
+/// of 4 delays the first token of many lines (e.g., "The", "But", "For").
+/// 3 chars is enough to distinguish normal text from fences (```) and headers (#).
+const LINE_START_RESOLVE_THRESHOLD: usize = 3;
 
 impl MarkdownRenderer {
     /// Create a new renderer with empty state.
@@ -1462,8 +1466,14 @@ impl Spinner {
     }
 
     /// Stop the spinner and clear its output.
+    /// Clears the spinner line directly (don't rely on the async task to clear,
+    /// since abort() can race with the clear sequence).
     pub fn stop(mut self) {
         let _ = self.cancel.send(true);
+        // Clear the spinner line from the calling thread — this is synchronous
+        // and guaranteed to complete before any subsequent stdout writes.
+        eprint!("\r\x1b[K");
+        let _ = io::stderr().flush();
         // Take the handle so Drop doesn't try to stop again
         if let Some(handle) = self.handle.take() {
             handle.abort();
@@ -1474,6 +1484,9 @@ impl Spinner {
 impl Drop for Spinner {
     fn drop(&mut self) {
         let _ = self.cancel.send(true);
+        // Clear the spinner line synchronously on drop too
+        eprint!("\r\x1b[K");
+        let _ = io::stderr().flush();
         if let Some(handle) = self.handle.take() {
             handle.abort();
         }
@@ -2497,6 +2510,78 @@ mod tests {
         assert!(
             total.contains("let") || total.contains("x"),
             "Code block content should eventually render, got: '{total}'"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_single_token_produces_output() {
+        // Issue #137: Common single-token inputs should produce non-empty output
+        // when used mid-line. At line start, short tokens that can't be fences/headers
+        // should also flush immediately.
+        let test_cases = vec![
+            // (token, description)
+            ("Hello", "common greeting"),
+            ("I", "single letter word"),
+            (" will", "space-prefixed verb"),
+            ("The", "article"),
+            ("Sure", "affirmative"),
+            ("Let", "common start word"),
+            ("Yes", "short response"),
+            ("To", "preposition"),
+        ];
+
+        for (token, desc) in &test_cases {
+            // Test mid-line: should always produce output immediately
+            let mut r = MarkdownRenderer::new();
+            // First, get past line-start by sending a resolved line-start token
+            let _ = r.render_delta("Start ");
+            let out = r.render_delta(token);
+            assert!(
+                !out.is_empty(),
+                "Mid-line token '{token}' ({desc}) should produce non-empty output, got empty"
+            );
+        }
+
+        // Test at line start: tokens that can't be fences (``) or headers (#)
+        // should flush immediately even if short
+        let line_start_cases = vec![
+            ("Hello", "common greeting"),
+            ("I", "single letter I"),
+            ("Sure", "affirmative"),
+            ("The", "article"),
+            ("Yes", "short response"),
+        ];
+
+        for (token, desc) in &line_start_cases {
+            let mut r = MarkdownRenderer::new();
+            let out = r.render_delta(token);
+            assert!(
+                !out.is_empty(),
+                "Line-start token '{token}' ({desc}) that can't be fence/header should produce output, got empty"
+            );
+        }
+    }
+
+    #[test]
+    fn test_md_streaming_single_char_non_special_at_line_start() {
+        // Single characters that are NOT '#' or '`' should flush immediately
+        // at line start, since they can't possibly be fences or headers
+        let mut r = MarkdownRenderer::new();
+        let out = r.render_delta("I");
+        assert!(
+            !out.is_empty(),
+            "'I' at line start cannot be fence or header, should flush immediately"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_space_prefixed_token_at_line_start() {
+        // " will" — space-prefixed, trimmed = "will" (4 chars), not fence/header
+        let mut r = MarkdownRenderer::new();
+        let out = r.render_delta(" will");
+        assert!(
+            !out.is_empty(),
+            "' will' at line start should resolve — trimmed 'will' is 4 chars, not fence/header"
         );
     }
 

@@ -603,6 +603,7 @@ async fn handle_prompt_events(
 ) -> PromptResult {
     let mut usage = Usage::default();
     let mut in_text = false;
+    let mut in_thinking = false;
     let mut tool_timers: HashMap<String, Instant> = HashMap::new();
     let mut collected_text = String::new();
     let mut retriable_error: Option<String> = None;
@@ -705,6 +706,13 @@ async fn handle_prompt_events(
                     } => {
                         // Stop spinner on first text
                         if let Some(s) = spinner.take() { s.stop(); }
+                        // Transition from thinking to text: add a newline separator
+                        // so text doesn't appear glued to the last thinking output
+                        if in_thinking {
+                            eprintln!();
+                            let _ = io::stderr().flush();
+                            in_thinking = false;
+                        }
                         if !in_text {
                             println!();
                             in_text = true;
@@ -722,8 +730,11 @@ async fn handle_prompt_events(
                     } => {
                         // Stop spinner on first thinking output
                         if let Some(s) = spinner.take() { s.stop(); }
-                        print!("{DIM}{delta}{RESET}");
-                        io::stdout().flush().ok();
+                        in_thinking = true;
+                        // Render thinking to stderr (dimmed) so it doesn't
+                        // interleave with stdout text output
+                        eprint!("{DIM}{delta}{RESET}");
+                        let _ = io::stderr().flush();
                     }
                     AgentEvent::AgentEnd { messages } => {
                         // Stop spinner if still running
