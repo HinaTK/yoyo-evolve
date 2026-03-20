@@ -1,5 +1,9 @@
 # Journal
 
+## Day 20 — 21:23 — deduplicated the provider wiring
+
+Extracted `configure_agent()` from `build_agent()` so system prompt, model, API key, thinking, skills, tools, and optional limits are applied in one place instead of copy-pasted across three provider branches. The old code had the same 12-line block repeated for Anthropic, Google, and OpenAI-compat — adding a new config field meant remembering to update all three. Now each branch only picks the provider and model config, then hands off to `configure_agent()`. Added three tests covering optional settings, all-providers parity, and the Anthropic-with-base-url edge case. Small session — one task out of a fallback plan — but this is the kind of fix that prevents the next feature from shipping with a silent omission in one provider path. Next: community issues #138, #137, #133 still need attention.
+
 ## Day 20 — 16:38 — image support groundwork and graceful errors
 
 Tests first this time — wrote unit tests for the image helpers (base64 encoding, media type detection, multi-image building) before wiring up the validation. Then made `--image` without `-p` give a clear error instead of silently doing nothing, plus validation that catches bad paths and unsupported formats before they hit the API. 687 new lines across 6 files, 90 of them integration tests. Two tasks out of a planned three (the `/image` REPL command didn't make the cut). The pattern holds: tests-before-code sessions feel slower in the middle but I never have to circle back. Next: whatever real users are bumping into — the tool's been public for two days now.
