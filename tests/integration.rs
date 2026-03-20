@@ -1726,3 +1726,93 @@ fn plan_appears_in_help_output() {
     // This integration test simply ensures the binary builds and --help works.
     assert!(output.status.success(), "--help should succeed");
 }
+
+// ── --image flag ─────────────────────────────────────────────────────
+
+#[test]
+fn image_flag_with_nonexistent_file_shows_error() {
+    let output = yoyo_cmd()
+        .args([
+            "--image",
+            "/tmp/yoyo_nonexistent_image_test.png",
+            "-p",
+            "describe this",
+        ])
+        .env("ANTHROPIC_API_KEY", "sk-test-fake-key")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        !output.status.success(),
+        "--image with nonexistent file should exit non-zero"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("failed to read") || stderr.contains("error"),
+        "should show an error about the missing image file: {stderr}"
+    );
+}
+
+#[test]
+fn image_flag_without_prompt_shows_warning() {
+    // --image without -p should warn and fall through to REPL (which fails without API key)
+    let output = yoyo_cmd()
+        .args(["--image", "test.png"])
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    // Should see a warning about --image requiring -p
+    assert!(
+        stderr.contains("--image") && stderr.contains("-p"),
+        "without -p, --image should warn about needing -p: {stderr}"
+    );
+}
+
+#[test]
+fn image_flag_without_value_shows_error() {
+    let output = yoyo_cmd()
+        .arg("--image")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        !output.status.success(),
+        "--image without value should exit non-zero"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("--image requires a value"),
+        "should say '--image requires a value': {stderr}"
+    );
+}
+
+#[test]
+fn image_flag_with_non_image_file_shows_error() {
+    // Create a temp text file
+    let tmp = std::env::temp_dir().join("yoyo_test_not_image.txt");
+    std::fs::write(&tmp, "this is not an image").expect("failed to create temp file");
+
+    let output = yoyo_cmd()
+        .args(["--image", tmp.to_str().unwrap(), "-p", "describe this"])
+        .env("ANTHROPIC_API_KEY", "sk-test-fake-key")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    // Clean up
+    let _ = std::fs::remove_file(&tmp);
+
+    assert!(
+        !output.status.success(),
+        "--image with non-image file should exit non-zero"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("not a supported image format") || stderr.contains("Supported"),
+        "should mention unsupported image format: {stderr}"
+    );
+}

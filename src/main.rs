@@ -667,6 +667,7 @@ async fn main() {
     let output_path = config.output_path;
     let mcp_servers = config.mcp_servers;
     let openapi_specs = config.openapi_specs;
+    let image_path = config.image_path;
     // Auto-approve in non-interactive modes (piped, --prompt) or when --yes is set
     let is_interactive = io::stdin().is_terminal() && config.prompt_arg.is_none();
     let auto_approve = config.auto_approve || !is_interactive;
@@ -772,13 +773,39 @@ async fn main() {
             );
         }
         let mut session_total = Usage::default();
-        let response = run_prompt(
-            &mut agent,
-            prompt_text.trim(),
-            &mut session_total,
-            &agent_config.model,
-        )
-        .await;
+        let response = if let Some(ref img_path) = image_path {
+            // Multi-modal prompt: text + image
+            match commands_project::read_image_for_add(img_path) {
+                Ok((data, mime_type)) => {
+                    let content_blocks = vec![
+                        Content::Text {
+                            text: prompt_text.trim().to_string(),
+                        },
+                        Content::Image { data, mime_type },
+                    ];
+                    run_prompt_with_content(
+                        &mut agent,
+                        content_blocks,
+                        &mut session_total,
+                        &agent_config.model,
+                    )
+                    .await
+                }
+                Err(e) => {
+                    eprintln!("{RED}  error: {e}{RESET}");
+                    std::process::exit(1);
+                }
+            }
+        } else {
+            // Text-only prompt
+            run_prompt(
+                &mut agent,
+                prompt_text.trim(),
+                &mut session_total,
+                &agent_config.model,
+            )
+            .await
+        };
         write_output_file(&output_path, &response.text);
         return;
     }

@@ -577,7 +577,30 @@ async fn run_prompt_once(
     changes: &SessionChanges,
     model: &str,
 ) -> PromptResult {
-    let mut rx = agent.prompt(input).await;
+    let rx = agent.prompt(input).await;
+    handle_prompt_events(agent, rx, changes, model).await
+}
+
+/// Execute a single prompt attempt with pre-built messages (e.g. multi-modal content).
+/// Same event handling as `run_prompt_once`, but uses `prompt_messages` instead of `prompt`.
+async fn run_prompt_once_with_messages(
+    agent: &mut Agent,
+    messages: Vec<AgentMessage>,
+    changes: &SessionChanges,
+    model: &str,
+) -> PromptResult {
+    let rx = agent.prompt_messages(messages).await;
+    handle_prompt_events(agent, rx, changes, model).await
+}
+
+/// Shared event-handling loop for prompt execution.
+/// Processes all events from the agent's streaming channel and returns the result.
+async fn handle_prompt_events(
+    agent: &mut Agent,
+    mut rx: tokio::sync::mpsc::UnboundedReceiver<AgentEvent>,
+    changes: &SessionChanges,
+    model: &str,
+) -> PromptResult {
     let mut usage = Usage::default();
     let mut in_text = false;
     let mut tool_timers: HashMap<String, Instant> = HashMap::new();
@@ -996,6 +1019,117 @@ pub async fn run_prompt_auto_retry(
     }
 
     outcome
+}
+
+/// Run a prompt with pre-built content blocks (e.g. text + image).
+/// This is the content-block equivalent of `run_prompt`.
+pub async fn run_prompt_with_content(
+    agent: &mut Agent,
+    content_blocks: Vec<Content>,
+    session_total: &mut Usage,
+    model: &str,
+) -> PromptOutcome {
+    let changes = SessionChanges::new();
+    run_prompt_with_content_and_changes(agent, content_blocks, session_total, model, &changes).await
+}
+
+/// Run a prompt with pre-built content blocks and file change tracking.
+/// This is the content-block equivalent of `run_prompt_with_changes`.
+pub async fn run_prompt_with_content_and_changes(
+    agent: &mut Agent,
+    content_blocks: Vec<Content>,
+    session_total: &mut Usage,
+    model: &str,
+    changes: &SessionChanges,
+) -> PromptOutcome {
+    let prompt_start = Instant::now();
+    let mut total_usage = Usage::default();
+    let mut collected_text = String::new();
+    let mut last_tool_error: Option<String> = None;
+
+    // Build the user message with content blocks
+    let user_msg = AgentMessage::Llm(Message::User {
+        content: content_blocks,
+        timestamp: now_ms(),
+    });
+
+    // Save message state before the first attempt so we can restore on retry
+    let saved_state = agent.save_messages().ok();
+
+    for attempt in 0..=MAX_RETRIES {
+        // On retry, restore pre-prompt state so we don't duplicate the user message
+        if attempt > 0 {
+            if let Some(ref json) = saved_state {
+                let _ = agent.restore_messages(json);
+            }
+        }
+
+        match run_prompt_once_with_messages(agent, vec![user_msg.clone()], changes, model).await {
+            PromptResult::Done {
+                collected_text: text,
+                usage,
+                last_tool_error: tool_err,
+            } => {
+                total_usage.input += usage.input;
+                total_usage.output += usage.output;
+                total_usage.cache_read += usage.cache_read;
+                total_usage.cache_write += usage.cache_write;
+                collected_text = text;
+                last_tool_error = tool_err;
+                break;
+            }
+            PromptResult::RetriableError { error_msg, usage } => {
+                total_usage.input += usage.input;
+                total_usage.output += usage.output;
+                total_usage.cache_read += usage.cache_read;
+                total_usage.cache_write += usage.cache_write;
+
+                if attempt < MAX_RETRIES {
+                    let delay = retry_delay(attempt + 1);
+                    let delay_secs = delay.as_secs();
+                    let next = attempt + 2;
+                    eprintln!(
+                        "{DIM}  ⚡ retrying (attempt {next}/{}, waiting {delay_secs}s)...{RESET}",
+                        MAX_RETRIES + 1
+                    );
+                    tokio::time::sleep(delay).await;
+                } else {
+                    eprintln!("\n{RED}  error: {error_msg}{RESET}");
+                    eprintln!("{DIM}  (failed after {} attempts){RESET}", MAX_RETRIES + 1);
+                    if let Some(diagnostic) = diagnose_api_error(&error_msg, model) {
+                        eprintln!(
+                            "{YELLOW}  💡 {}{RESET}",
+                            diagnostic.replace('\n', &format!("\n{YELLOW}     {RESET}"))
+                        );
+                    }
+                }
+            }
+            PromptResult::ContextOverflow { error_msg, usage } => {
+                total_usage.input += usage.input;
+                total_usage.output += usage.output;
+                total_usage.cache_read += usage.cache_read;
+                total_usage.cache_write += usage.cache_write;
+
+                eprintln!(
+                    "\n{YELLOW}  ⚡ context overflow detected — cannot retry with image content{RESET}"
+                );
+                eprintln!("{DIM}  ({error_msg}){RESET}");
+                break;
+            }
+        }
+    }
+
+    session_total.input += total_usage.input;
+    session_total.output += total_usage.output;
+    session_total.cache_read += total_usage.cache_read;
+    session_total.cache_write += total_usage.cache_write;
+    print_usage(&total_usage, session_total, model, prompt_start.elapsed());
+    println!();
+    PromptOutcome {
+        text: collected_text,
+        last_tool_error,
+        was_overflow: false,
+    }
 }
 
 /// Format the list of session changes for display.
@@ -1584,5 +1718,66 @@ mod tests {
         let prompt = build_overflow_retry_prompt("explain the code");
         assert!(prompt.contains("explain the code"));
         assert!(prompt.contains("auto-compacted"));
+    }
+
+    #[test]
+    fn test_image_content_block_construction() {
+        // Verify that Content::Image can be constructed with base64 data and mime type
+        let data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==".to_string();
+        let mime_type = "image/png".to_string();
+
+        let content_blocks = [
+            Content::Text {
+                text: "describe this image".to_string(),
+            },
+            Content::Image {
+                data: data.clone(),
+                mime_type: mime_type.clone(),
+            },
+        ];
+
+        assert_eq!(content_blocks.len(), 2);
+        match &content_blocks[0] {
+            Content::Text { text } => assert_eq!(text, "describe this image"),
+            _ => panic!("expected Text content"),
+        }
+        match &content_blocks[1] {
+            Content::Image {
+                data: d,
+                mime_type: m,
+            } => {
+                assert_eq!(d, &data);
+                assert_eq!(m, &mime_type);
+            }
+            _ => panic!("expected Image content"),
+        }
+    }
+
+    #[test]
+    fn test_user_message_with_image_content() {
+        // Verify that a user message with image content blocks can be constructed
+        // and wrapped as an AgentMessage — this is the exact pattern used by
+        // run_prompt_with_content
+        let content_blocks = vec![
+            Content::Text {
+                text: "what is this?".to_string(),
+            },
+            Content::Image {
+                data: "base64data".to_string(),
+                mime_type: "image/jpeg".to_string(),
+            },
+        ];
+
+        let user_msg = AgentMessage::Llm(Message::User {
+            content: content_blocks,
+            timestamp: now_ms(),
+        });
+
+        assert_eq!(user_msg.role(), "user");
+        if let AgentMessage::Llm(Message::User { content, .. }) = &user_msg {
+            assert_eq!(content.len(), 2);
+        } else {
+            panic!("expected Llm(User) message");
+        }
     }
 }

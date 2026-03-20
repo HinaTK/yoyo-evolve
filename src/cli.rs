@@ -326,7 +326,6 @@ pub struct Config {
     pub continue_session: bool,
     pub output_path: Option<String>,
     pub prompt_arg: Option<String>,
-    #[allow(dead_code)]
     pub image_path: Option<String>,
     pub verbose: bool,
     pub mcp_servers: Vec<String>,
@@ -933,6 +932,49 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         .cloned()
         .or_else(|| file_config.get("base_url").cloned());
 
+    // Parse prompt and image flags early so we can validate --image before API key check
+    let prompt_arg = args
+        .iter()
+        .position(|a| a == "--prompt" || a == "-p")
+        .and_then(|i| args.get(i + 1))
+        .cloned();
+
+    let image_path_raw = args
+        .iter()
+        .position(|a| a == "--image")
+        .and_then(|i| args.get(i + 1))
+        .cloned();
+
+    // Validate --image flag usage
+    if let Some(ref img_path) = image_path_raw {
+        if prompt_arg.is_none() {
+            // --image without -p: warn (image will be ignored in REPL mode)
+            eprintln!(
+                "{YELLOW}warning:{RESET} --image only works with -p (prompt mode). Ignoring --image flag."
+            );
+        } else {
+            // --image with -p: validate the file
+            let path = std::path::Path::new(img_path.as_str());
+            if !path.exists() {
+                eprintln!("{RED}error:{RESET} image file not found: {img_path}");
+                std::process::exit(1);
+            }
+            if !crate::commands_project::is_image_extension(img_path) {
+                eprintln!(
+                    "{RED}error:{RESET} '{img_path}' is not a supported image format. Supported: png, jpg, jpeg, gif, webp, bmp"
+                );
+                std::process::exit(1);
+            }
+        }
+    }
+
+    // Clear image_path if no -p flag (already warned above)
+    let image_path = if prompt_arg.is_some() {
+        image_path_raw
+    } else {
+        None
+    };
+
     // API key: --api-key flag > provider-specific env > ANTHROPIC_API_KEY > API_KEY > config file
     let api_key_from_flag = args
         .iter()
@@ -1101,18 +1143,6 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     let output_path = args
         .iter()
         .position(|a| a == "--output" || a == "-o")
-        .and_then(|i| args.get(i + 1))
-        .cloned();
-
-    let prompt_arg = args
-        .iter()
-        .position(|a| a == "--prompt" || a == "-p")
-        .and_then(|i| args.get(i + 1))
-        .cloned();
-
-    let image_path = args
-        .iter()
-        .position(|a| a == "--image")
         .and_then(|i| args.get(i + 1))
         .cloned();
 
