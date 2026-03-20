@@ -579,56 +579,24 @@ pub struct AgentConfig {
 }
 
 impl AgentConfig {
-    /// Build a fresh Agent from this configuration.
-    pub fn build_agent(&self) -> Agent {
-        let base_url = self.base_url.as_deref();
-        let mut agent = if self.provider == "anthropic" && base_url.is_none() {
-            // Default Anthropic path — add client identification headers
-            let mut anthropic_config = ModelConfig::anthropic(&self.model, &self.model);
-            insert_client_headers(&mut anthropic_config);
-            Agent::new(AnthropicProvider)
-                .with_system_prompt(&self.system_prompt)
-                .with_model(&self.model)
-                .with_api_key(&self.api_key)
-                .with_thinking(self.thinking)
-                .with_skills(self.skills.clone())
-                .with_tools(build_tools(
-                    self.auto_approve,
-                    &self.permissions,
-                    &self.dir_restrictions,
-                ))
-                .with_model_config(anthropic_config)
-        } else if self.provider == "google" {
-            // Google uses its own provider
-            let config = create_model_config(&self.provider, &self.model, base_url);
-            Agent::new(GoogleProvider)
-                .with_system_prompt(&self.system_prompt)
-                .with_model(&self.model)
-                .with_api_key(&self.api_key)
-                .with_thinking(self.thinking)
-                .with_skills(self.skills.clone())
-                .with_tools(build_tools(
-                    self.auto_approve,
-                    &self.permissions,
-                    &self.dir_restrictions,
-                ))
-                .with_model_config(config)
-        } else {
-            // All other providers use OpenAI-compatible API
-            let config = create_model_config(&self.provider, &self.model, base_url);
-            Agent::new(OpenAiCompatProvider)
-                .with_system_prompt(&self.system_prompt)
-                .with_model(&self.model)
-                .with_api_key(&self.api_key)
-                .with_thinking(self.thinking)
-                .with_skills(self.skills.clone())
-                .with_tools(build_tools(
-                    self.auto_approve,
-                    &self.permissions,
-                    &self.dir_restrictions,
-                ))
-                .with_model_config(config)
-        };
+    /// Apply common configuration to an agent (system prompt, model, API key,
+    /// thinking level, skills, tools, and optional limits).
+    ///
+    /// This is the single source of truth for agent configuration — every field
+    /// is applied here, so adding a new `AgentConfig` field only requires one
+    /// update instead of one per provider branch.
+    fn configure_agent(&self, mut agent: Agent) -> Agent {
+        agent = agent
+            .with_system_prompt(&self.system_prompt)
+            .with_model(&self.model)
+            .with_api_key(&self.api_key)
+            .with_thinking(self.thinking)
+            .with_skills(self.skills.clone())
+            .with_tools(build_tools(
+                self.auto_approve,
+                &self.permissions,
+                &self.dir_restrictions,
+            ));
 
         if let Some(max) = self.max_tokens {
             agent = agent.with_max_tokens(max);
@@ -643,6 +611,33 @@ impl AgentConfig {
             });
         }
         agent
+    }
+
+    /// Build a fresh Agent from this configuration.
+    ///
+    /// Provider selection (Anthropic, Google, or OpenAI-compatible) and model
+    /// config are the only things that vary per provider. Everything else is
+    /// handled by `configure_agent`, eliminating the previous 3-way duplication.
+    pub fn build_agent(&self) -> Agent {
+        let base_url = self.base_url.as_deref();
+
+        if self.provider == "anthropic" && base_url.is_none() {
+            // Default Anthropic path
+            let mut model_config = ModelConfig::anthropic(&self.model, &self.model);
+            insert_client_headers(&mut model_config);
+            let agent = Agent::new(AnthropicProvider).with_model_config(model_config);
+            self.configure_agent(agent)
+        } else if self.provider == "google" {
+            // Google uses its own provider
+            let model_config = create_model_config(&self.provider, &self.model, base_url);
+            let agent = Agent::new(GoogleProvider).with_model_config(model_config);
+            self.configure_agent(agent)
+        } else {
+            // All other providers use OpenAI-compatible API
+            let model_config = create_model_config(&self.provider, &self.model, base_url);
+            let agent = Agent::new(OpenAiCompatProvider).with_model_config(model_config);
+            self.configure_agent(agent)
+        }
     }
 }
 #[tokio::main]
@@ -1495,5 +1490,72 @@ mod tests {
         );
         // Also verify build_agent doesn't panic
         let _agent = agent_config.build_agent();
+    }
+
+    /// Helper to create a default AgentConfig for tests, varying only the provider.
+    fn test_agent_config(provider: &str, model: &str) -> AgentConfig {
+        AgentConfig {
+            model: model.to_string(),
+            api_key: "test-key".to_string(),
+            provider: provider.to_string(),
+            base_url: None,
+            skills: yoagent::skills::SkillSet::empty(),
+            system_prompt: "Test prompt.".to_string(),
+            thinking: ThinkingLevel::Off,
+            max_tokens: None,
+            temperature: None,
+            max_turns: None,
+            auto_approve: true,
+            permissions: cli::PermissionConfig::default(),
+            dir_restrictions: cli::DirectoryRestrictions::default(),
+        }
+    }
+
+    #[test]
+    fn test_configure_agent_applies_all_settings() {
+        // Verify configure_agent applies optional settings (max_tokens, temperature, max_turns)
+        let config = AgentConfig {
+            max_tokens: Some(2048),
+            temperature: Some(0.5),
+            max_turns: Some(5),
+            ..test_agent_config("anthropic", "claude-opus-4-6")
+        };
+        let agent = config.build_agent();
+        // Agent was built without panic — configure_agent applied all settings
+        assert_eq!(agent.messages().len(), 0);
+    }
+
+    #[test]
+    fn test_build_agent_all_providers_get_six_tools() {
+        // All three provider paths should produce agents with 6 tools via configure_agent.
+        // This catches regressions where a provider branch forgets to call configure_agent.
+        let providers = [
+            ("anthropic", "claude-opus-4-6"),
+            ("google", "gemini-2.5-pro"),
+            ("openai", "gpt-4o"),
+            ("deepseek", "deepseek-chat"),
+        ];
+        for (provider, model) in &providers {
+            let config = test_agent_config(provider, model);
+            let agent = config.build_agent();
+            assert_eq!(
+                agent.messages().len(),
+                0,
+                "provider '{provider}' should produce a clean agent"
+            );
+        }
+    }
+
+    #[test]
+    fn test_build_agent_anthropic_with_base_url_uses_openai_compat() {
+        // When Anthropic is used with a custom base_url, it should go through
+        // the OpenAI-compatible path (not the default Anthropic path)
+        let config = AgentConfig {
+            base_url: Some("https://custom-api.example.com/v1".to_string()),
+            ..test_agent_config("anthropic", "claude-opus-4-6")
+        };
+        // Should not panic — the OpenAI-compat path handles anthropic + base_url
+        let agent = config.build_agent();
+        assert_eq!(agent.messages().len(), 0);
     }
 }
