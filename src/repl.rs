@@ -309,8 +309,10 @@ pub async fn run_repl(
 
         match input {
             "/quit" | "/exit" => break,
-            "/help" => {
-                commands::handle_help();
+            s if s == "/help" || s.starts_with("/help ") => {
+                if !commands::handle_help_command(s) {
+                    commands::handle_help();
+                }
                 continue;
             }
             "/version" => {
@@ -495,14 +497,29 @@ pub async fn run_repl(
             s if s == "/add" || s.starts_with("/add ") => {
                 let results = commands::handle_add(input);
                 if !results.is_empty() {
-                    // Combine all file contents into a single user message
-                    let mut combined = String::new();
-                    for (summary, content) in &results {
-                        println!("{summary}");
-                        if !combined.is_empty() {
-                            combined.push_str("\n\n");
+                    // Build content blocks — text files become Content::Text,
+                    // image files become Content::Image
+                    let mut content_blocks: Vec<yoagent::types::Content> = Vec::new();
+                    for result in &results {
+                        match result {
+                            commands::AddResult::Text { summary, content } => {
+                                println!("{summary}");
+                                content_blocks.push(yoagent::types::Content::Text {
+                                    text: content.clone(),
+                                });
+                            }
+                            commands::AddResult::Image {
+                                summary,
+                                data,
+                                mime_type,
+                            } => {
+                                println!("{summary}");
+                                content_blocks.push(yoagent::types::Content::Image {
+                                    data: data.clone(),
+                                    mime_type: mime_type.clone(),
+                                });
+                            }
                         }
-                        combined.push_str(content);
                     }
                     let word = crate::format::pluralize(results.len(), "file", "files");
                     println!(
@@ -512,8 +529,10 @@ pub async fn run_repl(
                         RESET
                     );
                     // Inject as a user message so the AI sees the file contents
-                    let msg =
-                        yoagent::types::AgentMessage::Llm(yoagent::types::Message::user(combined));
+                    let msg = yoagent::types::AgentMessage::Llm(yoagent::types::Message::User {
+                        content: content_blocks,
+                        timestamp: yoagent::types::now_ms(),
+                    });
                     agent.append_message(msg);
                 }
                 continue;

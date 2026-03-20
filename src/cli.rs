@@ -326,6 +326,8 @@ pub struct Config {
     pub continue_session: bool,
     pub output_path: Option<String>,
     pub prompt_arg: Option<String>,
+    #[allow(dead_code)]
+    pub image_path: Option<String>,
     pub verbose: bool,
     pub mcp_servers: Vec<String>,
     pub openapi_specs: Vec<String>,
@@ -518,6 +520,7 @@ const KNOWN_FLAGS: &[&str] = &[
     "--deny",
     "--allow-dir",
     "--deny-dir",
+    "--image",
     "--no-color",
     "--verbose",
     "-v",
@@ -878,6 +881,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         "--deny",
         "--allow-dir",
         "--deny-dir",
+        "--image",
     ];
     for flag in &flags_needing_values {
         if let Some(pos) = args.iter().position(|a| a == flag) {
@@ -1106,6 +1110,12 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         .and_then(|i| args.get(i + 1))
         .cloned();
 
+    let image_path = args
+        .iter()
+        .position(|a| a == "--image")
+        .and_then(|i| args.get(i + 1))
+        .cloned();
+
     let verbose = args.iter().any(|a| a == "--verbose" || a == "-v");
 
     let auto_approve = args.iter().any(|a| a == "--yes" || a == "-y");
@@ -1193,6 +1203,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         continue_session,
         output_path,
         prompt_arg,
+        image_path,
         verbose,
         mcp_servers,
         openapi_specs,

@@ -106,8 +106,21 @@ pub fn command_arg_completions(cmd: &str, partial_arg: &str) -> Vec<String> {
         "/pr" => filter_candidates(PR_SUBCOMMANDS, &partial_lower),
         "/provider" => filter_candidates(KNOWN_PROVIDERS, &partial_lower),
         "/save" | "/load" => list_json_files(partial_arg),
+        "/help" => help_command_completions(&partial_lower),
         _ => Vec::new(),
     }
+}
+
+/// Return command names (without `/` prefix) for `/help <Tab>` completion.
+fn help_command_completions(partial_lower: &str) -> Vec<String> {
+    KNOWN_COMMANDS
+        .iter()
+        .map(|c| c.trim_start_matches('/'))
+        // /exit is an alias for /quit — skip it for cleaner completion
+        .filter(|name| *name != "exit")
+        .filter(|name| name.to_lowercase().starts_with(partial_lower))
+        .map(|name| name.to_string())
+        .collect()
 }
 
 /// Filter a list of candidates by a lowercase prefix.
@@ -159,6 +172,406 @@ pub fn thinking_level_name(level: ThinkingLevel) -> &'static str {
 }
 
 // ── /help ────────────────────────────────────────────────────────────────
+
+/// Return detailed help text for a specific command.
+///
+/// Accepts the command name without the leading `/` (e.g. `"add"`, `"commit"`).
+/// Returns `None` for unknown commands.
+pub fn command_help(cmd: &str) -> Option<&'static str> {
+    match cmd {
+        "add" => Some(
+            "/add <path> — Inject file contents into the conversation\n\n\
+             Usage:\n\
+             \x20 /add <path>              Add entire file\n\
+             \x20 /add <path>:<start>-<end> Add specific line range\n\
+             \x20 /add src/*.rs            Add files matching a glob pattern\n\
+             \x20 /add file1 file2         Add multiple files at once\n\n\
+             Examples:\n\
+             \x20 /add src/main.rs\n\
+             \x20 /add Cargo.toml:1-20\n\
+             \x20 /add src/*.rs tests/*.rs",
+        ),
+        "help" => Some(
+            "/help [command] — Show help information\n\n\
+             Usage:\n\
+             \x20 /help              Show all available commands\n\
+             \x20 /help <command>    Show detailed help for a specific command\n\n\
+             Examples:\n\
+             \x20 /help\n\
+             \x20 /help add\n\
+             \x20 /help commit",
+        ),
+        "quit" | "exit" => Some(
+            "/quit — Exit yoyo\n\n\
+             Aliases: /quit, /exit\n\n\
+             Exits the interactive REPL. Unsaved session data will be lost\n\
+             unless you /save first.",
+        ),
+        "clear" => Some(
+            "/clear — Clear conversation history\n\n\
+             Resets the conversation to a fresh state, removing all messages.\n\
+             The system prompt and loaded context are preserved.\n\
+             Session cost tracking continues.",
+        ),
+        "compact" => Some(
+            "/compact — Compact conversation to save context space\n\n\
+             Asks the AI to summarize the conversation so far into a shorter\n\
+             representation, freeing up context window space. Useful when\n\
+             approaching token limits on long sessions.",
+        ),
+        "commit" => Some(
+            "/commit [message] — Commit staged changes\n\n\
+             Usage:\n\
+             \x20 /commit              AI generates a commit message from the diff\n\
+             \x20 /commit <message>    Commit with the given message\n\n\
+             Stages all changes and commits. If no message is provided, the AI\n\
+             analyzes the diff and generates an appropriate commit message.\n\n\
+             Examples:\n\
+             \x20 /commit\n\
+             \x20 /commit fix: resolve off-by-one in parser",
+        ),
+        "cost" => Some(
+            "/cost — Show estimated session cost\n\n\
+             Displays the running cost estimate for this session based on\n\
+             input/output tokens and the current model's pricing. Supports\n\
+             cost tracking across multiple providers.",
+        ),
+        "docs" => Some(
+            "/docs <crate> [item] — Look up docs.rs documentation\n\n\
+             Usage:\n\
+             \x20 /docs <crate>          Show crate overview\n\
+             \x20 /docs <crate> <item>   Look up a specific item\n\n\
+             Fetches documentation from docs.rs for Rust crates.\n\n\
+             Examples:\n\
+             \x20 /docs serde\n\
+             \x20 /docs tokio spawn",
+        ),
+        "find" => Some(
+            "/find <pattern> — Fuzzy-search project files by name\n\n\
+             Usage:\n\
+             \x20 /find <pattern>    Search for files matching the pattern\n\n\
+             Searches the project directory for files whose names match\n\
+             the given pattern (case-insensitive fuzzy match).\n\n\
+             Examples:\n\
+             \x20 /find main\n\
+             \x20 /find test",
+        ),
+        "fix" => Some(
+            "/fix — Auto-fix build/lint errors\n\n\
+             Runs the project's build and lint checks, captures any errors,\n\
+             and sends them to the AI to automatically generate fixes.\n\
+             Auto-detects project type (Rust/cargo, Node/npm, Python, etc.).",
+        ),
+        "forget" => Some(
+            "/forget <n> — Remove a project memory by index\n\n\
+             Usage:\n\
+             \x20 /forget <n>    Delete the memory at the given index\n\n\
+             Removes a previously saved project memory. Use /memories to\n\
+             see all memories with their indices.\n\n\
+             Examples:\n\
+             \x20 /forget 0\n\
+             \x20 /forget 3",
+        ),
+        "index" => Some(
+            "/index — Build a lightweight index of project source files\n\n\
+             Scans the project directory and builds an index of source files,\n\
+             their sizes, and structure. Useful for giving the AI awareness\n\
+             of the full project layout.",
+        ),
+        "status" => Some(
+            "/status — Show session info\n\n\
+             Displays current session information including: working directory,\n\
+             active model, message count, and git branch (if in a repo).",
+        ),
+        "tokens" => Some(
+            "/tokens — Show token usage and context window\n\n\
+             Displays current token usage (input/output), the model's context\n\
+             window size, and how much capacity remains. Helps you decide\n\
+             when to /compact.",
+        ),
+        "save" => Some(
+            "/save [path] — Save session to file\n\n\
+             Usage:\n\
+             \x20 /save              Save to yoyo-session.json\n\
+             \x20 /save <path>       Save to specified path\n\n\
+             Saves the full conversation history to a JSON file so it can\n\
+             be resumed later with /load.\n\n\
+             Examples:\n\
+             \x20 /save\n\
+             \x20 /save my-debug-session.json",
+        ),
+        "load" => Some(
+            "/load [path] — Load session from file\n\n\
+             Usage:\n\
+             \x20 /load              Load from yoyo-session.json\n\
+             \x20 /load <path>       Load from specified path\n\n\
+             Restores a previously saved session, replacing the current\n\
+             conversation history.\n\n\
+             Examples:\n\
+             \x20 /load\n\
+             \x20 /load my-debug-session.json",
+        ),
+        "diff" => Some(
+            "/diff — Show file summary, change stats, and full diff\n\n\
+             Displays a summary of uncommitted changes: files modified,\n\
+             lines added/removed, and the full git diff output.\n\
+             Works in any git repository.",
+        ),
+        "undo" => Some(
+            "/undo — Revert all uncommitted changes\n\n\
+             Runs `git checkout -- .` to discard all unstaged changes.\n\
+             ⚠️  This is destructive and cannot be undone.",
+        ),
+        "health" => Some(
+            "/health — Run project health checks\n\n\
+             Auto-detects the project type and runs appropriate health\n\
+             checks (build, test, lint). Shows a summary of what passed\n\
+             and what failed.",
+        ),
+        "retry" => Some(
+            "/retry — Re-send the last user input\n\n\
+             Repeats the most recent user message to the AI. Useful when\n\
+             a response was interrupted or you want a different answer.",
+        ),
+        "history" => Some(
+            "/history — Show summary of conversation messages\n\n\
+             Displays a compact list of all messages in the current\n\
+             conversation: role, length, and a preview of each message.\n\
+             Useful for understanding conversation flow.",
+        ),
+        "search" => Some(
+            "/search <query> — Search conversation history\n\n\
+             Usage:\n\
+             \x20 /search <query>    Find messages containing the query\n\n\
+             Searches through all conversation messages for matching text\n\
+             (case-insensitive). Shows matching messages with context.\n\n\
+             Examples:\n\
+             \x20 /search error handling\n\
+             \x20 /search TODO",
+        ),
+        "model" => Some(
+            "/model <name> — Switch the AI model\n\n\
+             Usage:\n\
+             \x20 /model <name>    Switch to the specified model\n\n\
+             Changes the active model while preserving the conversation.\n\
+             Tab-completion is available for known model names.\n\n\
+             Examples:\n\
+             \x20 /model claude-sonnet-4-20250514\n\
+             \x20 /model gpt-4o\n\
+             \x20 /model gemini-2.5-pro",
+        ),
+        "think" => Some(
+            "/think [level] — Show or change thinking level\n\n\
+             Usage:\n\
+             \x20 /think             Show current thinking level\n\
+             \x20 /think <level>     Set thinking level\n\n\
+             Levels: off, minimal, low, medium, high\n\n\
+             Higher levels give the AI more internal reasoning tokens\n\
+             before responding, improving quality for complex tasks.\n\n\
+             Examples:\n\
+             \x20 /think\n\
+             \x20 /think high\n\
+             \x20 /think off",
+        ),
+        "config" => Some(
+            "/config — Show all current settings\n\n\
+             Displays the current configuration including: model, provider,\n\
+             thinking level, system prompt preview, permission settings,\n\
+             and other active options.",
+        ),
+        "context" => Some(
+            "/context — Show loaded project context files\n\n\
+             Lists the project context files that were loaded at startup\n\
+             (e.g. YOYO.md, CLAUDE.md). These files give the AI awareness\n\
+             of project conventions and architecture.",
+        ),
+        "init" => Some(
+            "/init — Scan project and generate a YOYO.md context file\n\n\
+             Analyzes the project structure, detects the tech stack, and\n\
+             creates a YOYO.md file with context information. This file\n\
+             is automatically loaded in future sessions to give the AI\n\
+             project awareness.",
+        ),
+        "version" => Some(
+            "/version — Show yoyo version\n\n\
+             Displays the current yoyo version number.",
+        ),
+        "run" => Some(
+            "/run <cmd> — Run a shell command directly\n\n\
+             Usage:\n\
+             \x20 /run <command>     Execute a shell command\n\
+             \x20 !<command>         Shortcut for /run\n\n\
+             Runs the command directly in the shell without using AI tokens.\n\
+             Output is displayed but not added to the conversation.\n\n\
+             Examples:\n\
+             \x20 /run cargo test\n\
+             \x20 !ls -la\n\
+             \x20 /run git log --oneline -5",
+        ),
+        "tree" => Some(
+            "/tree [depth] — Show project directory tree\n\n\
+             Usage:\n\
+             \x20 /tree              Show tree with default depth (3)\n\
+             \x20 /tree <depth>      Show tree with specified depth\n\n\
+             Displays the project directory structure, respecting .gitignore.\n\n\
+             Examples:\n\
+             \x20 /tree\n\
+             \x20 /tree 5",
+        ),
+        "pr" => Some(
+            "/pr [subcommand] — Pull request management\n\n\
+             Usage:\n\
+             \x20 /pr                     List open PRs\n\
+             \x20 /pr list                List open PRs\n\
+             \x20 /pr view <n>            View PR details\n\
+             \x20 /pr diff <n>            Show PR diff\n\
+             \x20 /pr comment <n> <text>  Comment on a PR\n\
+             \x20 /pr create [--draft]    Create a PR from current branch\n\
+             \x20 /pr checkout <n>        Checkout a PR's branch\n\n\
+             Requires the `gh` CLI to be installed and authenticated.\n\n\
+             Examples:\n\
+             \x20 /pr\n\
+             \x20 /pr create --draft\n\
+             \x20 /pr diff 42",
+        ),
+        "git" => Some(
+            "/git <subcmd> — Quick git commands\n\n\
+             Usage:\n\
+             \x20 /git status     Show working tree status\n\
+             \x20 /git log        Show recent commit log\n\
+             \x20 /git add        Stage all changes\n\
+             \x20 /git diff       Show unstaged changes\n\
+             \x20 /git branch     List branches\n\
+             \x20 /git stash      Stash current changes\n\n\
+             Shortcut for common git operations without leaving yoyo.\n\n\
+             Examples:\n\
+             \x20 /git status\n\
+             \x20 /git log",
+        ),
+        "test" => Some(
+            "/test — Auto-detect and run project tests\n\n\
+             Detects the project type and runs the appropriate test command:\n\
+             \x20 • Rust: cargo test\n\
+             \x20 • Node: npm test\n\
+             \x20 • Python: pytest / python -m pytest\n\
+             \x20 • Go: go test ./...\n\n\
+             Output is displayed directly in the terminal.",
+        ),
+        "lint" => Some(
+            "/lint — Auto-detect and run project linter\n\n\
+             Detects the project type and runs the appropriate linter:\n\
+             \x20 • Rust: cargo clippy\n\
+             \x20 • Node: npm run lint / eslint\n\
+             \x20 • Python: ruff / flake8\n\
+             \x20 • Go: golangci-lint\n\n\
+             Output is displayed directly in the terminal.",
+        ),
+        "spawn" => Some(
+            "/spawn <task> — Spawn a subagent to handle a task\n\n\
+             Usage:\n\
+             \x20 /spawn <task description>\n\n\
+             Creates a new AI agent with a separate context window to\n\
+             handle the given task. The subagent has access to the same\n\
+             tools but operates independently.\n\n\
+             Examples:\n\
+             \x20 /spawn write unit tests for the parser module\n\
+             \x20 /spawn refactor the error handling in src/lib.rs",
+        ),
+        "review" => Some(
+            "/review [path] — AI code review\n\n\
+             Usage:\n\
+             \x20 /review            Review staged/uncommitted changes\n\
+             \x20 /review <path>     Review a specific file\n\n\
+             Sends the diff or file to the AI for a code review, looking\n\
+             for bugs, style issues, and improvement opportunities.\n\n\
+             Examples:\n\
+             \x20 /review\n\
+             \x20 /review src/main.rs",
+        ),
+        "mark" => Some(
+            "/mark <name> — Bookmark current conversation state\n\n\
+             Usage:\n\
+             \x20 /mark <name>    Save a named bookmark at this point\n\n\
+             Creates a bookmark of the current conversation state that\n\
+             can be restored later with /jump. Useful for branching\n\
+             explorations.\n\n\
+             Examples:\n\
+             \x20 /mark before-refactor\n\
+             \x20 /mark checkpoint1",
+        ),
+        "jump" => Some(
+            "/jump <name> — Restore conversation to a bookmark\n\n\
+             Usage:\n\
+             \x20 /jump <name>    Restore to the named bookmark\n\n\
+             Restores the conversation to a previously saved bookmark.\n\
+             ⚠️  Messages after the bookmark are discarded.\n\n\
+             Examples:\n\
+             \x20 /jump before-refactor\n\
+             \x20 /jump checkpoint1",
+        ),
+        "marks" => Some(
+            "/marks — List all saved bookmarks\n\n\
+             Shows all conversation bookmarks created with /mark,\n\
+             including their names and the message count at each point.",
+        ),
+        "plan" => Some(
+            "/plan <task> — Plan a task step-by-step (architect mode)\n\n\
+             Usage:\n\
+             \x20 /plan <task description>\n\n\
+             Asks the AI to create a detailed plan for the given task\n\
+             without executing any tools. The AI analyzes the codebase\n\
+             and produces a step-by-step implementation plan.\n\n\
+             Examples:\n\
+             \x20 /plan add authentication to the API\n\
+             \x20 /plan migrate database from SQLite to PostgreSQL",
+        ),
+        "remember" => Some(
+            "/remember <note> — Save a project-specific memory\n\n\
+             Usage:\n\
+             \x20 /remember <note>    Save a memory for this project\n\n\
+             Saves a note that persists across sessions for the current\n\
+             project directory. Memories are loaded automatically when\n\
+             you start yoyo in the same directory.\n\n\
+             Examples:\n\
+             \x20 /remember always run migrations before testing\n\
+             \x20 /remember the auth module uses JWT with RS256",
+        ),
+        "memories" => Some(
+            "/memories — List project-specific memories\n\n\
+             Shows all saved memories for the current project directory.\n\
+             Each memory is displayed with its index (for use with /forget)\n\
+             and the saved text.",
+        ),
+        "provider" => Some(
+            "/provider <name> — Switch AI provider\n\n\
+             Usage:\n\
+             \x20 /provider <name>    Switch to the specified provider\n\n\
+             Changes the active AI provider and resets the model to that\n\
+             provider's default. Tab-completion is available.\n\n\
+             Providers: anthropic, openai, google, deepseek, openrouter, local\n\n\
+             Examples:\n\
+             \x20 /provider openai\n\
+             \x20 /provider google",
+        ),
+        "changes" => Some(
+            "/changes — Show files modified during this session\n\n\
+             Lists all files that were written or edited by the AI during\n\
+             the current session. Useful for reviewing what the AI touched\n\
+             before committing.",
+        ),
+        "web" => Some(
+            "/web <url> — Fetch and display web page content\n\n\
+             Usage:\n\
+             \x20 /web <url>    Fetch a URL and display readable text\n\n\
+             Downloads the web page and extracts clean readable text,\n\
+             stripping HTML tags and scripts.\n\n\
+             Examples:\n\
+             \x20 /web https://docs.rs/serde/latest\n\
+             \x20 /web https://rust-lang.org",
+        ),
+        _ => None,
+    }
+}
 
 /// Build help text as a String so it's testable.
 pub fn help_text() -> String {
@@ -258,6 +671,28 @@ pub fn help_text() -> String {
 
 pub fn handle_help() {
     println!("{DIM}{}{RESET}", help_text());
+}
+
+/// Handle `/help <command>` — show detailed help for a specific command.
+/// Returns `true` if a command was looked up (found or not), `false` if no argument.
+pub fn handle_help_command(input: &str) -> bool {
+    let arg = input
+        .strip_prefix("/help")
+        .unwrap_or("")
+        .trim()
+        .trim_start_matches('/');
+    if arg.is_empty() {
+        return false;
+    }
+    match command_help(arg) {
+        Some(text) => {
+            println!("{DIM}{text}{RESET}");
+        }
+        None => {
+            println!("{DIM}  Unknown command: /{arg}\n  Type /help for available commands.{RESET}");
+        }
+    }
+    true
 }
 
 // ── /version ─────────────────────────────────────────────────────────────
@@ -546,7 +981,7 @@ pub use crate::commands_git::{
 pub use crate::commands_project::{
     handle_add, handle_context, handle_docs, handle_find, handle_fix, handle_health, handle_index,
     handle_init, handle_lint, handle_plan, handle_run, handle_run_usage, handle_test, handle_tree,
-    handle_web,
+    handle_web, AddResult,
 };
 
 // Session-related handlers
@@ -2560,10 +2995,10 @@ mod tests {
     }
 
     #[test]
-    fn test_arg_completions_help_no_args() {
-        // Commands that don't have argument completion should return empty
+    fn test_arg_completions_help_has_args() {
+        // /help should now return command names for tab completion
         let candidates = command_arg_completions("/help", "");
-        assert!(candidates.is_empty());
+        assert!(!candidates.is_empty(), "/help should offer completions");
     }
 
     #[test]
@@ -3047,30 +3482,38 @@ mod tests {
     fn test_handle_add_real_file() {
         let results = handle_add("/add Cargo.toml");
         assert_eq!(results.len(), 1, "Should return one result for Cargo.toml");
-        let (summary, content) = &results[0];
-        assert!(
-            summary.contains("Cargo.toml"),
-            "Summary should mention the file"
-        );
-        assert!(
-            content.contains("[package]"),
-            "Content should contain file text"
-        );
+        match &results[0] {
+            AddResult::Text { summary, content } => {
+                assert!(
+                    summary.contains("Cargo.toml"),
+                    "Summary should mention the file"
+                );
+                assert!(
+                    content.contains("[package]"),
+                    "Content should contain file text"
+                );
+            }
+            _ => panic!("Expected AddResult::Text for Cargo.toml"),
+        }
     }
 
     #[test]
     fn test_handle_add_with_line_range() {
         let results = handle_add("/add Cargo.toml:1-3");
         assert_eq!(results.len(), 1);
-        let (summary, content) = &results[0];
-        assert!(
-            summary.contains("lines 1-3"),
-            "Summary should mention line range"
-        );
-        assert!(
-            content.contains("```"),
-            "Content should be wrapped in code fence"
-        );
+        match &results[0] {
+            AddResult::Text { summary, content } => {
+                assert!(
+                    summary.contains("lines 1-3"),
+                    "Summary should mention line range"
+                );
+                assert!(
+                    content.contains("```"),
+                    "Content should be wrapped in code fence"
+                );
+            }
+            _ => panic!("Expected AddResult::Text for line range"),
+        }
     }
 
     #[test]
@@ -3129,6 +3572,97 @@ mod tests {
         assert!(
             help.contains("architect"),
             "Help text should mention architect mode"
+        );
+    }
+
+    // ── /help <command> per-command detailed help tests ──────────────────
+
+    #[test]
+    fn test_command_help_add_returns_some() {
+        let help = command_help("add");
+        assert!(help.is_some(), "command_help(\"add\") should return Some");
+        let text = help.unwrap();
+        assert!(
+            text.contains("add"),
+            "Help for /add should mention file injection"
+        );
+    }
+
+    #[test]
+    fn test_command_help_nonexistent_returns_none() {
+        assert!(
+            command_help("nonexistent").is_none(),
+            "Nonexistent command should return None"
+        );
+        assert!(
+            command_help("").is_none(),
+            "Empty string should return None"
+        );
+    }
+
+    #[test]
+    fn test_command_help_exhaustive_for_known_commands() {
+        // Every command in KNOWN_COMMANDS should have a detailed help entry
+        for cmd in KNOWN_COMMANDS {
+            let name = cmd.trim_start_matches('/');
+            // /exit is an alias for /quit, skip it
+            if name == "exit" {
+                continue;
+            }
+            assert!(
+                command_help(name).is_some(),
+                "Missing detailed help for command: {cmd}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_command_help_strips_leading_slash() {
+        // command_help should work with or without leading slash
+        assert!(command_help("add").is_some());
+        assert!(command_help("commit").is_some());
+        assert!(command_help("model").is_some());
+    }
+
+    #[test]
+    fn test_help_still_in_known_commands() {
+        assert!(
+            KNOWN_COMMANDS.contains(&"/help"),
+            "/help should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_arg_completions_help_returns_command_names() {
+        let candidates = command_arg_completions("/help", "");
+        assert!(
+            !candidates.is_empty(),
+            "/help should offer command name completions"
+        );
+        assert!(
+            candidates.contains(&"add".to_string()),
+            "Should include 'add'"
+        );
+        assert!(
+            candidates.contains(&"commit".to_string()),
+            "Should include 'commit'"
+        );
+    }
+
+    #[test]
+    fn test_arg_completions_help_filters_by_prefix() {
+        let candidates = command_arg_completions("/help", "co");
+        assert!(
+            candidates.contains(&"commit".to_string()),
+            "Should include 'commit' for prefix 'co'"
+        );
+        assert!(
+            candidates.contains(&"compact".to_string()),
+            "Should include 'compact' for prefix 'co'"
+        );
+        assert!(
+            !candidates.contains(&"add".to_string()),
+            "Should not include 'add' for prefix 'co'"
         );
     }
 }

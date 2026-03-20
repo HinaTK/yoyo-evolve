@@ -1712,11 +1712,58 @@ pub fn format_add_content(path: &str, content: &str) -> String {
     format!("**{path}**\n```{lang}\n{content}\n```")
 }
 
+// ── Image support helpers ─────────────────────────────────────────────
+
+/// Check if a file path has an image extension.
+pub fn is_image_extension(path: &str) -> bool {
+    let lower = path.to_lowercase();
+    matches!(
+        lower.rsplit('.').next(),
+        Some("png" | "jpg" | "jpeg" | "gif" | "webp" | "bmp")
+    )
+}
+
+/// Map a file extension to a MIME type string.
+/// Returns `"application/octet-stream"` for unknown extensions.
+pub fn mime_type_for_extension(ext: &str) -> &'static str {
+    match ext.to_lowercase().as_str() {
+        "png" => "image/png",
+        "jpg" | "jpeg" => "image/jpeg",
+        "gif" => "image/gif",
+        "webp" => "image/webp",
+        "bmp" => "image/bmp",
+        _ => "application/octet-stream",
+    }
+}
+
+/// Result type for `/add` that distinguishes text files from image files.
+#[derive(Debug, Clone, PartialEq)]
+pub enum AddResult {
+    /// A text file: summary line + formatted content to inject.
+    Text { summary: String, content: String },
+    /// An image file: summary line + base64-encoded data + MIME type.
+    Image {
+        summary: String,
+        data: String,
+        mime_type: String,
+    },
+}
+
+/// Read an image file from disk and return base64-encoded data and MIME type.
+pub fn read_image_for_add(path: &str) -> Result<(String, String), String> {
+    use base64::Engine;
+    let bytes = std::fs::read(path).map_err(|e| format!("failed to read {path}: {e}"))?;
+    let ext = path.rsplit('.').next().unwrap_or("");
+    let mime = mime_type_for_extension(ext).to_string();
+    let data = base64::engine::general_purpose::STANDARD.encode(&bytes);
+    Ok((data, mime))
+}
+
 /// Handle the `/add` command: read file(s) and return the formatted content
 /// to be injected as a user message.
 ///
-/// Returns a Vec of (display_summary, content_to_inject) for each file.
-pub fn handle_add(input: &str) -> Vec<(String, String)> {
+/// Returns a Vec of `AddResult` — either text or image — for each file.
+pub fn handle_add(input: &str) -> Vec<AddResult> {
     let args = input.strip_prefix("/add").unwrap_or("").trim();
 
     if args.is_empty() {
@@ -1739,6 +1786,37 @@ pub fn handle_add(input: &str) -> Vec<(String, String)> {
         }
 
         for path in &paths {
+            // Check if this is an image file
+            if is_image_extension(path) {
+                // Line ranges don't apply to images
+                if range.is_some() {
+                    println!("{RED}  ✗ line ranges not supported for images: {path}{RESET}");
+                    continue;
+                }
+                match read_image_for_add(path) {
+                    Ok((data, mime_type)) => {
+                        let size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+                        let size_str = if size >= 1_048_576 {
+                            format!("{:.1} MB", size as f64 / 1_048_576.0)
+                        } else {
+                            format!("{:.0} KB", size as f64 / 1024.0)
+                        };
+                        let summary = format!(
+                            "{GREEN}  ✓ added image {path} ({size_str}, {mime_type}){RESET}"
+                        );
+                        results.push(AddResult::Image {
+                            summary,
+                            data,
+                            mime_type,
+                        });
+                    }
+                    Err(e) => {
+                        println!("{RED}  ✗ {e}{RESET}");
+                    }
+                }
+                continue;
+            }
+
             match read_file_for_add(path, range) {
                 Ok((content, line_count)) => {
                     let formatted = format_add_content(path, &content);
@@ -1750,7 +1828,10 @@ pub fn handle_add(input: &str) -> Vec<(String, String)> {
                     };
                     let summary =
                         format!("{GREEN}  ✓ added {path}{range_info} ({line_count} {word}){RESET}");
-                    results.push((summary, formatted));
+                    results.push(AddResult::Text {
+                        summary,
+                        content: formatted,
+                    });
                 }
                 Err(e) => {
                     println!("{RED}  ✗ {e}{RESET}");

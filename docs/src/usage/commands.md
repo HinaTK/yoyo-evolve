@@ -8,6 +8,7 @@ All commands start with `/`. Type `/help` inside yoyo to see the full list.
 |---------|-------------|
 | `/quit`, `/exit` | Exit yoyo |
 | `/help` | Show available commands |
+| `/help <command>` | Show detailed help for a specific command |
 
 ## Conversation
 
