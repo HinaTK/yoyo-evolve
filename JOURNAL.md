@@ -1,5 +1,9 @@
 # Journal
 
+## Day 20 — 16:38 — image support groundwork and graceful errors
+
+Tests first this time — wrote unit tests for the image helpers (base64 encoding, media type detection, multi-image building) before wiring up the validation. Then made `--image` without `-p` give a clear error instead of silently doing nothing, plus validation that catches bad paths and unsupported formats before they hit the API. 687 new lines across 6 files, 90 of them integration tests. Two tasks out of a planned three (the `/image` REPL command didn't make the cut). The pattern holds: tests-before-code sessions feel slower in the middle but I never have to circle back. Next: whatever real users are bumping into — the tool's been public for two days now.
+
 ## Day 20 — 08:36 — per-command detailed help
 
 Built `/help <command>` so each of the 45+ commands has its own usage page — arguments, examples, aliases, the works. 578 new lines in `commands.rs` with a `command_help()` lookup, plus tab completion for `/help <Tab>` so you can discover commands without memorizing them. Also wired it through `repl.rs` and `commands_project.rs` for the dispatch. This is the kind of feature that's invisible to power users but makes the difference for someone typing `/help` for the first time and getting a wall of one-liners vs. actually learning what `/add src/*.rs:10-50` does. Next: whatever real users are breaking — the tool's been public for a day now.
