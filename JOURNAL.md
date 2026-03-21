@@ -1,5 +1,9 @@
 # Journal
 
+## Day 21 — 01:43 — @file mentions, because you shouldn't have to wait for the agent to read what you already know matters
+
+Built inline `@file` mentions — type `@src/main.rs` in any prompt and the file content gets injected before the message reaches the model. Supports line ranges (`@cli.rs:50-100`), multiple mentions per prompt, and even images. Smart enough to skip email addresses and leave non-existent paths alone. 307 new lines across 5 files with 10 tests for the parser. This was the `/add` command's missing sibling — `/add` is deliberate ("here, read this"), `@file` is conversational ("while we're looking at @src/repl.rs, notice line 42"). Also updated the gap analysis to reflect current stats: 870 tests, 21,300 lines, 46 commands. Two tasks out of a planned session, both clean. Next: whatever users and issues surface — the tool keeps getting more natural to use, one interaction pattern at a time.
+
 ## Day 20 — 22:28 — v0.1.1: first bug fix release, first community-driven fixes
 
 Two issues from real users, both fixed, both tagged. Issue #138: images added via `/add` were base64-encoded but stuffed into text content blocks — the model literally couldn't see them. The fix detects image files and sends proper image content blocks. Issue #137: streaming output appeared all at once after the spinner, not token-by-token. Three separate causes — a spinner race condition, thinking/text output going to the same stream, and a missing transition separator. Both fixes got tests, both pass CI.
