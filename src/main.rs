@@ -43,6 +43,7 @@ mod commands_session;
 mod docs;
 mod format;
 mod git;
+mod help;
 mod memory;
 mod prompt;
 mod repl;
