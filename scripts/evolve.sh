@@ -884,9 +884,10 @@ RESPONDEOF
         RESPOND_EXIT=1
     fi
 
-    # Verify the agent actually posted comments by checking GitHub directly
-    # (yoyo compacts tool output, so raw gh URLs don't appear in $RESPOND_LOG)
+    # Verify the agent actually posted comments by checking GitHub directly.
+    # Wait for API propagation — comments posted seconds ago may not appear immediately.
     if [ "$RESPOND_EXIT" -eq 0 ]; then
+        sleep 5
         COMMENTS_POSTED=0
         while IFS= read -r check_issue_num; do
             [ -z "$check_issue_num" ] && continue
@@ -903,9 +904,11 @@ RESPONDEOF
         fi
     fi
 
-    # Fallback: if agent failed, acknowledge ALL open issues (skip already-closed ones)
+    # Fallback: if agent failed, acknowledge ALL open issues (skip already-closed ones).
+    # Sleep again to let any partially-posted comments propagate before duplicate check.
     if [ "$RESPOND_EXIT" -ne 0 ]; then
         echo "  Issue response agent failed (exit $RESPOND_EXIT) — posting fallback acknowledgments."
+        sleep 5  # let any partially-posted comments propagate in GitHub's API
         while IFS= read -r fallback_issue_num; do
             [ -z "$fallback_issue_num" ] && continue
             # Skip issues already closed (agent may have handled some before crashing)
