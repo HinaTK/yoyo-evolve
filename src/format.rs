@@ -954,6 +954,65 @@ pub fn truncate_with_ellipsis(s: &str, max: usize) -> String {
     }
 }
 
+/// Decode HTML entities in a string.
+///
+/// Handles named entities (`&amp;`, `&lt;`, `&gt;`, `&quot;`, `&apos;`, `&#39;`,
+/// `&nbsp;`, `&#x27;`, `&mdash;`, `&ndash;`, `&hellip;`, `&copy;`, `&reg;`)
+/// and numeric entities (decimal `&#NNN;` and hex `&#xHH;`).
+pub fn decode_html_entities(s: &str) -> String {
+    // First pass: named entities
+    let s = s
+        .replace("&amp;", "&")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&quot;", "\"")
+        .replace("&apos;", "'")
+        .replace("&#39;", "'")
+        .replace("&nbsp;", " ")
+        .replace("&#x27;", "'")
+        .replace("&mdash;", "—")
+        .replace("&ndash;", "–")
+        .replace("&hellip;", "…")
+        .replace("&copy;", "©")
+        .replace("&reg;", "®");
+
+    // Second pass: remaining numeric entities (&#NNN; and &#xHH;)
+    let mut decoded = String::with_capacity(s.len());
+    let mut chars = s.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c == '&' && chars.peek() == Some(&'#') {
+            let mut entity = String::from("&#");
+            chars.next(); // consume '#'
+            while let Some(&nc) = chars.peek() {
+                if nc == ';' {
+                    chars.next();
+                    break;
+                }
+                entity.push(nc);
+                chars.next();
+            }
+            let num_str = &entity[2..];
+            let parsed = if let Some(hex) = num_str.strip_prefix('x').or(num_str.strip_prefix('X'))
+            {
+                u32::from_str_radix(hex, 16).ok()
+            } else {
+                num_str.parse::<u32>().ok()
+            };
+            if let Some(ch) = parsed.and_then(char::from_u32) {
+                decoded.push(ch);
+            } else {
+                // Failed to decode — emit original
+                decoded.push_str(&entity);
+                decoded.push(';');
+            }
+        } else {
+            decoded.push(c);
+        }
+    }
+
+    decoded
+}
+
 /// Default character threshold for tool output truncation.
 /// Outputs longer than this get the head/tail treatment.
 pub const TOOL_OUTPUT_MAX_CHARS: usize = 30_000;
@@ -3528,5 +3587,66 @@ mod tests {
     fn test_truncate_tool_output_default_threshold_constant() {
         // Verify the default constant is 30,000
         assert_eq!(TOOL_OUTPUT_MAX_CHARS, 30_000);
+    }
+
+    // ── decode_html_entities tests ──────────────────────────────────
+
+    #[test]
+    fn test_decode_html_entities_named() {
+        assert_eq!(decode_html_entities("&amp;"), "&");
+        assert_eq!(decode_html_entities("&lt;"), "<");
+        assert_eq!(decode_html_entities("&gt;"), ">");
+        assert_eq!(decode_html_entities("&quot;"), "\"");
+        assert_eq!(decode_html_entities("&apos;"), "'");
+        assert_eq!(decode_html_entities("&#39;"), "'");
+        assert_eq!(decode_html_entities("&nbsp;"), " ");
+        assert_eq!(decode_html_entities("&#x27;"), "'");
+        assert_eq!(decode_html_entities("&mdash;"), "—");
+        assert_eq!(decode_html_entities("&ndash;"), "–");
+        assert_eq!(decode_html_entities("&hellip;"), "…");
+        assert_eq!(decode_html_entities("&copy;"), "©");
+        assert_eq!(decode_html_entities("&reg;"), "®");
+    }
+
+    #[test]
+    fn test_decode_html_entities_numeric_decimal() {
+        // &#65; = 'A'
+        assert_eq!(decode_html_entities("&#65;"), "A");
+        // &#8212; = '—' (em dash)
+        assert_eq!(decode_html_entities("&#8212;"), "—");
+    }
+
+    #[test]
+    fn test_decode_html_entities_numeric_hex() {
+        // &#x41; = 'A'
+        assert_eq!(decode_html_entities("&#x41;"), "A");
+        // &#x2014; = '—' (em dash)
+        assert_eq!(decode_html_entities("&#x2014;"), "—");
+    }
+
+    #[test]
+    fn test_decode_html_entities_mixed() {
+        assert_eq!(
+            decode_html_entities("hello &amp; world &lt;3 &#8212; done"),
+            "hello & world <3 — done"
+        );
+    }
+
+    #[test]
+    fn test_decode_html_entities_no_entities() {
+        assert_eq!(decode_html_entities("plain text"), "plain text");
+    }
+
+    #[test]
+    fn test_decode_html_entities_invalid_numeric() {
+        // Invalid numeric entity — should be preserved as-is
+        assert_eq!(decode_html_entities("&#xZZZZ;"), "&#xZZZZ;");
+        assert_eq!(decode_html_entities("&#abc;"), "&#abc;");
+    }
+
+    #[test]
+    fn test_decode_html_entities_incomplete() {
+        // Ampersand not part of an entity
+        assert_eq!(decode_html_entities("a & b"), "a & b");
     }
 }

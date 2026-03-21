@@ -144,6 +144,21 @@ pub fn format_docs_items(items: &[DocsItem], max_per_kind: usize) -> String {
     output
 }
 
+/// Build the display output for a docs.rs page given its URL, description, and item listing.
+/// Shared by `fetch_docs_summary` and `fetch_docs_item`.
+fn build_docs_display(url: &str, description: Option<String>, items_display: &str) -> String {
+    let mut summary = format!("  📦 {url}\n");
+    if let Some(desc) = description {
+        summary.push_str(&format!("  📝 {desc}\n"));
+    }
+    if !items_display.is_empty() {
+        summary.push_str(&format!("\n{items_display}"));
+    } else if !summary.contains("📝") {
+        summary.push_str("  Docs available at the URL above.");
+    }
+    summary
+}
+
 /// Fetch a summary from docs.rs for a given Rust crate.
 /// Returns (found, summary_text). If the crate exists, `found` is true and `summary_text`
 /// contains the URL, description, and API item overview. If not found or on error, `found` is false.
@@ -170,19 +185,7 @@ pub fn fetch_docs_summary(crate_name: &str) -> (bool, String) {
     let items = parse_docs_items(&body);
     let items_display = format_docs_items(&items, 10);
 
-    let mut summary = format!("  📦 {url}\n");
-    if let Some(desc) = description {
-        summary.push_str(&format!("  📝 {desc}\n"));
-    }
-    if !items_display.is_empty() {
-        summary.push_str(&format!("\n{items_display}"));
-    } else {
-        if !summary.contains("📝") {
-            summary.push_str("  Docs available at the URL above.");
-        }
-    }
-
-    (true, summary)
+    (true, build_docs_display(&url, description, &items_display))
 }
 
 /// Fetch docs for a specific item within a crate (e.g., `/docs tokio task`).
@@ -213,17 +216,7 @@ pub fn fetch_docs_item(crate_name: &str, item: &str) -> (bool, String) {
     let items = parse_docs_items(&body);
     let items_display = format_docs_items(&items, 10);
 
-    let mut summary = format!("  📦 {url}\n");
-    if let Some(desc) = description {
-        summary.push_str(&format!("  📝 {desc}\n"));
-    }
-    if !items_display.is_empty() {
-        summary.push_str(&format!("\n{items_display}"));
-    } else if !summary.contains("📝") {
-        summary.push_str("  Docs available at the URL above.");
-    }
-
-    (true, summary)
+    (true, build_docs_display(&url, description, &items_display))
 }
 
 /// Extract the content of `<meta name="description" content="...">` from HTML.
@@ -237,12 +230,7 @@ pub fn extract_meta_description(html: &str) -> Option<String> {
     let content_end = content.find('"')?;
     let desc = &content[..content_end];
 
-    let desc = desc
-        .replace("&amp;", "&")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", "\"")
-        .replace("&#39;", "'");
+    let desc = crate::format::decode_html_entities(desc);
 
     let desc = desc.trim().to_string();
     if desc.is_empty() || desc == "API documentation for the Rust `crate` crate." {
@@ -513,5 +501,49 @@ mod tests {
     fn test_fetch_docs_item_empty_item_delegates_to_summary() {
         let (_, msg) = fetch_docs_item("totally_nonexistent_crate_xyz_123", "");
         assert!(!msg.contains("Invalid crate name"));
+    }
+
+    // ── build_docs_display ──────────────────────────────────────────
+
+    #[test]
+    fn test_build_docs_display_with_desc_and_items() {
+        let result = build_docs_display(
+            "https://docs.rs/serde/latest/serde/",
+            Some("A serialization framework".to_string()),
+            "  Modules: de, ser",
+        );
+        assert!(result.contains("📦 https://docs.rs/serde/latest/serde/"));
+        assert!(result.contains("📝 A serialization framework"));
+        assert!(result.contains("Modules: de, ser"));
+    }
+
+    #[test]
+    fn test_build_docs_display_with_desc_no_items() {
+        let result = build_docs_display(
+            "https://docs.rs/serde/latest/serde/",
+            Some("A serialization framework".to_string()),
+            "",
+        );
+        assert!(result.contains("📝 A serialization framework"));
+        assert!(!result.contains("Docs available at the URL above."));
+    }
+
+    #[test]
+    fn test_build_docs_display_no_desc_no_items() {
+        let result = build_docs_display("https://docs.rs/serde/latest/serde/", None, "");
+        assert!(result.contains("📦"));
+        assert!(result.contains("Docs available at the URL above."));
+    }
+
+    #[test]
+    fn test_build_docs_display_no_desc_with_items() {
+        let result = build_docs_display(
+            "https://docs.rs/serde/latest/serde/",
+            None,
+            "  Structs: Foo",
+        );
+        assert!(!result.contains("📝"));
+        assert!(result.contains("Structs: Foo"));
+        assert!(!result.contains("Docs available at the URL above."));
     }
 }

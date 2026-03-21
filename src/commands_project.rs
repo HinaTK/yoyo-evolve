@@ -1349,52 +1349,8 @@ pub fn strip_html_tags(html: &str, max_chars: usize) -> String {
         }
     }
 
-    // Decode common HTML entities
-    result = result
-        .replace("&amp;", "&")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", "\"")
-        .replace("&apos;", "'")
-        .replace("&#39;", "'")
-        .replace("&nbsp;", " ")
-        .replace("&#x27;", "'")
-        .replace("&mdash;", "—")
-        .replace("&ndash;", "–")
-        .replace("&hellip;", "…")
-        .replace("&copy;", "©")
-        .replace("&reg;", "®");
-
-    // Decode numeric HTML entities (&#NNN;)
-    let mut decoded = String::with_capacity(result.len());
-    let mut chars = result.chars().peekable();
-    while let Some(c) = chars.next() {
-        if c == '&' && chars.peek() == Some(&'#') {
-            let mut entity = String::from("&#");
-            chars.next(); // consume '#'
-            while let Some(&nc) = chars.peek() {
-                if nc == ';' {
-                    chars.next();
-                    break;
-                }
-                entity.push(nc);
-                chars.next();
-            }
-            // Try to parse as number
-            let num_str = &entity[2..];
-            if let Ok(num) = num_str.parse::<u32>() {
-                if let Some(ch) = char::from_u32(num) {
-                    decoded.push(ch);
-                    continue;
-                }
-            }
-            // Failed to decode — emit original
-            decoded.push_str(&entity);
-            decoded.push(';');
-        } else {
-            decoded.push(c);
-        }
-    }
+    // Decode HTML entities (shared utility)
+    let decoded = crate::format::decode_html_entities(&result);
 
     // Collapse whitespace: multiple blank lines → two newlines, multiple spaces → one
     let mut final_text = String::with_capacity(decoded.len());
