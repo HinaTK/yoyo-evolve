@@ -4,6 +4,34 @@ All notable changes to **yoyo-agent** (`cargo install yoyo-agent`) are documente
 
 This project is a self-evolving coding agent — every change was planned, implemented, and tested by yoyo itself during automated evolution sessions. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] — 2026-03-22
+
+Feature release adding per-command help, inline file mentions, new commands, and polished rendering — built across Days 20–22.
+
+### Added
+
+- **Per-command `/help <command>`** — detailed usage, examples, and flags for any slash command (Day 21)
+- **`/grep` command** — direct file search from the REPL without an API round-trip (Day 21)
+- **`/git stash` subcommand** — `save`, `pop`, `list`, `apply`, `drop` for git stash management (Day 21)
+- **Inline `@file` mentions** — `@path` in prompts expands to file contents; supports line ranges `@file:10-20` and image files (Day 21)
+- **First-run welcome & setup guide** — detects first run, shows welcome message, guides API key and model configuration (Day 22)
+- **Visual section headers** — output hierarchy with section dividers for clearer structure (Day 22)
+
+### Improved
+
+- **Markdown rendering** — lists, italic, blockquotes, and horizontal rules now render properly with ANSI formatting (Day 21)
+- **`/diff` with inline colored patches** — diff output shows +/- lines with red/green highlighting (Day 22)
+- **Code block streaming** — token-by-token instead of line-buffered; tokens now flow immediately during code output (Day 21)
+- **Architecture documentation** — Mermaid diagrams added to mdbook docs (Day 21)
+- **`run_git()` helper deduplication** — consolidated repeated git command patterns into shared helper (Day 20)
+- **`configure_agent()` provider setup deduplication** — cleaned up provider configuration logic (Day 20)
+- **Tool output summaries** — richer context for `read_file`, `edit_file`, `search`, and `bash` tool results (Day 21)
+
+### Fixed
+
+- **Code block streaming buffering** — tokens inside code blocks now flow immediately instead of buffering entire lines (Day 21)
+- **Missing transition separator** — added separator between thinking output and text response sections (Day 22)
+
 ## [0.1.1] — 2026-03-20
 
 Bug fix release addressing two community-reported issues.
@@ -193,5 +221,10 @@ The codebase evolved from a single 200-line `main.rs` to 12 focused modules (~17
 | 17 | True token-by-token streaming fix, multi-provider cost tracking (7 providers), crates.io package rename, pluralization fix, `/changes` command |
 | 18 | z.ai (Zhipu AI) provider support, test backfill for `commands_git` and `commands_project` (1,118 lines of tests) |
 | 19 | Published to crates.io as v0.1.0 🎉 |
+| 20 | `run_git()` dedup, `configure_agent()` dedup, context overflow auto-recovery, v0.1.1 bug fix release |
+| 21 | Per-command `/help <cmd>`, `/grep`, `/git stash`, inline `@file` mentions, markdown rendering (lists, italic, blockquotes), code block streaming fix, tool output summaries, architecture docs |
+| 22 | First-run welcome & setup guide, `/diff` inline colored patches, visual section headers, v0.1.2 release |
 
+[0.1.2]: https://github.com/yologdev/yoyo-evolve/releases/tag/v0.1.2
+[0.1.1]: https://github.com/yologdev/yoyo-evolve/releases/tag/v0.1.1
 [0.1.0]: https://github.com/yologdev/yoyo-evolve/releases/tag/v0.1.0
