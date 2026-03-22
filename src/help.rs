@@ -138,6 +138,20 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /rename OldStruct NewStruct\n\
              \x20 /rename CONFIG_KEY NEW_KEY",
         ),
+        "extract" => Some(
+            "/extract <symbol> <source_file> <target_file> — Move a symbol between files\n\n\
+             Usage:\n\
+             \x20 /extract <symbol> <source> <target>    Move a top-level item to another file\n\n\
+             Finds and moves a function, struct, enum, impl, or trait from the source\n\
+             file to the target file. Includes doc comments and attributes.\n\
+             Uses brace-depth tracking to detect the full block.\n\
+             Shows a preview and asks for confirmation before moving.\n\
+             Creates the target file if it doesn't exist.\n\n\
+             Examples:\n\
+             \x20 /extract my_func src/lib.rs src/utils.rs\n\
+             \x20 /extract MyStruct src/main.rs src/types.rs\n\
+             \x20 /extract MyTrait src/old.rs src/new.rs",
+        ),
         "fix" => Some(
             "/fix — Auto-fix build/lint errors\n\n\
              Runs the project's build and lint checks, captures any errors,\n\
@@ -555,6 +569,7 @@ pub fn help_text() -> String {
     out.push_str("  /find <pattern>    Fuzzy-search project files by name\n");
     out.push_str("  /grep <pattern> [path] Search file contents directly (no AI, instant)\n");
     out.push_str("  /rename <old> <new> Cross-file symbol renaming with word boundaries\n");
+    out.push_str("  /extract <sym> <src> <dst> Move a function/struct/impl to another file\n");
     out.push_str("  /index             Build a lightweight index of project source files\n");
     out.push_str("  /tree [depth]      Show project directory tree (default depth: 3)\n");
     out.push_str("  /web <url>         Fetch a web page and display clean readable text content\n");

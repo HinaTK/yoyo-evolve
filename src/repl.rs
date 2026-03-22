@@ -587,6 +587,10 @@ pub async fn run_repl(
                 commands::handle_rename(input);
                 continue;
             }
+            s if s == "/extract" || s.starts_with("/extract ") => {
+                commands::handle_extract(input);
+                continue;
+            }
             s if s == "/remember" || s.starts_with("/remember ") => {
                 commands::handle_remember(input);
                 continue;

@@ -340,6 +340,34 @@ The `/review` command sends your code to the AI for a thorough review covering:
 
 This is one of the most common workflows for developers using coding agents — getting a second pair of eyes on your changes before committing.
 
+## Refactoring
+
+| Command | Description |
+|---------|-------------|
+| `/rename <old> <new>` | Cross-file symbol renaming with word-boundary matching |
+| `/extract <symbol> <source> <target>` | Move a function, struct, enum, impl, or trait from one file to another |
+
+### `/rename` — Cross-file symbol renaming
+
+The `/rename` command does a smart find-and-replace across all git-tracked files, respecting word boundaries (renaming `foo` won't change `foobar` or `my_foo`). Shows a preview of all matches, then asks for confirmation.
+
+```
+/rename my_func new_func
+/rename OldStruct NewStruct
+```
+
+### `/extract` — Move symbols between files
+
+The `/extract` command moves a top-level item (function, struct, enum, impl, trait) from one file to another. It uses brace-depth tracking to find the full block, including doc comments and attributes above the declaration.
+
+```
+/extract my_func src/lib.rs src/utils.rs
+/extract MyStruct src/main.rs src/types.rs
+/extract MyTrait src/old.rs src/new.rs
+```
+
+The command shows a preview of the block to be moved and asks for confirmation before making changes. If the target file doesn't exist, it's created. If the symbol is public, yoyo notes that you may need to add a `use` import in the source file.
+
 ## Project Context
 
 | Command | Description |
