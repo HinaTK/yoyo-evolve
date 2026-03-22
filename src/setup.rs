@@ -58,6 +58,28 @@ pub fn save_config_to_file(
     Ok(path.to_string())
 }
 
+/// Save config to the user-level XDG path (`~/.config/yoyo/config.toml`).
+/// Creates parent directories if they don't exist.
+/// Returns Ok(path_string) on success.
+pub fn save_config_to_user_file(
+    provider: &str,
+    model: &str,
+    base_url: Option<&str>,
+) -> io::Result<String> {
+    let path = crate::cli::user_config_path().ok_or_else(|| {
+        io::Error::new(
+            io::ErrorKind::NotFound,
+            "Could not determine user config directory (no HOME or XDG_CONFIG_HOME set)",
+        )
+    })?;
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    let contents = generate_config_contents(provider, model, base_url);
+    std::fs::write(&path, contents)?;
+    Ok(path.display().to_string())
+}
+
 /// Parse a provider selection number (1-based) from user input.
 /// Returns the provider slug if the number is valid, None otherwise.
 pub fn parse_provider_choice(input: &str) -> Option<&'static str> {
@@ -75,6 +97,37 @@ pub fn parse_provider_choice(input: &str) -> Option<&'static str> {
         }
     }
     None
+}
+
+/// Where the user wants to save their config.
+#[derive(Debug, Clone, PartialEq)]
+pub enum SaveLocation {
+    /// Save to `.yoyo.toml` in the current directory.
+    Project,
+    /// Save to `~/.config/yoyo/config.toml` (user-level XDG path).
+    User,
+    /// Don't save.
+    Skip,
+}
+
+/// Parse a save-location choice from wizard input.
+/// "1" or "p"/"project" => Project, "2" or "u"/"user" => User,
+/// "3" or "n"/"no"/"none"/"s"/"skip" => Skip. Default (empty) => Project.
+pub fn parse_save_choice(input: &str) -> SaveLocation {
+    let trimmed = input.trim().to_lowercase();
+    match trimmed.as_str() {
+        "" | "1" | "p" | "project" => SaveLocation::Project,
+        "2" | "u" | "user" | "global" => SaveLocation::User,
+        "3" | "n" | "no" | "none" | "s" | "skip" => SaveLocation::Skip,
+        _ => SaveLocation::Project, // default
+    }
+}
+
+/// Get a friendly display string for the user-level config path.
+pub fn user_config_display_path() -> String {
+    crate::cli::user_config_path()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|| "~/.config/yoyo/config.toml".to_string())
 }
 
 /// Run the interactive setup wizard, reading from `reader` and writing to `writer`.
@@ -273,44 +326,64 @@ pub fn run_wizard_interactive<R: BufRead, W: Write>(
 
     writeln!(writer, "  {GREEN}✓{RESET} Model: {BOLD}{model}{RESET}").ok();
 
-    // Step 4: Offer to save config
+    // Step 4: Offer to save config (three choices)
+    let xdg_display = user_config_display_path();
     writeln!(writer).ok();
-    writeln!(
-        writer,
-        "  {BOLD}Step 4:{RESET} Save configuration to {CYAN}.yoyo.toml{RESET}?"
-    )
-    .ok();
+    writeln!(writer, "  {BOLD}Step 4:{RESET} Save configuration?").ok();
     writeln!(
         writer,
         "  {DIM}This saves your provider and model so you don't need flags next time.{RESET}"
     )
     .ok();
     writeln!(writer).ok();
-    write!(writer, "  Save config? [Y/n]: ").ok();
+    writeln!(
+        writer,
+        "    {BOLD}1{RESET}. Save to {CYAN}.yoyo.toml{RESET} (current project only)"
+    )
+    .ok();
+    writeln!(
+        writer,
+        "    {BOLD}2{RESET}. Save to {CYAN}{xdg_display}{RESET} (user-level, applies everywhere)"
+    )
+    .ok();
+    writeln!(writer, "    {BOLD}3{RESET}. Don't save").ok();
+    writeln!(writer).ok();
+    write!(writer, "  Choice [1]: ").ok();
     writer.flush().ok();
 
     let mut save_input = String::new();
     if reader.read_line(&mut save_input).is_err() {
-        // Default to yes on read error
-        save_input = "y".to_string();
+        // Default to project on read error
+        save_input = "1".to_string();
     }
-    let save_choice = save_input.trim().to_lowercase();
+    let save_location = parse_save_choice(&save_input);
 
-    if save_choice.is_empty() || save_choice == "y" || save_choice == "yes" {
-        match save_config_to_file(provider, &model, base_url.as_deref()) {
+    match save_location {
+        SaveLocation::Project => match save_config_to_file(provider, &model, base_url.as_deref()) {
             Ok(path) => {
                 writeln!(writer, "  {GREEN}✓{RESET} Saved to {CYAN}{path}{RESET}").ok();
             }
             Err(e) => {
                 writeln!(writer, "  {YELLOW}Could not save config: {e}{RESET}").ok();
             }
+        },
+        SaveLocation::User => {
+            match save_config_to_user_file(provider, &model, base_url.as_deref()) {
+                Ok(path) => {
+                    writeln!(writer, "  {GREEN}✓{RESET} Saved to {CYAN}{path}{RESET}").ok();
+                }
+                Err(e) => {
+                    writeln!(writer, "  {YELLOW}Could not save config: {e}{RESET}").ok();
+                }
+            }
         }
-    } else {
-        writeln!(
-            writer,
-            "  {DIM}Skipped — you can create .yoyo.toml manually later.{RESET}"
-        )
-        .ok();
+        SaveLocation::Skip => {
+            writeln!(
+                writer,
+                "  {DIM}Skipped — you can create .yoyo.toml or {xdg_display} manually later.{RESET}"
+            )
+            .ok();
+        }
     }
 
     writeln!(writer).ok();
@@ -651,5 +724,182 @@ mod tests {
 
         let output_str = String::from_utf8(output).unwrap();
         assert!(output_str.contains("No base URL provided"));
+    }
+
+    #[test]
+    fn test_parse_save_choice_defaults_to_project() {
+        assert_eq!(parse_save_choice(""), SaveLocation::Project);
+        assert_eq!(parse_save_choice("1"), SaveLocation::Project);
+        assert_eq!(parse_save_choice("p"), SaveLocation::Project);
+        assert_eq!(parse_save_choice("project"), SaveLocation::Project);
+        assert_eq!(parse_save_choice("  1  "), SaveLocation::Project);
+    }
+
+    #[test]
+    fn test_parse_save_choice_user() {
+        assert_eq!(parse_save_choice("2"), SaveLocation::User);
+        assert_eq!(parse_save_choice("u"), SaveLocation::User);
+        assert_eq!(parse_save_choice("user"), SaveLocation::User);
+        assert_eq!(parse_save_choice("global"), SaveLocation::User);
+        assert_eq!(parse_save_choice("  2  "), SaveLocation::User);
+    }
+
+    #[test]
+    fn test_parse_save_choice_skip() {
+        assert_eq!(parse_save_choice("3"), SaveLocation::Skip);
+        assert_eq!(parse_save_choice("n"), SaveLocation::Skip);
+        assert_eq!(parse_save_choice("no"), SaveLocation::Skip);
+        assert_eq!(parse_save_choice("none"), SaveLocation::Skip);
+        assert_eq!(parse_save_choice("s"), SaveLocation::Skip);
+        assert_eq!(parse_save_choice("skip"), SaveLocation::Skip);
+    }
+
+    #[test]
+    fn test_parse_save_choice_unknown_defaults_to_project() {
+        assert_eq!(parse_save_choice("banana"), SaveLocation::Project);
+        assert_eq!(parse_save_choice("yes"), SaveLocation::Project);
+    }
+
+    #[test]
+    fn test_save_config_to_user_file() {
+        // Use a temp dir to simulate XDG_CONFIG_HOME
+        let dir = std::env::temp_dir().join("yoyo_test_xdg_save");
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+
+        // Override XDG_CONFIG_HOME so user_config_path() points here
+        let prev_xdg = std::env::var("XDG_CONFIG_HOME").ok();
+        std::env::set_var("XDG_CONFIG_HOME", &dir);
+
+        let result = save_config_to_user_file("google", "gemini-2.0-flash", None);
+        assert!(result.is_ok(), "save_config_to_user_file should succeed");
+        let path_str = result.unwrap();
+        assert!(
+            path_str.contains("yoyo"),
+            "path should contain yoyo directory"
+        );
+        assert!(
+            path_str.contains("config.toml"),
+            "path should end with config.toml"
+        );
+
+        // Verify file contents
+        let content = std::fs::read_to_string(&path_str).unwrap();
+        assert!(content.contains("provider = \"google\""));
+        assert!(content.contains("model = \"gemini-2.0-flash\""));
+
+        // Cleanup
+        if let Some(val) = prev_xdg {
+            std::env::set_var("XDG_CONFIG_HOME", val);
+        } else {
+            std::env::remove_var("XDG_CONFIG_HOME");
+        }
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn test_save_config_to_user_file_creates_parent_dirs() {
+        // Use a temp dir with nested path to verify parent creation
+        let dir = std::env::temp_dir().join("yoyo_test_xdg_nested");
+        let _ = std::fs::remove_dir_all(&dir);
+        // Don't create the dir — save_config_to_user_file should create it
+
+        let prev_xdg = std::env::var("XDG_CONFIG_HOME").ok();
+        std::env::set_var("XDG_CONFIG_HOME", &dir);
+
+        let result = save_config_to_user_file("openai", "gpt-4o", None);
+        assert!(
+            result.is_ok(),
+            "should create parent dirs: {:?}",
+            result.err()
+        );
+
+        let expected_path = dir.join("yoyo").join("config.toml");
+        assert!(expected_path.exists(), "config file should exist");
+
+        // Cleanup
+        if let Some(val) = prev_xdg {
+            std::env::set_var("XDG_CONFIG_HOME", val);
+        } else {
+            std::env::remove_var("XDG_CONFIG_HOME");
+        }
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn test_wizard_step4_shows_three_choices() {
+        // Choose ollama (4), default model, then check Step 4 output shows 3 options
+        let input = "4\n\n3\n"; // ollama, default model, skip saving
+        let mut reader = io::Cursor::new(input.as_bytes());
+        let mut output = Vec::new();
+
+        let result = run_wizard_interactive(&mut reader, &mut output);
+        assert!(result.is_some());
+
+        let output_str = String::from_utf8(output).unwrap();
+        assert!(
+            output_str.contains(".yoyo.toml"),
+            "should show project-level option"
+        );
+        assert!(
+            output_str.contains("user-level"),
+            "should show user-level option"
+        );
+        assert!(output_str.contains("Don't save"), "should show skip option");
+        assert!(
+            output_str.contains("Choice [1]"),
+            "should show choice prompt with default"
+        );
+    }
+
+    #[test]
+    fn test_wizard_save_to_user_level() {
+        // Set up a temp XDG dir so saving actually works
+        let dir = std::env::temp_dir().join("yoyo_test_wizard_user_save");
+        let _ = std::fs::remove_dir_all(&dir);
+
+        let prev_xdg = std::env::var("XDG_CONFIG_HOME").ok();
+        std::env::set_var("XDG_CONFIG_HOME", &dir);
+
+        // Choose ollama (4), default model, save to user-level (2)
+        let input = "4\n\n2\n";
+        let mut reader = io::Cursor::new(input.as_bytes());
+        let mut output = Vec::new();
+
+        let result = run_wizard_interactive(&mut reader, &mut output);
+        assert!(result.is_some());
+
+        let output_str = String::from_utf8(output).unwrap();
+        assert!(
+            output_str.contains("Saved to"),
+            "should confirm save: {output_str}"
+        );
+
+        // Verify file was actually created
+        let expected_path = dir.join("yoyo").join("config.toml");
+        assert!(
+            expected_path.exists(),
+            "user-level config should be created"
+        );
+        let content = std::fs::read_to_string(&expected_path).unwrap();
+        assert!(content.contains("provider = \"ollama\""));
+
+        // Cleanup
+        if let Some(val) = prev_xdg {
+            std::env::set_var("XDG_CONFIG_HOME", val);
+        } else {
+            std::env::remove_var("XDG_CONFIG_HOME");
+        }
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn test_user_config_display_path() {
+        // Just verify the function returns something reasonable
+        let display = user_config_display_path();
+        assert!(
+            display.contains("yoyo") || display.contains("config"),
+            "display path should mention yoyo or config: {display}"
+        );
     }
 }
