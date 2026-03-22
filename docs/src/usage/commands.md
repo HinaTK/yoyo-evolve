@@ -341,6 +341,7 @@ This is one of the most common workflows for developers using coding agents — 
 | `/add <path>` | Add file contents into the conversation — the AI sees them immediately |
 | `/context` | Show which project context files are loaded (YOYO.md is primary; CLAUDE.md supported for compatibility) |
 | `/find <pattern>` | Fuzzy-search project files by name — respects `.gitignore`, ranked by relevance |
+| `/grep <pattern> [path]` | Search file contents directly — no AI, no tokens, instant results |
 | `/index` | Build a lightweight index of all project source files — shows path, line count, and first-line summary |
 | `/init` | Scan the project and generate a YOYO.md context file with detected build commands, key files, and project structure |
 | `/tree [depth]` | Show project directory tree (default depth: 3, respects `.gitignore`) |
@@ -393,6 +394,36 @@ The `/find` command does fuzzy substring matching across all tracked files in yo
     Cargo.toml
     docs/book.toml
 ```
+
+### `/grep` — Search file contents directly
+
+The `/grep` command searches file contents without using the AI — no tokens, no API call, instant results. This is one of the fastest ways to find code in your project.
+
+```
+/grep TODO
+  src/main.rs:42: // TODO: handle edge case
+  src/cli.rs:15: // TODO: add validation
+  
+  2 matches
+
+/grep "fn main" src/
+  src/main.rs:10: fn main() {
+  
+  1 match
+
+/grep -s MyStruct src/lib.rs
+  src/lib.rs:5: pub struct MyStruct {
+  src/lib.rs:20: impl MyStruct {
+  
+  2 matches
+```
+
+Features:
+- **Case-insensitive by default** — use `-s` or `--case` for case-sensitive search
+- **Git-aware** — uses `git grep` in git repos (faster, respects `.gitignore`), falls back to `grep -rn`
+- **Colored output** — filenames in green, line numbers in cyan, matches highlighted in yellow
+- **Truncated results** — shows up to 50 matches with a "narrow your search" hint
+- **Optional path** — `/grep pattern src/` restricts search to a specific file or directory
 
 The `/tree` command uses `git ls-files` to show tracked files in a visual tree structure, automatically respecting your `.gitignore`. You can specify a depth limit:
 

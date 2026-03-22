@@ -567,6 +567,14 @@ pub async fn run_repl(
                 commands::handle_find(input);
                 continue;
             }
+            "/grep" => {
+                commands::handle_grep(input);
+                continue;
+            }
+            s if s.starts_with("/grep ") => {
+                commands::handle_grep(input);
+                continue;
+            }
             "/init" => {
                 commands::handle_init();
                 continue;

@@ -109,6 +109,20 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /find main\n\
              \x20 /find test",
         ),
+        "grep" => Some(
+            "/grep [-s|--case] <pattern> [path] — Search file contents directly\n\n\
+             Usage:\n\
+             \x20 /grep <pattern>           Search all files for pattern\n\
+             \x20 /grep <pattern> <path>    Search within a specific file or directory\n\
+             \x20 /grep -s <pattern>        Case-sensitive search\n\n\
+             Fast, direct file content search — no AI, no token cost, instant results.\n\
+             Uses git grep in git repos (respects .gitignore), falls back to grep.\n\
+             Case-insensitive by default. Limited to 50 results.\n\n\
+             Examples:\n\
+             \x20 /grep TODO\n\
+             \x20 /grep \"fn main\" src/\n\
+             \x20 /grep -s MyStruct src/lib.rs",
+        ),
         "fix" => Some(
             "/fix — Auto-fix build/lint errors\n\n\
              Runs the project's build and lint checks, captures any errors,\n\
@@ -510,6 +524,7 @@ pub fn help_text() -> String {
     out.push_str("  !<cmd>             Shortcut for /run\n");
     out.push_str("  /docs <crate> [item] Look up docs.rs documentation for a Rust crate\n");
     out.push_str("  /find <pattern>    Fuzzy-search project files by name\n");
+    out.push_str("  /grep <pattern> [path] Search file contents directly (no AI, instant)\n");
     out.push_str("  /index             Build a lightweight index of project source files\n");
     out.push_str("  /tree [depth]      Show project directory tree (default depth: 3)\n");
     out.push_str("  /web <url>         Fetch a web page and display clean readable text content\n");

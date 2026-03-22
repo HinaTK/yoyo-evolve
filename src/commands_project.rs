@@ -1939,9 +1939,241 @@ fn byte_offset(chars: &[char], char_idx: usize) -> usize {
     chars[..char_idx].iter().map(|c| c.len_utf8()).sum()
 }
 
+// ── /grep ────────────────────────────────────────────────────────────────
+
+/// Maximum matches to display before truncating.
+const GREP_MAX_MATCHES: usize = 50;
+
+/// Parsed arguments for the `/grep` command.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GrepArgs {
+    pub pattern: String,
+    pub path: String,
+    pub case_sensitive: bool,
+}
+
+/// Parse `/grep` arguments.
+///
+/// Syntax: `/grep [-s|--case] <pattern> [path]`
+///
+/// Returns `None` if the pattern is empty.
+pub fn parse_grep_args(input: &str) -> Option<GrepArgs> {
+    let rest = input.strip_prefix("/grep").unwrap_or(input).trim();
+
+    if rest.is_empty() {
+        return None;
+    }
+
+    let mut case_sensitive = false;
+    let mut remaining_parts: Vec<&str> = Vec::new();
+
+    for part in rest.split_whitespace() {
+        if part == "-s" || part == "--case" {
+            case_sensitive = true;
+        } else {
+            remaining_parts.push(part);
+        }
+    }
+
+    if remaining_parts.is_empty() {
+        return None;
+    }
+
+    let pattern = remaining_parts[0].to_string();
+    let path = if remaining_parts.len() > 1 {
+        remaining_parts[1..].join(" ")
+    } else {
+        ".".to_string()
+    };
+
+    Some(GrepArgs {
+        pattern,
+        path,
+        case_sensitive,
+    })
+}
+
+/// A single grep match result.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GrepMatch {
+    pub file: String,
+    pub line_num: u32,
+    pub text: String,
+}
+
+/// Run grep and return structured results.
+///
+/// Uses `git grep` when inside a git repo (faster, respects .gitignore),
+/// falls back to `grep -rn` with common directory exclusions.
+pub fn run_grep(args: &GrepArgs) -> Result<Vec<GrepMatch>, String> {
+    let in_git_repo = std::process::Command::new("git")
+        .args(["rev-parse", "--is-inside-work-tree"])
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false);
+
+    let output = if in_git_repo {
+        let mut cmd = std::process::Command::new("git");
+        cmd.args(["grep", "-n", "--color=never"]);
+        if !args.case_sensitive {
+            cmd.arg("-i");
+        }
+        cmd.arg("--");
+        cmd.arg(&args.pattern);
+        if args.path != "." {
+            cmd.arg(&args.path);
+        }
+        cmd.output()
+    } else {
+        let mut cmd = std::process::Command::new("grep");
+        cmd.args(["-rn", "--color=never"]);
+        if !args.case_sensitive {
+            cmd.arg("-i");
+        }
+        cmd.args([
+            "--exclude-dir=.git",
+            "--exclude-dir=target",
+            "--exclude-dir=node_modules",
+            "--exclude-dir=__pycache__",
+            "--exclude-dir=.venv",
+        ]);
+        cmd.arg(&args.pattern);
+        cmd.arg(&args.path);
+        cmd.output()
+    };
+
+    match output {
+        Ok(out) => {
+            let stdout = String::from_utf8_lossy(&out.stdout);
+            let matches: Vec<GrepMatch> = stdout
+                .lines()
+                .filter(|l| !l.is_empty())
+                .filter_map(|line| {
+                    // Format: file:line_num:text
+                    let first_colon = line.find(':')?;
+                    let rest = &line[first_colon + 1..];
+                    let second_colon = rest.find(':')?;
+                    let file = line[..first_colon].to_string();
+                    let line_num = rest[..second_colon].parse::<u32>().ok()?;
+                    let text = rest[second_colon + 1..].to_string();
+                    Some(GrepMatch {
+                        file,
+                        line_num,
+                        text,
+                    })
+                })
+                .collect();
+            Ok(matches)
+        }
+        Err(e) => Err(format!("Failed to run grep: {e}")),
+    }
+}
+
+/// Format grep results with colors and truncation.
+///
+/// Returns the formatted string to display.
+/// Colors: filenames in green, line numbers in cyan, matches highlighted in bold yellow.
+pub fn format_grep_results(matches: &[GrepMatch], pattern: &str, case_sensitive: bool) -> String {
+    if matches.is_empty() {
+        return format!("{DIM}  No matches found.{RESET}\n");
+    }
+
+    let total = matches.len();
+    let shown = matches.iter().take(GREP_MAX_MATCHES);
+    let mut output = String::new();
+
+    for m in shown {
+        // Highlight the matched pattern in the text
+        let highlighted_text = highlight_grep_match(&m.text, pattern, case_sensitive);
+        output.push_str(&format!(
+            "  {GREEN}{}{RESET}:{CYAN}{}{RESET}: {}\n",
+            m.file, m.line_num, highlighted_text
+        ));
+    }
+
+    if total > GREP_MAX_MATCHES {
+        output.push_str(&format!(
+            "\n{DIM}  ({} more matches, narrow your search){RESET}\n",
+            total - GREP_MAX_MATCHES
+        ));
+    } else {
+        output.push_str(&format!(
+            "\n{DIM}  {} match{}{RESET}\n",
+            total,
+            if total == 1 { "" } else { "es" }
+        ));
+    }
+
+    output
+}
+
+/// Highlight occurrences of a pattern in a line of text.
+fn highlight_grep_match(text: &str, pattern: &str, case_sensitive: bool) -> String {
+    if pattern.is_empty() {
+        return text.to_string();
+    }
+
+    let mut result = String::new();
+    let (search_text, search_pattern) = if case_sensitive {
+        (text.to_string(), pattern.to_string())
+    } else {
+        (text.to_lowercase(), pattern.to_lowercase())
+    };
+
+    let mut last_end = 0;
+    let mut start = 0;
+    while let Some(pos) = search_text[start..].find(&search_pattern) {
+        let abs_pos = start + pos;
+        // Append text before match
+        result.push_str(&text[last_end..abs_pos]);
+        // Append highlighted match (use original case from text)
+        result.push_str(&format!(
+            "{BOLD_YELLOW}{}{RESET}",
+            &text[abs_pos..abs_pos + pattern.len()]
+        ));
+        last_end = abs_pos + pattern.len();
+        start = last_end;
+    }
+    result.push_str(&text[last_end..]);
+
+    result
+}
+
+/// Handle the `/grep` command.
+pub fn handle_grep(input: &str) {
+    let args = match parse_grep_args(input) {
+        Some(a) => a,
+        None => {
+            println!("{DIM}  usage: /grep [-s|--case] <pattern> [path]");
+            println!("  Search file contents directly — no AI, no tokens, instant results.");
+            println!("  Case-insensitive by default. Use -s or --case for case-sensitive.");
+            println!();
+            println!("  Examples:");
+            println!("    /grep TODO");
+            println!("    /grep \"fn main\" src/");
+            println!("    /grep -s MyStruct src/lib.rs{RESET}\n");
+            return;
+        }
+    };
+
+    match run_grep(&args) {
+        Ok(matches) => {
+            let formatted = format_grep_results(&matches, &args.pattern, args.case_sensitive);
+            print!("{formatted}");
+        }
+        Err(e) => {
+            println!("{RED}  Error: {e}{RESET}\n");
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::commands::KNOWN_COMMANDS;
+    use crate::help::help_text;
     use std::fs;
     use tempfile::TempDir;
 
@@ -2969,6 +3201,138 @@ mod tests {
             prompt.contains("Verification"),
             "Should mention verification"
         );
+    }
+
+    // ── /grep tests ─────────────────────────────────────────────────────
+
+    #[test]
+    fn parse_grep_args_basic_pattern() {
+        let args = parse_grep_args("/grep TODO").unwrap();
+        assert_eq!(args.pattern, "TODO");
+        assert_eq!(args.path, ".");
+        assert!(!args.case_sensitive);
+    }
+
+    #[test]
+    fn parse_grep_args_with_path() {
+        let args = parse_grep_args("/grep fn_main src/").unwrap();
+        assert_eq!(args.pattern, "fn_main");
+        assert_eq!(args.path, "src/");
+        assert!(!args.case_sensitive);
+    }
+
+    #[test]
+    fn parse_grep_args_case_sensitive_flag() {
+        let args = parse_grep_args("/grep -s MyStruct src/").unwrap();
+        assert_eq!(args.pattern, "MyStruct");
+        assert_eq!(args.path, "src/");
+        assert!(args.case_sensitive);
+    }
+
+    #[test]
+    fn parse_grep_args_case_long_flag() {
+        let args = parse_grep_args("/grep --case Pattern").unwrap();
+        assert_eq!(args.pattern, "Pattern");
+        assert!(args.case_sensitive);
+    }
+
+    #[test]
+    fn parse_grep_args_empty_returns_none() {
+        assert!(parse_grep_args("/grep").is_none());
+        assert!(parse_grep_args("/grep  ").is_none());
+    }
+
+    #[test]
+    fn parse_grep_args_only_flag_returns_none() {
+        assert!(parse_grep_args("/grep -s").is_none());
+        assert!(parse_grep_args("/grep --case").is_none());
+    }
+
+    #[test]
+    fn format_grep_results_empty() {
+        let formatted = format_grep_results(&[], "pattern", false);
+        assert!(formatted.contains("No matches found"));
+    }
+
+    #[test]
+    fn format_grep_results_with_matches() {
+        let matches = vec![
+            GrepMatch {
+                file: "src/main.rs".to_string(),
+                line_num: 10,
+                text: "fn main() {".to_string(),
+            },
+            GrepMatch {
+                file: "src/lib.rs".to_string(),
+                line_num: 5,
+                text: "// main entry".to_string(),
+            },
+        ];
+        let formatted = format_grep_results(&matches, "main", false);
+        assert!(formatted.contains("src/main.rs"));
+        assert!(formatted.contains("10"));
+        assert!(formatted.contains("src/lib.rs"));
+        assert!(formatted.contains("5"));
+        assert!(formatted.contains("2 matches"));
+    }
+
+    #[test]
+    fn format_grep_results_truncation() {
+        let matches: Vec<GrepMatch> = (0..60)
+            .map(|i| GrepMatch {
+                file: format!("file{i}.rs"),
+                line_num: i,
+                text: format!("line {i}"),
+            })
+            .collect();
+        let formatted = format_grep_results(&matches, "line", false);
+        assert!(formatted.contains("10 more matches, narrow your search"));
+        // Should show first 50, not last 10
+        assert!(formatted.contains("file0.rs"));
+        assert!(formatted.contains("file49.rs"));
+    }
+
+    #[test]
+    fn format_grep_results_single_match() {
+        let matches = vec![GrepMatch {
+            file: "test.rs".to_string(),
+            line_num: 1,
+            text: "hello".to_string(),
+        }];
+        let formatted = format_grep_results(&matches, "hello", false);
+        assert!(formatted.contains("1 match"));
+        // Shouldn't say "1 matches"
+        assert!(!formatted.contains("1 matches"));
+    }
+
+    #[test]
+    fn handle_grep_finds_real_matches() {
+        // This tests run_grep on the actual project — "fn main" should exist in src/
+        let args = GrepArgs {
+            pattern: "fn main".to_string(),
+            path: "src/".to_string(),
+            case_sensitive: true,
+        };
+        let matches = run_grep(&args).unwrap();
+        assert!(
+            !matches.is_empty(),
+            "Should find 'fn main' in src/ of this project"
+        );
+        assert!(matches.iter().any(|m| m.file.contains("main.rs")));
+    }
+
+    #[test]
+    fn grep_in_known_commands() {
+        assert!(
+            KNOWN_COMMANDS.contains(&"/grep"),
+            "/grep should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn grep_in_help_text() {
+        let help = help_text();
+        assert!(help.contains("/grep"), "/grep should appear in help text");
     }
 
     // ── is_image_extension ────────────────────────────────────────────
