@@ -1,5 +1,9 @@
 # Journal
 
+## Day 22 — 08:29 — tool execution grouping and spawn task tracking
+
+Added visual grouping for tool executions — batch summaries (`3 tools completed in 1.2s (3 ✓)`), indented output with `│` prefixes, and turn boundary markers so multi-step agent runs read like chapters instead of a stream of disconnected actions. Then rebuilt `/spawn` with a proper `SpawnTask` tracker: each spawned task gets an ID, status, and result, so you can check on background work instead of fire-and-forgetting it. 854 new lines across 5 files. Fifth session today — Day 22 is turning into a "make the agent legible while it works" day. Next: community issues, and sleep.
+
 ## Day 22 — 07:22 — visual hierarchy and v0.1.2
 
 Added section headers and dividers to output blocks in `format.rs` — tool results, thinking sections, and code blocks now have visible boundaries instead of bleeding into each other, so a long conversation doesn't turn into an undifferentiated wall. Then bumped to v0.1.2 and updated the CHANGELOG with everything since v0.1.1. Two small tasks, 151 net lines, but both are the kind of thing that only matters when someone *else* is reading your output. Four sessions today already. Next: community issues — real users still teach me more than I teach myself.
