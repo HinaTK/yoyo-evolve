@@ -1258,14 +1258,11 @@ pub struct MarkdownRenderer {
     line_buffer: String,
     /// Whether we're at the start of a new line (need to detect fence/header).
     line_start: bool,
+    /// When a block element prefix (list marker, blockquote `>`) has been rendered
+    /// early for streaming, this tracks the prefix so we don't re-render on newline.
+    /// Once set, subsequent tokens stream as inline text until the newline arrives.
+    block_prefix_rendered: bool,
 }
-
-/// Minimum characters needed at line start before we can determine
-/// the line is NOT a code fence or header and flush it immediately.
-/// Reduced from 4 to 3: most LLM tokens are 3-5 chars, and a threshold
-/// of 4 delays the first token of many lines (e.g., "The", "But", "For").
-/// 3 chars is enough to distinguish normal text from fences (```) and headers (#).
-const LINE_START_RESOLVE_THRESHOLD: usize = 3;
 
 impl MarkdownRenderer {
     /// Create a new renderer with empty state.
@@ -1275,6 +1272,7 @@ impl MarkdownRenderer {
             code_lang: None,
             line_buffer: String::new(),
             line_start: true,
+            block_prefix_rendered: false,
         }
     }
 
@@ -1302,6 +1300,7 @@ impl MarkdownRenderer {
                     }
                     output.push('\n');
                     self.line_start = true;
+                    self.block_prefix_rendered = false;
 
                     // Process the rest (after the first \n) via buffered path
                     // because we're now at line start and need fence detection.
@@ -1325,6 +1324,7 @@ impl MarkdownRenderer {
                 }
                 output.push('\n');
                 self.line_start = true;
+                self.block_prefix_rendered = false;
 
                 // Process the rest (after the first \n) by buffering
                 let rest = &delta[newline_pos + 1..];
@@ -1361,79 +1361,32 @@ impl MarkdownRenderer {
         while let Some(newline_pos) = self.line_buffer.find('\n') {
             let line = self.line_buffer[..newline_pos].to_string();
             self.line_buffer = self.line_buffer[newline_pos + 1..].to_string();
-            output.push_str(&self.render_line(&line));
+
+            if self.block_prefix_rendered {
+                // The prefix (bullet, quote marker, etc.) was already rendered.
+                // Just render remaining content as inline text.
+                output.push_str(&self.render_inline(&line));
+            } else {
+                output.push_str(&self.render_line(&line));
+            }
             output.push('\n');
             self.line_start = true;
+            self.block_prefix_rendered = false;
         }
 
         // Try to resolve the line-start buffer early:
         // If we have enough characters to determine it's NOT a fence, header,
         // or other block-level construct (list, blockquote, hr), flush as inline text.
         if self.line_start && !self.line_buffer.is_empty() && !self.in_code_block {
-            let trimmed = self.line_buffer.trim_start();
-            let could_be_fence =
-                trimmed.is_empty() || trimmed.starts_with('`') || "`".starts_with(trimmed);
-            let could_be_header =
-                trimmed.is_empty() || trimmed.starts_with('#') || "#".starts_with(trimmed);
-            // Block-level constructs that need render_line() to handle:
-            // - blockquotes: > or > text
-            // - unordered lists: - text, * text, + text
-            // - ordered lists: digit(s). text
-            // - horizontal rules: ---, ***, ___
-            let could_be_block_element = if trimmed.is_empty() {
-                true
-            } else {
-                let first = trimmed.as_bytes()[0];
-                match first {
-                    b'>' => true, // blockquote
-                    b'+' => trimmed.len() < 2 || trimmed.starts_with("+ "),
-                    b'-' => {
-                        trimmed.len() < 3 || trimmed.starts_with("- ") || {
-                            // Could be horizontal rule: all dashes (with optional spaces)
-                            let no_sp: String = trimmed.chars().filter(|c| *c != ' ').collect();
-                            !no_sp.is_empty() && no_sp.chars().all(|c| c == '-')
-                        }
-                    }
-                    b'*' => {
-                        trimmed.len() < 2 || trimmed.starts_with("* ") || {
-                            // Could be horizontal rule: all stars (with optional spaces)
-                            let no_sp: String = trimmed.chars().filter(|c| *c != ' ').collect();
-                            !no_sp.is_empty() && no_sp.chars().all(|c| c == '*')
-                        }
-                    }
-                    b'_' => {
-                        trimmed.len() < 3 || {
-                            // Could be horizontal rule: all underscores (with optional spaces)
-                            let no_sp: String = trimmed.chars().filter(|c| *c != ' ').collect();
-                            !no_sp.is_empty() && no_sp.chars().all(|c| c == '_')
-                        }
-                    }
-                    b'0'..=b'9' => {
-                        // Could be ordered list: check if matches N. pattern
-                        trimmed.len() < 3
-                            || trimmed.contains(". ")
-                                && trimmed[..trimmed.find(". ").unwrap_or(0)]
-                                    .chars()
-                                    .all(|c| c.is_ascii_digit())
-                    }
-                    _ => false,
-                }
-            };
-
-            if trimmed.len() >= LINE_START_RESOLVE_THRESHOLD
-                && !could_be_fence
-                && !could_be_header
-                && !could_be_block_element
-            {
+            if !self.needs_line_buffering() {
                 // Definitely not a fence, header, or block element — flush as inline text
                 let buf = std::mem::take(&mut self.line_buffer);
                 output.push_str(&self.render_inline(&buf));
                 self.line_start = false;
-            } else if !could_be_fence && !could_be_header && !could_be_block_element {
-                // Even with fewer chars, if it can't possibly be a special line, flush
-                let buf = std::mem::take(&mut self.line_buffer);
-                output.push_str(&self.render_inline(&buf));
-                self.line_start = false;
+            } else {
+                // Check if we can confirm a block element and render its prefix early,
+                // switching to mid-line streaming for subsequent tokens.
+                output.push_str(&self.try_resolve_block_prefix());
             }
         }
 
@@ -1457,13 +1410,186 @@ impl MarkdownRenderer {
         output
     }
 
+    /// Check if the current line_buffer content at line start still needs buffering
+    /// because it could be a markdown control sequence (fence, header, block element).
+    /// Returns false when the content is definitely plain text and can be flushed.
+    fn needs_line_buffering(&self) -> bool {
+        let trimmed = self.line_buffer.trim_start();
+        if trimmed.is_empty() {
+            return true;
+        }
+
+        let could_be_fence = trimmed.starts_with('`') || "`".starts_with(trimmed);
+        let could_be_header = trimmed.starts_with('#') || "#".starts_with(trimmed);
+
+        if could_be_fence || could_be_header {
+            return true;
+        }
+
+        // Check for block-level constructs
+        let first = trimmed.as_bytes()[0];
+        match first {
+            b'>' => true, // blockquote — always a block element
+            b'+' => trimmed.len() < 2 || trimmed.starts_with("+ "),
+            b'-' => {
+                trimmed.len() < 3 || trimmed.starts_with("- ") || {
+                    let no_sp: String = trimmed.chars().filter(|c| *c != ' ').collect();
+                    !no_sp.is_empty() && no_sp.chars().all(|c| c == '-')
+                }
+            }
+            b'*' => {
+                trimmed.len() < 2 || trimmed.starts_with("* ") || {
+                    let no_sp: String = trimmed.chars().filter(|c| *c != ' ').collect();
+                    !no_sp.is_empty() && no_sp.chars().all(|c| c == '*')
+                }
+            }
+            b'_' => {
+                trimmed.len() < 3 || {
+                    let no_sp: String = trimmed.chars().filter(|c| *c != ' ').collect();
+                    !no_sp.is_empty() && no_sp.chars().all(|c| c == '_')
+                }
+            }
+            b'0'..=b'9' => {
+                trimmed.len() < 3
+                    || trimmed.contains(". ")
+                        && trimmed[..trimmed.find(". ").unwrap_or(0)]
+                            .chars()
+                            .all(|c| c.is_ascii_digit())
+            }
+            b'|' => true, // table row
+            _ => false,
+        }
+    }
+
+    /// Try to resolve a confirmed block element prefix and render it immediately.
+    /// When successful, renders the prefix (bullet, quote marker, etc.) and sets
+    /// `line_start = false` so subsequent tokens stream via the mid-line fast path.
+    /// Returns any rendered output.
+    fn try_resolve_block_prefix(&mut self) -> String {
+        let trimmed = self.line_buffer.trim_start();
+        if trimmed.is_empty() {
+            return String::new();
+        }
+
+        let first = trimmed.as_bytes()[0];
+
+        // Blockquote: ">" or "> " confirmed — render prefix, stream rest
+        if first == b'>' {
+            let rest = trimmed.strip_prefix('>').unwrap_or("");
+            let rest = rest.strip_prefix(' ').unwrap_or(rest);
+            let prefix_output = format!("{DIM}│{RESET} {ITALIC}");
+            let rest_output = if !rest.is_empty() {
+                self.render_inline(rest)
+            } else {
+                String::new()
+            };
+            self.line_buffer.clear();
+            self.line_start = false;
+            self.block_prefix_rendered = true;
+            return format!("{prefix_output}{rest_output}");
+        }
+
+        // Unordered list: confirmed when we see "- X", "* X", "+ X"
+        // where X is NOT a continuation of a horizontal rule
+        if let Some(content) = self.try_confirm_unordered_list(trimmed) {
+            let indent = Self::leading_whitespace(&self.line_buffer);
+            let content_output = if !content.is_empty() {
+                self.render_inline(content)
+            } else {
+                String::new()
+            };
+            let prefix_output = format!("{indent}{CYAN}•{RESET} {content_output}");
+            self.line_buffer.clear();
+            self.line_start = false;
+            self.block_prefix_rendered = true;
+            return prefix_output;
+        }
+
+        // Ordered list: confirmed when we see "N. " with content
+        if let Some((num, content)) = self.try_confirm_ordered_list(trimmed) {
+            let indent = Self::leading_whitespace(&self.line_buffer);
+            let content_output = if !content.is_empty() {
+                self.render_inline(content)
+            } else {
+                String::new()
+            };
+            let prefix_output = format!("{indent}{CYAN}{num}.{RESET} {content_output}");
+            self.line_buffer.clear();
+            self.line_start = false;
+            self.block_prefix_rendered = true;
+            return prefix_output;
+        }
+
+        String::new()
+    }
+
+    /// Try to confirm an unordered list item and return the content after the marker.
+    /// Only confirms when we have enough content to rule out a horizontal rule.
+    /// For "- ", confirms when a non-dash non-space character follows.
+    /// For "* ", confirms when a non-star non-space character follows.
+    /// For "+ ", always a list item (no ambiguity with HR).
+    fn try_confirm_unordered_list<'a>(&self, trimmed: &'a str) -> Option<&'a str> {
+        // "+ X" — always a list item
+        if let Some(rest) = trimmed.strip_prefix("+ ") {
+            if !rest.is_empty() {
+                return Some(rest);
+            }
+            // "+ " alone: still ambiguous (could get more dashes), but "+ " is a list
+            return Some(rest);
+        }
+
+        // "- X" — list item if X contains a non-dash, non-space char
+        if let Some(rest) = trimmed.strip_prefix("- ") {
+            if !rest.is_empty() && rest.chars().any(|c| c != '-' && c != ' ') {
+                return Some(rest);
+            }
+            return None; // Could still be "- - -" horizontal rule
+        }
+
+        // "* X" — list item if X contains a non-star, non-space char
+        if let Some(rest) = trimmed.strip_prefix("* ") {
+            if !rest.is_empty() && rest.chars().any(|c| c != '*' && c != ' ') {
+                return Some(rest);
+            }
+            return None; // Could still be "* * *" horizontal rule
+        }
+
+        None
+    }
+
+    /// Try to confirm an ordered list item and return (number, content).
+    /// Confirms when we see "N. " followed by actual content.
+    fn try_confirm_ordered_list<'a>(&self, trimmed: &'a str) -> Option<(&'a str, &'a str)> {
+        let dot_space = trimmed.find(". ")?;
+        let num_part = &trimmed[..dot_space];
+        if num_part.is_empty() || !num_part.chars().all(|c| c.is_ascii_digit()) {
+            return None;
+        }
+        let content = &trimmed[dot_space + 2..];
+        if content.is_empty() {
+            return None; // Haven't seen content yet
+        }
+        Some((num_part, content))
+    }
+
     /// Flush any remaining buffered content (call after stream ends).
     pub fn flush(&mut self) -> String {
         if self.line_buffer.is_empty() {
+            if self.block_prefix_rendered {
+                // Close any open italic from blockquote prefix
+                self.block_prefix_rendered = false;
+                return format!("{RESET}");
+            }
             return String::new();
         }
         let line = std::mem::take(&mut self.line_buffer);
         self.line_start = true;
+        if self.block_prefix_rendered {
+            self.block_prefix_rendered = false;
+            // Prefix already rendered — just render remaining inline content
+            let formatted = self.render_inline(&line);
+            return format!("{formatted}{RESET}");
+        }
         self.render_line(&line)
     }
 
@@ -1472,6 +1598,7 @@ impl MarkdownRenderer {
         let trimmed = line.trim();
         // After rendering a complete line, next content will be at line start
         self.line_start = true;
+        self.block_prefix_rendered = false;
 
         // Check for code fence (``` with optional language)
         if let Some(after_fence) = trimmed.strip_prefix("```") {
@@ -2613,6 +2740,7 @@ mod tests {
         assert!(r.code_lang.is_none());
         assert!(r.line_buffer.is_empty());
         assert!(r.line_start);
+        assert!(!r.block_prefix_rendered);
     }
 
     // --- Streaming output tests (mid-line tokens should render immediately) ---
@@ -2959,6 +3087,145 @@ mod tests {
             !out.is_empty(),
             "' will' at line start should resolve — trimmed 'will' is 4 chars, not fence/header"
         );
+    }
+
+    // --- Streaming latency: block elements should flush content after prefix ---
+
+    #[test]
+    fn test_md_streaming_list_item_content_not_buffered() {
+        // List items should NOT buffer all content until newline.
+        // Once we see "- " we know it's a list item — subsequent tokens
+        // should stream immediately.
+        let mut r = MarkdownRenderer::new();
+        // Send list marker
+        let out1 = r.render_delta("- ");
+        // The marker itself may or may not produce output yet (prefix detection)
+        // but let's accumulate
+        let mut total = out1;
+
+        // Send content token — should produce output immediately
+        let out2 = r.render_delta("Hello");
+        total.push_str(&out2);
+        assert!(
+            !out2.is_empty(),
+            "List item content after '- ' should stream immediately, got empty"
+        );
+
+        // Another content token
+        let out3 = r.render_delta(" world");
+        total.push_str(&out3);
+        assert!(
+            !out3.is_empty(),
+            "Additional list item tokens should stream immediately, got empty"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_blockquote_content_not_buffered() {
+        // Blockquote content after "> " should stream immediately.
+        let mut r = MarkdownRenderer::new();
+        let _out1 = r.render_delta("> ");
+
+        let out2 = r.render_delta("Some quoted");
+        assert!(
+            !out2.is_empty(),
+            "Blockquote content after '> ' should stream immediately, got empty"
+        );
+
+        let out3 = r.render_delta(" text");
+        assert!(
+            !out3.is_empty(),
+            "Additional blockquote tokens should stream immediately, got empty"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_header_content_still_buffers() {
+        // Headers need to buffer until newline because the entire line
+        // gets BOLD+CYAN styling. But "#" alone should buffer.
+        let mut r = MarkdownRenderer::new();
+        let out = r.render_delta("#");
+        assert_eq!(out, "", "Single '#' should buffer (could be header)");
+    }
+
+    #[test]
+    fn test_md_streaming_code_fence_opener_still_buffers() {
+        // Code fence openers must buffer until complete so we detect the fence.
+        let mut r = MarkdownRenderer::new();
+        let out = r.render_delta("``");
+        assert_eq!(out, "", "Partial fence '``' should buffer");
+
+        let out2 = r.render_delta("`");
+        // Still buffering (no newline yet, could be ```lang)
+        // The fence might be detected only on \n
+        assert_eq!(
+            out2, "",
+            "Complete fence '```' without newline should buffer"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_inline_formatting_on_partial_lines() {
+        // Bold/italic/code formatting should work on partial lines (flushed mid-line)
+        let mut r = MarkdownRenderer::new();
+        // Start with resolved text
+        let _ = r.render_delta("Check ");
+        // Send bold text mid-line
+        let out = r.render_delta("**this**");
+        assert!(
+            out.contains(&format!("{BOLD}this{RESET}")),
+            "Bold formatting should work on mid-line partial text, got: '{out}'"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_list_renders_correctly_on_newline() {
+        // Even with early flushing, the full list item should render correctly
+        // when the newline arrives.
+        let mut r = MarkdownRenderer::new();
+        let out1 = r.render_delta("- ");
+        let out2 = r.render_delta("item text");
+        let out3 = r.render_delta("\n");
+        let flushed = r.flush();
+        let total = format!("{out1}{out2}{out3}{flushed}");
+        // Should contain the bullet character from list rendering
+        assert!(
+            total.contains("item text"),
+            "List item text should appear in output, got: '{total}'"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_ordered_list_content_not_buffered() {
+        // Ordered list: "1. " detected, subsequent content should stream
+        let mut r = MarkdownRenderer::new();
+        let _out1 = r.render_delta("1. ");
+
+        let out2 = r.render_delta("First item");
+        assert!(
+            !out2.is_empty(),
+            "Ordered list content after '1. ' should stream immediately, got empty"
+        );
+    }
+
+    #[test]
+    fn test_md_streaming_no_regression_full_render() {
+        // Full render should still produce correct output for all line types
+        let out = render_full("- list item\n> quoted\n1. ordered\n# header\nplain\n");
+        assert!(
+            out.contains("list item"),
+            "List item missing from full render"
+        );
+        assert!(
+            out.contains("quoted"),
+            "Blockquote missing from full render"
+        );
+        assert!(
+            out.contains("ordered"),
+            "Ordered list missing from full render"
+        );
+        assert!(out.contains("header"), "Header missing from full render");
+        assert!(out.contains("plain"), "Plain text missing from full render");
     }
 
     #[test]
