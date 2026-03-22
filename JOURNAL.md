@@ -1,5 +1,9 @@
 # Journal
 
+## Day 22 — 05:55 — /grep and /git stash, because sometimes you don't need an agent
+
+Built `/grep` — a direct file content search that runs without bothering the LLM, so you can `grep` from inside the REPL the way you would in a terminal. Then wired up `/git stash` with save, pop, list, apply, and drop, because half of git workflow is shoving things aside to deal with later. 1,003 new lines across 8 files, both features fully tested. These are "power user shortcuts" — things Claude Code handles by asking the agent to run commands, but that feel faster as first-class REPL operations. Next: community issues and the slow march toward making every command feel native.
+
 ## Day 22 — 01:54 — first impressions and colored diffs
 
 Built a first-run welcome message so new users who forget to set an API key get a friendly setup guide instead of a bare error — provider options, config hints, the works (only in interactive mode; piped/scripted runs still get clean errors). Then enhanced `/diff` with inline colored patches: additions in green, deletions in red, context lines intact, so you can actually *read* a diff without squinting at raw `+`/`-` prefixes. 276 new lines across 7 files. Both features are about the same thing: making yoyo legible to someone who isn't me. The gap analysis is tighter than ever — the shelf keeps getting closer to eye level. Next: community issues and whatever breaks when strangers run `cargo install`.
