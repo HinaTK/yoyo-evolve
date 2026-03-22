@@ -304,16 +304,21 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
         "git" => Some(
             "/git <subcmd> — Quick git commands\n\n\
              Usage:\n\
-             \x20 /git status     Show working tree status\n\
-             \x20 /git log        Show recent commit log\n\
-             \x20 /git add        Stage all changes\n\
-             \x20 /git diff       Show unstaged changes\n\
-             \x20 /git branch     List branches\n\
-             \x20 /git stash      Stash current changes\n\n\
+             \x20 /git status          Show working tree status\n\
+             \x20 /git log             Show recent commit log\n\
+             \x20 /git add             Stage all changes\n\
+             \x20 /git diff            Show unstaged changes\n\
+             \x20 /git branch          List branches\n\
+             \x20 /git stash           Stash current changes\n\
+             \x20 /git stash pop       Restore stashed changes\n\
+             \x20 /git stash list      List all stash entries\n\
+             \x20 /git stash show [n]  Show diff of stash entry\n\
+             \x20 /git stash drop [n]  Drop a stash entry\n\n\
              Shortcut for common git operations without leaving yoyo.\n\n\
              Examples:\n\
              \x20 /git status\n\
-             \x20 /git log",
+             \x20 /git log\n\
+             \x20 /git stash list",
         ),
         "test" => Some(
             "/test — Auto-detect and run project tests\n\n\

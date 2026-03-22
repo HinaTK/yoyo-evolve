@@ -235,6 +235,9 @@ The subagent has access to the same tools (bash, file operations, etc.) and uses
 | `/git add <path>` | Stage files for commit |
 | `/git stash` | Stash uncommitted changes |
 | `/git stash pop` | Restore stashed changes |
+| `/git stash list` | List all stash entries with colored output |
+| `/git stash show [n]` | Show diff of stash entry (default: latest) |
+| `/git stash drop [n]` | Drop a stash entry (default: latest) |
 | `/commit [msg]` | Commit staged changes — generates a conventional commit message if no msg provided |
 | `/diff` | Show colored file summary, change stats, and full diff of uncommitted changes |
 | `/undo` | Revert all uncommitted changes (`git checkout -- .` and `git clean -fd`) |
@@ -256,6 +259,9 @@ The `/git` command is a convenience wrapper for common git operations without bu
 /git add src/main.rs # stage a file
 /git stash           # stash changes
 /git stash pop       # restore stash
+/git stash list      # see all stash entries
+/git stash show 1    # view diff of stash@{1}
+/git stash drop 0    # drop the latest stash
 ```
 
 The `/commit` command helps you commit staged changes quickly:

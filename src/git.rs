@@ -143,6 +143,38 @@ pub fn colorize_diff(diff: &str) -> String {
     result
 }
 
+/// Format `git stash list` output with colored entries.
+///
+/// Each line looks like: `stash@{0}: WIP on main: abc1234 commit message`
+/// We dim the date/index part and bold the description.
+pub fn format_stash_list(raw: &str) -> String {
+    if raw.is_empty() {
+        return format!("{DIM}  (no stashes){RESET}\n");
+    }
+
+    let mut result = String::with_capacity(raw.len() * 2);
+    for line in raw.lines() {
+        // Lines look like: stash@{N}: <type> on <branch>: <message>
+        if let Some(colon_pos) = line.find(':') {
+            let stash_ref = &line[..colon_pos];
+            let rest = &line[colon_pos..];
+            // Second colon separates "WIP on branch" from the commit message
+            if let Some(second_colon) = rest[1..].find(':') {
+                let middle = &rest[..second_colon + 1];
+                let message = &rest[second_colon + 1..];
+                result.push_str(&format!(
+                    "  {YELLOW}{stash_ref}{RESET}{DIM}{middle}{RESET}:{BOLD}{message}{RESET}\n"
+                ));
+            } else {
+                result.push_str(&format!("  {YELLOW}{stash_ref}{RESET}{DIM}{rest}{RESET}\n"));
+            }
+        } else {
+            result.push_str(&format!("  {DIM}{line}{RESET}\n"));
+        }
+    }
+    result
+}
+
 /// Represents a parsed `/git` subcommand.
 #[derive(Debug, PartialEq)]
 pub enum GitSubcommand {
@@ -152,10 +184,16 @@ pub enum GitSubcommand {
     Log(usize),
     /// `/git add <path>` — stage files
     Add(String),
-    /// `/git stash` — stash changes
+    /// `/git stash` or `/git stash push` — stash changes
     Stash,
     /// `/git stash pop` — pop stashed changes
     StashPop,
+    /// `/git stash list` — list all stash entries
+    StashList,
+    /// `/git stash drop [n]` — drop a stash entry (default: stash@{0})
+    StashDrop(Option<usize>),
+    /// `/git stash show [n]` — show diff of a stash entry (default: stash@{0})
+    StashShow(Option<usize>),
     /// `/git diff` — show diff (unstaged by default, `--cached` for staged)
     Diff { cached: bool },
     /// `/git branch` — list branches or create/switch to a new one
@@ -191,8 +229,21 @@ pub fn parse_git_args(arg: &str) -> GitSubcommand {
             }
         }
         "stash" => {
-            if parts.len() >= 2 && parts[1].to_lowercase() == "pop" {
-                GitSubcommand::StashPop
+            if parts.len() >= 2 {
+                match parts[1].to_lowercase().as_str() {
+                    "pop" => GitSubcommand::StashPop,
+                    "list" => GitSubcommand::StashList,
+                    "show" => {
+                        let n = parts.get(2).and_then(|s| s.parse::<usize>().ok());
+                        GitSubcommand::StashShow(n)
+                    }
+                    "drop" => {
+                        let n = parts.get(2).and_then(|s| s.parse::<usize>().ok());
+                        GitSubcommand::StashDrop(n)
+                    }
+                    "push" => GitSubcommand::Stash,
+                    _ => GitSubcommand::Stash,
+                }
             } else {
                 GitSubcommand::Stash
             }
@@ -250,7 +301,7 @@ pub fn run_git_subcommand(subcmd: &GitSubcommand) {
                 }
             }
         },
-        GitSubcommand::Stash => match run_git(&["stash"]) {
+        GitSubcommand::Stash => match run_git(&["stash", "push"]) {
             Ok(text) => {
                 println!("{GREEN}  ✓ {text}{RESET}\n");
             }
@@ -274,6 +325,57 @@ pub fn run_git_subcommand(subcmd: &GitSubcommand) {
                 }
             }
         },
+        GitSubcommand::StashList => match run_git(&["stash", "list"]) {
+            Ok(text) => {
+                print!("{}", format_stash_list(&text));
+            }
+            Err(e) => {
+                if e.contains("git not found") {
+                    eprintln!("{RED}  error: git not found{RESET}\n");
+                } else {
+                    eprintln!("{RED}  error: {e}{RESET}\n");
+                }
+            }
+        },
+        GitSubcommand::StashDrop(n) => {
+            let stash_ref = match n {
+                Some(idx) => format!("stash@{{{idx}}}"),
+                None => "stash@{0}".to_string(),
+            };
+            match run_git(&["stash", "drop", &stash_ref]) {
+                Ok(text) => {
+                    println!("{GREEN}  ✓ {text}{RESET}\n");
+                }
+                Err(e) => {
+                    if e.contains("git not found") {
+                        eprintln!("{RED}  error: git not found{RESET}\n");
+                    } else {
+                        eprintln!("{RED}  error: {e}{RESET}\n");
+                    }
+                }
+            }
+        }
+        GitSubcommand::StashShow(n) => {
+            let stash_ref = match n {
+                Some(idx) => format!("stash@{{{idx}}}"),
+                None => "stash@{0}".to_string(),
+            };
+            match run_git(&["stash", "show", "-p", &stash_ref]) {
+                Ok(text) if text.is_empty() => {
+                    println!("{DIM}  (empty stash){RESET}\n");
+                }
+                Ok(text) => {
+                    println!("{}", colorize_diff(&text));
+                }
+                Err(e) => {
+                    if e.contains("git not found") {
+                        eprintln!("{RED}  error: git not found{RESET}\n");
+                    } else {
+                        eprintln!("{RED}  error: {e}{RESET}\n");
+                    }
+                }
+            }
+        }
         GitSubcommand::Diff { cached } => {
             let args: Vec<&str> = if *cached {
                 vec!["diff", "--cached"]
@@ -329,7 +431,10 @@ pub fn run_git_subcommand(subcmd: &GitSubcommand) {
             println!("         /git diff [--cached]     Show diff (unstaged or staged changes)");
             println!("         /git branch [name]       List branches or create & switch");
             println!("         /git stash               Stash uncommitted changes");
-            println!("         /git stash pop           Restore stashed changes{RESET}\n");
+            println!("         /git stash pop           Restore stashed changes");
+            println!("         /git stash list          List all stash entries");
+            println!("         /git stash show [n]      Show diff of stash entry n");
+            println!("         /git stash drop [n]      Drop stash entry n{RESET}\n");
         }
     }
 }
@@ -613,6 +718,126 @@ diff --git a/src/old.rs b/src/old.rs
         assert_eq!(parse_git_args("stash pop"), GitSubcommand::StashPop);
         assert_eq!(parse_git_args("STASH POP"), GitSubcommand::StashPop);
         assert_eq!(parse_git_args("stash Pop"), GitSubcommand::StashPop);
+    }
+
+    #[test]
+    fn test_git_subcommand_stash_list() {
+        assert_eq!(parse_git_args("stash list"), GitSubcommand::StashList);
+        assert_eq!(parse_git_args("STASH LIST"), GitSubcommand::StashList);
+        assert_eq!(parse_git_args("stash List"), GitSubcommand::StashList);
+    }
+
+    #[test]
+    fn test_git_subcommand_stash_show() {
+        assert_eq!(parse_git_args("stash show"), GitSubcommand::StashShow(None));
+        assert_eq!(
+            parse_git_args("stash show 2"),
+            GitSubcommand::StashShow(Some(2))
+        );
+        assert_eq!(
+            parse_git_args("STASH SHOW 0"),
+            GitSubcommand::StashShow(Some(0))
+        );
+        // Non-numeric argument falls back to None (default stash@{0})
+        assert_eq!(
+            parse_git_args("stash show abc"),
+            GitSubcommand::StashShow(None)
+        );
+    }
+
+    #[test]
+    fn test_git_subcommand_stash_drop() {
+        assert_eq!(parse_git_args("stash drop"), GitSubcommand::StashDrop(None));
+        assert_eq!(
+            parse_git_args("stash drop 3"),
+            GitSubcommand::StashDrop(Some(3))
+        );
+        assert_eq!(
+            parse_git_args("STASH DROP 1"),
+            GitSubcommand::StashDrop(Some(1))
+        );
+        // Non-numeric argument falls back to None
+        assert_eq!(
+            parse_git_args("stash drop xyz"),
+            GitSubcommand::StashDrop(None)
+        );
+    }
+
+    #[test]
+    fn test_git_subcommand_stash_push() {
+        // "stash push" is an explicit alias for "stash"
+        assert_eq!(parse_git_args("stash push"), GitSubcommand::Stash);
+        assert_eq!(parse_git_args("STASH PUSH"), GitSubcommand::Stash);
+    }
+
+    #[test]
+    fn test_format_stash_list_empty() {
+        let result = format_stash_list("");
+        assert!(
+            result.contains("no stashes"),
+            "Empty input should show 'no stashes': {result}"
+        );
+    }
+
+    #[test]
+    fn test_format_stash_list_single_entry() {
+        let input = "stash@{0}: WIP on main: abc1234 fix tests";
+        let result = format_stash_list(input);
+        // Should contain the stash ref
+        assert!(
+            result.contains("stash@{0}"),
+            "Should contain stash ref: {result}"
+        );
+        // Should contain the message
+        assert!(
+            result.contains("fix tests"),
+            "Should contain the message: {result}"
+        );
+    }
+
+    #[test]
+    fn test_format_stash_list_multiple_entries() {
+        let input = "\
+stash@{0}: WIP on main: abc1234 fix tests
+stash@{1}: On feature: def5678 wip stuff";
+        let result = format_stash_list(input);
+        assert!(
+            result.contains("stash@{0}"),
+            "Should contain first stash ref: {result}"
+        );
+        assert!(
+            result.contains("stash@{1}"),
+            "Should contain second stash ref: {result}"
+        );
+        assert!(
+            result.contains("fix tests"),
+            "Should contain first message: {result}"
+        );
+        assert!(
+            result.contains("wip stuff"),
+            "Should contain second message: {result}"
+        );
+    }
+
+    #[test]
+    fn test_format_stash_list_uses_ansi_colors() {
+        let input = "stash@{0}: WIP on main: abc1234 fix tests";
+        let result = format_stash_list(input);
+        // Should use YELLOW for stash ref
+        assert!(
+            result.contains("\x1b[33m"),
+            "Should use YELLOW ANSI code: {result}"
+        );
+        // Should use BOLD for message
+        assert!(
+            result.contains("\x1b[1m"),
+            "Should use BOLD ANSI code: {result}"
+        );
+        // Should use DIM for middle part
+        assert!(
+            result.contains("\x1b[2m"),
+            "Should use DIM ANSI code: {result}"
+        );
     }
 
     #[test]
