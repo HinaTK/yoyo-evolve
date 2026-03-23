@@ -2,7 +2,7 @@ name: Evolution
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # every 4 hours (bonus runs skip if no sponsors)
+    - cron: '0 * * * *'  # every hour (sponsor gate in evolve.sh controls actual frequency)
   workflow_dispatch:       # manual trigger for testing
 
 permissions:

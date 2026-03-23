@@ -38,33 +38,102 @@ echo "Plan timeout: ${TIMEOUT}s | Impl timeout: 900s/task"
 echo ""
 
 # ── Step 0: Fetch sponsors & bonus-run gate ──
-# Sponsor tiers control evolution frequency:
-#   $0/mo  → 3 runs/day (hours 0, 8, 16)
-#   $10+   → 4 runs/day (hours 0, 8, 12, 16)
-#   $50+   → 6 runs/day (hours 0, 4, 8, 12, 16, 20)
+# Two sponsor models:
+#   Monthly ($X/mo) → tier-based run frequency (3/4/6 runs per day)
+#   One-time ($X)   → each $1 = 1 accelerated run (credits tracked in sponsors/credits.json)
+#
+# Tier 0 ($0/mo):   3 runs/day (hours 0, 8, 16)
+# Tier 1 ($10+/mo): 4 runs/day (hours 0, 8, 12, 16)
+# Tier 2 ($50+/mo): 6 runs/day (all hours)
 SPONSORS_FILE="/tmp/sponsor_logins.json"
+CREDITS_FILE="sponsors/credits.json"
 SPONSOR_TIER=0
 MONTHLY_TOTAL=0
+HAS_ONETIME_CREDITS="false"
 if command -v gh &>/dev/null; then
     # Use GH_PAT for sponsor query (needs read:user scope), fall back to GH_TOKEN
     SPONSOR_GH_TOKEN="${GH_PAT:-${GH_TOKEN:-}}"
-    GH_TOKEN="$SPONSOR_GH_TOKEN" gh api graphql -f query='{ viewer { sponsorshipsAsMaintainer(first: 100, activeOnly: true) { nodes { sponsorEntity { ... on User { login } ... on Organization { login } } tier { monthlyPriceInCents } } } } }' > /tmp/sponsor_raw.json 2>/dev/null || echo '{}' > /tmp/sponsor_raw.json
+    GH_TOKEN="$SPONSOR_GH_TOKEN" gh api graphql -f query='{ viewer { sponsorshipsAsMaintainer(first: 100, activeOnly: true) { nodes { isOneTimePayment sponsorEntity { ... on User { login } ... on Organization { login } } tier { monthlyPriceInCents isOneTime } } } } }' > /tmp/sponsor_raw.json 2>/dev/null || echo '{}' > /tmp/sponsor_raw.json
 
     MONTHLY_TOTAL=$(python3 <<'PYEOF'
-import json
+import json, os
+from datetime import datetime, timedelta, timezone
+
+CREDITS_FILE = "sponsors/credits.json"
+
 try:
     data = json.load(open('/tmp/sponsor_raw.json'))
     nodes = data['data']['viewer']['sponsorshipsAsMaintainer']['nodes']
-    logins = [n['sponsorEntity']['login'] for n in nodes if n.get('sponsorEntity', {}).get('login')]
-    total_cents = sum(n.get('tier', {}).get('monthlyPriceInCents', 0) for n in nodes)
-    json.dump(logins, open('/tmp/sponsor_logins.json', 'w'))
-    print(total_cents)
 except (KeyError, TypeError, json.JSONDecodeError):
-    json.dump([], open('/tmp/sponsor_logins.json', 'w'))
-    print(0)
+    nodes = []
+
+# Split into recurring and one-time
+recurring_logins = []
+onetime_sponsors = []
+monthly_cents = 0
+
+for n in nodes:
+    login = (n.get('sponsorEntity') or {}).get('login', '')
+    if not login:
+        continue
+    if n.get('isOneTimePayment', False):
+        cents = n.get('tier', {}).get('monthlyPriceInCents', 0)
+        onetime_sponsors.append({'login': login, 'cents': cents})
+    else:
+        recurring_logins.append(login)
+        monthly_cents += n.get('tier', {}).get('monthlyPriceInCents', 0)
+
+# Load existing credits
+credits = {}
+if os.path.exists(CREDITS_FILE):
+    try:
+        credits = json.load(open(CREDITS_FILE))
+    except (json.JSONDecodeError, FileNotFoundError):
+        credits = {}
+
+# Update credits with new one-time sponsors
+today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+for s in onetime_sponsors:
+    login = s['login']
+    if login not in credits:
+        credits[login] = {
+            'total_cents': s['cents'],
+            'used_runs': 0,
+            'first_seen': today,
+            'last_used': ''
+        }
+
+# Expire entries older than 30 days
+cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).strftime('%Y-%m-%d')
+credits = {k: v for k, v in credits.items() if v.get('first_seen', '') >= cutoff}
+
+# Find one-time sponsors with remaining credits
+onetime_logins_with_credits = []
+for login, info in credits.items():
+    max_runs = info.get('total_cents', 0) // 100  # $1 = 1 run
+    if info.get('used_runs', 0) < max_runs:
+        onetime_logins_with_credits.append(login)
+
+# Save updated credits
+os.makedirs(os.path.dirname(CREDITS_FILE), exist_ok=True)
+json.dump(credits, open(CREDITS_FILE, 'w'), indent=2)
+
+# Combine all sponsor logins (recurring + one-time with credits)
+all_logins = list(set(recurring_logins + onetime_logins_with_credits))
+json.dump(all_logins, open('/tmp/sponsor_logins.json', 'w'))
+
+# Output: monthly_cents|has_onetime_credits
+has_credits = "true" if onetime_logins_with_credits else "false"
+print(f"{monthly_cents}|{has_credits}")
 PYEOF
-    ) 2>/dev/null || MONTHLY_TOTAL=0
+    ) 2>/dev/null || MONTHLY_TOTAL="0|false"
     rm -f /tmp/sponsor_raw.json
+
+    # Parse output: monthly_cents|has_onetime_credits
+    HAS_ONETIME_CREDITS="${MONTHLY_TOTAL#*|}"
+    MONTHLY_TOTAL="${MONTHLY_TOTAL%%|*}"
+    MONTHLY_TOTAL="${MONTHLY_TOTAL:-0}"
+    HAS_ONETIME_CREDITS="${HAS_ONETIME_CREDITS:-false}"
 else
     echo '[]' > "$SPONSORS_FILE"
 fi
@@ -83,28 +152,69 @@ elif [ "$MONTHLY_DOLLARS" -gt 0 ] 2>/dev/null; then
 else
     echo "→ Sponsors: none (3 runs/day)"
 fi
+if [ "$HAS_ONETIME_CREDITS" = "true" ]; then
+    echo "→ One-time sponsors with remaining credits detected."
+fi
 
 # Bonus-run gate based on sponsor tier.
-# Cron fires every 4h: 0, 4, 8, 12, 16, 20. Base slots: 0, 8, 16.
+# Cron fires every hour. Base slots: 0, 8, 16.
 # GitHub Actions delays can shift start times by 30-90 min, so we use ±1 hour ranges.
-# Tier 0 ($0):   skip 3-5, 11-13, 19-21   → 3 runs/day
-# Tier 1 ($10+): skip 3-5, 19-21          → 4 runs/day
-# Tier 2 ($50+): allow all                → 6 runs/day
+# Tier 0 ($0/mo):   run at 7-9, 15-17, 23-1  → 3 runs/day
+# Tier 1 ($10+/mo): also 11-13               → 4 runs/day
+# Tier 2 ($50+/mo): also 3-5, 19-21          → 6 runs/day
+# One-time credits: override skip if sponsor has open issues
 CURRENT_HOUR=$((10#$(date +%H)))
 SKIP_RUN="false"
+IS_BASE_SLOT="false"
+
+# Base slots: hours 23, 0, 1, 7, 8, 9, 15, 16, 17
 case "$CURRENT_HOUR" in
-    3|4|5|19|20|21)
-        [ "$SPONSOR_TIER" -lt 2 ] 2>/dev/null && SKIP_RUN="true"
+    23|0|1|7|8|9|15|16|17)
+        IS_BASE_SLOT="true"
         ;;
     11|12|13)
         [ "$SPONSOR_TIER" -lt 1 ] 2>/dev/null && SKIP_RUN="true"
         ;;
+    3|4|5|19|20|21)
+        [ "$SPONSOR_TIER" -lt 2 ] 2>/dev/null && SKIP_RUN="true"
+        ;;
+    *)
+        SKIP_RUN="true"
+        ;;
 esac
+
+# One-time sponsors with credits override the skip
+if [ "$SKIP_RUN" = "true" ] && [ "$HAS_ONETIME_CREDITS" = "true" ]; then
+    echo "  One-time sponsor credits available — overriding skip."
+    SKIP_RUN="false"
+fi
 
 if [ "$SKIP_RUN" = "true" ] && [ "${FORCE_RUN:-}" != "true" ]; then
     echo "  Bonus slot (hour $CURRENT_HOUR) — tier $SPONSOR_TIER. Skipping."
     echo "  Set FORCE_RUN=true to override."
     exit 0
+fi
+
+# Consume one-time sponsor credits for this run
+if [ "$HAS_ONETIME_CREDITS" = "true" ]; then
+    python3 <<'PYEOF'
+import json, os
+from datetime import datetime, timezone
+CREDITS_FILE = "sponsors/credits.json"
+try:
+    credits = json.load(open(CREDITS_FILE))
+except (json.JSONDecodeError, FileNotFoundError):
+    credits = {}
+today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+for login, info in credits.items():
+    max_runs = info.get('total_cents', 0) // 100
+    if info.get('used_runs', 0) < max_runs:
+        info['used_runs'] = info.get('used_runs', 0) + 1
+        info['last_used'] = today
+        break  # consume one credit per run
+json.dump(credits, open(CREDITS_FILE, 'w'), indent=2)
+PYEOF
+    echo "  Consumed one-time sponsor credit."
 fi
 echo ""
 
