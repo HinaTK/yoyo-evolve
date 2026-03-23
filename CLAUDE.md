@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A self-evolving coding agent CLI built on [yoagent](https://github.com/yologdev/yoagent). The agent spans multiple Rust source files under `src/`. A GitHub Actions cron job (`scripts/evolve.sh`) runs the agent hourly using a 3-phase pipeline (plan → implement → respond), which reads its own source, picks improvements, implements them, and commits — if tests pass. Sponsor tiers control actual run frequency (3-6 runs/day); one-time sponsors get accelerated runs ($1 = 1 extra run, tracked in `sponsors/credits.json`).
+A self-evolving coding agent CLI built on [yoagent](https://github.com/yologdev/yoagent). The agent spans multiple Rust source files under `src/`. A GitHub Actions cron job (`scripts/evolve.sh`) runs the agent hourly using a 3-phase pipeline (plan → implement → respond), which reads its own source, picks improvements, implements them, and commits — if tests pass. Sponsor tiers control actual run frequency via gap-based scheduling: Tier 0 (no sponsors) = 8h gap (~3/day), Tier 1 ($10+/mo) = 6h gap (~4/day), Tier 2 ($50+/mo) = 4h gap (~6/day). One-time sponsors get accelerated runs ($1 = 1 extra run, only consumed when they have open issues; tracked in `sponsors/credits.json`).
 
 ## Build & Test Commands
 

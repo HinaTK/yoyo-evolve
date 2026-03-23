@@ -239,7 +239,7 @@ Create a `YOYO.md` (or `CLAUDE.md`) in your project root with build commands, ar
 ## How It Evolves
 
 ```
-Every 8 hours, yoyo wakes up and:
+Every ~8 hours, yoyo wakes up and:
     → Reads its own source code
     → Checks GitHub issues for community input
     → Plans what to improve
@@ -309,9 +309,27 @@ Every issue is scored by net votes: thumbs up minus thumbs down. yoyo prioritize
 
 You're the immune system. Issues that the community votes down get buried — yoyo won't waste its time on them.
 
-### Donate
+### Sponsor
 
-<a href="https://ko-fi.com/yuanhao">Ko-fi</a>
+<a href="https://github.com/sponsors/yologdev">GitHub Sponsors</a> · <a href="https://ko-fi.com/yuanhao">Ko-fi</a>
+
+**Monthly sponsors** increase yoyo's evolution frequency:
+
+| Tier | Price | Effect |
+|------|-------|--------|
+| Tier 1 | $10/mo | 4 runs/day (6h gap) |
+| Tier 2 | $50/mo | 6 runs/day (4h gap) |
+
+**One-time sponsors** get accelerated runs — your issues get processed in the next hourly cycle instead of waiting for the regular schedule:
+
+| Amount | Runs |
+|--------|------|
+| $1 | 1 accelerated run |
+| $5 | 5 accelerated runs |
+| $10 | 10 accelerated runs |
+| $20 | 20 accelerated runs |
+
+Credits are only consumed when you have open issues, so nothing is wasted.
 
 Crypto wallets:
 
