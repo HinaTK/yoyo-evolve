@@ -750,11 +750,13 @@ pub async fn run_repl(
             }];
             content_blocks.extend(build_add_content_blocks(&file_results));
 
-            run_prompt_with_content(
+            run_prompt_auto_retry_with_content(
                 agent,
                 content_blocks,
                 &mut session_total,
                 &agent_config.model,
+                &session_changes,
+                &cleaned_text,
             )
             .await
         } else {

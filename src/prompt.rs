@@ -1297,6 +1297,49 @@ pub async fn run_prompt_with_content(
     run_prompt_with_content_and_changes(agent, content_blocks, session_total, model, &changes).await
 }
 
+/// Run a content-block prompt with automatic retry on tool errors.
+///
+/// This is the content-block equivalent of `run_prompt_auto_retry`: when the
+/// outcome contains a `last_tool_error`, the prompt is automatically re-run
+/// with error context appended as a text-only follow-up (up to `MAX_AUTO_RETRIES`
+/// times). The original content blocks (including images and @file mentions) are
+/// already in the conversation history, so the retry only needs the text nudge.
+///
+/// Without this, @file mention prompts silently skip auto-retry, meaning tool
+/// failures require the user to manually `/retry` — inconsistent with regular
+/// prompts where auto-retry kicks in automatically.
+pub async fn run_prompt_auto_retry_with_content(
+    agent: &mut Agent,
+    content_blocks: Vec<Content>,
+    session_total: &mut Usage,
+    model: &str,
+    changes: &SessionChanges,
+    original_text: &str,
+) -> PromptOutcome {
+    let mut outcome =
+        run_prompt_with_content_and_changes(agent, content_blocks, session_total, model, changes)
+            .await;
+
+    for attempt in 1..=MAX_AUTO_RETRIES {
+        match outcome.last_tool_error {
+            Some(ref err) => {
+                // Retry with a text-only follow-up — the original content blocks
+                // (files, images) are already in conversation history from the first attempt
+                let retry_prompt = build_auto_retry_prompt(original_text, err, attempt);
+                eprintln!(
+                    "{DIM}  ⚡ auto-retrying after tool error (attempt {attempt}/{MAX_AUTO_RETRIES})...{RESET}"
+                );
+                outcome =
+                    run_prompt_with_changes(agent, &retry_prompt, session_total, model, changes)
+                        .await;
+            }
+            None => break,
+        }
+    }
+
+    outcome
+}
+
 /// Run a prompt with pre-built content blocks and file change tracking.
 /// This is the content-block equivalent of `run_prompt_with_changes`.
 pub async fn run_prompt_with_content_and_changes(
@@ -1893,6 +1936,53 @@ mod tests {
         // Short errors should not have ellipsis
         let error_portion = &prompt[..prompt.find("Try a").unwrap()];
         assert!(!error_portion.ends_with("…. "));
+    }
+
+    #[test]
+    fn test_auto_retry_prompt_with_file_mention_context() {
+        // When @file mentions are expanded, the cleaned_text passed to
+        // run_prompt_auto_retry_with_content should be preserved in retries.
+        // The retry prompt includes the original text so the agent knows what
+        // the user asked even though the files are already in conversation history.
+        let original_text = "explain the bug in this file";
+        let error = "bash: command not found: cargo";
+        let prompt = build_auto_retry_prompt(original_text, error, 1);
+        assert!(
+            prompt.contains(original_text),
+            "Retry should include original user text: {prompt}"
+        );
+        assert!(
+            prompt.contains(error),
+            "Retry should include the tool error: {prompt}"
+        );
+    }
+
+    #[test]
+    fn test_session_changes_shared_across_content_prompts() {
+        // Verifies that SessionChanges can be used across multiple prompt styles.
+        // When @file mention prompts use the same SessionChanges as regular prompts,
+        // all changes should be tracked together.
+        let changes = SessionChanges::new();
+
+        // Simulate a regular prompt recording a write
+        changes.record("src/main.rs", ChangeKind::Write);
+
+        // Simulate an @file mention prompt recording an edit
+        changes.record("src/cli.rs", ChangeKind::Edit);
+
+        // Both should be visible in the snapshot
+        let snapshot = changes.snapshot();
+        assert_eq!(snapshot.len(), 2);
+        assert_eq!(snapshot[0].path, "src/main.rs");
+        assert_eq!(snapshot[0].kind, ChangeKind::Write);
+        assert_eq!(snapshot[1].path, "src/cli.rs");
+        assert_eq!(snapshot[1].kind, ChangeKind::Edit);
+
+        // format_changes should show both
+        let output = format_changes(&changes);
+        assert!(output.contains("2 files"));
+        assert!(output.contains("src/main.rs"));
+        assert!(output.contains("src/cli.rs"));
     }
 
     #[test]
