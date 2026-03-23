@@ -99,6 +99,22 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /docs serde\n\
              \x20 /docs tokio spawn",
         ),
+        "doctor" => Some(
+            "/doctor — Run environment diagnostics\n\n\
+             Checks your development environment and reports what's working,\n\
+             what's missing, and what might need attention.\n\n\
+             Checks performed:\n\
+             \x20 • Version — current yoyo version\n\
+             \x20 • Git — whether git is installed and current repo/branch\n\
+             \x20 • Provider — configured AI provider\n\
+             \x20 • API key — whether the required env var is set\n\
+             \x20 • Model — configured model name\n\
+             \x20 • Config file — .yoyo.toml or ~/.config/yoyo/config.toml\n\
+             \x20 • Project context — YOYO.md, CLAUDE.md, etc.\n\
+             \x20 • Curl — needed for /docs and /web\n\
+             \x20 • Memory dir — .yoyo/ for persistent memories\n\n\
+             Run this when something isn't working to quickly identify the issue.",
+        ),
         "find" => Some(
             "/find <pattern> — Fuzzy-search project files by name\n\n\
              Usage:\n\
@@ -570,6 +586,7 @@ pub fn help_text() -> String {
         "                     /add <path>:<start>-<end> for line ranges, /add src/*.rs for globs\n",
     );
     out.push_str("  /context           Show loaded project context files\n");
+    out.push_str("  /doctor            Run environment diagnostics (git, API key, config, etc.)\n");
     out.push_str("  /init              Scan project and generate a YOYO.md context file\n");
     out.push_str("  /health            Run project health checks (auto-detects project type)\n");
     out.push_str(

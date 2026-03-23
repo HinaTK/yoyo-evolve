@@ -383,6 +383,17 @@ The `/move` command moves a method from one `impl` block to another, within the 
 
 If the method uses `self.` references, yoyo warns you to verify that the field/method references are valid on the target type. This is a common source of bugs when relocating methods between different types.
 
+### `rename_symbol` — Agent-invocable rename tool
+
+In addition to the interactive `/rename` REPL command, yoyo exposes a `rename_symbol` tool that the AI agent can call directly. This means the agent can rename symbols across files in a single tool call instead of issuing multiple `edit_file` calls — faster and more reliable for large refactors.
+
+The tool accepts:
+- **`old_name`** (required) — the current symbol name
+- **`new_name`** (required) — the replacement name
+- **`path`** (optional) — limit scope to a specific file or directory
+
+Like `write_file` and `edit_file`, `rename_symbol` asks for user confirmation before making changes (unless `--yes` is passed).
+
 ## Project Context
 
 | Command | Description |

@@ -1240,6 +1240,7 @@ pub async fn run_prompt_with_changes(
     session_total.cache_read += total_usage.cache_read;
     session_total.cache_write += total_usage.cache_write;
     print_usage(&total_usage, session_total, model, prompt_start.elapsed());
+    maybe_ring_bell(prompt_start.elapsed());
     println!();
     PromptOutcome {
         text: collected_text,
@@ -1387,6 +1388,7 @@ pub async fn run_prompt_with_content_and_changes(
     session_total.cache_read += total_usage.cache_read;
     session_total.cache_write += total_usage.cache_write;
     print_usage(&total_usage, session_total, model, prompt_start.elapsed());
+    maybe_ring_bell(prompt_start.elapsed());
     println!();
     PromptOutcome {
         text: collected_text,

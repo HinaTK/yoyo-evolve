@@ -2026,3 +2026,24 @@ fn wizard_does_not_trigger_for_ollama_provider() {
         "wizard welcome should not appear for ollama: {stderr}"
     );
 }
+
+// ── --no-bell ───────────────────────────────────────────────────────
+
+#[test]
+fn no_bell_flag_accepted() {
+    // --no-bell should be recognized without causing an error.
+    // We pass --help along with it so the process exits cleanly.
+    let output = yoyo_cmd()
+        .arg("--no-bell")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(output.status.success(), "--no-bell --help should exit 0");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("--no-bell"),
+        "help output should mention --no-bell flag"
+    );
+}

@@ -1,5 +1,5 @@
-//! Project-related command handlers: /add, /context, /init, /health, /fix, /test, /lint,
-//! /tree, /run, /docs, /find, /index, /web.
+//! Project-related command handlers: /add, /context, /init, /doctor, /health, /fix, /test,
+//! /lint, /tree, /run, /docs, /find, /index, /web.
 
 use crate::cli;
 use crate::commands::auto_compact_if_needed;
@@ -347,6 +347,259 @@ pub fn handle_docs(input: &str) {
     } else {
         println!("{RED}  ✗ {summary}{RESET}\n");
     }
+}
+
+// ── /doctor ──────────────────────────────────────────────────────────────
+
+/// Status of a single doctor check.
+#[derive(Debug, Clone, PartialEq)]
+pub enum DoctorStatus {
+    Pass,
+    Fail,
+    Warn,
+}
+
+/// A single diagnostic check result from `/doctor`.
+#[derive(Debug, Clone)]
+pub struct DoctorCheck {
+    pub name: String,
+    pub status: DoctorStatus,
+    pub detail: String,
+}
+
+/// Run all environment diagnostic checks and return structured results.
+///
+/// This is separated from the display logic so it can be tested.
+pub fn run_doctor_checks(provider: &str, model: &str) -> Vec<DoctorCheck> {
+    let mut checks = Vec::new();
+
+    // 1. Version
+    checks.push(DoctorCheck {
+        name: "Version".to_string(),
+        status: DoctorStatus::Pass,
+        detail: cli::VERSION.to_string(),
+    });
+
+    // 2. Git installed
+    match std::process::Command::new("git").arg("--version").output() {
+        Ok(output) if output.status.success() => {
+            let ver = String::from_utf8_lossy(&output.stdout)
+                .trim()
+                .replace("git version ", "")
+                .to_string();
+            checks.push(DoctorCheck {
+                name: "Git".to_string(),
+                status: DoctorStatus::Pass,
+                detail: format!("installed ({ver})"),
+            });
+        }
+        _ => {
+            checks.push(DoctorCheck {
+                name: "Git".to_string(),
+                status: DoctorStatus::Fail,
+                detail: "not found".to_string(),
+            });
+        }
+    }
+
+    // 3. Git repo
+    match std::process::Command::new("git")
+        .args(["rev-parse", "--is-inside-work-tree"])
+        .output()
+    {
+        Ok(output) if output.status.success() => {
+            let branch = std::process::Command::new("git")
+                .args(["branch", "--show-current"])
+                .output()
+                .ok()
+                .and_then(|o| {
+                    if o.status.success() {
+                        let b = String::from_utf8_lossy(&o.stdout).trim().to_string();
+                        if b.is_empty() {
+                            None
+                        } else {
+                            Some(b)
+                        }
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or_else(|| "detached".to_string());
+            checks.push(DoctorCheck {
+                name: "Git repo".to_string(),
+                status: DoctorStatus::Pass,
+                detail: format!("yes (branch: {branch})"),
+            });
+        }
+        _ => {
+            checks.push(DoctorCheck {
+                name: "Git repo".to_string(),
+                status: DoctorStatus::Warn,
+                detail: "not inside a git repository".to_string(),
+            });
+        }
+    }
+
+    // 4. Provider
+    checks.push(DoctorCheck {
+        name: "Provider".to_string(),
+        status: DoctorStatus::Pass,
+        detail: provider.to_string(),
+    });
+
+    // 5. API key
+    let env_var = cli::provider_api_key_env(provider);
+    match env_var {
+        Some(var_name) => {
+            if std::env::var(var_name).is_ok() {
+                checks.push(DoctorCheck {
+                    name: "API key".to_string(),
+                    status: DoctorStatus::Pass,
+                    detail: format!("set ({var_name})"),
+                });
+            } else {
+                checks.push(DoctorCheck {
+                    name: "API key".to_string(),
+                    status: DoctorStatus::Fail,
+                    detail: format!("{var_name} not set"),
+                });
+            }
+        }
+        None => {
+            // Unknown provider — can't check env var
+            if provider == "ollama" {
+                checks.push(DoctorCheck {
+                    name: "API key".to_string(),
+                    status: DoctorStatus::Pass,
+                    detail: "not required (ollama)".to_string(),
+                });
+            } else {
+                checks.push(DoctorCheck {
+                    name: "API key".to_string(),
+                    status: DoctorStatus::Warn,
+                    detail: format!("unknown env var for provider '{provider}'"),
+                });
+            }
+        }
+    }
+
+    // 6. Model
+    checks.push(DoctorCheck {
+        name: "Model".to_string(),
+        status: DoctorStatus::Pass,
+        detail: model.to_string(),
+    });
+
+    // 7. Config file
+    let mut config_found = Vec::new();
+    if std::path::Path::new(".yoyo.toml").exists() {
+        config_found.push(".yoyo.toml");
+    }
+    if let Some(user_path) = cli::user_config_path() {
+        if user_path.exists() {
+            config_found.push("~/.config/yoyo/config.toml");
+        }
+    }
+    if config_found.is_empty() {
+        checks.push(DoctorCheck {
+            name: "Config file".to_string(),
+            status: DoctorStatus::Warn,
+            detail: "none found (.yoyo.toml or ~/.config/yoyo/config.toml)".to_string(),
+        });
+    } else {
+        checks.push(DoctorCheck {
+            name: "Config file".to_string(),
+            status: DoctorStatus::Pass,
+            detail: format!("found: {}", config_found.join(", ")),
+        });
+    }
+
+    // 8. Project context
+    let context_files = cli::list_project_context_files();
+    if context_files.is_empty() {
+        checks.push(DoctorCheck {
+            name: "Project context".to_string(),
+            status: DoctorStatus::Warn,
+            detail: "no context file (create YOYO.md or run /init)".to_string(),
+        });
+    } else {
+        let descriptions: Vec<String> = context_files
+            .iter()
+            .map(|(name, lines)| format!("{name} ({lines} lines)"))
+            .collect();
+        checks.push(DoctorCheck {
+            name: "Project context".to_string(),
+            status: DoctorStatus::Pass,
+            detail: descriptions.join(", "),
+        });
+    }
+
+    // 9. Curl
+    match std::process::Command::new("curl").arg("--version").output() {
+        Ok(output) if output.status.success() => {
+            checks.push(DoctorCheck {
+                name: "Curl".to_string(),
+                status: DoctorStatus::Pass,
+                detail: "installed (for /docs and /web)".to_string(),
+            });
+        }
+        _ => {
+            checks.push(DoctorCheck {
+                name: "Curl".to_string(),
+                status: DoctorStatus::Warn,
+                detail: "not found (/docs and /web won't work)".to_string(),
+            });
+        }
+    }
+
+    // 10. Memory dir (.yoyo/)
+    if std::path::Path::new(".yoyo").is_dir() {
+        checks.push(DoctorCheck {
+            name: "Memory dir".to_string(),
+            status: DoctorStatus::Pass,
+            detail: ".yoyo/ found".to_string(),
+        });
+    } else {
+        checks.push(DoctorCheck {
+            name: "Memory dir".to_string(),
+            status: DoctorStatus::Warn,
+            detail: ".yoyo/ not found (run /remember to create)".to_string(),
+        });
+    }
+
+    checks
+}
+
+/// Display the doctor report from a list of checks.
+pub fn print_doctor_report(checks: &[DoctorCheck]) {
+    println!("\n  {BOLD}🩺 yoyo doctor{RESET}");
+    println!("  {DIM}─────────────────────────────{RESET}");
+
+    for check in checks {
+        let (icon, color) = match check.status {
+            DoctorStatus::Pass => ("✓", &GREEN),
+            DoctorStatus::Fail => ("✗", &RED),
+            DoctorStatus::Warn => ("⚠", &YELLOW),
+        };
+        println!(
+            "  {color}{icon}{RESET} {BOLD}{}{RESET}: {}",
+            check.name, check.detail
+        );
+    }
+
+    let passed = checks
+        .iter()
+        .filter(|c| c.status == DoctorStatus::Pass)
+        .count();
+    let total = checks.len();
+    let summary_color = if passed == total { &GREEN } else { &YELLOW };
+    println!("\n  {summary_color}{passed}/{total} checks passed{RESET}\n");
+}
+
+/// Handle the `/doctor` command.
+pub fn handle_doctor(provider: &str, model: &str) {
+    let checks = run_doctor_checks(provider, model);
+    print_doctor_report(&checks);
 }
 
 // ── /health ──────────────────────────────────────────────────────────────
@@ -2518,6 +2771,65 @@ pub struct RenameMatch {
     pub line_num: usize,
     pub line_text: String,
     pub column: usize,
+}
+
+/// Result of a rename-in-project operation.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RenameResult {
+    pub files_changed: Vec<String>,
+    pub total_replacements: usize,
+    pub preview: String,
+}
+
+/// Perform a word-boundary-aware rename across git-tracked files.
+///
+/// If `scope` is `Some(path)`, only files under that path are considered.
+/// Returns a `RenameResult` with details of what changed, or an error message.
+pub fn rename_in_project(
+    old_name: &str,
+    new_name: &str,
+    scope: Option<&str>,
+) -> Result<RenameResult, String> {
+    if old_name.is_empty() {
+        return Err("old_name must not be empty".to_string());
+    }
+    if new_name.is_empty() {
+        return Err("new_name must not be empty".to_string());
+    }
+    if old_name == new_name {
+        return Err("old_name and new_name are identical — nothing to do".to_string());
+    }
+
+    let mut matches = find_rename_matches(old_name);
+
+    // Filter by scope if provided
+    if let Some(scope_path) = scope {
+        matches.retain(|m| m.file.starts_with(scope_path));
+    }
+
+    if matches.is_empty() {
+        let scope_msg = scope
+            .map(|s| format!(" (scoped to '{s}')"))
+            .unwrap_or_default();
+        return Err(format!(
+            "No word-boundary matches found for '{old_name}'{scope_msg}."
+        ));
+    }
+
+    let preview = format_rename_preview(&matches, old_name, new_name);
+
+    // Collect unique files that will be changed
+    let mut files_changed: Vec<String> = matches.iter().map(|m| m.file.clone()).collect();
+    files_changed.sort();
+    files_changed.dedup();
+
+    let total_replacements = apply_rename(&matches, old_name, new_name);
+
+    Ok(RenameResult {
+        files_changed,
+        total_replacements,
+        preview,
+    })
 }
 
 /// Find all word-boundary matches of `old_name` across files tracked by git.
@@ -5969,5 +6281,48 @@ impl B {
         } else {
             blocks[0].2.clone()
         }
+    }
+
+    // ── rename_in_project ─────────────────────────────────────────────
+
+    #[test]
+    fn test_rename_in_project_empty_old_name() {
+        let result = rename_in_project("", "Bar", None);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("old_name must not be empty"));
+    }
+
+    #[test]
+    fn test_rename_in_project_empty_new_name() {
+        let result = rename_in_project("Foo", "", None);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("new_name must not be empty"));
+    }
+
+    #[test]
+    fn test_rename_in_project_same_name() {
+        let result = rename_in_project("Foo", "Foo", None);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("identical"));
+    }
+
+    #[test]
+    fn test_rename_result_fields() {
+        let r = RenameResult {
+            files_changed: vec!["a.rs".to_string()],
+            total_replacements: 3,
+            preview: "preview".to_string(),
+        };
+        assert_eq!(r.files_changed, vec!["a.rs"]);
+        assert_eq!(r.total_replacements, 3);
+        assert_eq!(r.preview, "preview");
+    }
+
+    #[test]
+    fn test_rename_in_project_scoped_no_match() {
+        // Scope to a nonexistent directory — should find no matches
+        let result = rename_in_project("RenameMatch", "RM", Some("nonexistent_dir_xyz/"));
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("No word-boundary matches"));
     }
 }

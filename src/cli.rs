@@ -377,6 +377,7 @@ pub fn print_help() {
     println!("  --mcp <cmd>       Connect to an MCP server via stdio (repeatable)");
     println!("  --openapi <spec>  Load OpenAPI spec file and register API tools (repeatable)");
     println!("  --no-color        Disable colored output (also respects NO_COLOR env)");
+    println!("  --no-bell         Disable terminal bell on long completions (also respects YOYO_NO_BELL env)");
     println!("  --verbose, -v     Show debug info (API errors, request details)");
     println!("  --yes, -y         Auto-approve all tool executions (skip confirmation prompts)");
     println!("  --allow <pat>     Auto-approve bash commands matching glob pattern (repeatable)");
@@ -524,6 +525,7 @@ const KNOWN_FLAGS: &[&str] = &[
     "--deny-dir",
     "--image",
     "--no-color",
+    "--no-bell",
     "--verbose",
     "-v",
     "--yes",
@@ -1601,6 +1603,13 @@ mod tests {
     fn test_no_color_flag_recognized() {
         let args = ["yoyo".to_string(), "--no-color".to_string()];
         assert!(args.iter().any(|a| a == "--no-color"));
+    }
+
+    #[test]
+    fn test_no_bell_flag_recognized() {
+        let args = ["yoyo".to_string(), "--no-bell".to_string()];
+        assert!(args.iter().any(|a| a == "--no-bell"));
+        assert!(KNOWN_FLAGS.contains(&"--no-bell"));
     }
 
     #[test]

@@ -9,6 +9,7 @@ By default, yoyo prompts you before executing any potentially dangerous tool:
 - **`bash`** — every shell command asks for `[y/N]` confirmation
 - **`write_file`** — creating or overwriting files asks for approval
 - **`edit_file`** — modifying existing files asks for approval
+- **`rename_symbol`** — cross-file symbol renaming asks for approval
 
 Read-only tools (`read_file`, `list_files`, `search`) run without prompting.
 

@@ -10,6 +10,31 @@ use yoagent::types::{Content, ToolResult};
 /// Whether color output has been disabled (via NO_COLOR env or --no-color flag).
 static COLOR_DISABLED: OnceLock<bool> = OnceLock::new();
 
+// --- Bell notification support with YOYO_NO_BELL and --no-bell ---
+
+/// Whether bell notification has been disabled (via --no-bell flag or YOYO_NO_BELL env).
+static BELL_DISABLED: OnceLock<bool> = OnceLock::new();
+
+/// Disable bell notifications. Call from CLI arg parsing.
+pub fn disable_bell() {
+    let _ = BELL_DISABLED.set(true);
+}
+
+/// Check if bell is enabled. Respects YOYO_NO_BELL env var.
+pub fn bell_enabled() -> bool {
+    !*BELL_DISABLED.get_or_init(|| std::env::var("YOYO_NO_BELL").is_ok())
+}
+
+/// Ring the terminal bell if enabled and elapsed time exceeds threshold.
+/// The bell character (\x07) causes most terminal emulators to flash the tab
+/// or play a sound, alerting multitasking developers.
+pub fn maybe_ring_bell(elapsed: Duration) {
+    if bell_enabled() && elapsed.as_secs() >= 3 {
+        let _ = io::stdout().write_all(b"\x07");
+        let _ = io::stdout().flush();
+    }
+}
+
 /// Disable color output. Call before any formatting happens (e.g., from CLI arg parsing).
 pub fn disable_color() {
     let _ = COLOR_DISABLED.set(true);
@@ -6105,5 +6130,32 @@ mod tests {
             total.contains("bold item"),
             "Streamed list should contain bold item text, got: '{total}'"
         );
+    }
+
+    #[test]
+    fn test_bell_enabled_default() {
+        // Verify bell_enabled() is callable and returns a bool without panicking.
+        // Since OnceLock is global, the value depends on test ordering and env,
+        // but the function itself should never panic.
+        let _result = bell_enabled();
+    }
+
+    #[test]
+    fn test_maybe_ring_bell_short_duration_no_bell() {
+        // Durations under 3s should never ring the bell, regardless of settings.
+        // This just verifies no panic or error — the bell character is harmless
+        // even if it does get emitted.
+        maybe_ring_bell(Duration::from_secs(0));
+        maybe_ring_bell(Duration::from_secs(1));
+        maybe_ring_bell(Duration::from_secs(2));
+        // No assertion needed — we're testing that it doesn't panic.
+    }
+
+    #[test]
+    fn test_maybe_ring_bell_long_duration_no_panic() {
+        // Durations >= 3s should attempt the bell if enabled.
+        // In test environment this is harmless.
+        maybe_ring_bell(Duration::from_secs(3));
+        maybe_ring_bell(Duration::from_secs(60));
     }
 }

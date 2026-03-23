@@ -449,6 +449,10 @@ pub async fn run_repl(
                 commands::handle_health();
                 continue;
             }
+            "/doctor" => {
+                commands::handle_doctor(&agent_config.provider, &agent_config.model);
+                continue;
+            }
             "/test" => {
                 commands::handle_test();
                 continue;

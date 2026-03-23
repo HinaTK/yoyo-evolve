@@ -227,6 +227,21 @@ pub fn describe_file_operation(tool_name: &str, params: &serde_json::Value) -> S
             let new_lines = new_text.lines().count();
             format!("edit: {path} ({old_lines} → {new_lines} lines)")
         }
+        "rename_symbol" => {
+            let old_name = params
+                .get("old_name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("<unknown>");
+            let new_name = params
+                .get("new_name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("<unknown>");
+            let scope = params
+                .get("path")
+                .and_then(|v| v.as_str())
+                .unwrap_or("project");
+            format!("rename: {old_name} → {new_name} (in {scope})")
+        }
         _ => format!("{tool_name}: file operation"),
     }
 }
@@ -617,6 +632,90 @@ impl AgentTool for StreamingBashTool {
     }
 }
 
+// ── rename_symbol agent tool ─────────────────────────────────────────────
+
+/// An agent-invocable tool for renaming symbols across a project.
+/// Wraps `commands_project::rename_in_project` so the LLM can do cross-file
+/// renames in a single tool call instead of multiple edit_file invocations.
+struct RenameSymbolTool;
+
+#[async_trait::async_trait]
+impl AgentTool for RenameSymbolTool {
+    fn name(&self) -> &str {
+        "rename_symbol"
+    }
+
+    fn label(&self) -> &str {
+        "Rename"
+    }
+
+    fn description(&self) -> &str {
+        "Rename a symbol across the project. Performs word-boundary-aware find-and-replace \
+         in all git-tracked files. More reliable than multiple edit_file calls for renames. \
+         Returns a preview of changes and the number of files modified."
+    }
+
+    fn parameters_schema(&self) -> serde_json::Value {
+        serde_json::json!({
+            "type": "object",
+            "properties": {
+                "old_name": {
+                    "type": "string",
+                    "description": "The current name of the symbol to rename"
+                },
+                "new_name": {
+                    "type": "string",
+                    "description": "The new name for the symbol"
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Optional: limit rename to a specific file or directory (default: entire project)"
+                }
+            },
+            "required": ["old_name", "new_name"]
+        })
+    }
+
+    async fn execute(
+        &self,
+        params: serde_json::Value,
+        _ctx: yoagent::types::ToolContext,
+    ) -> Result<yoagent::types::ToolResult, yoagent::types::ToolError> {
+        use yoagent::types::{Content, ToolError, ToolResult as TR};
+
+        let old_name = params["old_name"]
+            .as_str()
+            .ok_or_else(|| ToolError::InvalidArgs("missing 'old_name' parameter".into()))?;
+
+        let new_name = params["new_name"]
+            .as_str()
+            .ok_or_else(|| ToolError::InvalidArgs("missing 'new_name' parameter".into()))?;
+
+        let scope = params["path"].as_str();
+
+        match commands_project::rename_in_project(old_name, new_name, scope) {
+            Ok(result) => {
+                let summary = format!(
+                    "Renamed '{}' → '{}': {} replacement{} across {} file{}.\n\nFiles changed:\n{}\n\n{}",
+                    old_name,
+                    new_name,
+                    result.total_replacements,
+                    if result.total_replacements == 1 { "" } else { "s" },
+                    result.files_changed.len(),
+                    if result.files_changed.len() == 1 { "" } else { "s" },
+                    result.files_changed.iter().map(|f| format!("  - {f}")).collect::<Vec<_>>().join("\n"),
+                    result.preview,
+                );
+                Ok(TR {
+                    content: vec![Content::Text { text: summary }],
+                    details: serde_json::json!({}),
+                })
+            }
+            Err(msg) => Err(ToolError::Failed(msg)),
+        }
+    }
+}
+
 /// Build the tool set, optionally with a bash confirmation prompt.
 /// When `auto_approve` is false (default), bash commands and file writes require user approval.
 /// The "always" option sets a session-wide flag so subsequent operations are auto-approved.
@@ -707,6 +806,13 @@ pub fn build_tools(
         )
     };
 
+    // Build rename_symbol tool with optional confirmation (it writes files)
+    let rename_tool: Box<dyn AgentTool> = if auto_approve {
+        Box::new(RenameSymbolTool)
+    } else {
+        maybe_confirm(Box::new(RenameSymbolTool), &always_approved, permissions)
+    };
+
     vec![
         with_truncation(Box::new(bash)),
         with_truncation(maybe_guard(
@@ -723,6 +829,7 @@ pub fn build_tools(
             Box::new(SearchTool::default()),
             dir_restrictions,
         )),
+        with_truncation(rename_tool),
     ]
 }
 
@@ -929,6 +1036,11 @@ async fn main() {
     // Also auto-disable color when stdout is not a terminal (piped output)
     if args.iter().any(|a| a == "--no-color") || !io::stdout().is_terminal() {
         disable_color();
+    }
+
+    // Check --no-bell before any output
+    if args.iter().any(|a| a == "--no-bell") {
+        disable_bell();
     }
 
     let Some(config) = parse_args(&args) else {
@@ -1255,13 +1367,13 @@ mod tests {
 
     #[test]
     fn test_build_tools_returns_six_tools() {
-        // build_tools should return 6 tools regardless of auto_approve
+        // build_tools should return 7 tools regardless of auto_approve
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
         let tools_approved = build_tools(true, &perms, &dirs);
         let tools_confirm = build_tools(false, &perms, &dirs);
-        assert_eq!(tools_approved.len(), 6);
-        assert_eq!(tools_confirm.len(), 6);
+        assert_eq!(tools_approved.len(), 7);
+        assert_eq!(tools_confirm.len(), 7);
     }
 
     #[test]
@@ -1596,7 +1708,7 @@ mod tests {
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
         let tools = build_tools(true, &perms, &dirs);
-        assert_eq!(tools.len(), 6);
+        assert_eq!(tools.len(), 7);
         // Tool names should still be correct
         let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
         assert!(names.contains(&"write_file"));
@@ -1611,7 +1723,7 @@ mod tests {
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
         let tools = build_tools(false, &perms, &dirs);
-        assert_eq!(tools.len(), 6);
+        assert_eq!(tools.len(), 7);
         let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
         assert!(names.contains(&"write_file"));
         assert!(names.contains(&"edit_file"));
@@ -2069,5 +2181,93 @@ mod tests {
             }
             _ => panic!("Expected text content"),
         }
+    }
+
+    // ── rename_symbol tool tests ─────────────────────────────────────
+
+    #[test]
+    fn test_rename_symbol_tool_name() {
+        let tool = RenameSymbolTool;
+        assert_eq!(tool.name(), "rename_symbol");
+    }
+
+    #[test]
+    fn test_rename_symbol_tool_label() {
+        let tool = RenameSymbolTool;
+        assert_eq!(tool.label(), "Rename");
+    }
+
+    #[test]
+    fn test_rename_symbol_tool_schema() {
+        let tool = RenameSymbolTool;
+        let schema = tool.parameters_schema();
+        // Must have old_name, new_name, and path properties
+        let props = schema["properties"].as_object().unwrap();
+        assert!(
+            props.contains_key("old_name"),
+            "schema should have old_name"
+        );
+        assert!(
+            props.contains_key("new_name"),
+            "schema should have new_name"
+        );
+        assert!(props.contains_key("path"), "schema should have path");
+        // old_name and new_name are required
+        let required = schema["required"].as_array().unwrap();
+        let required_strs: Vec<&str> = required.iter().map(|v| v.as_str().unwrap()).collect();
+        assert!(required_strs.contains(&"old_name"));
+        assert!(required_strs.contains(&"new_name"));
+        // path is NOT required
+        assert!(!required_strs.contains(&"path"));
+    }
+
+    #[test]
+    fn test_rename_result_struct() {
+        let result = commands_project::RenameResult {
+            files_changed: vec!["src/main.rs".to_string(), "src/lib.rs".to_string()],
+            total_replacements: 5,
+            preview: "preview text".to_string(),
+        };
+        assert_eq!(result.files_changed.len(), 2);
+        assert_eq!(result.total_replacements, 5);
+        assert_eq!(result.preview, "preview text");
+    }
+
+    #[test]
+    fn test_rename_symbol_tool_in_build_tools() {
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(true, &perms, &dirs);
+        let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
+        assert!(
+            names.contains(&"rename_symbol"),
+            "build_tools should include rename_symbol, got: {names:?}"
+        );
+    }
+
+    #[test]
+    fn test_describe_rename_symbol_operation() {
+        let params = serde_json::json!({
+            "old_name": "FooBar",
+            "new_name": "BazQux",
+            "path": "src/"
+        });
+        let desc = describe_file_operation("rename_symbol", &params);
+        assert!(desc.contains("FooBar"), "Should contain old_name: {desc}");
+        assert!(desc.contains("BazQux"), "Should contain new_name: {desc}");
+        assert!(desc.contains("src/"), "Should contain scope: {desc}");
+    }
+
+    #[test]
+    fn test_describe_rename_symbol_no_path() {
+        let params = serde_json::json!({
+            "old_name": "Foo",
+            "new_name": "Bar"
+        });
+        let desc = describe_file_operation("rename_symbol", &params);
+        assert!(
+            desc.contains("project"),
+            "Should default to 'project': {desc}"
+        );
     }
 }
