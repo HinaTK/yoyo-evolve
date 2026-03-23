@@ -591,6 +591,10 @@ pub async fn run_repl(
                 commands::handle_extract(input);
                 continue;
             }
+            s if s == "/move" || s.starts_with("/move ") => {
+                commands::handle_move(input);
+                continue;
+            }
             s if s == "/remember" || s.starts_with("/remember ") => {
                 commands::handle_remember(input);
                 continue;

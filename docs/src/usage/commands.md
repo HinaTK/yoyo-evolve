@@ -346,6 +346,7 @@ This is one of the most common workflows for developers using coding agents — 
 |---------|-------------|
 | `/rename <old> <new>` | Cross-file symbol renaming with word-boundary matching |
 | `/extract <symbol> <source> <target>` | Move a symbol (fn, struct, enum, trait, type, const, static) between files |
+| `/move <Src>::<method> [file::]<Dst>` | Move a method between impl blocks (same file or cross-file) |
 
 ### `/rename` — Cross-file symbol renaming
 
@@ -369,6 +370,18 @@ The `/extract` command moves a top-level item (function, struct, enum, impl, tra
 ```
 
 The command shows a preview of the block to be moved and asks for confirmation before making changes. If the target file doesn't exist, it's created. If the symbol is public, yoyo notes that you may need to add a `use` import in the source file.
+
+### `/move` — Relocate methods between impl blocks
+
+The `/move` command moves a method from one `impl` block to another, within the same file or across files. It extracts the method (including doc comments and attributes), re-indents it to match the target block, and inserts it before the closing `}`. Shows a preview and asks for confirmation.
+
+```
+/move MyStruct::process TargetStruct           # same file
+/move Parser::parse_expr other.rs::Lexer       # cross-file
+/move Config::validate Settings                # same file
+```
+
+If the method uses `self.` references, yoyo warns you to verify that the field/method references are valid on the target type. This is a common source of bugs when relocating methods between different types.
 
 ## Project Context
 

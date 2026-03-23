@@ -155,6 +155,21 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /extract MyResult src/lib.rs src/errors.rs\n\
              \x20 /extract MAX_SIZE src/config.rs src/constants.rs",
         ),
+        "move" => Some(
+            "/move <SourceType>::<method> [file::]<TargetType> — Relocate a method between impl blocks\n\n\
+             Usage:\n\
+             \x20 /move Source::method Target           Move method within the same file\n\
+             \x20 /move Source::method file.rs::Target   Move method to a different file\n\n\
+             Finds the method in `impl SourceType`, extracts it (with doc comments\n\
+             and attributes), and inserts it into `impl TargetType`.\n\
+             Automatically re-indents to match the target block.\n\
+             Shows a preview and asks for confirmation before moving.\n\
+             Warns if the method uses `self.` references.\n\n\
+             Examples:\n\
+             \x20 /move MyStruct::process TargetStruct\n\
+             \x20 /move Parser::parse_expr other.rs::Lexer\n\
+             \x20 /move Config::validate Settings",
+        ),
         "fix" => Some(
             "/fix — Auto-fix build/lint errors\n\n\
              Runs the project's build and lint checks, captures any errors,\n\
@@ -573,6 +588,7 @@ pub fn help_text() -> String {
     out.push_str("  /grep <pattern> [path] Search file contents directly (no AI, instant)\n");
     out.push_str("  /rename <old> <new> Cross-file symbol renaming with word boundaries\n");
     out.push_str("  /extract <sym> <src> <dst> Move a symbol (fn/struct/enum/type/const/...) to another file\n");
+    out.push_str("  /move <Src>::<method> [file::]<Dst> Move a method between impl blocks\n");
     out.push_str("  /index             Build a lightweight index of project source files\n");
     out.push_str("  /tree [depth]      Show project directory tree (default depth: 3)\n");
     out.push_str("  /web <url>         Fetch a web page and display clean readable text content\n");
