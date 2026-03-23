@@ -519,7 +519,7 @@ You MUST address ALL community issues shown above. For each one, decide:
 - wontfix: explain why in the Issue Responses section (issue will be CLOSED — no follow-up needed)
 - partial: explain what you'd do and note it for next session (issue stays OPEN)
 
-Every issue gets a response. Real people are waiting.
+Every actionable issue gets a response. Skip issues where you have nothing new to say — silence is better than noise.
 Write issue responses in yoyo's voice (see PERSONALITY.md). Be a curious, honest octopus —
 celebrate fixes, admit struggles, show personality. No corporate speak.
 
@@ -530,7 +530,8 @@ Title: [short task title]
 Files: [files to modify]
 Issue: #N (or "none")
 
-[Detailed description of what to do — specific enough for a focused implementation agent]
+[Detailed description of what to do — specific enough for a focused implementation agent.
+Include which docs need updating (CLAUDE.md, README.md, docs/src/) if the task changes behavior, features, or architecture.]
 
 Also create session_plan/issue_responses.md with your planned response for each issue:
 - #N: [what you'll do — implement as task, won't fix because X, already resolved, need more time, etc.]
@@ -640,7 +641,11 @@ Follow the evolve skill rules:
 - If any check fails, read the error and fix it. Keep trying until it passes.
 - Only if you've tried 3+ times and are stuck, revert with: git checkout -- . (keeps previous commits)
 - After ALL checks pass, commit: git add -A && git commit -m "Day $DAY ($SESSION_TIME): $task_title (Task $TASK_NUM)"
-- If you added a new feature or command, update the relevant docs in docs/src/
+- If you changed behavior, added features, or modified architecture, update the docs:
+  - CLAUDE.md — keep the "What This Is", "Build & Test", "Architecture", and "State files" sections accurate
+  - README.md — keep "How It Evolves", commands table, and feature descriptions accurate
+  - docs/src/ — update relevant pages for user-facing changes
+  Stale docs are as bad as failing tests. If your change makes any doc statement wrong, fix it in the same commit.
 - Do NOT work on anything else. This is your only task.
 TEOF
 
@@ -1007,25 +1012,25 @@ $(if [ "$BUILD_OK" = "FAILING" ] && [ -n "$BUILD_DIAG" ]; then echo "Build error
 
 ## Your task
 
-For EACH issue listed above, you must:
+For EACH issue listed above, decide what to do:
 
-1. **Decide** what happened with this issue:
-   - Did your commits fix it? → comment explaining what you did, then close it
-   - Did you make partial progress? → comment with progress update (keep open)
-   - Is it already resolved from a previous session? → comment saying so, then close it
-   - Will you not fix it? → explain why, then close it
-   - No progress this session? → briefly acknowledge you saw it
+- **Fixed by your commits** → comment explaining what you did, then close it
+- **Partial progress** → comment with a specific progress update (keep open)
+- **Already resolved from a previous session** → comment saying so, then close it
+- **Won't fix** → explain why, then close it
+- **No progress and nothing useful to say** → SKIP IT. Do NOT comment. Silence is better than noise.
 
-2. **Act directly** using these commands:
-   - Comment: gh issue comment NUMBER --repo $REPO --body "🐙 **Day $DAY**
+Only comment when you have something REAL to say — a fix, progress, a decision, or a genuine question. "I saw this" or "it's on my list" adds zero value. If you didn't work on it and have nothing new, just move on.
 
-   YOUR_MESSAGE_HERE"
-   - Close (after commenting): gh issue close NUMBER --repo $REPO
+Commands:
+- Comment: gh issue comment NUMBER --repo $REPO --body "🐙 **Day $DAY**
+
+YOUR_MESSAGE_HERE"
+- Close (after commenting): gh issue close NUMBER --repo $REPO
 
 Rules:
 ${ALREADY_RESPONDED:+- SKIP these issues (already responded today):${ALREADY_RESPONDED}. Do NOT comment on them again.
-}- Respond to every OTHER issue. Real people are waiting.
-- Comment on each issue EXACTLY ONCE. Never post a second comment on the same issue in the same session.
+}- Comment on each issue AT MOST ONCE. Never post a second comment on the same issue in the same session.
 - DO close issues that are clearly resolved — leaving stale issues open creates noise for humans. Always comment first explaining why.
 - Only keep open if there's genuinely more work to do.
 - If build is FAILING, do NOT claim anything is "fixed" — say you'll fix the build first.
@@ -1065,31 +1070,8 @@ RESPONDEOF
         fi
     fi
 
-    # Fallback: if agent failed, acknowledge ALL open issues (skip already-closed ones).
-    # Sleep again to let any partially-posted comments propagate before duplicate check.
     if [ "$RESPOND_EXIT" -ne 0 ]; then
-        echo "  Issue response agent failed (exit $RESPOND_EXIT) — posting fallback acknowledgments."
-        sleep 5  # let any partially-posted comments propagate in GitHub's API
-        while IFS= read -r fallback_issue_num; do
-            [ -z "$fallback_issue_num" ] && continue
-            # Skip issues already closed (agent may have handled some before crashing)
-            ISSUE_STATE=$(gh issue view "$fallback_issue_num" --repo "$REPO" --json state --jq '.state' 2>/dev/null || echo "UNKNOWN")
-            if [ "$ISSUE_STATE" = "CLOSED" ]; then
-                echo "  Skipping issue #$fallback_issue_num (already closed)."
-                continue
-            fi
-            # Skip issues already commented on this session
-            LAST_COMMENT=$(gh api "repos/$REPO/issues/$fallback_issue_num/comments?per_page=1&sort=created&direction=desc" --jq '.[0].body' 2>/dev/null || true)
-            if echo "$LAST_COMMENT" | grep -q "Day $DAY"; then
-                echo "  Skipping issue #$fallback_issue_num (already commented today)."
-                continue
-            fi
-            gh issue comment "$fallback_issue_num" --repo "$REPO" \
-                --body "🐙 **Day $DAY**
-
-Spotted this but had my tentacles full with other things today. It's on my list — I'll come back to it." \
-                || echo "  WARNING: Fallback comment to issue #$fallback_issue_num failed (exit $?)"
-        done < <(grep -oE '### Issue #[0-9]+' "$ISSUES_FILE" 2>/dev/null | grep -oE '[0-9]+')
+        echo "  Issue response agent failed (exit $RESPOND_EXIT) — skipping. Issues will be picked up next session."
     fi
 
     rm -f "$RESPOND_LOG"
