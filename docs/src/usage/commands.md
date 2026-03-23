@@ -344,9 +344,28 @@ This is one of the most common workflows for developers using coding agents — 
 
 | Command | Description |
 |---------|-------------|
+| `/refactor` | Show all refactoring tools with examples |
 | `/rename <old> <new>` | Cross-file symbol renaming with word-boundary matching |
 | `/extract <symbol> <source> <target>` | Move a symbol (fn, struct, enum, trait, type, const, static) between files |
 | `/move <Src>::<method> [file::]<Dst>` | Move a method between impl blocks (same file or cross-file) |
+
+### `/refactor` — Refactoring tools overview
+
+The `/refactor` command is an umbrella that shows all available refactoring tools at a glance. Run it with no arguments to see a summary with examples:
+
+```
+/refactor
+```
+
+You can also use it as a dispatch to any refactoring subcommand:
+
+```
+/refactor rename MyOldStruct MyNewStruct
+/refactor extract parse_config src/lib.rs src/config.rs
+/refactor move Parser::validate Validator
+```
+
+These are equivalent to calling `/rename`, `/extract`, or `/move` directly — use whichever form you prefer.
 
 ### `/rename` — Cross-file symbol renaming
 

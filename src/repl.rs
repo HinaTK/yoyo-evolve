@@ -599,6 +599,10 @@ pub async fn run_repl(
                 commands::handle_move(input);
                 continue;
             }
+            s if s == "/refactor" || s.starts_with("/refactor ") => {
+                commands::handle_refactor(input);
+                continue;
+            }
             s if s == "/remember" || s.starts_with("/remember ") => {
                 commands::handle_remember(input);
                 continue;

@@ -1,5 +1,5 @@
 //! Project-related command handlers: /add, /context, /init, /doctor, /health, /fix, /test,
-//! /lint, /tree, /run, /docs, /find, /index, /web.
+//! /lint, /tree, /run, /docs, /find, /index, /web, /refactor.
 
 use crate::cli;
 use crate::commands::auto_compact_if_needed;
@@ -2734,6 +2734,73 @@ pub fn handle_extract(input: &str) {
     match extract_symbol(&source, &target, &symbol) {
         Ok(msg) => println!("{GREEN}  ✓ {msg}{RESET}\n"),
         Err(e) => println!("{RED}  ✗ {e}{RESET}\n"),
+    }
+}
+
+// ── /refactor ─────────────────────────────────────────────────────────────
+
+/// Handle the `/refactor` umbrella command.
+///
+/// With no arguments, displays a summary of all available refactoring commands.
+/// With a subcommand (`rename`, `extract`, `move`), dispatches to the corresponding handler.
+pub fn handle_refactor(input: &str) {
+    let rest = input.strip_prefix("/refactor").unwrap_or(input).trim();
+
+    if rest.is_empty() {
+        println!("{DIM}  Refactoring Tools:");
+        println!("    /rename <old> <new>              Rename a symbol across all project files");
+        println!(
+            "    /extract <item> <src> <dst>      Move a function, struct, or type to another file"
+        );
+        println!("    /move <Type>::<method> <Target>   Relocate a method between impl blocks");
+        println!();
+        println!("  Examples:");
+        println!("    /rename MyOldStruct MyNewStruct");
+        println!("    /extract parse_config src/lib.rs src/config.rs");
+        println!("    /move Parser::validate Validator");
+        println!();
+        println!(
+            "  These operate on source text (not ASTs), so they work with any language.{RESET}"
+        );
+        println!();
+        return;
+    }
+
+    // Dispatch subcommands: /refactor rename ... → /rename ...
+    let parts: Vec<&str> = rest.splitn(2, char::is_whitespace).collect();
+    let subcmd = parts[0];
+    let sub_args = if parts.len() > 1 { parts[1].trim() } else { "" };
+
+    match subcmd {
+        "rename" => {
+            let forwarded = if sub_args.is_empty() {
+                "/rename".to_string()
+            } else {
+                format!("/rename {sub_args}")
+            };
+            handle_rename(&forwarded);
+        }
+        "extract" => {
+            let forwarded = if sub_args.is_empty() {
+                "/extract".to_string()
+            } else {
+                format!("/extract {sub_args}")
+            };
+            handle_extract(&forwarded);
+        }
+        "move" => {
+            let forwarded = if sub_args.is_empty() {
+                "/move".to_string()
+            } else {
+                format!("/move {sub_args}")
+            };
+            handle_move(&forwarded);
+        }
+        other => {
+            println!("{RED}  Unknown refactoring subcommand: {other}{RESET}");
+            println!("{DIM}  Available: rename, extract, move");
+            println!("  Run /refactor with no arguments to see all options.{RESET}\n");
+        }
     }
 }
 
@@ -6324,5 +6391,82 @@ impl B {
         let result = rename_in_project("RenameMatch", "RM", Some("nonexistent_dir_xyz/"));
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("No word-boundary matches"));
+    }
+
+    // ── /refactor tests ──────────────────────────────────────────────────
+
+    #[test]
+    fn test_refactor_no_args_shows_help() {
+        // Calling handle_refactor with no args should not panic
+        // and should print the refactoring tools summary
+        handle_refactor("/refactor");
+    }
+
+    #[test]
+    fn test_refactor_in_known_commands() {
+        assert!(
+            KNOWN_COMMANDS.contains(&"/refactor"),
+            "/refactor should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_refactor_help_exists() {
+        use crate::help::command_help;
+        assert!(
+            command_help("refactor").is_some(),
+            "/refactor should have a help entry"
+        );
+    }
+
+    #[test]
+    fn test_refactor_tab_completion() {
+        use crate::commands::command_arg_completions;
+        let candidates = command_arg_completions("/refactor", "");
+        assert!(
+            candidates.contains(&"rename".to_string()),
+            "Should include 'rename'"
+        );
+        assert!(
+            candidates.contains(&"extract".to_string()),
+            "Should include 'extract'"
+        );
+        assert!(
+            candidates.contains(&"move".to_string()),
+            "Should include 'move'"
+        );
+    }
+
+    #[test]
+    fn test_refactor_tab_completion_filters() {
+        use crate::commands::command_arg_completions;
+        let candidates = command_arg_completions("/refactor", "re");
+        assert!(
+            candidates.contains(&"rename".to_string()),
+            "Should include 'rename' for prefix 're'"
+        );
+        assert!(
+            !candidates.contains(&"extract".to_string()),
+            "Should not include 'extract' for prefix 're'"
+        );
+        assert!(
+            !candidates.contains(&"move".to_string()),
+            "Should not include 'move' for prefix 're'"
+        );
+    }
+
+    #[test]
+    fn test_refactor_unknown_subcommand() {
+        // Should not panic on unknown subcommand
+        handle_refactor("/refactor foobar");
+    }
+
+    #[test]
+    fn test_refactor_in_help_text() {
+        let help = help_text();
+        assert!(
+            help.contains("/refactor"),
+            "/refactor should appear in help text"
+        );
     }
 }

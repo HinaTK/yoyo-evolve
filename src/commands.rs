@@ -73,6 +73,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/rename",
     "/extract",
     "/move",
+    "/refactor",
 ];
 
 /// Well-known model names for `/model <Tab>` completion.
@@ -105,6 +106,9 @@ pub const PR_SUBCOMMANDS: &[&str] = &["list", "view", "diff", "comment", "create
 /// Undo option names for `/undo <Tab>` completion.
 pub const UNDO_OPTIONS: &[&str] = &["--all"];
 
+/// Refactor subcommand names for `/refactor <Tab>` completion.
+pub const REFACTOR_SUBCOMMANDS: &[&str] = &["rename", "extract", "move"];
+
 /// Return context-aware argument completions for a given command and partial argument.
 ///
 /// `cmd` is the slash command (e.g. "/model"), `partial_arg` is what the user has typed
@@ -120,6 +124,7 @@ pub fn command_arg_completions(cmd: &str, partial_arg: &str) -> Vec<String> {
         "/save" | "/load" => list_json_files(partial_arg),
         "/help" => help_command_completions(&partial_lower),
         "/undo" => filter_candidates(UNDO_OPTIONS, &partial_lower),
+        "/refactor" => filter_candidates(REFACTOR_SUBCOMMANDS, &partial_lower),
         _ => Vec::new(),
     }
 }
@@ -457,8 +462,8 @@ pub use crate::commands_git::{
 pub use crate::commands_project::{
     expand_file_mentions, handle_add, handle_context, handle_docs, handle_doctor, handle_extract,
     handle_find, handle_fix, handle_grep, handle_health, handle_index, handle_init, handle_lint,
-    handle_move, handle_plan, handle_rename, handle_run, handle_run_usage, handle_test,
-    handle_tree, handle_web, AddResult,
+    handle_move, handle_plan, handle_refactor, handle_rename, handle_run, handle_run_usage,
+    handle_test, handle_tree, handle_web, AddResult,
 };
 
 // Session-related handlers

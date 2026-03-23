@@ -186,6 +186,23 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /move Parser::parse_expr other.rs::Lexer\n\
              \x20 /move Config::validate Settings",
         ),
+        "refactor" => Some(
+            "/refactor — Refactoring tools overview and dispatch\n\n\
+             Usage:\n\
+             \x20 /refactor                              Show all refactoring tools\n\
+             \x20 /refactor rename <old> <new>            Rename a symbol across files\n\
+             \x20 /refactor extract <sym> <src> <dst>     Move a symbol to another file\n\
+             \x20 /refactor move <Src>::<method> <Target> Move a method between impl blocks\n\n\
+             The umbrella command for all source-code refactoring operations.\n\
+             Run /refactor with no arguments to see a summary of all tools\n\
+             with examples. Each subcommand dispatches to its standalone\n\
+             equivalent (/rename, /extract, /move).\n\n\
+             Examples:\n\
+             \x20 /refactor\n\
+             \x20 /refactor rename MyOldStruct MyNewStruct\n\
+             \x20 /refactor extract parse_config src/lib.rs src/config.rs\n\
+             \x20 /refactor move Parser::validate Validator",
+        ),
         "fix" => Some(
             "/fix — Auto-fix build/lint errors\n\n\
              Runs the project's build and lint checks, captures any errors,\n\
@@ -606,6 +623,7 @@ pub fn help_text() -> String {
     out.push_str("  /rename <old> <new> Cross-file symbol renaming with word boundaries\n");
     out.push_str("  /extract <sym> <src> <dst> Move a symbol (fn/struct/enum/type/const/...) to another file\n");
     out.push_str("  /move <Src>::<method> [file::]<Dst> Move a method between impl blocks\n");
+    out.push_str("  /refactor              Show all refactoring tools (rename, extract, move)\n");
     out.push_str("  /index             Build a lightweight index of project source files\n");
     out.push_str("  /tree [depth]      Show project directory tree (default depth: 3)\n");
     out.push_str("  /web <url>         Fetch a web page and display clean readable text content\n");
