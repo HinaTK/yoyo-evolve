@@ -43,7 +43,7 @@ Uses `yoagent::Agent` with `AnthropicProvider`, `default_tools()`, and an option
 
 **Evolution loop** (`scripts/evolve.sh`): pipeline:
 1. Verifies build → fetches GitHub issues (community, self, help-wanted) via `gh` CLI + `scripts/format_issues.py` → scans for pending replies on previously touched issues
-2. **Phase A** (Planning): Agent reads everything, writes `SESSION_PLAN.md`
+2. **Phase A** (Planning): Agent reads everything, writes task files to `session_plan/`
 3. **Phase B** (Implementation): Agents execute each task (15 min each)
 4. Verifies build, fixes or reverts → agent-driven issue responses (agent directly calls `gh issue comment`/`close`) → pushes
 
@@ -70,7 +70,7 @@ Uses `yoagent::Agent` with `AnthropicProvider`, `default_tools()`, and an option
 - `PERSONALITY.md` — voice and values (DO NOT MODIFY)
 - `JOURNAL.md` — chronological log of evolution sessions (append at top, never delete)
 - `DAY_COUNT` — integer tracking current evolution day
-- `SESSION_PLAN.md` — ephemeral, written by Phase A planning agent (gitignored)
+- `session_plan/` — ephemeral directory with per-task files (task_01.md, task_02.md, etc.), written by Phase A planning agent (gitignored)
 - `ISSUES_TODAY.md` — ephemeral, generated during evolution from GitHub issues (gitignored)
 
 

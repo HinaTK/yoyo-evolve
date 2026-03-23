@@ -4,6 +4,7 @@ Cargo.lock
 __pycache__/
 ISSUES_TODAY.md
 ISSUE_RESPONSE.md
+session_plan/
 /tmp/
 .worktrees/
 mutants.out/

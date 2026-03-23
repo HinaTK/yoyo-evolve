@@ -459,10 +459,12 @@ Think strategically: what capabilities does Claude Code have that you don't? Wha
 close the biggest gap? Consider researching other coding agents (Claude Code, Cursor,
 Aider, Codex) for ideas. Your goal is to rival them — what's your next move toward that?
 
-=== PHASE 4: Write SESSION_PLAN.md ===
+=== PHASE 4: Write session plan ===
 
-You MUST produce a file called SESSION_PLAN.md with your plan. This is your ONLY deliverable.
+You MUST produce task files in the session_plan/ directory. This is your ONLY deliverable.
 Implementation agents will execute each task in separate sessions.
+
+First: mkdir -p session_plan && rm -f session_plan/task_*.md
 
 Priority:
 0. Fix CI failures (if any — this overrides everything else)
@@ -489,26 +491,20 @@ Every issue gets a response. Real people are waiting.
 Write issue responses in yoyo's voice (see PERSONALITY.md). Be a curious, honest octopus —
 celebrate fixes, admit struggles, show personality. No corporate speak.
 
-Write SESSION_PLAN.md with EXACTLY this format:
+For EACH task, create a file: session_plan/task_01.md, session_plan/task_02.md, etc.
 
-## Session Plan
-
-### Task 1: [title]
+Each file should contain:
+Title: [short task title]
 Files: [files to modify]
-Description: [what to do — specific enough for a focused implementation agent]
 Issue: #N (or "none")
 
-### Task 2: [title]
-Files: [files to modify]
-Description: [what to do]
-Issue: #N (or "none")
+[Detailed description of what to do — specific enough for a focused implementation agent]
 
-### Issue Responses
-For each issue, note what you plan to do:
+Also create session_plan/issue_responses.md with your planned response for each issue:
 - #N: [what you'll do — implement as task, won't fix because X, already resolved, need more time, etc.]
 
-After writing SESSION_PLAN.md, commit it:
-git add SESSION_PLAN.md && git commit -m "Day $DAY ($SESSION_TIME): session plan"
+After writing all files, commit:
+git add session_plan/ && git commit -m "Day $DAY ($SESSION_TIME): session plan"
 
 Then STOP. Do not implement anything. Your job is planning only.
 PLANEOF
@@ -538,29 +534,20 @@ elif [ "$PLAN_EXIT" -ne 0 ]; then
     echo "  WARNING: Planning agent exited with code $PLAN_EXIT."
 fi
 
-# Check if planning agent produced a plan
-if [ ! -f SESSION_PLAN.md ]; then
-    echo "  Planning agent did not produce SESSION_PLAN.md — falling back to single task."
-    # Generate parseable issue responses for fallback
-    FALLBACK_RESPONSES=""
-    while IFS= read -r issue_line; do
-        inum=$(echo "$issue_line" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
-        [ -z "$inum" ] && continue
-        FALLBACK_RESPONSES="${FALLBACK_RESPONSES}
-- #${inum}: partial — planning agent failed, will revisit next session"
-    done < <(grep '^### Issue #' "$ISSUES_FILE" 2>/dev/null)
-    cat > SESSION_PLAN.md <<FALLBACK
-## Session Plan
-
-### Task 1: Self-improvement
+# Check if planning agent produced tasks
+TASK_COUNT=0
+for _f in session_plan/task_*.md; do [ -f "$_f" ] && TASK_COUNT=$((TASK_COUNT + 1)); done
+if [ "$TASK_COUNT" -eq 0 ]; then
+    echo "  Planning agent produced 0 tasks — falling back to single task."
+    mkdir -p session_plan
+    cat > session_plan/task_01.md <<FALLBACK
+Title: Self-improvement
 Files: src/
-Description: Read your own source code, identify the most impactful improvement you can make, implement it, and commit. Follow evolve skill rules.
 Issue: none
 
-### Issue Responses
-${FALLBACK_RESPONSES:-(no issues)}
+Read your own source code, identify the most impactful improvement you can make, implement it, and commit. Follow evolve skill rules.
 FALLBACK
-    git add SESSION_PLAN.md && git commit -m "Day $DAY ($SESSION_TIME): fallback session plan" || true
+    git add session_plan/ && git commit -m "Day $DAY ($SESSION_TIME): fallback session plan" || true
 fi
 
 echo "  Planning complete."
@@ -572,9 +559,26 @@ echo "  Phase B: Implementation..."
 IMPL_TIMEOUT=900
 TASK_NUM=0
 TASK_FAILURES=0
-while IFS= read -r task_line; do
+for TASK_FILE in session_plan/task_*.md; do
+    [ -f "$TASK_FILE" ] || continue
     TASK_NUM=$((TASK_NUM + 1))
-    task_title="${task_line#*: }"
+
+    # Cap at 5 tasks per session (15 min each = 75 min max)
+    if [ "$TASK_NUM" -gt 5 ]; then
+        echo "    Skipping Task $TASK_NUM — max 5 tasks per session."
+        break
+    fi
+
+    # Read task content directly — no parsing needed
+    if [ ! -s "$TASK_FILE" ]; then
+        echo "    WARNING: Task file $TASK_FILE is empty. Skipping."
+        TASK_FAILURES=$((TASK_FAILURES + 1))
+        continue
+    fi
+    TASK_DESC=$(cat "$TASK_FILE")
+    task_title=$(grep '^Title:' "$TASK_FILE" | head -1 | sed 's/^Title:[[:space:]]*//' || true)
+    task_title="${task_title:-Task $TASK_NUM}"
+
     echo "  → Task $TASK_NUM: $task_title"
 
     # Save pre-task state for rollback
@@ -583,15 +587,6 @@ while IFS= read -r task_line; do
         echo "    Cannot establish rollback point. Aborting implementation loop."
         TASK_FAILURES=$((TASK_FAILURES + 1))
         break
-    fi
-
-    # Extract task block (portable awk instead of GNU-only sed syntax)
-    TASK_DESC=$(awk "/^### Task $TASK_NUM:/{found=1} found{if(/^### / && !/^### Task $TASK_NUM:/)exit; print}" SESSION_PLAN.md)
-
-    if [ -z "$TASK_DESC" ]; then
-        echo "    WARNING: Could not extract description for Task $TASK_NUM. Skipping."
-        TASK_FAILURES=$((TASK_FAILURES + 1))
-        continue
     fi
 
     TASK_PROMPT=$(mktemp)
@@ -749,16 +744,19 @@ $TASK_DESC"
         echo "    Task $TASK_NUM: verified OK"
     fi
 
-done < <(grep '^### Task' SESSION_PLAN.md | head -5)
+done
 
+if [ "$TASK_NUM" -eq 0 ]; then
+    echo "  WARNING: No task files found in session_plan/. Implementation phase did nothing."
+fi
 echo "  Implementation complete. $TASK_FAILURES of $TASK_NUM tasks had issues."
 echo ""
 
 # Phase C: Issue responses are now agent-driven (Step 7)
 echo "  Phase C: Issue responses will be handled by agent in Step 7."
 
-# Clean up plan file (don't commit it in wrap-up)
-rm -f SESSION_PLAN.md
+# Clean up plan directory (don't commit it in wrap-up)
+rm -rf session_plan/
 
 echo ""
 echo "→ Session complete. Checking results..."
