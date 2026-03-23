@@ -410,6 +410,7 @@ if [ "$SOCIAL_CHANGED" = "true" ]; then
     # ── Step 10: Push ──
     echo ""
     echo "→ Pushing..."
+    git pull --rebase || echo "  WARNING: Pull --rebase failed (will attempt push anyway)"
     if ! git push; then
         echo "  ERROR: Push failed. Social learnings committed locally but will be lost in ephemeral CI."
         exit 1

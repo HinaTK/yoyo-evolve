@@ -1116,6 +1116,7 @@ echo "  Tagged: $TAG_NAME"
 # ── Step 8: Push ──
 echo ""
 echo "→ Pushing..."
+git pull --rebase || echo "  Pull --rebase failed (will attempt push anyway)"
 git push || echo "  Push failed (maybe no remote or auth issue)"
 git push --tags || echo "  Tag push failed (non-fatal)"
 
