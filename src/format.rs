@@ -6133,6 +6133,282 @@ mod tests {
     }
 
     #[test]
+    fn test_streaming_contract_digit_word_flushes() {
+        // Issue #147: digit-word patterns like "2nd" should flush early.
+        // "2" at line start buffers (could be numbered list "2. ").
+        // "2n" → second char is not '.' or ')' → needs_line_buffering() returns false → flush.
+        let mut r = MarkdownRenderer::new();
+
+        let out1 = r.render_delta("2");
+        // "2" alone — a digit at line start with len < 2, needs_line_buffering returns true
+        assert!(
+            r.line_start,
+            "After single digit '2', should still be at line_start (buffering)"
+        );
+
+        let out2 = r.render_delta("n");
+        // line_buffer is now "2n". needs_line_buffering sees '2' then 'n' (not '.' or ')').
+        // Returns false → buffer flushes as inline text.
+        let combined = format!("{out1}{out2}");
+        assert!(
+            !combined.is_empty(),
+            "After '2n', digit-word should have flushed, got empty"
+        );
+        assert!(
+            combined.contains('2'),
+            "Flushed output should contain '2', got: '{combined}'"
+        );
+        assert!(
+            !r.line_start,
+            "After digit-word flush, line_start should be false"
+        );
+
+        // Subsequent tokens stream immediately via mid-line fast path
+        let out3 = r.render_delta("d");
+        assert!(
+            !out3.is_empty(),
+            "Mid-line token 'd' should produce immediate output"
+        );
+    }
+
+    #[test]
+    fn test_streaming_contract_dash_word_flushes() {
+        // Issue #147: dash-word patterns like "-based" should flush early.
+        // "-" at line start buffers (could be list "- " or horizontal rule "---").
+        // "-b" → second char is not space or dash → needs_line_buffering() returns false → flush.
+        let mut r = MarkdownRenderer::new();
+
+        let out1 = r.render_delta("-");
+        // "-" alone — needs_line_buffering: trimmed.len() < 2 → true
+        assert!(
+            r.line_start,
+            "After single dash '-', should still be at line_start (buffering)"
+        );
+
+        let out2 = r.render_delta("b");
+        // line_buffer is now "-b". needs_line_buffering: second char 'b' != ' ' && != '-'
+        // → returns false → flush as inline text.
+        let combined = format!("{out1}{out2}");
+        assert!(
+            !combined.is_empty(),
+            "After '-b', dash-word should have flushed, got empty"
+        );
+        assert!(
+            !r.line_start,
+            "After dash-word flush, line_start should be false"
+        );
+
+        // Subsequent tokens stream immediately
+        let out3 = r.render_delta("ased");
+        assert!(
+            !out3.is_empty(),
+            "Mid-line token 'ased' should produce immediate output"
+        );
+    }
+
+    #[test]
+    fn test_streaming_contract_numbered_list_buffers() {
+        // "1." at line start should keep buffering (could be numbered list "1. item").
+        // needs_line_buffering: digit followed by '.' → keeps buffering.
+        // Once "1. item" arrives (via newline), it resolves as ordered list.
+        let mut r = MarkdownRenderer::new();
+
+        let out1 = r.render_delta("1");
+        assert!(r.line_start, "After '1', should still buffer at line_start");
+
+        let out2 = r.render_delta(".");
+        // line_buffer is "1." — needs_line_buffering: digit then '.', trimmed.len() < 3 → true
+        assert!(
+            r.line_start,
+            "After '1.', should still buffer (could be numbered list)"
+        );
+
+        let out3 = r.render_delta(" ");
+        // line_buffer is "1. " — needs_line_buffering checks for ". " pattern.
+        // try_resolve_block_prefix tries ordered list: "1. " with empty content → returns None.
+        // flush_on_whitespace: starts with digit → returns empty.
+        // So still buffering.
+        let pre_content = format!("{out1}{out2}{out3}");
+
+        let out4 = r.render_delta("item");
+        // line_buffer is "1. item" — needs_line_buffering: contains ". " and digits before it → true.
+        // try_resolve_block_prefix → try_confirm_ordered_list: "1. item" → Some(("1", "item")).
+        // Renders prefix and sets line_start=false.
+        let all = format!("{pre_content}{out4}");
+        assert!(
+            all.contains(&format!("{CYAN}1.{RESET}")),
+            "Numbered list should render with CYAN number, got: '{all}'"
+        );
+        assert!(
+            all.contains("item"),
+            "Should contain list item content, got: '{all}'"
+        );
+        assert!(
+            !r.line_start,
+            "After ordered list prefix resolves, line_start should be false"
+        );
+    }
+
+    #[test]
+    fn test_streaming_contract_unordered_list_buffers() {
+        // "- " at line start triggers list detection but doesn't resolve until
+        // non-dash, non-space content arrives (to rule out horizontal rule "- - -").
+        // After "- item", try_resolve_block_prefix confirms it as a list.
+        let mut r = MarkdownRenderer::new();
+
+        let out1 = r.render_delta("- ");
+        // "- " alone: try_confirm_unordered_list returns None (could be "- - -" HR).
+        // Still buffering.
+        assert!(
+            r.line_start,
+            "After '- ', should still be at line_start (not yet confirmed as list)"
+        );
+
+        let out2 = r.render_delta("item");
+        // line_buffer is "- item" — try_confirm_unordered_list: rest="item", has non-dash char → Some.
+        // Prefix renders with bullet, line_start=false.
+        let combined = format!("{out1}{out2}");
+        assert!(
+            combined.contains(&format!("{CYAN}•{RESET}")),
+            "Unordered list should render with CYAN bullet after '- item', got: '{combined}'"
+        );
+        assert!(
+            !r.line_start,
+            "After list prefix resolves, line_start should be false"
+        );
+        assert!(
+            r.block_prefix_rendered,
+            "block_prefix_rendered should be true after list prefix"
+        );
+        assert!(
+            combined.contains("item"),
+            "Output should contain 'item', got: '{combined}'"
+        );
+    }
+
+    #[test]
+    fn test_streaming_contract_code_fence_buffers() {
+        // Code fence "```" should buffer until fully resolved.
+        // No output should leak before the fence is complete.
+        let mut r = MarkdownRenderer::new();
+
+        let out1 = r.render_delta("`");
+        assert_eq!(
+            out1, "",
+            "Single '`' at line start should buffer (could be fence)"
+        );
+        assert!(r.line_start, "Should still be at line_start after '`'");
+
+        let out2 = r.render_delta("`");
+        assert_eq!(
+            out2, "",
+            "Two backticks '``' should still buffer (could be fence)"
+        );
+        assert!(r.line_start, "Should still be at line_start after '``'");
+
+        let out3 = r.render_delta("`");
+        assert_eq!(
+            out3, "",
+            "Three backticks '```' should still buffer (fence, awaiting newline)"
+        );
+
+        let out4 = r.render_delta("rust\n");
+        // Now the fence line "```rust\n" is complete — should produce output
+        let all = format!("{out1}{out2}{out3}{out4}");
+        assert!(
+            !all.is_empty(),
+            "Complete fence line should produce output, got empty"
+        );
+        assert!(
+            r.in_code_block,
+            "Should be inside code block after fence resolves"
+        );
+    }
+
+    #[test]
+    fn test_streaming_contract_mid_line_immediate() {
+        // After line_start is set to false (by flushing initial content),
+        // subsequent tokens should produce immediate output via mid-line fast path.
+        let mut r = MarkdownRenderer::new();
+
+        // "Hello" starts with 'H' — not a special char, flushes immediately
+        let out1 = r.render_delta("Hello");
+        assert!(
+            !out1.is_empty(),
+            "'Hello' should flush immediately (non-special first char)"
+        );
+        assert!(!r.line_start, "After flushing 'Hello', should be mid-line");
+
+        // Now feed mid-line content
+        let out2 = r.render_delta(" world");
+        assert!(
+            !out2.is_empty(),
+            "Mid-line ' world' should produce immediate output"
+        );
+        assert!(
+            out2.contains("world"),
+            "Mid-line output should contain 'world', got: '{out2}'"
+        );
+    }
+
+    #[test]
+    fn test_streaming_contract_plain_text_immediate_flush() {
+        // Text starting with a non-special character ('H', 'T', 'A', etc.)
+        // should flush immediately — no buffering needed.
+        let mut r = MarkdownRenderer::new();
+        assert!(r.line_start, "Fresh renderer starts at line_start=true");
+
+        let out = r.render_delta("Hello");
+        assert!(
+            !out.is_empty(),
+            "'Hello' at line start should produce immediate output (not a special char)"
+        );
+        assert!(
+            out.contains("Hello"),
+            "Output should contain 'Hello', got: '{out}'"
+        );
+        assert!(
+            !r.line_start,
+            "After flushing plain text, line_start should be false"
+        );
+        assert!(
+            r.line_buffer.is_empty(),
+            "line_buffer should be empty after immediate flush"
+        );
+    }
+
+    #[test]
+    fn test_streaming_contract_heading_buffers_then_resolves() {
+        // "#" at line start should buffer. "# Title\n" resolves as heading.
+        let mut r = MarkdownRenderer::new();
+
+        let out1 = r.render_delta("#");
+        assert_eq!(
+            out1, "",
+            "'#' at line start should buffer (could be heading)"
+        );
+        assert!(r.line_start, "Should still be at line_start after '#'");
+        assert!(!r.line_buffer.is_empty(), "line_buffer should contain '#'");
+
+        let out2 = r.render_delta(" ");
+        // line_buffer is "# " — still needs buffering (heading confirmed but no content yet)
+        let out3 = r.render_delta("Title");
+        let out4 = r.render_delta("\n");
+        let all = format!("{out1}{out2}{out3}{out4}");
+
+        // After newline, the complete heading "# Title" should render with formatting
+        assert!(
+            all.contains(&format!("{BOLD}{CYAN}")),
+            "Heading should have BOLD+CYAN formatting, got: '{all}'"
+        );
+        assert!(
+            all.contains("Title"),
+            "Heading output should contain 'Title', got: '{all}'"
+        );
+        assert!(r.line_start, "After newline, should be at line_start again");
+    }
+
+    #[test]
     fn test_bell_enabled_default() {
         // Verify bell_enabled() is callable and returns a bool without panicking.
         // Since OnceLock is global, the value depends on test ordering and env,
