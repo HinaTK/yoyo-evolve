@@ -543,6 +543,22 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /export chat-log.md\n\
              \x20 /export output/session.md",
         ),
+        "watch" => Some(
+            "/watch [command|off|status] — Auto-run tests after agent edits\n\n\
+             Usage:\n\
+             \x20 /watch              Auto-detect and enable test watching\n\
+             \x20 /watch cargo test   Watch with a specific command\n\
+             \x20 /watch off          Disable watching\n\
+             \x20 /watch status       Show current watch state\n\n\
+             When enabled, yoyo automatically runs the test command after every\n\
+             agent turn that modifies files. On success, a brief pass message is\n\
+             shown. On failure, the last 20 lines of output are displayed.\n\n\
+             Examples:\n\
+             \x20 /watch\n\
+             \x20 /watch npm test\n\
+             \x20 /watch pytest -x\n\
+             \x20 /watch off",
+        ),
         _ => None,
     }
 }
@@ -627,6 +643,7 @@ pub fn help_text() -> String {
     out.push_str("  /index             Build a lightweight index of project source files\n");
     out.push_str("  /tree [depth]      Show project directory tree (default depth: 3)\n");
     out.push_str("  /web <url>         Fetch a web page and display clean readable text content\n");
+    out.push_str("  /watch [cmd]       Auto-run tests after agent edits (off/status to control)\n");
     out.push('\n');
 
     // ── AI ──

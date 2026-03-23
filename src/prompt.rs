@@ -4,10 +4,94 @@ use crate::cli::is_verbose;
 use crate::format::*;
 use std::collections::HashMap;
 use std::io::{self, Write};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 use yoagent::agent::Agent;
 use yoagent::*;
+
+// ── Watch mode state ─────────────────────────────────────────────────────
+// Global state for `/watch` — auto-run a test command after agent edits.
+
+/// The currently active watch command (None = watch mode off).
+static WATCH_COMMAND: RwLock<Option<String>> = RwLock::new(None);
+
+/// Set the watch command, enabling watch mode.
+pub fn set_watch_command(cmd: &str) {
+    let mut guard = WATCH_COMMAND.write().unwrap();
+    *guard = Some(cmd.to_string());
+}
+
+/// Get the current watch command, if watch mode is active.
+pub fn get_watch_command() -> Option<String> {
+    let guard = WATCH_COMMAND.read().unwrap();
+    guard.clone()
+}
+
+/// Clear the watch command, disabling watch mode.
+pub fn clear_watch_command() {
+    let mut guard = WATCH_COMMAND.write().unwrap();
+    *guard = None;
+}
+
+/// Run the watch command if watch mode is active and files were changed.
+/// Returns a summary string if the command was run.
+pub fn run_watch_if_needed(changes_count: usize, prev_count: usize) -> Option<String> {
+    // Only run if new changes happened since last check
+    if changes_count <= prev_count {
+        return None;
+    }
+
+    let cmd = get_watch_command()?;
+
+    println!("{DIM}  👀 watch: running `{cmd}`...{RESET}");
+    let start = std::time::Instant::now();
+
+    let output = if cfg!(target_os = "windows") {
+        std::process::Command::new("cmd")
+            .args(["/C", &cmd])
+            .output()
+    } else {
+        std::process::Command::new("sh").args(["-c", &cmd]).output()
+    };
+
+    let elapsed = format_duration(start.elapsed());
+
+    match output {
+        Ok(o) => {
+            if o.status.success() {
+                println!("{GREEN}  ✓ watch: passed ({elapsed}){RESET}\n");
+                Some(format!("Watch tests passed ({elapsed}): {cmd}"))
+            } else {
+                let stdout = String::from_utf8_lossy(&o.stdout);
+                let stderr = String::from_utf8_lossy(&o.stderr);
+                let error_text = if !stderr.is_empty() {
+                    stderr.to_string()
+                } else {
+                    stdout.to_string()
+                };
+                // Show last 20 lines of output on failure
+                let lines: Vec<&str> = error_text.lines().collect();
+                let preview_lines = if lines.len() > 20 {
+                    &lines[lines.len() - 20..]
+                } else {
+                    &lines
+                };
+                for line in preview_lines {
+                    eprintln!("  {line}");
+                }
+                let code = o.status.code().unwrap_or(-1);
+                println!("{RED}  ✗ watch: failed (exit {code}, {elapsed}){RESET}\n");
+                Some(format!(
+                    "Watch tests FAILED (exit {code}, {elapsed}): {cmd}"
+                ))
+            }
+        }
+        Err(e) => {
+            eprintln!("{RED}  ✗ watch: failed to run `{cmd}`: {e}{RESET}\n");
+            Some(format!("Watch failed to run `{cmd}`: {e}"))
+        }
+    }
+}
 
 /// Tracks files modified during a session via write_file and edit_file tool calls.
 /// Thread-safe via Arc<Mutex<...>> so it can be shared across async tasks.

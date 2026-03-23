@@ -1,5 +1,5 @@
 //! Project-related command handlers: /add, /context, /init, /doctor, /health, /fix, /test,
-//! /lint, /tree, /run, /docs, /find, /index, /web, /refactor.
+//! /lint, /tree, /run, /docs, /find, /index, /web, /refactor, /watch.
 
 use crate::cli;
 use crate::commands::auto_compact_if_needed;
@@ -1041,6 +1041,62 @@ pub fn handle_lint() -> Option<String> {
         Err(e) => {
             eprintln!("{RED}  ✗ Failed to run {label}: {e}{RESET}\n");
             Some(format!("Failed to run {label}: {e}"))
+        }
+    }
+}
+
+// ── /watch ──────────────────────────────────────────────────────────────
+
+/// Auto-detect the test command for the current project.
+/// Returns the command string (e.g. "cargo test") if a project type is detected.
+pub fn detect_test_command() -> Option<String> {
+    let dir = std::env::current_dir().unwrap_or_default();
+    let project_type = detect_project_type(&dir);
+    test_command_for_project(&project_type).map(|(label, _args)| label.to_string())
+}
+
+/// Watch subcommand names for tab completion.
+pub const WATCH_SUBCOMMANDS: &[&str] = &["off", "status"];
+
+/// Handle the /watch command: toggle auto-test-on-edit mode.
+pub fn handle_watch(input: &str) {
+    let arg = input.strip_prefix("/watch").unwrap_or("").trim();
+
+    match arg {
+        "" => {
+            // Auto-detect and toggle on
+            match detect_test_command() {
+                Some(cmd) => {
+                    crate::prompt::set_watch_command(&cmd);
+                    println!(
+                        "{GREEN}  👀 Watch mode ON — will run `{cmd}` after agent edits{RESET}\n"
+                    );
+                }
+                None => {
+                    println!("{DIM}  No test command detected. Specify one:{RESET}");
+                    println!("{DIM}    /watch cargo test{RESET}");
+                    println!("{DIM}    /watch npm test{RESET}\n");
+                }
+            }
+        }
+        "off" => {
+            crate::prompt::clear_watch_command();
+            println!("{DIM}  👀 Watch mode OFF{RESET}\n");
+        }
+        "status" => match crate::prompt::get_watch_command() {
+            Some(cmd) => {
+                println!("{DIM}  👀 Watch mode: ON{RESET}");
+                println!("{DIM}  Command: `{cmd}`{RESET}\n");
+            }
+            None => {
+                println!("{DIM}  👀 Watch mode: OFF{RESET}\n");
+            }
+        },
+        custom_cmd => {
+            crate::prompt::set_watch_command(custom_cmd);
+            println!(
+                "{GREEN}  👀 Watch mode ON — will run `{custom_cmd}` after agent edits{RESET}\n"
+            );
         }
     }
 }

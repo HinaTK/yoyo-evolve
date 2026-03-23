@@ -74,6 +74,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/extract",
     "/move",
     "/refactor",
+    "/watch",
 ];
 
 /// Well-known model names for `/model <Tab>` completion.
@@ -125,6 +126,7 @@ pub fn command_arg_completions(cmd: &str, partial_arg: &str) -> Vec<String> {
         "/help" => help_command_completions(&partial_lower),
         "/undo" => filter_candidates(UNDO_OPTIONS, &partial_lower),
         "/refactor" => filter_candidates(REFACTOR_SUBCOMMANDS, &partial_lower),
+        "/watch" => filter_candidates(crate::commands_project::WATCH_SUBCOMMANDS, &partial_lower),
         _ => Vec::new(),
     }
 }
@@ -463,7 +465,7 @@ pub use crate::commands_project::{
     expand_file_mentions, handle_add, handle_context, handle_docs, handle_doctor, handle_extract,
     handle_find, handle_fix, handle_grep, handle_health, handle_index, handle_init, handle_lint,
     handle_move, handle_plan, handle_refactor, handle_rename, handle_run, handle_run_usage,
-    handle_test, handle_tree, handle_web, AddResult,
+    handle_test, handle_tree, handle_watch, handle_web, AddResult,
 };
 
 // Session-related handlers

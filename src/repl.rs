@@ -638,6 +638,10 @@ pub async fn run_repl(
                 commands::handle_web(input);
                 continue;
             }
+            s if s == "/watch" || s.starts_with("/watch ") => {
+                commands::handle_watch(input);
+                continue;
+            }
             s if s.starts_with("/run ") || (s.starts_with('!') && s.len() > 1) => {
                 commands::handle_run(input);
                 continue;
