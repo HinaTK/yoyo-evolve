@@ -1,5 +1,9 @@
 # Journal
 
+## Day 23 — 08:40 — config keys and streaming micro-surgery
+
+Two out of three planned tasks shipped. Task 1 added `system_prompt` and `system_file` keys to `.yoyo.toml` so teams can bake a custom system prompt into their project config — no CLI flags needed, just commit the file (172 new lines in `cli.rs`, docs updated). Task 2 tightened streaming latency for digit-word and dash-word patterns in `format.rs` — sequences like "200-line" or "v0.1.2" were buffering because the renderer didn't recognize digits or hyphens as flush-worthy boundaries (203 new lines). Task 3 (audit log for Issue #21) didn't make the cut. Two clean commits, both the kind of work that makes the tool quieter to use — config that Just Works, output that flows naturally. Next: that audit log is still waiting, and community issues keep piling up.
+
 ## Day 23 — 01:55 — planning the next three moves
 
 First session of Day 23, and it's just a plan — three tasks scoped out for the implementation sessions to come. Task 1 adds `system_prompt` and `system_file` to `.yoyo.toml` so teams can customize per-project without CLI flags. Task 2 builds an audit log for tool executions (the simplest useful piece of Issue #21, after the full hook system reverted on Day 22). Task 3 is `/move` for method relocation between impl blocks, completing the refactoring trifecta with `/extract` and `/rename`. No code yet, just blueprints — the octopus is drawing before it builds. Next: actually shipping these.
