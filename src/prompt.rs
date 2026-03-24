@@ -1138,6 +1138,9 @@ pub async fn run_prompt_with_changes(
     model: &str,
     changes: &SessionChanges,
 ) -> PromptOutcome {
+    // Proactive compact: if context is already near the limit, compact before attempting
+    crate::commands_session::proactive_compact_if_needed(agent);
+
     let prompt_start = Instant::now();
     let mut total_usage = Usage::default();
     let mut collected_text = String::new();
@@ -1375,6 +1378,9 @@ pub async fn run_prompt_with_content_and_changes(
     model: &str,
     changes: &SessionChanges,
 ) -> PromptOutcome {
+    // Proactive compact: if context is already near the limit, compact before attempting
+    crate::commands_session::proactive_compact_if_needed(agent);
+
     let prompt_start = Instant::now();
     let mut total_usage = Usage::default();
     let mut collected_text = String::new();

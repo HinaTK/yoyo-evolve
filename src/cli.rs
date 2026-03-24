@@ -9,6 +9,7 @@ use yoagent::ThinkingLevel;
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const MAX_CONTEXT_TOKENS: u64 = 200_000;
 pub const AUTO_COMPACT_THRESHOLD: f64 = 0.80;
+pub const PROACTIVE_COMPACT_THRESHOLD: f64 = 0.70;
 pub const DEFAULT_SESSION_PATH: &str = "yoyo-session.json";
 pub const AUTO_SAVE_SESSION_PATH: &str = ".yoyo/last-session.json";
 
@@ -1606,6 +1607,17 @@ mod tests {
     fn test_auto_compact_threshold_constants() {
         assert_eq!(MAX_CONTEXT_TOKENS, 200_000);
         assert!((AUTO_COMPACT_THRESHOLD - 0.80).abs() < f64::EPSILON);
+        assert!((PROACTIVE_COMPACT_THRESHOLD - 0.70).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_proactive_threshold_lower_than_auto() {
+        // Proactive compact fires earlier (0.70) to prevent overflow before it happens.
+        // Auto-compact fires later (0.80) as a post-turn safety net.
+        // Compile-time guarantee that the relationship holds.
+        const {
+            assert!(PROACTIVE_COMPACT_THRESHOLD < AUTO_COMPACT_THRESHOLD);
+        }
     }
 
     #[test]

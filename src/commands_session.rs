@@ -13,6 +13,7 @@ use yoagent::*;
 
 use crate::cli::{
     AUTO_COMPACT_THRESHOLD, AUTO_SAVE_SESSION_PATH, DEFAULT_SESSION_PATH, MAX_CONTEXT_TOKENS,
+    PROACTIVE_COMPACT_THRESHOLD,
 };
 
 // ── compact ──────────────────────────────────────────────────────────────
@@ -51,6 +52,29 @@ pub fn auto_compact_if_needed(agent: &mut Agent) {
             );
         }
     }
+}
+
+/// Proactively compact conversation if context usage exceeds the proactive threshold.
+/// This runs BEFORE a prompt attempt (not after) to prevent overflow during agentic execution.
+/// Uses a tighter threshold (0.70) than the post-turn auto-compact (0.80).
+/// Returns true if compaction was performed.
+pub fn proactive_compact_if_needed(agent: &mut Agent) -> bool {
+    let messages = agent.messages().to_vec();
+    let used = total_tokens(&messages) as u64;
+    let ratio = used as f64 / MAX_CONTEXT_TOKENS as f64;
+
+    if ratio > PROACTIVE_COMPACT_THRESHOLD {
+        if let Some((before_count, before_tokens, after_count, after_tokens)) = compact_agent(agent)
+        {
+            eprintln!(
+                "{DIM}  ⚡ proactive compact: {before_count} → {after_count} messages, ~{} → ~{} tokens{RESET}",
+                format_token_count(before_tokens),
+                format_token_count(after_tokens)
+            );
+            return true;
+        }
+    }
+    false
 }
 
 pub fn handle_compact(agent: &mut Agent) {
@@ -1335,5 +1359,29 @@ mod tests {
             format!("{}", SpawnStatus::Failed("oops".to_string())),
             "failed: oops"
         );
+    }
+
+    // ── proactive compact tests ──────────────────────────────────────────
+
+    #[test]
+    fn test_proactive_compact_threshold_is_lower_than_auto() {
+        // Proactive compact (0.70) fires before auto-compact (0.80).
+        // This ensures we try to shrink the context BEFORE hitting the API limit,
+        // rather than only reacting after an overflow error.
+        use crate::cli::{AUTO_COMPACT_THRESHOLD, PROACTIVE_COMPACT_THRESHOLD};
+        const {
+            assert!(PROACTIVE_COMPACT_THRESHOLD < AUTO_COMPACT_THRESHOLD);
+        }
+    }
+
+    #[test]
+    fn test_proactive_compact_threshold_in_valid_range() {
+        use crate::cli::PROACTIVE_COMPACT_THRESHOLD;
+        // Should be between 0.5 and 0.8 — not so aggressive it compacts tiny contexts,
+        // not so high it's redundant with auto-compact.
+        const {
+            assert!(PROACTIVE_COMPACT_THRESHOLD > 0.5);
+            assert!(PROACTIVE_COMPACT_THRESHOLD < 0.8);
+        }
     }
 }
