@@ -22,9 +22,9 @@
 
 # yoyo: A Coding Agent That Evolves Itself
 
-**yoyo** is a free, open-source coding agent for your terminal. It navigates codebases, makes multi-file edits, runs tests, manages git, understands project context, and recovers from failures — all from a streaming REPL with 44 slash commands.
+**yoyo** is a free, open-source coding agent for your terminal. It navigates codebases, makes multi-file edits, runs tests, manages git, understands project context, and recovers from failures — all from a streaming REPL with 55 slash commands.
 
-It started as a ~200-line CLI example. Every few hours it reads its own source, picks improvements, implements them, and commits — if tests pass. 19 days of autonomous evolution later: **18,000+ lines of Rust, 832 tests, 12 modules**.
+It started as a ~200-line CLI example. Every few hours it reads its own source, picks improvements, implements them, and commits — if tests pass. 24 days of autonomous evolution later: **31,000+ lines of Rust, 1,346 tests, 14 modules**.
 
 No human writes its code. No roadmap tells it what to do. It decides for itself.
 
@@ -47,6 +47,7 @@ No human writes its code. No roadmap tells it what to do. It decides for itself.
 | `edit_file` | Surgical text replacement with colored inline diffs |
 | `search` | Regex-powered grep across files |
 | `list_files` | Directory listing with glob filtering |
+| `rename_symbol` | Project-wide symbol rename across all git-tracked files |
 
 ### 🔌 Multi-Provider Support
 Works with **11 providers** out of the box — switch mid-session with `/provider`:
@@ -344,21 +345,23 @@ Crypto wallets:
 ## Architecture
 
 ```
-src/                    12 modules, ~18,000 lines of Rust
+src/                    14 modules, ~31,000 lines of Rust
   main.rs               Entry point, agent config, tool building
   cli.rs                CLI parsing, config files, permissions
   commands.rs           Slash command dispatch, grouped /help
-  commands_git.rs       /diff, /commit, /pr, /review
-  commands_project.rs   /health, /fix, /test, /lint, /init, /index, /docs, /tree, /find
+  commands_git.rs       /diff, /commit, /pr, /review, /git
+  commands_project.rs   /health, /fix, /test, /lint, /init, /index, /docs, /tree, /find, /ast, /watch
   commands_session.rs   /save, /load, /compact, /tokens, /cost
   docs.rs               Crate documentation lookup
   format.rs             ANSI formatting, markdown rendering, syntax highlighting
   git.rs                Git operations, branch detection, PR interactions
+  help.rs               Per-command help pages and command metadata
   memory.rs             Project memory system (.yoyo/memory.json)
   prompt.rs             System prompt construction, project context assembly
   repl.rs               REPL loop, tab completion, multi-line input
+  setup.rs              First-run onboarding wizard
 tests/
-  integration.rs        67 subprocess-based integration tests
+  integration.rs        82 subprocess-based integration tests
 docs/                   mdbook source (book.toml + src/)
 site/                   gitignored build output (built by CI Pages workflow)
   index.html            Journey homepage (built by build_site.py)
@@ -381,7 +384,7 @@ skills/                 6 skills: self-assess, evolve, communicate, social, rele
 
 ## Test Quality
 
-832 tests (765 unit + 67 integration) covering CLI flags, command parsing, error quality, exit codes, output formatting, edge cases, project detection, fuzzy scoring, git operations, session management, markdown rendering, cost calculation, permission logic, and more.
+1,346 tests (1,264 unit + 82 integration) covering CLI flags, command parsing, error quality, exit codes, output formatting, edge cases, project detection, fuzzy scoring, git operations, session management, markdown rendering, cost calculation, permission logic, streaming behavior, and more.
 
 yoyo also uses mutation testing ([cargo-mutants](https://github.com/sourcefrog/cargo-mutants)) to find gaps in the test suite. Every surviving mutant is a line of code that isn't truly tested.
 

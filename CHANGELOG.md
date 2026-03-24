@@ -4,6 +4,31 @@ All notable changes to **yoyo-agent** (`cargo install yoyo-agent`) are documente
 
 This project is a self-evolving coding agent — every change was planned, implemented, and tested by yoyo itself during automated evolution sessions. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] — 2026-03-24
+
+Feature release adding file watching, structural search, refactoring tools, and piped-mode improvements — built across Days 22–24.
+
+### Added
+
+- **`/watch <command>`** — auto-run tests after every agent turn that modifies files (Day 23)
+- **`/ast <pattern>`** — structural code search via ast-grep integration, graceful fallback when `sg` not installed (Day 24)
+- **`/refactor` umbrella** — groups `/extract`, `/rename`, `/move` under one discoverable entry (Day 23)
+- **`rename_symbol` agent tool** — model can do project-wide renames in a single tool call (Day 23)
+- **Terminal bell notification** — rings `\x07` after operations >3s; disable with `--no-bell` or `YOYO_NO_BELL=1` (Day 23)
+- **`system_prompt` and `system_file` keys** in `.yoyo.toml` config (Day 23)
+- **Git-aware system prompt** — agent automatically sees current branch and dirty-file status (Day 23)
+
+### Improved
+
+- **Per-turn `/undo`** — undo individual agent turns instead of all-or-nothing (Day 22)
+- **Onboarding wizard** — added Cerebras provider, XDG user-level config path option (Day 22)
+- **Streaming latency** — tighter flush logic for digit-word and dash-word patterns (Day 23)
+
+### Fixed
+
+- **Suppressed partial tool output in piped/CI mode** — eliminates ~6500 noise lines from CI logs ([#172](https://github.com/yologdev/yoyo-evolve/issues/172))
+- **Reduced tool output truncation** from 30K to 15K chars in piped mode — cuts context growth rate to prevent 400 errors ([#173](https://github.com/yologdev/yoyo-evolve/issues/173))
+
 ## [0.1.2] — 2026-03-22
 
 Feature release adding per-command help, inline file mentions, new commands, and polished rendering — built across Days 20–22.
@@ -224,7 +249,10 @@ The codebase evolved from a single 200-line `main.rs` to 12 focused modules (~17
 | 20 | `run_git()` dedup, `configure_agent()` dedup, context overflow auto-recovery, v0.1.1 bug fix release |
 | 21 | Per-command `/help <cmd>`, `/grep`, `/git stash`, inline `@file` mentions, markdown rendering (lists, italic, blockquotes), code block streaming fix, tool output summaries, architecture docs |
 | 22 | First-run welcome & setup guide, `/diff` inline colored patches, visual section headers, v0.1.2 release |
+| 23 | `/watch` auto-test, `/refactor` umbrella, `rename_symbol` tool, terminal bell, `system_prompt`/`system_file` config, git-aware prompt, streaming flush improvements |
+| 24 | `/ast` structural search, piped-mode output fixes, v0.1.3 release |
 
+[0.1.3]: https://github.com/yologdev/yoyo-evolve/releases/tag/v0.1.3
 [0.1.2]: https://github.com/yologdev/yoyo-evolve/releases/tag/v0.1.2
 [0.1.1]: https://github.com/yologdev/yoyo-evolve/releases/tag/v0.1.1
 [0.1.0]: https://github.com/yologdev/yoyo-evolve/releases/tag/v0.1.0
