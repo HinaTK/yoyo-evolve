@@ -105,6 +105,15 @@ temperature = 0.5
 max_turns = 20
 ```
 
+### `--no-bell`
+
+Disable the terminal bell notification that rings after long-running prompts (≥3 seconds). By default, yoyo sends a bell character (`\x07`) when a prompt completes, which causes most terminals to flash the tab or play a sound — useful when you switch away while waiting. Disable it with the flag or environment variable:
+
+```bash
+yoyo --no-bell
+YOYO_NO_BELL=1 yoyo
+```
+
 ## Error handling
 
 If the skills directory doesn't exist or can't be loaded, yoyo prints a warning and continues without skills:

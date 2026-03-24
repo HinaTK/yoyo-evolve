@@ -1,5 +1,7 @@
 //! Interactive REPL loop and related helpers (tab-completion, multi-line input).
 
+use std::time::Instant;
+
 use crate::cli::*;
 use crate::commands::{
     self, auto_compact_if_needed, clear_confirmation_message, command_arg_completions,
@@ -674,6 +676,7 @@ pub async fn run_repl(
                 .await
                 {
                     last_input = Some(context_msg.clone());
+                    let prompt_start = Instant::now();
                     let outcome = run_prompt_with_changes(
                         agent,
                         &context_msg,
@@ -682,6 +685,7 @@ pub async fn run_repl(
                         &session_changes,
                     )
                     .await;
+                    crate::format::maybe_ring_bell(prompt_start.elapsed());
                     last_error = outcome.last_tool_error;
                     auto_compact_if_needed(agent);
                 }
@@ -736,6 +740,7 @@ pub async fn run_repl(
         // Expand @file mentions (e.g. "explain @src/main.rs") into file content
         let (cleaned_text, file_results) = commands::expand_file_mentions(input);
 
+        let prompt_start = Instant::now();
         let outcome = if !file_results.is_empty() {
             // Print summaries like /add does
             for result in &file_results {
@@ -777,6 +782,7 @@ pub async fn run_repl(
             )
             .await
         };
+        crate::format::maybe_ring_bell(prompt_start.elapsed());
         last_error = outcome.last_tool_error;
 
         // After the turn, find newly modified files and update the snapshot

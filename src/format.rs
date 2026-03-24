@@ -1046,6 +1046,11 @@ pub fn decode_html_entities(s: &str) -> String {
 /// Outputs longer than this get the head/tail treatment.
 pub const TOOL_OUTPUT_MAX_CHARS: usize = 30_000;
 
+/// Maximum tool output size in piped/CI mode (half of interactive).
+/// Reduces context growth rate during evolution sessions and CI runs
+/// where the user isn't watching live output anyway.
+pub const TOOL_OUTPUT_MAX_CHARS_PIPED: usize = 15_000;
+
 /// Number of lines to keep from the start of truncated output.
 const TRUNCATION_HEAD_LINES: usize = 100;
 
@@ -5036,6 +5041,54 @@ mod tests {
     fn test_truncate_tool_output_default_threshold_constant() {
         // Verify the default constant is 30,000
         assert_eq!(TOOL_OUTPUT_MAX_CHARS, 30_000);
+    }
+
+    #[test]
+    fn test_tool_output_max_chars_piped_smaller() {
+        // Piped/CI mode limit should be strictly less than interactive limit
+        const _: () = assert!(TOOL_OUTPUT_MAX_CHARS_PIPED < TOOL_OUTPUT_MAX_CHARS);
+    }
+
+    #[test]
+    fn test_tool_output_max_chars_piped_value() {
+        // Piped/CI mode limit should be 15,000
+        assert_eq!(TOOL_OUTPUT_MAX_CHARS_PIPED, 15_000);
+    }
+
+    #[test]
+    fn test_truncate_tool_output_with_custom_limit() {
+        // Verify truncation respects a custom (small) limit
+        let output = (0..200)
+            .map(|i| format!("line {i}"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        let result = truncate_tool_output(&output, 100);
+        // Output is well over 100 chars and has 200 lines (> head+tail),
+        // so it should be truncated
+        assert!(
+            result.contains("[... truncated"),
+            "Should be truncated with 100-char limit, got length {}",
+            result.len()
+        );
+    }
+
+    #[test]
+    fn test_truncate_tool_output_respects_limit_parameter() {
+        // Same output should NOT be truncated with a large limit but SHOULD be with a small one
+        let output = (0..200)
+            .map(|i| format!("line {i}"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        let large_limit_result = truncate_tool_output(&output, 1_000_000);
+        let small_limit_result = truncate_tool_output(&output, 100);
+        assert_eq!(
+            large_limit_result, output,
+            "Large limit should return output unchanged"
+        );
+        assert_ne!(
+            small_limit_result, output,
+            "Small limit should truncate the output"
+        );
     }
 
     // ── decode_html_entities tests ──────────────────────────────────

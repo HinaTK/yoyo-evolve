@@ -56,7 +56,7 @@ use prompt::*;
 use std::io::{self, IsTerminal, Read, Write};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use yoagent::agent::Agent;
 use yoagent::context::ExecutionLimits;
 use yoagent::openapi::{OpenApiConfig, OperationFilter};
@@ -114,21 +114,25 @@ impl AgentTool for GuardedTool {
 }
 
 /// A wrapper tool that truncates large tool output to save context window tokens.
-/// When tool output exceeds `TOOL_OUTPUT_MAX_CHARS`, preserves the first ~100 and
+/// When tool output exceeds the configured `max_chars`, preserves the first ~100 and
 /// last ~50 lines with a clear truncation marker in between.
 struct TruncatingTool {
     inner: Box<dyn AgentTool>,
+    max_chars: usize,
 }
 
-/// Truncate the text content of a ToolResult if it exceeds the threshold.
-fn truncate_result(mut result: yoagent::types::ToolResult) -> yoagent::types::ToolResult {
+/// Truncate the text content of a ToolResult if it exceeds the given char limit.
+fn truncate_result(
+    mut result: yoagent::types::ToolResult,
+    max_chars: usize,
+) -> yoagent::types::ToolResult {
     use yoagent::Content;
     result.content = result
         .content
         .into_iter()
         .map(|c| match c {
             Content::Text { text } => Content::Text {
-                text: truncate_tool_output(&text, TOOL_OUTPUT_MAX_CHARS),
+                text: truncate_tool_output(&text, max_chars),
             },
             other => other,
         })
@@ -160,13 +164,16 @@ impl AgentTool for TruncatingTool {
         ctx: yoagent::types::ToolContext,
     ) -> Result<yoagent::types::ToolResult, yoagent::types::ToolError> {
         let result = self.inner.execute(params, ctx).await?;
-        Ok(truncate_result(result))
+        Ok(truncate_result(result, self.max_chars))
     }
 }
 
 /// Wrap a tool with output truncation for large results.
-fn with_truncation(tool: Box<dyn AgentTool>) -> Box<dyn AgentTool> {
-    Box::new(TruncatingTool { inner: tool })
+fn with_truncation(tool: Box<dyn AgentTool>, max_chars: usize) -> Box<dyn AgentTool> {
+    Box::new(TruncatingTool {
+        inner: tool,
+        max_chars,
+    })
 }
 
 /// Wrap a tool with directory restrictions if any are configured.
@@ -726,6 +733,7 @@ pub fn build_tools(
     auto_approve: bool,
     permissions: &cli::PermissionConfig,
     dir_restrictions: &cli::DirectoryRestrictions,
+    max_tool_output: usize,
 ) -> Vec<Box<dyn AgentTool>> {
     // Shared flag: when any tool gets "always", all tools skip prompts
     let always_approved = Arc::new(AtomicBool::new(false));
@@ -814,22 +822,22 @@ pub fn build_tools(
     };
 
     vec![
-        with_truncation(Box::new(bash)),
-        with_truncation(maybe_guard(
-            Box::new(ReadFileTool::default()),
-            dir_restrictions,
-        )),
-        with_truncation(write_tool),
-        with_truncation(edit_tool),
-        with_truncation(maybe_guard(
-            Box::new(ListFilesTool::default()),
-            dir_restrictions,
-        )),
-        with_truncation(maybe_guard(
-            Box::new(SearchTool::default()),
-            dir_restrictions,
-        )),
-        with_truncation(rename_tool),
+        with_truncation(Box::new(bash), max_tool_output),
+        with_truncation(
+            maybe_guard(Box::new(ReadFileTool::default()), dir_restrictions),
+            max_tool_output,
+        ),
+        with_truncation(write_tool, max_tool_output),
+        with_truncation(edit_tool, max_tool_output),
+        with_truncation(
+            maybe_guard(Box::new(ListFilesTool::default()), dir_restrictions),
+            max_tool_output,
+        ),
+        with_truncation(
+            maybe_guard(Box::new(SearchTool::default()), dir_restrictions),
+            max_tool_output,
+        ),
+        with_truncation(rename_tool, max_tool_output),
     ]
 }
 
@@ -984,6 +992,11 @@ impl AgentConfig {
                 self.auto_approve,
                 &self.permissions,
                 &self.dir_restrictions,
+                if io::stdin().is_terminal() {
+                    TOOL_OUTPUT_MAX_CHARS
+                } else {
+                    TOOL_OUTPUT_MAX_CHARS_PIPED
+                },
             ));
 
         if let Some(max) = self.max_tokens {
@@ -1183,6 +1196,7 @@ async fn main() {
             );
         }
         let mut session_total = Usage::default();
+        let prompt_start = Instant::now();
         let response = if let Some(ref img_path) = image_path {
             // Multi-modal prompt: text + image
             match commands_project::read_image_for_add(img_path) {
@@ -1216,6 +1230,7 @@ async fn main() {
             )
             .await
         };
+        format::maybe_ring_bell(prompt_start.elapsed());
         write_output_file(&output_path, &response.text);
         return;
     }
@@ -1235,7 +1250,9 @@ async fn main() {
             agent_config.model
         );
         let mut session_total = Usage::default();
+        let prompt_start = Instant::now();
         let response = run_prompt(&mut agent, input, &mut session_total, &agent_config.model).await;
+        format::maybe_ring_bell(prompt_start.elapsed());
         write_output_file(&output_path, &response.text);
         return;
     }
@@ -1370,8 +1387,8 @@ mod tests {
         // build_tools should return 7 tools regardless of auto_approve
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
-        let tools_approved = build_tools(true, &perms, &dirs);
-        let tools_confirm = build_tools(false, &perms, &dirs);
+        let tools_approved = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
+        let tools_confirm = build_tools(false, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
         assert_eq!(tools_approved.len(), 7);
         assert_eq!(tools_confirm.len(), 7);
     }
@@ -1707,7 +1724,7 @@ mod tests {
         // When auto_approve is true, tools should not have ConfirmTool wrappers
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
-        let tools = build_tools(true, &perms, &dirs);
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
         assert_eq!(tools.len(), 7);
         // Tool names should still be correct
         let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
@@ -1722,7 +1739,7 @@ mod tests {
         // (ConfirmTool delegates name() to inner tool)
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
-        let tools = build_tools(false, &perms, &dirs);
+        let tools = build_tools(false, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
         assert_eq!(tools.len(), 7);
         let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
         assert!(names.contains(&"write_file"));
@@ -2237,7 +2254,7 @@ mod tests {
     fn test_rename_symbol_tool_in_build_tools() {
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
-        let tools = build_tools(true, &perms, &dirs);
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
         let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
         assert!(
             names.contains(&"rename_symbol"),
@@ -2269,5 +2286,57 @@ mod tests {
             desc.contains("project"),
             "Should default to 'project': {desc}"
         );
+    }
+
+    #[test]
+    fn test_truncate_result_with_custom_limit() {
+        use yoagent::types::{Content, ToolResult};
+        // Create a ToolResult with text longer than 100 chars and enough lines
+        let long_text = (0..200)
+            .map(|i| format!("line {i}"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        let result = ToolResult {
+            content: vec![Content::Text {
+                text: long_text.clone(),
+            }],
+            details: serde_json::Value::Null,
+        };
+        let truncated = truncate_result(result, 100);
+        let text = match &truncated.content[0] {
+            Content::Text { text } => text.clone(),
+            _ => panic!("Expected text content"),
+        };
+        assert!(
+            text.contains("[... truncated"),
+            "Result should be truncated with 100-char limit"
+        );
+    }
+
+    #[test]
+    fn test_truncate_result_preserves_under_limit() {
+        use yoagent::types::{Content, ToolResult};
+        let short_text = "hello world".to_string();
+        let result = ToolResult {
+            content: vec![Content::Text {
+                text: short_text.clone(),
+            }],
+            details: serde_json::Value::Null,
+        };
+        let truncated = truncate_result(result, TOOL_OUTPUT_MAX_CHARS);
+        let text = match &truncated.content[0] {
+            Content::Text { text } => text.clone(),
+            _ => panic!("Expected text content"),
+        };
+        assert_eq!(text, short_text, "Short text should be unchanged");
+    }
+
+    #[test]
+    fn test_build_tools_with_piped_limit() {
+        // build_tools should work with the piped limit too
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS_PIPED);
+        assert_eq!(tools.len(), 7, "Should still have 7 tools with piped limit");
     }
 }
