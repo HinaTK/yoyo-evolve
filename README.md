@@ -71,6 +71,7 @@ Anthropic · OpenAI · Google · Ollama · OpenRouter · xAI · Groq · DeepSeek
 - `/docs` — look up docs.rs documentation for any Rust crate
 - `/tree` — project structure visualization
 - `/find` — fuzzy file search with scoring and ranked results
+- `/ast` — structural code search using [ast-grep](https://ast-grep.github.io/) (optional)
 
 ### 💾 Session Management
 - `/save` and `/load` — persist and restore sessions as JSON
@@ -192,6 +193,7 @@ Create a `YOYO.md` (or `CLAUDE.md`) in your project root with build commands, ar
 
 | Command | Description |
 |---------|-------------|
+| `/ast <pattern>` | Structural code search using ast-grep (optional) |
 | `/help` | Grouped command reference |
 | `/changes` | Show files modified during this session |
 | `/clear` | Clear conversation history |

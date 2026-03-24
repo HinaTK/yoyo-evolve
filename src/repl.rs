@@ -642,6 +642,10 @@ pub async fn run_repl(
                 commands::handle_watch(input);
                 continue;
             }
+            s if s == "/ast" || s.starts_with("/ast ") => {
+                commands::handle_ast_grep(input);
+                continue;
+            }
             s if s.starts_with("/run ") || (s.starts_with('!') && s.len() > 1) => {
                 commands::handle_run(input);
                 continue;

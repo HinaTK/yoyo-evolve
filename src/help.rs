@@ -559,6 +559,16 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /watch pytest -x\n\
              \x20 /watch off",
         ),
+        "ast" => Some(
+            "/ast <pattern> [--lang <lang>] [--in <path>] — Structural code search using ast-grep\n\n\
+             Searches for AST patterns using ast-grep (sg). Requires `sg` to be installed.\n\
+             Pattern syntax: use $VAR for wildcards. E.g. $X.unwrap() matches any .unwrap() call.\n\n\
+             Install: https://ast-grep.github.io/\n\n\
+             Examples:\n\
+             \x20 /ast $X.unwrap()\n\
+             \x20 /ast $X.unwrap() --lang rust\n\
+             \x20 /ast fn $NAME($$$ARGS) --lang rust --in src/",
+        ),
         _ => None,
     }
 }
@@ -644,6 +654,9 @@ pub fn help_text() -> String {
     out.push_str("  /tree [depth]      Show project directory tree (default depth: 3)\n");
     out.push_str("  /web <url>         Fetch a web page and display clean readable text content\n");
     out.push_str("  /watch [cmd]       Auto-run tests after agent edits (off/status to control)\n");
+    out.push_str(
+        "  /ast <pattern>     Structural code search using ast-grep (--lang, --in flags)\n",
+    );
     out.push('\n');
 
     // ── AI ──

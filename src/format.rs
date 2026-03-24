@@ -1629,21 +1629,31 @@ impl MarkdownRenderer {
                 // Quick disambiguation: if we have at least 2 chars and the first
                 // non-digit char isn't '.' or ')', it can't be a numbered list —
                 // flush immediately. "2nd", "3rd", "100ms" → flush.
-                // "1.", "1)", "12" (all digits) → keep buffering.
+                // "1.", "1)", "12" (all digits), "12." → keep buffering.
                 if trimmed.len() >= 2 {
                     if let Some(pos) = trimmed.bytes().position(|b| !b.is_ascii_digit()) {
                         let non_digit = trimmed.as_bytes()[pos];
                         if non_digit != b'.' && non_digit != b')' {
                             return false; // Not a numbered list pattern
                         }
+                        // We have digits followed by '.' or ')'.
+                        // Keep buffering until we see what follows the separator.
+                        // "1." "12." "1)" → buffer (next char could be space → list)
+                        // "1. " "12. " → buffer (confirmed list pattern, resolve in prefix)
+                        // "1.x" "12.x" → flush (not a list — char after dot isn't space)
+                        let after_sep = pos + 1;
+                        if after_sep >= trimmed.len() {
+                            return true; // Haven't seen char after separator yet
+                        }
+                        let next = trimmed.as_bytes()[after_sep];
+                        if next == b' ' {
+                            return true; // "12. " pattern — list item, keep buffering
+                        }
+                        return false; // "12.x" — not a list
                     }
-                    // All digits so far, or digit(s) followed by ./), keep buffering
+                    // All digits so far, keep buffering
                 }
                 trimmed.len() < 3
-                    || trimmed.contains(". ")
-                        && trimmed[..trimmed.find(". ").unwrap_or(0)]
-                            .chars()
-                            .all(|c| c.is_ascii_digit())
             }
             b'|' => true, // table row
             _ => false,
@@ -6246,6 +6256,76 @@ mod tests {
         assert!(
             !r.line_start,
             "After ordered list prefix resolves, line_start should be false"
+        );
+    }
+
+    #[test]
+    fn test_streaming_contract_multi_digit_numbered_list_buffers() {
+        // "12." at line start should keep buffering (could be "12. item").
+        // The early disambiguation should NOT flush "12." as inline text —
+        // digits followed by '.' is a valid numbered-list prefix pattern.
+        let mut r = MarkdownRenderer::new();
+
+        let out1 = r.render_delta("1");
+        assert!(r.line_start, "After '1', should still buffer");
+
+        let out2 = r.render_delta("2");
+        // "12" — all digits, len < 3, needs_line_buffering → true
+        assert!(r.line_start, "After '12', should still buffer (all digits)");
+
+        let out3 = r.render_delta(".");
+        // "12." — digits followed by '.', should keep buffering
+        // (could become "12. item" — a numbered list)
+        assert!(
+            r.line_start,
+            "After '12.', should still buffer (could be numbered list like '12. item')"
+        );
+
+        let out4 = r.render_delta(" ");
+        // "12. " — has ". " pattern with digits before it
+        let out5 = r.render_delta("item");
+        // "12. item" — should resolve as ordered list
+        let all = format!("{out1}{out2}{out3}{out4}{out5}");
+        assert!(
+            all.contains(&format!("{CYAN}12.{RESET}")),
+            "Multi-digit numbered list should render with CYAN number, got: '{all}'"
+        );
+        assert!(
+            all.contains("item"),
+            "Should contain list item content, got: '{all}'"
+        );
+        assert!(
+            !r.line_start,
+            "After ordered list prefix resolves, line_start should be false"
+        );
+    }
+
+    #[test]
+    fn test_streaming_contract_digit_dot_non_space_flushes() {
+        // "12.x" at line start: digits + '.' + non-space → not a numbered list.
+        // Should flush as inline text once the non-space char after '.' is seen.
+        let mut r = MarkdownRenderer::new();
+
+        let out1 = r.render_delta("1");
+        assert!(r.line_start, "After '1', should buffer");
+
+        let out2 = r.render_delta("2");
+        assert!(r.line_start, "After '12', should buffer");
+
+        let out3 = r.render_delta(".");
+        // "12." — digits + '.', could be list, still buffering
+        assert!(r.line_start, "After '12.', should still buffer");
+
+        let out4 = r.render_delta("x");
+        // "12.x" — char after dot is 'x', not space → not a list → flush
+        let combined = format!("{out1}{out2}{out3}{out4}");
+        assert!(
+            !combined.is_empty(),
+            "After '12.x' (not a list), should flush as inline text"
+        );
+        assert!(
+            !r.line_start,
+            "After flushing '12.x', line_start should be false"
         );
     }
 
