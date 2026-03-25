@@ -97,7 +97,7 @@ Anthropic · OpenAI · Google · Ollama · OpenRouter · xAI · Groq · DeepSeek
 - Config file support via `[permissions]` and `[directories]` sections
 
 ### 🧩 Extensibility
-- **MCP servers** — `--mcp <cmd>` connects to MCP servers via stdio transport
+- **MCP servers** — `--mcp <cmd>` or `mcp = [...]` in `.yoyo.toml` connects to MCP servers via stdio transport
 - **OpenAPI tools** — `--openapi <spec>` registers tools from OpenAPI specifications
 - **Skills system** — `--skills <dir>` loads markdown skill files with YAML frontmatter
 
@@ -177,6 +177,7 @@ Create `.yoyo.toml` in your project root or `~/.config/yoyo/config.toml` globall
 model = "claude-sonnet-4-20250514"
 provider = "anthropic"
 thinking = "medium"
+mcp = ["npx open-websearch@latest"]
 
 [permissions]
 allow = ["cargo *", "npm *"]

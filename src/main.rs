@@ -947,9 +947,10 @@ pub fn create_model_config(provider: &str, model: &str, base_url: Option<&str>) 
             config
         }
         "minimax" => {
-            let mut config = ModelConfig::openai(model, model);
-            config.provider = "minimax".into();
-            config.base_url = base_url.unwrap_or("https://api.minimax.io/v1").to_string();
+            let mut config = ModelConfig::minimax(model, model);
+            if let Some(url) = base_url {
+                config.base_url = url.to_string();
+            }
             config
         }
         "custom" => {
@@ -1944,6 +1945,59 @@ mod tests {
             model: "glm-4-plus".to_string(),
             api_key: "test-key".to_string(),
             provider: "zai".to_string(),
+            base_url: None,
+            skills: yoagent::skills::SkillSet::empty(),
+            system_prompt: "Test.".to_string(),
+            thinking: ThinkingLevel::Off,
+            max_tokens: None,
+            temperature: None,
+            max_turns: None,
+            auto_approve: true,
+            permissions: cli::PermissionConfig::default(),
+            dir_restrictions: cli::DirectoryRestrictions::default(),
+            context_strategy: cli::ContextStrategy::default(),
+        };
+        let agent = config.build_agent();
+        assert_eq!(agent.messages().len(), 0);
+    }
+
+    #[test]
+    fn test_create_model_config_minimax_defaults() {
+        let config = create_model_config("minimax", "MiniMax-M2.7", None);
+        assert_eq!(config.provider, "minimax");
+        assert_eq!(config.id, "MiniMax-M2.7");
+        assert_eq!(
+            config.base_url, "https://api.minimaxi.chat/v1",
+            "MiniMax should use api.minimaxi.chat (not api.minimax.io)"
+        );
+        assert!(
+            config.compat.is_some(),
+            "MiniMax config should have compat flags set"
+        );
+        assert_eq!(
+            config.headers.get("User-Agent").unwrap(),
+            &yoyo_user_agent(),
+            "MiniMax config should have User-Agent header"
+        );
+    }
+
+    #[test]
+    fn test_create_model_config_minimax_custom_base_url() {
+        let config = create_model_config(
+            "minimax",
+            "MiniMax-M2.7",
+            Some("https://custom.minimax.example/v1"),
+        );
+        assert_eq!(config.provider, "minimax");
+        assert_eq!(config.base_url, "https://custom.minimax.example/v1");
+    }
+
+    #[test]
+    fn test_agent_config_build_agent_minimax() {
+        let config = AgentConfig {
+            model: "MiniMax-M2.7".to_string(),
+            api_key: "test-key".to_string(),
+            provider: "minimax".to_string(),
             base_url: None,
             skills: yoagent::skills::SkillSet::empty(),
             system_prompt: "Test.".to_string(),

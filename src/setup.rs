@@ -709,7 +709,7 @@ mod tests {
         let r = result.unwrap();
         assert_eq!(r.provider, "minimax");
         assert_eq!(r.api_key, "sk-minimax-key");
-        assert_eq!(r.model, "MiniMax-M1"); // default for minimax
+        assert_eq!(r.model, "MiniMax-M2.7"); // default for minimax
         assert_eq!(r.base_url, None);
 
         let output_str = String::from_utf8(output).unwrap();

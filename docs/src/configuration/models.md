@@ -1,6 +1,6 @@
 # Models & Providers
 
-yoyo supports **12 providers** out of the box — from Anthropic and OpenAI to local models via Ollama.
+yoyo supports **13 providers** out of the box — from Anthropic and OpenAI to local models via Ollama.
 
 ## Default model
 
@@ -41,6 +41,7 @@ Use `--provider <name>` to select a provider. Each provider has a default model 
 | `mistral` | `mistral-large-latest` | `MISTRAL_API_KEY` |
 | `cerebras` | `llama-3.3-70b` | `CEREBRAS_API_KEY` |
 | `zai` | `glm-4-plus` | `ZAI_API_KEY` |
+| `minimax` | `MiniMax-M2.7` | `MINIMAX_API_KEY` |
 | `custom` | `claude-opus-4-6` | *(none — bring your own)* |
 
 ### Examples

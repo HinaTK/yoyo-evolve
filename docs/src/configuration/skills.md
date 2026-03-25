@@ -59,6 +59,16 @@ yoyo \
   --mcp "python my_custom_server.py"
 ```
 
+### MCP in config files
+
+You can also configure MCP servers in `.yoyo.toml` or `~/.config/yoyo/config.toml`, so they connect automatically without needing CLI flags:
+
+```toml
+mcp = ["npx -y @modelcontextprotocol/server-filesystem /tmp", "npx open-websearch@latest"]
+```
+
+MCP servers from the config file are merged with any `--mcp` CLI flags — both sources contribute. CLI flags are additive, not overriding.
+
 Each `--mcp` command is launched as a child process. yoyo communicates with it over stdio using the MCP protocol, discovers the tools it offers, and makes them available to the agent alongside the built-in tools.
 
 ## OpenAPI specs

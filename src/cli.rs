@@ -464,6 +464,7 @@ pub fn print_help() {
     println!("  api_key = \"sk-ant-...\"");
     println!("  system_prompt = \"You are a Go expert\"");
     println!("  system_file = \"prompts/system.txt\"");
+    println!("  mcp = [\"npx open-websearch@latest\", \"npx @mcp/server-filesystem /tmp\"]");
     println!();
     println!("  [permissions]");
     println!("  allow = [\"git *\", \"cargo *\"]");
@@ -1328,12 +1329,22 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         .unwrap_or_default();
 
     // --mcp <command> flags: collect all MCP server commands (repeatable)
-    let mcp_servers: Vec<String> = args
+    let mut mcp_servers: Vec<String> = args
         .iter()
         .enumerate()
         .filter(|(_, a)| a.as_str() == "--mcp")
         .filter_map(|(i, _)| args.get(i + 1).cloned())
         .collect();
+
+    // Merge MCP servers from config file (config servers added first, CLI servers override/add)
+    if let Some(mcp_config) = file_config.get("mcp") {
+        let config_mcps = parse_toml_array(mcp_config);
+        for server in config_mcps.into_iter().rev() {
+            if !mcp_servers.contains(&server) {
+                mcp_servers.insert(0, server);
+            }
+        }
+    }
 
     // --openapi <spec-path> flags: collect all OpenAPI spec paths (repeatable)
     let openapi_specs: Vec<String> = args
@@ -1483,7 +1494,7 @@ pub fn default_model_for_provider(provider: &str) -> String {
         "mistral" => "mistral-large-latest".into(),
         "cerebras" => "llama-3.3-70b".into(),
         "zai" => "glm-4-plus".into(),
-        "minimax" => "MiniMax-M1".into(),
+        "minimax" => "MiniMax-M2.7".into(),
         _ => "claude-opus-4-6".into(),
     }
 }
@@ -1771,6 +1782,39 @@ thinking = "high"
         let content = "  model  =  claude-opus-4-6  ";
         let config = parse_config_file(content);
         assert_eq!(config.get("model").unwrap(), "claude-opus-4-6");
+    }
+
+    #[test]
+    fn test_parse_config_file_mcp_array() {
+        let content = r#"
+model = "claude-sonnet-4-20250514"
+mcp = ["npx open-websearch@latest", "npx @mcp/server-filesystem /tmp"]
+"#;
+        let config = parse_config_file(content);
+        let mcp_val = config.get("mcp").expect("mcp key should exist");
+        let mcps = parse_toml_array(mcp_val);
+        assert_eq!(mcps.len(), 2);
+        assert_eq!(mcps[0], "npx open-websearch@latest");
+        assert_eq!(mcps[1], "npx @mcp/server-filesystem /tmp");
+    }
+
+    #[test]
+    fn test_parse_config_file_mcp_empty_array() {
+        let content = "mcp = []";
+        let config = parse_config_file(content);
+        let mcp_val = config.get("mcp").expect("mcp key should exist");
+        let mcps = parse_toml_array(mcp_val);
+        assert!(mcps.is_empty());
+    }
+
+    #[test]
+    fn test_parse_config_file_mcp_single_entry() {
+        let content = r#"mcp = ["npx open-websearch@latest"]"#;
+        let config = parse_config_file(content);
+        let mcp_val = config.get("mcp").expect("mcp key should exist");
+        let mcps = parse_toml_array(mcp_val);
+        assert_eq!(mcps.len(), 1);
+        assert_eq!(mcps[0], "npx open-websearch@latest");
     }
 
     #[test]
@@ -2851,7 +2895,7 @@ system_prompt = "You are a Go expert"
 
     #[test]
     fn test_minimax_default_model() {
-        assert_eq!(default_model_for_provider("minimax"), "MiniMax-M1");
+        assert_eq!(default_model_for_provider("minimax"), "MiniMax-M2.7");
     }
 
     #[test]
