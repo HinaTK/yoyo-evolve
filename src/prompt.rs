@@ -1202,6 +1202,23 @@ async fn handle_prompt_events(
                         }
                         println!("{DIM}  {text}{RESET}");
                     }
+                    AgentEvent::MessageStart { .. } => {
+                        // Agent started a new message — stop the spinner
+                        // so it doesn't overlap with output
+                        if let Some(s) = spinner.take() { s.stop(); }
+                    }
+                    AgentEvent::MessageEnd { .. } => {
+                        // Agent finished a message — flush any pending text
+                        // (This is where ExecutionLimits stop messages appear)
+                        if in_text {
+                            let remaining = md_renderer.flush();
+                            if !remaining.is_empty() {
+                                print!("{remaining}");
+                            }
+                            println!();
+                            in_text = false;
+                        }
+                    }
                     _ => {}
                 }
             }

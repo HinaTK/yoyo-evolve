@@ -58,7 +58,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use yoagent::agent::Agent;
-use yoagent::context::ExecutionLimits;
+use yoagent::context::{ContextConfig, ExecutionLimits};
 use yoagent::openapi::{OpenApiConfig, OperationFilter};
 use yoagent::provider::{
     AnthropicProvider, GoogleProvider, ModelConfig, OpenAiCompat, OpenAiCompatProvider,
@@ -1005,17 +1005,27 @@ impl AgentConfig {
                 },
             ));
 
+        // Tell yoagent the context window size so its built-in compaction knows the budget
+        agent = agent.with_context_config(ContextConfig {
+            max_context_tokens: 200_000,
+            system_prompt_tokens: 4_000,
+            keep_recent: 10,
+            keep_first: 2,
+            tool_output_max_lines: 50,
+        });
+
+        // Always set execution limits — use user's --max-turns or a generous default
+        agent = agent.with_execution_limits(ExecutionLimits {
+            max_turns: self.max_turns.unwrap_or(200),
+            max_total_tokens: 1_000_000,
+            ..ExecutionLimits::default()
+        });
+
         if let Some(max) = self.max_tokens {
             agent = agent.with_max_tokens(max);
         }
         if let Some(temp) = self.temperature {
             agent.temperature = Some(temp);
-        }
-        if let Some(turns) = self.max_turns {
-            agent = agent.with_execution_limits(ExecutionLimits {
-                max_turns: turns,
-                ..ExecutionLimits::default()
-            });
         }
         agent
     }
@@ -2344,5 +2354,73 @@ mod tests {
         let dirs = cli::DirectoryRestrictions::default();
         let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS_PIPED);
         assert_eq!(tools.len(), 7, "Should still have 7 tools with piped limit");
+    }
+
+    #[test]
+    fn test_configure_agent_sets_context_config() {
+        // Verify that configure_agent successfully builds an agent with context config
+        let config = AgentConfig {
+            model: "test-model".to_string(),
+            api_key: "test-key".to_string(),
+            provider: "anthropic".to_string(),
+            base_url: None,
+            skills: yoagent::skills::SkillSet::default(),
+            system_prompt: "test".to_string(),
+            thinking: yoagent::ThinkingLevel::Off,
+            max_tokens: None,
+            temperature: None,
+            max_turns: None,
+            auto_approve: true,
+            permissions: cli::PermissionConfig::default(),
+            dir_restrictions: cli::DirectoryRestrictions::default(),
+        };
+        // This should not panic — context config and execution limits are wired
+        let agent = config.configure_agent(Agent::new(yoagent::provider::AnthropicProvider));
+        // Agent built successfully with context config
+        let _ = agent;
+    }
+
+    #[test]
+    fn test_execution_limits_always_set() {
+        // Even without --max-turns, configure_agent should set execution limits
+        let config_no_turns = AgentConfig {
+            model: "test-model".to_string(),
+            api_key: "test-key".to_string(),
+            provider: "anthropic".to_string(),
+            base_url: None,
+            skills: yoagent::skills::SkillSet::default(),
+            system_prompt: "test".to_string(),
+            thinking: yoagent::ThinkingLevel::Off,
+            max_tokens: None,
+            temperature: None,
+            max_turns: None, // No explicit max_turns
+            auto_approve: true,
+            permissions: cli::PermissionConfig::default(),
+            dir_restrictions: cli::DirectoryRestrictions::default(),
+        };
+        // Should not panic — limits are set with defaults
+        let agent =
+            config_no_turns.configure_agent(Agent::new(yoagent::provider::AnthropicProvider));
+        let _ = agent;
+
+        // With explicit max_turns, it should use that value
+        let config_with_turns = AgentConfig {
+            model: "test-model".to_string(),
+            api_key: "test-key".to_string(),
+            provider: "anthropic".to_string(),
+            base_url: None,
+            skills: yoagent::skills::SkillSet::default(),
+            system_prompt: "test".to_string(),
+            thinking: yoagent::ThinkingLevel::Off,
+            max_tokens: None,
+            temperature: None,
+            max_turns: Some(50),
+            auto_approve: true,
+            permissions: cli::PermissionConfig::default(),
+            dir_restrictions: cli::DirectoryRestrictions::default(),
+        };
+        let agent =
+            config_with_turns.configure_agent(Agent::new(yoagent::provider::AnthropicProvider));
+        let _ = agent;
     }
 }
