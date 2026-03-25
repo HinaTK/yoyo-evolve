@@ -74,6 +74,20 @@ Uses `yoagent::Agent` with `AnthropicProvider`, `default_tools()`, and an option
 - `ISSUES_TODAY.md` — ephemeral, generated during evolution from GitHub issues (gitignored)
 
 
+## yoagent: Don't Reinvent the Wheel
+
+yoyo is built on [yoagent](https://github.com/yologdev/yoagent). Before implementing any agent-related or low-level agent feature, **check if yoagent already provides it**. Past examples of reinvented wheels:
+- Manual context compaction (`compact_agent`, `auto_compact_if_needed`) — yoagent has `ContextConfig`, `CompactionStrategy`, and built-in 3-level compaction
+- Hardcoded token limits — yoagent has `ExecutionLimits` (max_turns, max_total_tokens, max_duration)
+- Ignoring `MessageStart`/`MessageEnd` events — yoagent streams these for agent stop messages
+
+**Before building agent infrastructure in src/:**
+1. Search yoagent's source (`~/.cargo/registry/src/*/yoagent-*/src/`) for existing features
+2. Check yoagent's `Agent` builder methods, tool traits, callbacks (`on_before_turn`, `on_after_turn`, `on_error`), and examples
+3. If yoagent has it → use it. If yoagent almost has it → file an issue on yoagent. If yoagent doesn't have it → build it in yoyo.
+
+Key yoagent features available: `SubAgentTool`, `ContextConfig`, `ExecutionLimits`, `CompactionStrategy`, `AgentEvent` stream, `default_tools()`, `SkillSet`, `with_sub_agent()`.
+
 ## Safety Rules
 
 These are enforced by the `evolve` skill and `evolve.sh`:
