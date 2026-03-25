@@ -768,6 +768,7 @@ TEOF
         ${TIMEOUT_CMD:+$TIMEOUT_CMD "$IMPL_TIMEOUT"} "$YOYO_BIN" \
             --model "$MODEL" \
             --skills ./skills \
+            --context-strategy checkpoint \
             < "$TASK_PROMPT" 2>&1 | tee "$TASK_LOG" || TASK_EXIT=$?
         rm -f "$TASK_PROMPT"
 
