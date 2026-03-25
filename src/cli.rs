@@ -1457,7 +1457,14 @@ pub fn known_models_for_provider(provider: &str) -> &'static [&'static str] {
         ],
         "cerebras" => &["llama-3.3-70b"],
         "zai" => &["glm-4-plus", "glm-4-air", "glm-4-flash"],
-        "minimax" => &["MiniMax-M1", "MiniMax-M1-40k"],
+        "minimax" => &[
+            "MiniMax-M2.7",
+            "MiniMax-M2.7-highspeed",
+            "MiniMax-M2.5",
+            "MiniMax-M2.5-highspeed",
+            "MiniMax-M1",
+            "MiniMax-M1-40k",
+        ],
         "ollama" => &["llama3.2", "llama3.1", "codellama", "mistral"],
         _ => &[],
     }
