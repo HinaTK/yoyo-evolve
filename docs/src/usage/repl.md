@@ -67,17 +67,18 @@ When yoyo uses tools, you'll see status indicators:
 
 ## Token usage
 
-After each response, you'll see token usage:
+After each response, you'll see a compact token summary:
 
 ```
-  tokens: 1523 in / 842 out  (session: 4200 in / 2100 out)  cost: $0.0234  total: $0.0567  ⏱ 3.2s
+  ↳ 3.2s · 1523→842 tokens · $0.0234
 ```
+
+Use `--verbose` (or `-v`) for the full breakdown including session totals and cache info.
 
 This shows:
-- Input/output tokens for this turn
-- Session totals
-- Estimated cost for this turn and session total
 - Wall-clock time for the response
+- Input→output tokens for this turn
+- Estimated cost for this turn
 
 ## Interrupting
 

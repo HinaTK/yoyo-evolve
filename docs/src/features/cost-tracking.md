@@ -4,10 +4,16 @@ yoyo estimates the cost of each interaction so you can monitor spending.
 
 ## Per-turn costs
 
-After each response, you'll see token usage and cost:
+After each response, you'll see a compact token summary:
 
 ```
-  tokens: 1523 in / 842 out  (session: 4200 in / 2100 out)  cost: $0.0234  total: $0.0567  ⏱ 3.2s
+  ↳ 3.2s · 1523→842 tokens · $0.0234
+```
+
+With `--verbose` (or `-v`), you get the full breakdown:
+
+```
+  tokens: 1523 in / 842 out  [cache: 1000 read, 500 write]  (session: 4200 in / 2100 out)  cost: $0.0234  total: $0.0567  ⏱ 3.2s
 ```
 
 - **cost** — estimated cost for this turn

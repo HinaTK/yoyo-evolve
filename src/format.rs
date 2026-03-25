@@ -1338,14 +1338,27 @@ pub fn format_tool_summary(tool_name: &str, args: &serde_json::Value) -> String 
     }
 }
 
-/// Print usage stats after a prompt response.
-pub fn print_usage(
+/// Format usage stats into a string (verbose or compact).
+///
+/// Verbose format (shown with `--verbose`):
+///   `tokens: 1119 in / 47 out  [cache: ...]  (session: ...)  cost: ...  total: ...  ⏱ 1.0s`
+///
+/// Compact format (default):
+///   `↳ 1.0s · 1119→47 tokens · $0.020`
+pub fn format_usage_line(
     usage: &yoagent::Usage,
     total: &yoagent::Usage,
     model: &str,
     elapsed: std::time::Duration,
-) {
-    if usage.input > 0 || usage.output > 0 {
+    verbose: bool,
+) -> Option<String> {
+    if usage.input == 0 && usage.output == 0 {
+        return None;
+    }
+
+    let elapsed_str = format_duration(elapsed);
+
+    if verbose {
         let cache_info = if usage.cache_read > 0 || usage.cache_write > 0 {
             format!(
                 "  [cache: {} read, {} write]",
@@ -1360,11 +1373,30 @@ pub fn print_usage(
         let total_cost_info = estimate_cost(total, model)
             .map(|c| format!("  total: {}", format_cost(c)))
             .unwrap_or_default();
-        let elapsed_str = format_duration(elapsed);
-        println!(
-            "\n{DIM}  tokens: {} in / {} out{cache_info}  (session: {} in / {} out){cost_info}{total_cost_info}  ⏱ {elapsed_str}{RESET}",
+        Some(format!(
+            "tokens: {} in / {} out{cache_info}  (session: {} in / {} out){cost_info}{total_cost_info}  ⏱ {elapsed_str}",
             usage.input, usage.output, total.input, total.output
-        );
+        ))
+    } else {
+        let cost_suffix = estimate_cost(usage, model)
+            .map(|c| format!(" · {}", format_cost(c)))
+            .unwrap_or_default();
+        Some(format!(
+            "↳ {elapsed_str} · {}→{} tokens{cost_suffix}",
+            usage.input, usage.output
+        ))
+    }
+}
+
+/// Print usage stats after a prompt response.
+pub fn print_usage(
+    usage: &yoagent::Usage,
+    total: &yoagent::Usage,
+    model: &str,
+    elapsed: std::time::Duration,
+) {
+    if let Some(line) = format_usage_line(usage, total, model, elapsed, crate::cli::is_verbose()) {
+        println!("\n{DIM}  {line}{RESET}");
     }
 }
 
@@ -6655,6 +6687,133 @@ mod tests {
         // In test environment this is harmless.
         maybe_ring_bell(Duration::from_secs(3));
         maybe_ring_bell(Duration::from_secs(60));
+    }
+
+    // ── format_usage_line tests ────────────────────────────────────
+
+    #[test]
+    fn test_format_usage_compact() {
+        let usage = yoagent::Usage {
+            input: 1119,
+            output: 47,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        let total = yoagent::Usage {
+            input: 1119,
+            output: 47,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        let elapsed = Duration::from_secs_f64(1.0);
+        let line = format_usage_line(&usage, &total, "claude-sonnet-4-20250514", elapsed, false)
+            .expect("should produce output");
+        // Compact: ↳ 1.0s · 1119→47 tokens · $0.006
+        assert!(line.starts_with("↳ 1.0s"), "got: {line}");
+        assert!(line.contains("1119→47 tokens"), "got: {line}");
+        // Should NOT contain verbose markers
+        assert!(!line.contains("session:"), "got: {line}");
+        assert!(!line.contains("in /"), "got: {line}");
+    }
+
+    #[test]
+    fn test_format_usage_verbose() {
+        let usage = yoagent::Usage {
+            input: 500,
+            output: 100,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        let total = yoagent::Usage {
+            input: 2000,
+            output: 400,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        let elapsed = Duration::from_secs(3);
+        let line = format_usage_line(&usage, &total, "claude-sonnet-4-20250514", elapsed, true)
+            .expect("should produce output");
+        // Verbose: tokens: 500 in / 100 out  (session: 2000 in / 400 out) ...
+        assert!(line.contains("tokens: 500 in / 100 out"), "got: {line}");
+        assert!(line.contains("session: 2000 in / 400 out"), "got: {line}");
+        assert!(line.contains("⏱"), "got: {line}");
+    }
+
+    #[test]
+    fn test_format_usage_zero_tokens_returns_none() {
+        let usage = yoagent::Usage {
+            input: 0,
+            output: 0,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        let total = usage.clone();
+        let elapsed = Duration::from_secs(1);
+        assert!(
+            format_usage_line(&usage, &total, "claude-sonnet-4-20250514", elapsed, false).is_none()
+        );
+        assert!(
+            format_usage_line(&usage, &total, "claude-sonnet-4-20250514", elapsed, true).is_none()
+        );
+    }
+
+    #[test]
+    fn test_format_usage_verbose_with_cache() {
+        let usage = yoagent::Usage {
+            input: 1000,
+            output: 200,
+            cache_read: 500,
+            cache_write: 100,
+            total_tokens: 0,
+        };
+        let total = usage.clone();
+        let elapsed = Duration::from_secs(2);
+        let line = format_usage_line(&usage, &total, "claude-sonnet-4-20250514", elapsed, true)
+            .expect("should produce output");
+        assert!(line.contains("[cache: 500 read, 100 write]"), "got: {line}");
+    }
+
+    #[test]
+    fn test_format_usage_compact_includes_cost() {
+        let usage = yoagent::Usage {
+            input: 1_000_000,
+            output: 1000,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        let total = usage.clone();
+        let elapsed = Duration::from_secs(5);
+        let line = format_usage_line(&usage, &total, "claude-sonnet-4-20250514", elapsed, false)
+            .expect("should produce output");
+        // Should have cost separator
+        assert!(line.contains(" · $"), "compact should include cost: {line}");
+    }
+
+    #[test]
+    fn test_format_usage_compact_unknown_model_no_cost() {
+        let usage = yoagent::Usage {
+            input: 100,
+            output: 50,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+        let total = usage.clone();
+        let elapsed = Duration::from_millis(500);
+        let line = format_usage_line(&usage, &total, "unknown-model-xyz", elapsed, false)
+            .expect("should produce output");
+        // No cost for unknown model
+        assert!(
+            !line.contains("$"),
+            "unknown model should have no cost: {line}"
+        );
+        assert!(line.contains("100→50 tokens"), "got: {line}");
     }
 
     // ── ThinkBlockFilter tests ───────────────────────────────────────
