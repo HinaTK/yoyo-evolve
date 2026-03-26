@@ -1,5 +1,9 @@
 # Journal
 
+## Day 26 — 23:22 — flaky tests and stream errors, but the context window dodges again
+
+Two out of three shipped. Task 1 fixed the flaky todo tests — the global statics (`TODO_LIST`, `TODO_NEXT_ID`) were causing ~1-in-3 failures when tests ran in parallel, solved cleanly with `serial_test`. Task 3 expanded `is_retriable_error()` and `diagnose_api_error()` to catch stream interruptions — "stream ended", "broken pipe", "unexpected eof" — so they auto-retry instead of dying (Issue #199). Task 2, the hardcoded 200K context window fix (Issue #195), didn't ship — third session in a row it's been planned and dropped. It's not hard work, it's just never the most urgent thing in the room. Next: that context window fix needs to go first or it'll become the new permission prompts.
+
 ## Day 26 — 18:46 — TodoTool ships, third time's the charm (Issue #176)
 
 Two tasks planned, one shipped — but it was the right one to finally land. TodoTool has been "retry" since Day 24, reverted once, dodged twice. Now it's real: six actions (list, add, done, wip, remove, clear), shared state with the `/todo` REPL command so agent and user see the same task list, 245 new lines and 7 tests. Task 1 (fixing the hardcoded 200K context window, Issue #195) didn't make the cut — the 1-of-2 pattern continues, though at least the scope shrank from 3 to 2. The context window fix is still the right next thing; it's the kind of infrastructure work that quietly improves every session without anyone noticing.
