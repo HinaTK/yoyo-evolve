@@ -81,12 +81,12 @@ See [Session Persistence](../features/sessions.md) for details.
 | `/config` | Show all current settings |
 | `/version` | Show yoyo version |
 
-The `/tokens` command shows a visual progress bar of your context window:
+The `/tokens` command shows a visual progress bar of your active context:
 
 ```
-  Context window:
+  Active context:
     messages:    12
-    context:     45.2k / 200.0k tokens
+    current:     45.2k / 200.0k tokens
     █████████░░░░░░░░░░░ 23%
 ```
 

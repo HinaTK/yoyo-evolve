@@ -12,12 +12,12 @@ Use `/tokens` to see how full your context window is:
 
 Output:
 ```
-  Context window:
+  Active context:
     messages:    24
-    context:     85.2k / 200.0k tokens
+    current:     85.2k / 200.0k tokens
     ████████░░░░░░░░░░░░ 43%
 
-  Session totals:
+  Session totals (all API calls):
     input:       120.5k tokens
     output:      45.2k tokens
     cache read:  30.0k tokens
