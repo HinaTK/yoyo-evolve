@@ -231,7 +231,16 @@ if __name__ == "__main__":
         if len(sys.argv) >= 3:
             try:
                 with open(sys.argv[2]) as f:
-                    sponsor_logins = set(json.load(f))
+                    data = json.load(f)
+                if isinstance(data, dict):
+                    # Rich sponsor info dict — extract priority-eligible logins
+                    sponsor_logins = {
+                        login for login, info in data.items()
+                        if isinstance(info, dict) and "priority" in info.get("benefits", [])
+                    }
+                elif isinstance(data, list):
+                    # Flat array of logins (backwards compat)
+                    sponsor_logins = set(data)
             except (json.JSONDecodeError, FileNotFoundError):
                 pass  # Graceful fallback: no sponsors
 

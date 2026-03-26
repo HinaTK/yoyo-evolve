@@ -4,7 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A self-evolving coding agent CLI built on [yoagent](https://github.com/yologdev/yoagent). The agent spans multiple Rust source files under `src/`. A GitHub Actions cron job (`scripts/evolve.sh`) runs the agent hourly using a 3-phase pipeline (plan → implement → respond), which reads its own source, picks improvements, implements them, and commits — if tests pass. Sponsor tiers control actual run frequency via gap-based scheduling: Tier 0 (no sponsors) = 8h gap (~3/day), Tier 1 ($10+/mo) = 6h gap (~4/day), Tier 2 ($50+/mo) = 4h gap (~6/day). One-time sponsors get accelerated runs ($1 = 1 extra run, only consumed when they have open issues; tracked in `sponsors/credits.json`).
+A self-evolving coding agent CLI built on [yoagent](https://github.com/yologdev/yoagent). The agent spans multiple Rust source files under `src/`. A GitHub Actions cron job (`scripts/evolve.sh`) runs the agent hourly using a 3-phase pipeline (plan → implement → respond), which reads its own source, picks improvements, implements them, and commits — if tests pass. All runs use a flat 8h gap (~3/day). Sponsors get benefit tiers (issue priority, shoutout issues, listing eligibility) but no run-frequency speedup. One-time sponsors ($2+) get 1 accelerated run that bypasses the gap (only consumed when they have open issues; tracked in `sponsors/credits.json`).
+
+**Sponsor benefit tiers:**
+
+Monthly recurring (benefits only):
+- $5/mo: Issue priority (💖)
+- $10/mo: Priority + shoutout issue
+- $25/mo: Above + SPONSORS.md eligible (manual)
+- $50/mo: Above + README eligible (manual)
+
+One-time (cumulative — each tier includes all benefits below it):
+- $2: 1 accelerated run (bypasses 8h gap)
+- $5: Accelerated run + issue priority (14 days)
+- $10: Above + shoutout issue (30 days)
+- $20: Above + SPONSORS.md eligible (30 days, manual)
+- $50: Above + priority for 60 days + SPONSORS.md eligible (manual)
 
 ## Build & Test Commands
 
@@ -72,6 +87,7 @@ Uses `yoagent::Agent` with `AnthropicProvider`, `default_tools()`, and an option
 - `DAY_COUNT` — integer tracking current evolution day
 - `session_plan/` — ephemeral directory with per-task files (task_01.md, task_02.md, etc.), written by Phase A planning agent (gitignored)
 - `ISSUES_TODAY.md` — ephemeral, generated during evolution from GitHub issues (gitignored)
+- `sponsors/shoutouts.json` — tracks which recurring sponsors have received shoutout issues (dedup)
 
 
 ## yoagent: Don't Reinvent the Wheel

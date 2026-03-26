@@ -1,7 +1,7 @@
 #!/bin/bash
-# scripts/evolve.sh — One evolution cycle. Cron fires hourly; gap-based gate controls frequency.
-# Tier 0 ($0/mo): 8h gap (~3/day) | Tier 1 ($10+/mo): 6h (~4/day) | Tier 2 ($50+/mo): 4h (~6/day)
-# One-time sponsors ($1 = 1 run) get accelerated runs that bypass the gap.
+# scripts/evolve.sh — One evolution cycle. Cron fires hourly; 8h gap controls frequency.
+# Monthly sponsors get benefit tiers (priority, shoutout, listing) — no run speedup.
+# One-time sponsors ($2+) get 1 accelerated run + benefit tiers based on amount.
 #
 # Usage:
 #   ANTHROPIC_API_KEY=sk-... ./scripts/evolve.sh
@@ -40,16 +40,14 @@ echo "Plan timeout: ${TIMEOUT}s (assess: $((TIMEOUT/2))s + plan: $((TIMEOUT/2))s
 echo ""
 
 # ── Step 0: Fetch sponsors & run-frequency gate ──
-# Two sponsor models:
-#   Monthly ($X/mo) → tier-based run frequency (gap between runs)
-#   One-time ($X)   → each $1 = 1 accelerated run (credits tracked in sponsors/credits.json)
-#
-# Tier 0 ($0/mo):   8h gap (~3 runs/day)
-# Tier 1 ($10+/mo): 6h gap (~4 runs/day)
-# Tier 2 ($50+/mo): 4h gap (~6 runs/day)
+# Sponsor benefits (no run-frequency speedup):
+#   Monthly: $5→priority, $10→+shoutout, $25→+SPONSORS.md, $50→+README
+#   One-time: $2→1 accelerated run, $5→priority, $10→+shoutout (30d),
+#             $20→+SPONSORS.md (30d), $50→priority 60d+SPONSORS.md
 SPONSORS_FILE="/tmp/sponsor_logins.json"
+SPONSOR_INFO_FILE="/tmp/sponsor_info.json"
 CREDITS_FILE="sponsors/credits.json"
-SPONSOR_TIER=0
+SHOUTOUTS_FILE="sponsors/shoutouts.json"
 MONTHLY_TOTAL=0
 HAS_ONETIME_CREDITS="false"
 if command -v gh &>/dev/null; then
@@ -62,6 +60,7 @@ import json, os
 from datetime import datetime, timedelta, timezone
 
 CREDITS_FILE = "sponsors/credits.json"
+SHOUTOUTS_FILE = "sponsors/shoutouts.json"
 
 try:
     data = json.load(open('/tmp/sponsor_raw.json'))
@@ -70,7 +69,7 @@ except (KeyError, TypeError, json.JSONDecodeError):
     nodes = []
 
 # Split into recurring and one-time
-recurring_logins = []
+recurring = {}  # login -> monthly_cents
 onetime_sponsors = []
 monthly_cents = 0
 
@@ -82,8 +81,9 @@ for n in nodes:
         cents = n.get('tier', {}).get('monthlyPriceInCents', 0)
         onetime_sponsors.append({'login': login, 'cents': cents})
     else:
-        recurring_logins.append(login)
-        monthly_cents += n.get('tier', {}).get('monthlyPriceInCents', 0)
+        cents = n.get('tier', {}).get('monthlyPriceInCents', 0)
+        recurring[login] = cents
+        monthly_cents += cents
 
 # Load existing credits
 credits = {}
@@ -93,43 +93,140 @@ if os.path.exists(CREDITS_FILE):
     except (json.JSONDecodeError, FileNotFoundError):
         credits = {}
 
-# Update credits with new one-time sponsors
+# Load shoutout tracking for recurring sponsors
+shoutouts = {}
+if os.path.exists(SHOUTOUTS_FILE):
+    try:
+        shoutouts = json.load(open(SHOUTOUTS_FILE))
+    except (json.JSONDecodeError, FileNotFoundError):
+        shoutouts = {}
+
 today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+
+# Update credits with new one-time sponsors
 for s in onetime_sponsors:
     login = s['login']
     if login not in credits:
         credits[login] = {
             'total_cents': s['cents'],
-            'used_runs': 0,
+            'run_used': False,
             'first_seen': today,
-            'last_used': ''
+            'benefit_expires': '',
+            'shouted_out': False
         }
 
-# Expire entries older than 30 days
-cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).strftime('%Y-%m-%d')
+# Compute benefit_expires for one-time sponsors based on amount (only set once at creation)
+for login, info in credits.items():
+    if info.get('benefit_expires', ''):
+        continue  # Already set — don't overwrite
+    dollars = info.get('total_cents', 0) / 100
+    first_seen = info.get('first_seen', today)
+    try:
+        fs_date = datetime.strptime(first_seen, '%Y-%m-%d')
+    except ValueError:
+        fs_date = datetime.now(timezone.utc)
+    if dollars >= 50:
+        info['benefit_expires'] = (fs_date + timedelta(days=60)).strftime('%Y-%m-%d')
+    elif dollars >= 10:
+        info['benefit_expires'] = (fs_date + timedelta(days=30)).strftime('%Y-%m-%d')
+    elif dollars >= 5:
+        info['benefit_expires'] = (fs_date + timedelta(days=14)).strftime('%Y-%m-%d')
+
+# Expire credit entries older than 90 days (generous buffer beyond benefit windows)
+cutoff = (datetime.now(timezone.utc) - timedelta(days=90)).strftime('%Y-%m-%d')
 credits = {k: v for k, v in credits.items() if v.get('first_seen', '') >= cutoff}
 
-# Find one-time sponsors with remaining credits
-onetime_logins_with_credits = []
+# Determine which one-time sponsors can still use an accelerated run
+onetime_with_run = []
 for login, info in credits.items():
-    max_runs = info.get('total_cents', 0) // 100  # $1 = 1 run
-    if info.get('used_runs', 0) < max_runs:
-        onetime_logins_with_credits.append(login)
+    if info.get('total_cents', 0) >= 200 and not info.get('run_used', False):
+        onetime_with_run.append(login)
 
 # Save updated credits
 os.makedirs(os.path.dirname(CREDITS_FILE), exist_ok=True)
-json.dump(credits, open(CREDITS_FILE, 'w'), indent=2)
+with open(CREDITS_FILE, 'w') as f:
+    json.dump(credits, f, indent=2)
 
-# Combine all sponsor logins (recurring + one-time with credits)
-all_logins = list(set(recurring_logins + onetime_logins_with_credits))
-json.dump(all_logins, open('/tmp/sponsor_logins.json', 'w'))
+# ── Build rich sponsor info ──
+
+def recurring_benefits(monthly_cents):
+    dollars = monthly_cents / 100
+    b = []
+    if dollars >= 5:  b.append("priority")
+    if dollars >= 10: b.append("shoutout")
+    if dollars >= 25: b.append("sponsors_md")
+    if dollars >= 50: b.append("readme")
+    return b
+
+def onetime_benefits(total_cents):
+    dollars = total_cents / 100
+    b = []
+    if dollars >= 5:  b.append("priority")
+    if dollars >= 10: b.append("shoutout")
+    if dollars >= 20: b.append("sponsors_md")
+    # $50+ also qualifies for sponsors_md (already covered by $20+ above)
+    return b
+
+sponsor_info = {}
+
+# Recurring sponsors
+for login, cents in recurring.items():
+    benefits = recurring_benefits(cents)
+    sponsor_info[login] = {
+        'type': 'recurring',
+        'monthly_cents': cents,
+        'benefits': benefits,
+        'shouted_out': shoutouts.get(login, False)
+    }
+
+# One-time sponsors (only those with active benefits)
+for login, info in credits.items():
+    dollars = info.get('total_cents', 0) / 100
+    benefit_expires = info.get('benefit_expires', '')
+    # Check if benefits are still active
+    benefits_active = True
+    if benefit_expires and benefit_expires < today:
+        benefits_active = False
+    benefits = onetime_benefits(info.get('total_cents', 0)) if (benefits_active and dollars >= 5) else []
+    entry = {
+        'type': 'onetime',
+        'total_cents': info.get('total_cents', 0),
+        'benefits': benefits,
+        'benefit_expires': benefit_expires,
+        'shouted_out': info.get('shouted_out', False),
+        'run_used': info.get('run_used', False)
+    }
+    if login in sponsor_info:
+        # Merge: recurring takes precedence, but add onetime benefits
+        sponsor_info[login]['onetime'] = entry
+    else:
+        sponsor_info[login] = entry
+
+# Write rich sponsor info
+with open('/tmp/sponsor_info.json', 'w') as f:
+    json.dump(sponsor_info, f, indent=2)
+
+# Write flat array of priority-eligible logins for backwards compat
+priority_logins = [login for login, info in sponsor_info.items()
+                   if 'priority' in info.get('benefits', [])]
+all_sponsor_logins = list(set(priority_logins + onetime_with_run))
+with open('/tmp/sponsor_logins.json', 'w') as f:
+    json.dump(all_sponsor_logins, f)
+
+# Save shoutout tracking
+with open(SHOUTOUTS_FILE, 'w') as f:
+    json.dump(shoutouts, f, indent=2)
 
 # Output: monthly_cents|has_onetime_credits
-has_credits = "true" if onetime_logins_with_credits else "false"
+has_credits = "true" if onetime_with_run else "false"
 print(f"{monthly_cents}|{has_credits}")
 PYEOF
-    ) 2>/dev/null || MONTHLY_TOTAL="0|false"
-    rm -f /tmp/sponsor_raw.json
+    ) 2>/tmp/sponsor_stderr.log || MONTHLY_TOTAL="0|false"
+    if [ -s /tmp/sponsor_stderr.log ]; then
+        echo "  WARNING: Sponsor processing errors:"
+        cat /tmp/sponsor_stderr.log | sed 's/^/    /'
+    fi
+    rm -f /tmp/sponsor_raw.json /tmp/sponsor_stderr.log
 
     # Parse output: monthly_cents|has_onetime_credits
     HAS_ONETIME_CREDITS="${MONTHLY_TOTAL#*|}"
@@ -138,21 +235,15 @@ PYEOF
     HAS_ONETIME_CREDITS="${HAS_ONETIME_CREDITS:-false}"
 else
     echo '[]' > "$SPONSORS_FILE"
+    echo '{}' > "$SPONSOR_INFO_FILE"
 fi
 
-# Determine sponsor tier from total monthly cents
+# Log sponsor summary
 MONTHLY_DOLLARS=$(( MONTHLY_TOTAL / 100 ))
-if [ "$MONTHLY_DOLLARS" -ge 50 ] 2>/dev/null; then
-    SPONSOR_TIER=2
-    echo "→ Sponsors: \$${MONTHLY_DOLLARS}/mo (tier 2 — 6 runs/day)"
-elif [ "$MONTHLY_DOLLARS" -ge 10 ] 2>/dev/null; then
-    SPONSOR_TIER=1
-    echo "→ Sponsors: \$${MONTHLY_DOLLARS}/mo (tier 1 — 4 runs/day)"
-elif [ "$MONTHLY_DOLLARS" -gt 0 ] 2>/dev/null; then
-    SPONSOR_TIER=0
-    echo "→ Sponsors: \$${MONTHLY_DOLLARS}/mo (below tier 1 — 3 runs/day)"
+if [ "$MONTHLY_DOLLARS" -gt 0 ] 2>/dev/null; then
+    echo "→ Sponsors: \$${MONTHLY_DOLLARS}/mo (benefits only — no run speedup)"
 else
-    echo "→ Sponsors: none (3 runs/day)"
+    echo "→ Sponsors: none"
 fi
 # One-time credits only trigger accelerated runs if the sponsor has open issues
 if [ "$HAS_ONETIME_CREDITS" = "true" ]; then
@@ -162,38 +253,29 @@ if [ "$HAS_ONETIME_CREDITS" = "true" ]; then
         OPEN_COUNT=$(gh issue list --repo "$REPO" --state open --search "author:$credit_login" --limit 1 --json number --jq 'length' 2>/dev/null || echo 0)
         if [ "$OPEN_COUNT" -gt 0 ]; then
             SPONSOR_HAS_ISSUES="true"
-            echo "→ One-time sponsor @$credit_login has open issues — credits active."
+            echo "→ One-time sponsor @$credit_login has open issues — accelerated run available."
             break
         fi
     done < <(python3 -c "
-import json
+import json, sys
 try:
     credits = json.load(open('$CREDITS_FILE'))
     for login, info in credits.items():
-        if info.get('used_runs', 0) < info.get('total_cents', 0) // 100:
+        if info.get('total_cents', 0) >= 200 and not info.get('run_used', False):
             print(login)
-except: pass
+except (json.JSONDecodeError, FileNotFoundError, KeyError, TypeError, AttributeError) as e:
+    print(f'WARNING: Could not enumerate sponsor credits: {e}', file=sys.stderr)
 " 2>/dev/null)
     if [ "$SPONSOR_HAS_ISSUES" = "false" ]; then
-        echo "→ One-time sponsors have credits but no open issues — saving credits."
+        echo "→ One-time sponsors have unused run but no open issues — saving it."
         HAS_ONETIME_CREDITS="false"
     fi
 fi
 
 # Run-frequency gate.
-# Cron fires every hour. Decide whether to run based on:
-#   1. One-time sponsor credits → always run (accelerated)
-#   2. Gap since last non-accelerated run → run if ≥ threshold
-# Gap thresholds by tier:
-#   Tier 0 ($0/mo):   8h → ~3 runs/day
-#   Tier 1 ($10+/mo): 6h → ~4 runs/day
-#   Tier 2 ($50+/mo): 4h → ~6 runs/day
+# Cron fires every hour. Flat 8h gap for everyone — no tier-based speedup.
+# One-time sponsor credits ($2+) bypass the gap (1 accelerated run each).
 MIN_GAP_SECS=$((8 * 3600))
-if [ "$SPONSOR_TIER" -ge 2 ] 2>/dev/null; then
-    MIN_GAP_SECS=$((4 * 3600))
-elif [ "$SPONSOR_TIER" -ge 1 ] 2>/dev/null; then
-    MIN_GAP_SECS=$((6 * 3600))
-fi
 
 # Check last non-accelerated run (filter out [accelerated] wrap-up commits)
 LAST_SCHEDULED_EPOCH=$(git log --format="%ct %s" --grep="session wrap-up" -20 2>/dev/null \
@@ -208,8 +290,7 @@ IS_ACCELERATED="false"
 if [ "$HAS_ONETIME_CREDITS" != "true" ] && [ "$ELAPSED" -lt "$MIN_GAP_SECS" ]; then
     SKIP_RUN="true"
     ELAPSED_H=$((ELAPSED / 3600))
-    MIN_GAP_H=$((MIN_GAP_SECS / 3600))
-    echo "  Last scheduled run ${ELAPSED_H}h ago — need ${MIN_GAP_H}h gap (tier $SPONSOR_TIER)."
+    echo "  Last scheduled run ${ELAPSED_H}h ago — need 8h gap."
 fi
 
 if [ "$SKIP_RUN" = "true" ] && [ "${FORCE_RUN:-}" != "true" ]; then
@@ -217,7 +298,7 @@ if [ "$SKIP_RUN" = "true" ] && [ "${FORCE_RUN:-}" != "true" ]; then
     exit 0
 fi
 
-# Consume one-time sponsor credits for this run
+# Consume one-time sponsor accelerated run
 ACCELERATED_BY=""
 if [ "$HAS_ONETIME_CREDITS" = "true" ]; then
     ACCELERATED_BY=$(python3 <<'PYEOF'
@@ -228,33 +309,130 @@ try:
     credits = json.load(open(CREDITS_FILE))
 except (json.JSONDecodeError, FileNotFoundError):
     credits = {}
-today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
 consumed_login = ""
 for login, info in credits.items():
-    max_runs = info.get('total_cents', 0) // 100
-    if info.get('used_runs', 0) < max_runs:
-        info['used_runs'] = info.get('used_runs', 0) + 1
-        info['last_used'] = today
+    if info.get('total_cents', 0) >= 200 and not info.get('run_used', False):
+        info['run_used'] = True
         consumed_login = login
-        break  # consume one credit per run
+        break  # consume one run per session
 if consumed_login:
-    json.dump(credits, open(CREDITS_FILE, 'w'), indent=2)
+    with open(CREDITS_FILE, 'w') as f:
+        json.dump(credits, f, indent=2)
 print(consumed_login)
 PYEOF
     ) || true
     if [ -n "$ACCELERATED_BY" ]; then
         IS_ACCELERATED="true"
-        echo "  Consumed one-time sponsor credit (from @$ACCELERATED_BY) — accelerated run."
+        echo "  Consumed accelerated run (from @$ACCELERATED_BY)."
     else
-        echo "  WARNING: No credits remaining to consume. Running as scheduled."
+        echo "  WARNING: No accelerated runs remaining. Running as scheduled."
     fi
+fi
+
+# ── Step 0c: Shoutout issue creation ──
+if [ -f "$SPONSOR_INFO_FILE" ] && command -v gh &>/dev/null; then
+    python3 <<'PYEOF' || echo "  WARNING: Shoutout creation failed (non-fatal)."
+import json, os, subprocess, sys
+
+SPONSOR_INFO_FILE = "/tmp/sponsor_info.json"
+CREDITS_FILE = "sponsors/credits.json"
+SHOUTOUTS_FILE = "sponsors/shoutouts.json"
+REPO = os.environ.get("REPO", "yologdev/yoyo-evolve")
+
+try:
+    sponsor_info = json.load(open(SPONSOR_INFO_FILE))
+except (json.JSONDecodeError, FileNotFoundError):
+    sponsor_info = {}
+
+try:
+    credits = json.load(open(CREDITS_FILE))
+except (json.JSONDecodeError, FileNotFoundError):
+    credits = {}
+
+try:
+    shoutouts = json.load(open(SHOUTOUTS_FILE))
+except (json.JSONDecodeError, FileNotFoundError):
+    shoutouts = {}
+
+changed_credits = False
+changed_shoutouts = False
+
+for login, info in sponsor_info.items():
+    if 'shoutout' not in info.get('benefits', []):
+        continue
+    if info.get('shouted_out', False):
+        continue
+
+    # Check GitHub for existing shoutout issue (dedup)
+    try:
+        result = subprocess.run(
+            ['gh', 'issue', 'list', '--repo', REPO, '--state', 'all',
+             '--search', f'"Shoutout: @{login}" in:title', '--json', 'number', '--jq', 'length'],
+            capture_output=True, text=True, timeout=15
+        )
+        if result.returncode != 0:
+            print(f"  WARNING: Could not check shoutouts for @{login}: {result.stderr.strip()}", file=sys.stderr)
+            continue  # Don't create if we can't verify dedup
+        if result.stdout.strip() not in ('', '0'):
+            # Already exists — mark as shouted out
+            if info.get('type') == 'recurring':
+                shoutouts[login] = True
+                changed_shoutouts = True
+            elif login in credits:
+                credits[login]['shouted_out'] = True
+                changed_credits = True
+            continue
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        continue
+
+    # Determine amount for title
+    if info.get('type') == 'recurring':
+        dollars = info.get('monthly_cents', 0) // 100
+        amount_str = f"${dollars}/mo"
+    else:
+        dollars = info.get('total_cents', 0) // 100
+        amount_str = f"${dollars}"
+
+    # Create shoutout issue
+    try:
+        result = subprocess.run(
+            ['gh', 'issue', 'create', '--repo', REPO,
+             '--title', f'Shoutout: @{login} — {amount_str} sponsor',
+             '--label', 'shoutout',
+             '--body', f'Thank you @{login} for sponsoring yoyo! 🐙💖\n\nYour support helps keep yoyo evolving.'],
+            capture_output=True, text=True, timeout=15
+        )
+        if result.returncode != 0:
+            print(f"  WARNING: Failed to create shoutout for @{login}: {result.stderr.strip()}", file=sys.stderr)
+            continue  # Don't mark as shouted out if creation failed
+        print(f"  Created shoutout issue for @{login}")
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        print(f"  WARNING: Shoutout creation timed out for @{login}", file=sys.stderr)
+        continue
+
+    # Mark as shouted out (only reached if creation succeeded)
+    if info.get('type') == 'recurring':
+        shoutouts[login] = True
+        changed_shoutouts = True
+    elif login in credits:
+        credits[login]['shouted_out'] = True
+        changed_credits = True
+
+if changed_credits:
+    with open(CREDITS_FILE, 'w') as f:
+        json.dump(credits, f, indent=2)
+if changed_shoutouts:
+    os.makedirs(os.path.dirname(SHOUTOUTS_FILE), exist_ok=True)
+    with open(SHOUTOUTS_FILE, 'w') as f:
+        json.dump(shoutouts, f, indent=2)
+PYEOF
 fi
 echo ""
 
 # Ensure memory directory exists
 mkdir -p memory
 
-# ── Step 0b: Load identity context ──
+# ── Step 0d: Load identity context ──
 if [ -f scripts/yoyo_context.sh ]; then
     source scripts/yoyo_context.sh
 else
@@ -302,7 +480,10 @@ if command -v gh &>/dev/null; then
         > /tmp/issues_raw.json 2>/dev/null || true
 
     FORMAT_STDERR=$(mktemp)
-    python3 scripts/format_issues.py /tmp/issues_raw.json "$SPONSORS_FILE" "$DAY" > "$ISSUES_FILE" 2>"$FORMAT_STDERR" || echo "No issues found." > "$ISSUES_FILE"
+    # Prefer rich sponsor info (format_issues.py handles both dict and array)
+    _SPONSOR_ARG="$SPONSORS_FILE"
+    [ -f "$SPONSOR_INFO_FILE" ] && _SPONSOR_ARG="$SPONSOR_INFO_FILE"
+    python3 scripts/format_issues.py /tmp/issues_raw.json "$_SPONSOR_ARG" "$DAY" > "$ISSUES_FILE" 2>"$FORMAT_STDERR" || echo "No issues found." > "$ISSUES_FILE"
     if [ -s "$FORMAT_STDERR" ]; then
         echo "  format_issues.py stderr:"
         cat "$FORMAT_STDERR" | sed 's/^/    /'
@@ -1381,6 +1562,23 @@ fi
 TAG_NAME="day${DAY}-$(echo "$SESSION_TIME" | tr ':' '-')"
 git tag "$TAG_NAME" -m "Day $DAY evolution ($SESSION_TIME)" 2>/dev/null || true
 echo "  Tagged: $TAG_NAME"
+
+# ── Step 7c: Eligibility logging ──
+if [ -f "$SPONSOR_INFO_FILE" ]; then
+    python3 <<'PYEOF'
+import json
+try:
+    info = json.load(open('/tmp/sponsor_info.json'))
+    sm = [l for l, d in info.items() if isinstance(d, dict) and 'sponsors_md' in d.get('benefits', [])]
+    rm = [l for l, d in info.items() if isinstance(d, dict) and 'readme' in d.get('benefits', [])]
+    if sm:
+        print(f"  SPONSORS.md eligible: {', '.join('@'+l for l in sm)}")
+    if rm:
+        print(f"  README eligible: {', '.join('@'+l for l in rm)}")
+except (json.JSONDecodeError, FileNotFoundError, AttributeError, TypeError):
+    pass
+PYEOF
+fi
 
 # ── Step 8: Push ──
 echo ""

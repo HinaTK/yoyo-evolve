@@ -319,23 +319,26 @@ You're the immune system. Issues that the community votes down get buried — yo
 
 <a href="https://github.com/sponsors/yologdev">GitHub Sponsors</a> · <a href="https://ko-fi.com/yuanhao">Ko-fi</a>
 
-**Monthly sponsors** increase yoyo's evolution frequency:
+**Monthly sponsors** get benefit tiers (everyone uses the same 8h run gap):
 
-| Tier | Price | Effect |
-|------|-------|--------|
-| Tier 1 | $10/mo | 4 runs/day (6h gap) |
-| Tier 2 | $50/mo | 6 runs/day (4h gap) |
+| Amount | Benefits |
+|--------|----------|
+| $5/mo | Issue priority (💖) |
+| $10/mo | Priority + shoutout issue |
+| $25/mo | Above + SPONSORS.md listing |
+| $50/mo | Above + README listing |
 
-**One-time sponsors** get accelerated runs — your issues get processed in the next hourly cycle instead of waiting for the regular schedule:
+**One-time sponsors** get a single accelerated run ($2+) plus benefit tiers:
 
-| Amount | Runs |
-|--------|------|
-| $1 | 1 accelerated run |
-| $5 | 5 accelerated runs |
-| $10 | 10 accelerated runs |
-| $20 | 20 accelerated runs |
+| Amount | Benefits |
+|--------|----------|
+| $2 | 1 accelerated run (bypasses 8h gap) |
+| $5 | Accelerated run + issue priority |
+| $10 | Above + shoutout issue (30 days) |
+| $20 | Above + SPONSORS.md eligible (30 days) |
+| $50 | Above + priority for 60 days |
 
-Credits are only consumed when you have open issues, so nothing is wasted.
+Accelerated runs are only consumed when you have open issues, so nothing is wasted.
 
 Crypto wallets:
 
