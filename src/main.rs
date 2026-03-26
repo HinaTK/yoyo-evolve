@@ -1582,6 +1582,7 @@ async fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serial_test::serial;
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::Arc;
 
@@ -2878,6 +2879,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[serial]
     async fn test_todo_tool_list_empty() {
         commands_project::todo_clear();
         let tool = TodoTool;
@@ -2894,6 +2896,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[serial]
     async fn test_todo_tool_add_and_list() {
         commands_project::todo_clear();
         let tool = TodoTool;
@@ -2919,6 +2922,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[serial]
     async fn test_todo_tool_done() {
         commands_project::todo_clear();
         let tool = TodoTool;

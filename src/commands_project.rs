@@ -1992,6 +1992,7 @@ mod tests {
     use super::*;
     use crate::commands::KNOWN_COMMANDS;
     use crate::help::help_text;
+    use serial_test::serial;
     use std::fs;
     use tempfile::TempDir;
 
@@ -3585,6 +3586,7 @@ impl B {
     // ── /todo tests ──────────────────────────────────────────────────────
 
     #[test]
+    #[serial]
     fn test_todo_add_returns_incrementing_ids() {
         todo_clear();
         let id1 = todo_add("first task");
@@ -3597,6 +3599,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_todo_update_status() {
         todo_clear();
         let id = todo_add("update me");
@@ -3610,6 +3613,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_todo_update_invalid_id() {
         todo_clear();
         let result = todo_update(99999, TodoStatus::Done);
@@ -3618,6 +3622,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_todo_remove() {
         todo_clear();
         let id = todo_add("remove me");
@@ -3629,6 +3634,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_todo_remove_invalid_id() {
         todo_clear();
         let result = todo_remove(99998);
@@ -3637,6 +3643,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_todo_clear() {
         todo_clear();
         todo_add("one");
@@ -3648,12 +3655,14 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_todo_list_empty() {
         todo_clear();
         assert!(todo_list().is_empty());
     }
 
     #[test]
+    #[serial]
     fn test_format_todo_list() {
         todo_clear();
         let id1 = todo_add("pending task");
@@ -3683,6 +3692,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_handle_todo_add() {
         todo_clear();
         let result = handle_todo("/todo add write tests");
@@ -3692,6 +3702,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_handle_todo_show_empty() {
         todo_clear();
         let result = handle_todo("/todo");
@@ -3699,6 +3710,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_handle_todo_done() {
         todo_clear();
         let id = todo_add("finish me");
@@ -3708,6 +3720,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_handle_todo_wip() {
         todo_clear();
         let id = todo_add("start me");
@@ -3717,6 +3730,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_handle_todo_remove_via_command() {
         todo_clear();
         let id = todo_add("delete me");
@@ -3726,6 +3740,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_handle_todo_clear_via_command() {
         todo_clear();
         todo_add("one");
@@ -3742,6 +3757,7 @@ impl B {
     }
 
     #[test]
+    #[serial]
     fn test_handle_todo_add_empty_description() {
         let result = handle_todo("/todo add");
         assert!(result.contains("Usage"));
