@@ -715,6 +715,9 @@ pub fn help_text() -> String {
     );
     out.push_str("  /spawn <task>      Spawn a subagent to handle a task (separate context)\n");
     out.push_str(
+        "                     The model can also delegate subtasks to sub-agents automatically.\n",
+    );
+    out.push_str(
         "  /remember <note>   Save a project-specific memory (persists across sessions)\n",
     );
     out.push_str("  /memories          List project-specific memories for this directory\n");

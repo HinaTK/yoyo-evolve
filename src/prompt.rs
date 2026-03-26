@@ -971,6 +971,10 @@ async fn handle_prompt_events(
                             (tool_name.clone(), args.clone()),
                         );
                         let summary = format_tool_summary(&tool_name, &args);
+                        if tool_name == "sub_agent" {
+                            // Distinctive header for sub-agent delegation
+                            eprintln!("\n{DIM}  🐙 Delegating to sub-agent...{RESET}");
+                        }
                         print!("{YELLOW}  ▶ {summary}{RESET}");
                         if is_verbose() {
                             println!();

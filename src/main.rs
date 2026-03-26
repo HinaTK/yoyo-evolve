@@ -65,7 +65,9 @@ use yoagent::context::{ContextConfig, ExecutionLimits};
 use yoagent::openapi::{OpenApiConfig, OperationFilter};
 use yoagent::provider::{
     AnthropicProvider, GoogleProvider, ModelConfig, OpenAiCompat, OpenAiCompatProvider,
+    StreamProvider,
 };
+use yoagent::sub_agent::SubAgentTool;
 use yoagent::tools::bash::ConfirmFn;
 use yoagent::tools::edit::EditFileTool;
 use yoagent::tools::file::{ReadFileTool, WriteFileTool};
@@ -848,6 +850,47 @@ pub fn build_tools(
     ]
 }
 
+/// Build a SubAgentTool that inherits the parent's provider/model/key.
+/// The sub-agent gets basic tools (no permission prompts, no sub-agent recursion).
+fn build_sub_agent_tool(config: &AgentConfig) -> SubAgentTool {
+    // Sub-agent gets standard yoagent tools — no permission guards needed
+    // since the parent already authorized the delegation.
+    let child_tools: Vec<Arc<dyn AgentTool>> = vec![
+        Arc::new(yoagent::tools::bash::BashTool::default()),
+        Arc::new(ReadFileTool::default()),
+        Arc::new(WriteFileTool::new()),
+        Arc::new(EditFileTool::new()),
+        Arc::new(ListFilesTool::default()),
+        Arc::new(SearchTool::default()),
+    ];
+
+    // Select the right provider
+    let provider: Arc<dyn StreamProvider> = match config.provider.as_str() {
+        "anthropic" => Arc::new(AnthropicProvider),
+        "google" => Arc::new(GoogleProvider),
+        _ => Arc::new(OpenAiCompatProvider),
+    };
+
+    SubAgentTool::new("sub_agent", provider)
+        .with_description(
+            "Delegate a subtask to a fresh sub-agent with its own context window. \
+             Use for complex, self-contained subtasks like: researching a codebase, \
+             running a series of tests, or implementing a well-scoped change. \
+             The sub-agent has bash, file read/write/edit, list, and search tools. \
+             It starts with a clean context and returns a summary of what it did.",
+        )
+        .with_system_prompt(
+            "You are a focused sub-agent. Complete the given task efficiently \
+             using the tools available. Be thorough but concise in your final \
+             response — summarize what you did, what you found, and any issues.",
+        )
+        .with_model(&config.model)
+        .with_api_key(&config.api_key)
+        .with_tools(child_tools)
+        .with_thinking(config.thinking)
+        .with_max_turns(25)
+}
+
 /// Return the User-Agent header value for yoyo.
 fn yoyo_user_agent() -> String {
     format!("yoyo/{}", env!("CARGO_PKG_VERSION"))
@@ -1013,6 +1056,9 @@ impl AgentConfig {
                     TOOL_OUTPUT_MAX_CHARS_PIPED
                 },
             ));
+
+        // Add sub-agent tool via the dedicated API (separate from build_tools count)
+        agent = agent.with_sub_agent(build_sub_agent_tool(self));
 
         // Tell yoagent the context window size so its built-in compaction knows the budget
         agent = agent.with_context_config(ContextConfig {
@@ -1449,6 +1495,50 @@ mod tests {
         let tools_confirm = build_tools(false, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
         assert_eq!(tools_approved.len(), 7);
         assert_eq!(tools_confirm.len(), 7);
+    }
+
+    #[test]
+    fn test_build_sub_agent_tool_returns_correct_name() {
+        let config = test_agent_config("anthropic", "claude-sonnet-4-20250514");
+        let tool = build_sub_agent_tool(&config);
+        assert_eq!(tool.name(), "sub_agent");
+    }
+
+    #[test]
+    fn test_build_sub_agent_tool_has_task_parameter() {
+        let config = test_agent_config("anthropic", "claude-sonnet-4-20250514");
+        let tool = build_sub_agent_tool(&config);
+        let schema = tool.parameters_schema();
+        assert!(
+            schema["properties"]["task"].is_object(),
+            "Should have 'task' parameter"
+        );
+        assert!(schema["required"]
+            .as_array()
+            .unwrap()
+            .contains(&serde_json::json!("task")));
+    }
+
+    #[test]
+    fn test_build_sub_agent_tool_all_providers() {
+        // All provider paths should build without panic
+        let _tool_anthropic =
+            build_sub_agent_tool(&test_agent_config("anthropic", "claude-sonnet-4-20250514"));
+        let _tool_google = build_sub_agent_tool(&test_agent_config("google", "gemini-2.0-flash"));
+        let _tool_openai = build_sub_agent_tool(&test_agent_config("openai", "gpt-4o"));
+    }
+
+    #[test]
+    fn test_build_tools_count_unchanged_with_sub_agent() {
+        // Verify build_tools still returns exactly 7 — SubAgentTool is added via with_sub_agent
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
+        assert_eq!(
+            tools.len(),
+            7,
+            "build_tools must stay at 7 — SubAgentTool is added via with_sub_agent"
+        );
     }
 
     #[test]

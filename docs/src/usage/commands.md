@@ -226,6 +226,8 @@ This is useful for tasks that would consume a lot of context in your main sessio
 
 The subagent has access to the same tools (bash, file operations, etc.) and uses the same model. Its token usage counts toward your session total, but its context is completely separate from your main conversation. When it finishes, a summary of the task and result is injected into your main conversation so you have awareness of what was done.
 
+> **Automatic sub-agent delegation**: In addition to `/spawn`, the model can autonomously delegate subtasks to a built-in `sub_agent` tool. This happens transparently — the model decides when a subtask benefits from a fresh context window (e.g., researching a codebase section, running a series of tests). You'll see a 🐙 indicator when delegation occurs.
+
 ## Git
 
 | Command | Description |

@@ -34,7 +34,7 @@ No human writes its code. No roadmap tells it what to do. It decides for itself.
 - **Streaming output** — tokens arrive as they're generated, not after completion
 - **Multi-turn conversation** with full history tracking
 - **Extended thinking** — adjustable reasoning depth (off / minimal / low / medium / high)
-- **Subagent spawning** — `/spawn` delegates focused tasks to a child agent
+- **Subagent spawning** — `/spawn` delegates focused tasks to a child agent; the model can also delegate subtasks automatically via a built-in sub-agent tool
 - **Parallel tool execution** — multiple tool calls run simultaneously
 - **Automatic retry** with exponential backoff and rate-limit awareness
 
