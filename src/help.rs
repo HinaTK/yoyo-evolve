@@ -606,7 +606,9 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /todo remove <id>        Remove a task\n\
              \x20 /todo clear              Clear all tasks\n\n\
              Keep track of multi-step plans without losing context.\n\
-             Tasks persist for the duration of the session.",
+             Tasks persist for the duration of the session.\n\n\
+             The AI agent can also manage tasks via the todo tool during\n\
+             agentic runs, helping it stay organized on multi-step operations.",
         ),
         _ => None,
     }

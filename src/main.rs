@@ -818,6 +818,122 @@ impl AgentTool for AskUserTool {
     }
 }
 
+// ── todo agent tool ──────────────────────────────────────────────────────
+
+/// Agent tool for managing a task list during complex multi-step operations.
+pub struct TodoTool;
+
+#[async_trait::async_trait]
+impl AgentTool for TodoTool {
+    fn name(&self) -> &str {
+        "todo"
+    }
+
+    fn label(&self) -> &str {
+        "todo"
+    }
+
+    fn description(&self) -> &str {
+        "Manage a task list to track progress on complex multi-step operations. \
+         Use this to plan work, check off completed steps, and see what's remaining. \
+         Available actions: list, add, done, wip, remove, clear."
+    }
+
+    fn parameters_schema(&self) -> serde_json::Value {
+        serde_json::json!({
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": ["list", "add", "done", "wip", "remove", "clear"],
+                    "description": "Action: list (show all), add (create task), done (mark complete), wip (mark in-progress), remove (delete task), clear (delete all)"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Task description (required for 'add')"
+                },
+                "id": {
+                    "type": "integer",
+                    "description": "Task ID number (required for 'done', 'wip', 'remove')"
+                }
+            },
+            "required": ["action"]
+        })
+    }
+
+    async fn execute(
+        &self,
+        params: serde_json::Value,
+        _ctx: yoagent::types::ToolContext,
+    ) -> Result<yoagent::types::ToolResult, yoagent::types::ToolError> {
+        use yoagent::types::{Content, ToolError, ToolResult as TR};
+
+        let action = params
+            .get("action")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| ToolError::InvalidArgs("Missing required 'action' parameter".into()))?;
+
+        let text =
+            match action {
+                "list" => {
+                    let items = commands_project::todo_list();
+                    if items.is_empty() {
+                        "No tasks. Use action 'add' to create one.".to_string()
+                    } else {
+                        commands_project::format_todo_list(&items)
+                    }
+                }
+                "add" => {
+                    let desc = params
+                        .get("description")
+                        .and_then(|v| v.as_str())
+                        .ok_or_else(|| {
+                            ToolError::InvalidArgs("Missing 'description' for add action".into())
+                        })?;
+                    let id = commands_project::todo_add(desc);
+                    format!("Added task #{id}: {desc}")
+                }
+                "done" => {
+                    let id = params.get("id").and_then(|v| v.as_u64()).ok_or_else(|| {
+                        ToolError::InvalidArgs("Missing 'id' for done action".into())
+                    })? as usize;
+                    commands_project::todo_update(id, commands_project::TodoStatus::Done)
+                        .map_err(ToolError::Failed)?;
+                    format!("Task #{id} marked as done ✓")
+                }
+                "wip" => {
+                    let id = params.get("id").and_then(|v| v.as_u64()).ok_or_else(|| {
+                        ToolError::InvalidArgs("Missing 'id' for wip action".into())
+                    })? as usize;
+                    commands_project::todo_update(id, commands_project::TodoStatus::InProgress)
+                        .map_err(ToolError::Failed)?;
+                    format!("Task #{id} marked as in-progress")
+                }
+                "remove" => {
+                    let id = params.get("id").and_then(|v| v.as_u64()).ok_or_else(|| {
+                        ToolError::InvalidArgs("Missing 'id' for remove action".into())
+                    })? as usize;
+                    let item = commands_project::todo_remove(id).map_err(ToolError::Failed)?;
+                    format!("Removed task #{id}: {}", item.description)
+                }
+                "clear" => {
+                    commands_project::todo_clear();
+                    "All tasks cleared.".to_string()
+                }
+                other => {
+                    return Err(ToolError::InvalidArgs(format!(
+                        "Unknown action '{other}'. Use: list, add, done, wip, remove, clear"
+                    )));
+                }
+            };
+
+        Ok(TR {
+            content: vec![Content::Text { text }],
+            details: serde_json::Value::Null,
+        })
+    }
+}
+
 /// Build the tool set, optionally with a bash confirmation prompt.
 /// When `auto_approve` is false (default), bash commands and file writes require user approval.
 /// The "always" option sets a session-wide flag so subsequent operations are auto-approved.
@@ -940,6 +1056,9 @@ pub fn build_tools(
     if std::io::stdin().is_terminal() {
         tools.push(Box::new(AskUserTool));
     }
+
+    // TodoTool is always available — it only modifies in-memory state, not filesystem
+    tools.push(Box::new(TodoTool));
 
     tools
 }
@@ -1581,14 +1700,14 @@ mod tests {
     }
 
     #[test]
-    fn test_build_tools_returns_six_tools() {
-        // build_tools should return 7 tools regardless of auto_approve
+    fn test_build_tools_returns_eight_tools() {
+        // build_tools should return 8 tools regardless of auto_approve (in non-terminal: no ask_user)
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
         let tools_approved = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
         let tools_confirm = build_tools(false, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
-        assert_eq!(tools_approved.len(), 7);
-        assert_eq!(tools_confirm.len(), 7);
+        assert_eq!(tools_approved.len(), 8);
+        assert_eq!(tools_confirm.len(), 8);
     }
 
     #[test]
@@ -1624,14 +1743,14 @@ mod tests {
 
     #[test]
     fn test_build_tools_count_unchanged_with_sub_agent() {
-        // Verify build_tools still returns exactly 7 — SubAgentTool is added via with_sub_agent
+        // Verify build_tools still returns exactly 8 — SubAgentTool is added via with_sub_agent
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
         let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
         assert_eq!(
             tools.len(),
-            7,
-            "build_tools must stay at 7 — SubAgentTool is added via with_sub_agent"
+            8,
+            "build_tools must stay at 8 — SubAgentTool is added via with_sub_agent"
         );
     }
 
@@ -1975,8 +2094,7 @@ mod tests {
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
         let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
-        assert_eq!(tools.len(), 7);
-        // Tool names should still be correct
+        assert_eq!(tools.len(), 8);
         let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
         assert!(names.contains(&"write_file"));
         assert!(names.contains(&"edit_file"));
@@ -1990,7 +2108,7 @@ mod tests {
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
         let tools = build_tools(false, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
-        assert_eq!(tools.len(), 7);
+        assert_eq!(tools.len(), 8);
         let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
         assert!(names.contains(&"write_file"));
         assert!(names.contains(&"edit_file"));
@@ -1998,6 +2116,7 @@ mod tests {
         assert!(names.contains(&"read_file"));
         assert!(names.contains(&"list_files"));
         assert!(names.contains(&"search"));
+        assert!(names.contains(&"todo"));
     }
 
     #[test]
@@ -2264,7 +2383,7 @@ mod tests {
     }
 
     #[test]
-    fn test_build_agent_all_providers_get_six_tools() {
+    fn test_build_agent_all_providers_build_cleanly() {
         // All three provider paths should produce agents with 6 tools via configure_agent.
         // This catches regressions where a provider branch forgets to call configure_agent.
         let providers = [
@@ -2643,7 +2762,7 @@ mod tests {
         let perms = cli::PermissionConfig::default();
         let dirs = cli::DirectoryRestrictions::default();
         let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS_PIPED);
-        assert_eq!(tools.len(), 7, "Should still have 7 tools with piped limit");
+        assert_eq!(tools.len(), 8, "Should still have 8 tools with piped limit");
     }
 
     #[test]
@@ -2741,5 +2860,116 @@ mod tests {
         let agent =
             config_with_turns.configure_agent(Agent::new(yoagent::provider::AnthropicProvider));
         let _ = agent;
+    }
+
+    // -----------------------------------------------------------------------
+    // TodoTool tests
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_todo_tool_schema() {
+        let tool = TodoTool;
+        assert_eq!(tool.name(), "todo");
+        assert_eq!(tool.label(), "todo");
+        let schema = tool.parameters_schema();
+        assert!(schema["properties"]["action"].is_object());
+        assert!(schema["properties"]["description"].is_object());
+        assert!(schema["properties"]["id"].is_object());
+    }
+
+    #[tokio::test]
+    async fn test_todo_tool_list_empty() {
+        commands_project::todo_clear();
+        let tool = TodoTool;
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(serde_json::json!({"action": "list"}), ctx)
+            .await;
+        assert!(result.is_ok());
+        let text = match &result.unwrap().content[0] {
+            yoagent::types::Content::Text { text } => text.clone(),
+            _ => panic!("Expected text content"),
+        };
+        assert!(text.contains("No tasks"));
+    }
+
+    #[tokio::test]
+    async fn test_todo_tool_add_and_list() {
+        commands_project::todo_clear();
+        let tool = TodoTool;
+
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(
+                serde_json::json!({"action": "add", "description": "Write tests"}),
+                ctx,
+            )
+            .await;
+        assert!(result.is_ok());
+
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(serde_json::json!({"action": "list"}), ctx)
+            .await;
+        let text = match &result.unwrap().content[0] {
+            yoagent::types::Content::Text { text } => text.clone(),
+            _ => panic!("Expected text content"),
+        };
+        assert!(text.contains("Write tests"));
+    }
+
+    #[tokio::test]
+    async fn test_todo_tool_done() {
+        commands_project::todo_clear();
+        let tool = TodoTool;
+        let ctx = test_tool_context(None);
+        tool.execute(
+            serde_json::json!({"action": "add", "description": "Task A"}),
+            ctx,
+        )
+        .await
+        .unwrap();
+
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(serde_json::json!({"action": "done", "id": 1}), ctx)
+            .await;
+        let text = match &result.unwrap().content[0] {
+            yoagent::types::Content::Text { text } => text.clone(),
+            _ => panic!("Expected text content"),
+        };
+        assert!(text.contains("done ✓"));
+    }
+
+    #[tokio::test]
+    async fn test_todo_tool_invalid_action() {
+        let tool = TodoTool;
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(serde_json::json!({"action": "explode"}), ctx)
+            .await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_todo_tool_missing_description() {
+        let tool = TodoTool;
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(serde_json::json!({"action": "add"}), ctx)
+            .await;
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_todo_tool_in_build_tools() {
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS);
+        let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
+        assert!(
+            names.contains(&"todo"),
+            "build_tools should include todo, got: {names:?}"
+        );
     }
 }
