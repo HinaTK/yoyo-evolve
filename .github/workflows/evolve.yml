@@ -73,6 +73,9 @@ jobs:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
           GH_PAT: ${{ secrets.GH_PAT }}
           FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && 'true' || '' }}
+          FALLBACK_PROVIDER: zai
+          FALLBACK_MODEL: glm-5
+          ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
         run: |
           chmod +x scripts/evolve.sh
           ./scripts/evolve.sh
@@ -88,6 +91,9 @@ jobs:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
           GH_PAT: ${{ secrets.GH_PAT }}
           FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && 'true' || '' }}
+          FALLBACK_PROVIDER: zai
+          FALLBACK_MODEL: glm-5
+          ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
         run: |
           echo "Waiting 15 minutes before retry..."
           sleep 900
@@ -104,6 +110,9 @@ jobs:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
           GH_PAT: ${{ secrets.GH_PAT }}
           FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && 'true' || '' }}
+          FALLBACK_PROVIDER: zai
+          FALLBACK_MODEL: glm-5
+          ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
         run: |
           echo "Waiting 45 minutes before retry..."
           sleep 2700
