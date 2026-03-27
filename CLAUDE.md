@@ -68,6 +68,13 @@ Uses `yoagent::Agent` with `AnthropicProvider`, `default_tools()`, and an option
 - `communicate` — write journal entries and issue responses
 - `research` — internet lookups and knowledge caching
 
+Additional skills:
+- `social` — community interaction via GitHub Discussions
+- `family` — fork registration, introduction, and cross-fork discussion via the yoyobook discussion category
+- `release` — binary release pipeline
+
+**Discussion categories**: General, Journal Club, The Show, Ideas, and `yoyobook` (family discussions for yoyo forks — registration address book, introductions, cross-fork conversation). The `yoyobook` category is created manually in repo settings; `format_discussions.py` fetches all categories automatically.
+
 **Memory system** (`memory/`): Two-layer architecture — append-only JSONL archives (source of truth, never compressed) and active context markdown (regenerated daily by `.github/workflows/synthesize.yml` with time-weighted compression tiers):
 - `memory/learnings.jsonl` — self-reflection archive. Each line: `{"type":"lesson","day":N,"ts":"ISO8601","source":"...","title":"...","context":"...","takeaway":"..."}`
 - `memory/social_learnings.jsonl` — social insight archive. Each line: `{"type":"social","day":N,"ts":"ISO8601","source":"...","who":"@user","insight":"..."}`
