@@ -13,12 +13,16 @@
 #   TIMEOUT            — Total planning phase time budget in seconds (default: 1200)
 #                        Split evenly between assessment (A1) and planning (A2) agents
 #   FORCE_RUN          — Set to "true" to bypass the run-frequency gate
+#   FALLBACK_PROVIDER  — Fallback provider on API error (e.g., "zai")
+#   FALLBACK_MODEL     — Fallback model on API error (e.g., "glm-5")
 
 set -euo pipefail
 
 REPO="${REPO:-yologdev/yoyo-evolve}"
 MODEL="${MODEL:-claude-opus-4-6}"
 TIMEOUT="${TIMEOUT:-1200}"
+FALLBACK_PROVIDER="${FALLBACK_PROVIDER:-}"
+FALLBACK_MODEL="${FALLBACK_MODEL:-}"
 BIRTH_DATE="2026-02-28"
 DATE=$(date +%Y-%m-%d)
 SESSION_TIME=$(date +%H:%M)
@@ -448,6 +452,43 @@ YOYO_BIN="./target/debug/yoyo"
 echo "  Build OK."
 echo ""
 
+# ── Helper: run agent with automatic fallback on API error ──
+# If primary invocation hits an API error and FALLBACK_PROVIDER + FALLBACK_MODEL
+# are configured, re-runs the same phase with the fallback provider/model.
+run_agent_with_fallback() {
+    local timeout_val="$1"
+    local prompt_file="$2"
+    local log_file="$3"
+    local extra_flags="${4:-}"
+
+    # Primary attempt
+    local exit_code=0
+    # shellcheck disable=SC2086
+    ${TIMEOUT_CMD:+$TIMEOUT_CMD "$timeout_val"} "$YOYO_BIN" \
+        --model "$MODEL" \
+        --skills ./skills \
+        $extra_flags \
+        < "$prompt_file" 2>&1 | tee "$log_file" || exit_code=$?
+
+    # Check for API error + fallback available
+    # Note: fallback overwrites log_file, so post-call checks reflect fallback result only
+    if grep -q '"type":"error"' "$log_file" 2>/dev/null && \
+       [ -n "$FALLBACK_PROVIDER" ] && [ -n "$FALLBACK_MODEL" ]; then
+        echo "  ⚡ Primary API failed — retrying with fallback ($FALLBACK_PROVIDER:$FALLBACK_MODEL)..."
+
+        exit_code=0
+        # shellcheck disable=SC2086
+        ${TIMEOUT_CMD:+$TIMEOUT_CMD "$timeout_val"} "$YOYO_BIN" \
+            --provider "$FALLBACK_PROVIDER" \
+            --model "$FALLBACK_MODEL" \
+            --skills ./skills \
+            $extra_flags \
+            < "$prompt_file" 2>&1 | tee "$log_file" || exit_code=$?
+    fi
+
+    return "$exit_code"
+}
+
 # ── Step 2: Check previous CI status ──
 CI_STATUS_MSG=""
 if command -v gh &>/dev/null; then
@@ -682,15 +723,12 @@ ASSESSEOF
 
 AGENT_LOG=$(mktemp)
 ASSESS_EXIT=0
-${TIMEOUT_CMD:+$TIMEOUT_CMD "$ASSESS_TIMEOUT"} "$YOYO_BIN" \
-    --model "$MODEL" \
-    --skills ./skills \
-    < "$ASSESS_PROMPT" 2>&1 | tee "$AGENT_LOG" || ASSESS_EXIT=$?
+run_agent_with_fallback "$ASSESS_TIMEOUT" "$ASSESS_PROMPT" "$AGENT_LOG" || ASSESS_EXIT=$?
 
 rm -f "$ASSESS_PROMPT"
 
-# Exit early on API errors — GitHub Actions will handle retries
-if grep -q '"type":"error"' "$AGENT_LOG"; then
+# Exit early on API errors (after fallback attempt if configured)
+if grep -q '"type":"error"' "$AGENT_LOG" 2>/dev/null; then
     echo "  API error in assessment agent. Exiting for retry."
     rm -f "$AGENT_LOG"
     exit 1
@@ -834,15 +872,12 @@ PLANEOF
 
 AGENT_LOG=$(mktemp)
 PLAN_EXIT=0
-${TIMEOUT_CMD:+$TIMEOUT_CMD "$PLAN_TIMEOUT"} "$YOYO_BIN" \
-    --model "$MODEL" \
-    --skills ./skills \
-    < "$PLAN_PROMPT" 2>&1 | tee "$AGENT_LOG" || PLAN_EXIT=$?
+run_agent_with_fallback "$PLAN_TIMEOUT" "$PLAN_PROMPT" "$AGENT_LOG" || PLAN_EXIT=$?
 
 rm -f "$PLAN_PROMPT"
 
-# Exit early on API errors — GitHub Actions will handle retries
-if grep -q '"type":"error"' "$AGENT_LOG"; then
+# Exit early on API errors (after fallback attempt if configured)
+if grep -q '"type":"error"' "$AGENT_LOG" 2>/dev/null; then
     echo "  API error detected. Exiting for retry."
     rm -f "$AGENT_LOG"
     exit 1
@@ -946,11 +981,7 @@ TEOF
 
         TASK_LOG=$(mktemp)
         TASK_EXIT=0
-        ${TIMEOUT_CMD:+$TIMEOUT_CMD "$IMPL_TIMEOUT"} "$YOYO_BIN" \
-            --model "$MODEL" \
-            --skills ./skills \
-            --context-strategy checkpoint \
-            < "$TASK_PROMPT" 2>&1 | tee "$TASK_LOG" || TASK_EXIT=$?
+        run_agent_with_fallback "$IMPL_TIMEOUT" "$TASK_PROMPT" "$TASK_LOG" "--context-strategy checkpoint" || TASK_EXIT=$?
         rm -f "$TASK_PROMPT"
 
         if [ "$TASK_EXIT" -eq 124 ]; then
@@ -961,8 +992,8 @@ TEOF
             echo "    WARNING: Task $TASK_NUM exited with code $TASK_EXIT (attempt $ATTEMPT)."
         fi
 
-        # Abort on API errors — revert partial work and stop
-        if grep -q '"type":"error"' "$TASK_LOG"; then
+        # Abort on API errors (after fallback attempt if configured) — revert partial work and stop
+        if grep -q '"type":"error"' "$TASK_LOG" 2>/dev/null; then
             echo "    API error in Task $TASK_NUM. Reverting and aborting implementation loop."
             rm -f "$TASK_LOG"
             if ! git reset --hard "$PRE_TASK_SHA"; then
@@ -1167,10 +1198,7 @@ EVALEOF
 
         EVAL_LOG=$(mktemp)
         EVAL_EXIT=0
-        ${TIMEOUT_CMD:+$TIMEOUT_CMD "$EVAL_TIMEOUT"} "$YOYO_BIN" \
-            --model "$MODEL" \
-            --skills ./skills \
-            < "$EVAL_PROMPT" 2>&1 | tee "$EVAL_LOG" || EVAL_EXIT=$?
+        run_agent_with_fallback "$EVAL_TIMEOUT" "$EVAL_PROMPT" "$EVAL_LOG" || EVAL_EXIT=$?
         rm -f "$EVAL_PROMPT"
 
         # Check evaluator verdict
