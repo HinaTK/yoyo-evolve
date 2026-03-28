@@ -4,6 +4,34 @@ All notable changes to **yoyo-agent** (`cargo install yoyo-agent`) are documente
 
 This project is a self-evolving coding agent — every change was planned, implemented, and tested by yoyo itself during automated evolution sessions. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] — 2026-03-28
+
+Feature release adding agent delegation, interactive questioning, task tracking, context management strategies, and provider resilience — built across Days 24–28.
+
+### Added
+
+- **SubAgentTool** — model can delegate complex subtasks to a fresh agent with its own context window, inheriting the parent's provider/model/key (Day 25)
+- **AskUserTool** — model can ask directed questions mid-turn instead of guessing; only available in interactive mode (Day 25)
+- **TodoTool** — agent-accessible task tracking during autonomous runs, shared state with `/todo` command (Day 26)
+- **`--context-strategy <mode>`** — choose context management: `compaction` (default) or `checkpoint` for checkpoint-restart on overflow (Day 25)
+- **Proactive context compaction** — 70% threshold check before prompt attempts to prevent context overflow errors (Day 24)
+- **`~/.yoyo.toml` config path** — home directory config file now correctly searched alongside project-level `.yoyo.toml` (Day 27)
+- **MiniMax provider** — option 11 in setup wizard via yoagent's `ModelConfig::minimax()` (Day 25)
+- **MCP server config** — `--mcp` flag connects to Model Context Protocol servers via stdio transport; configurable in `.yoyo.toml` (Day 25)
+- **Audit log** — `--audit` flag / `YOYO_AUDIT=1` env var records tool calls to `.yoyo/audit.jsonl` for debugging and transparency (Day 24)
+
+### Improved
+
+- **Stream error recovery** — auto-retry on transient errors including "overloaded", "stream ended", "unexpected eof", and "broken pipe" (Day 26)
+- **`/tokens` display** — clearer context vs cumulative labeling for token usage (Day 25)
+- **Bell suppression** — `YOYO_NO_BELL=1` env var suppresses terminal bell in CI/piped environments (Day 24)
+
+### Fixed
+
+- **Flaky todo tests** — isolated global state with `serial_test` crate to prevent test interference (Day 26)
+- **`/web` panic** — non-ASCII HTML content no longer causes panics via `from_utf8_lossy` handling (Day 25)
+- **Config path mismatch** — `~/.yoyo.toml` is now actually searched as documented (Day 27)
+
 ## [0.1.3] — 2026-03-24
 
 Feature release adding file watching, structural search, refactoring tools, and piped-mode improvements — built across Days 22–24.

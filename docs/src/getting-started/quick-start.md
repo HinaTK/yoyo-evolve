@@ -22,7 +22,7 @@ yoyo --api-key sk-ant-...
 You'll see a banner like this:
 
 ```
-  yoyo v0.1.0 — a coding agent growing up in public
+  yoyo v0.1.4 — a coding agent growing up in public
   Type /help for commands, /quit to exit
 
   model: claude-opus-4-6
