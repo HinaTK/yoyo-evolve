@@ -40,7 +40,7 @@ echo "$DAY" > DAY_COUNT
 
 echo "=== Day $DAY ($DATE $SESSION_TIME) ==="
 echo "Model: $MODEL"
-echo "Plan timeout: ${TIMEOUT}s (assess: $((TIMEOUT/2))s + plan: $((TIMEOUT/2))s) | Impl timeout: 900s/task"
+echo "Plan timeout: ${TIMEOUT}s (assess: $((TIMEOUT/2))s + plan: $((TIMEOUT/2))s) | Impl timeout: 1200s/task"
 echo ""
 
 # ── Step 0: Fetch sponsors & run-frequency gate ──
@@ -911,15 +911,15 @@ echo ""
 
 # ── Phase B: Implementation loop ──
 echo "  Phase B: Implementation..."
-# Fixed 15 min per implementation task
-IMPL_TIMEOUT=900
+# Fixed 20 min per implementation task
+IMPL_TIMEOUT=1200
 TASK_NUM=0
 TASK_FAILURES=0
 for TASK_FILE in session_plan/task_*.md; do
     [ -f "$TASK_FILE" ] || continue
     TASK_NUM=$((TASK_NUM + 1))
 
-    # Cap at 5 tasks per session (15 min each = 75 min max)
+    # Cap at 5 tasks per session (20 min each = 100 min max)
     if [ "$TASK_NUM" -gt 5 ]; then
         echo "    Skipping Task $TASK_NUM — max 5 tasks per session."
         break

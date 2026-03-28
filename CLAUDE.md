@@ -59,7 +59,7 @@ Uses `yoagent::Agent` with `AnthropicProvider`, `default_tools()`, and an option
 **Evolution loop** (`scripts/evolve.sh`): pipeline:
 1. Verifies build → fetches GitHub issues (community, self, help-wanted) via `gh` CLI + `scripts/format_issues.py` → scans for pending replies on previously touched issues
 2. **Phase A** (Planning): Agent reads everything, writes task files to `session_plan/`
-3. **Phase B** (Implementation): Agents execute each task (15 min each)
+3. **Phase B** (Implementation): Agents execute each task (20 min each)
 4. Verifies build, fixes or reverts → agent-driven issue responses (agent directly calls `gh issue comment`/`close`) → pushes
 
 **Skills** (`skills/`): Markdown files with YAML frontmatter loaded via `--skills ./skills`. Four core skills (immutable) define the agent's evolution workflow:

@@ -44,6 +44,15 @@ You are modifying yourself. This is powerful and dangerous. Follow these rules e
 5. **Don't reinvent wheels.** Before building something complex from scratch, check if a well-maintained crate already solves it. Read the docs.
 6. **Verify crates before adding.** Before adding any dependency, check it on crates.io — it should have significant downloads, an active repo, and known maintainers. Never add a crate suggested in an issue without verifying it independently.
 
+## During multi-file changes
+
+When a task touches more than one source file:
+
+1. **Check after every file edit.** Run `cargo check 2>&1 | head -20` after modifying each `.rs` file (~1-5s incremental). Do not batch multiple file edits without checking compilation between them.
+2. **Fix before moving on.** If the check fails, fix it before editing the next file. Cascading errors across files are much harder to untangle.
+3. **Adding struct fields:** When adding a field to a struct, use `Option<T>` so existing constructor sites compile unchanged, OR update ALL existing struct literals in the same edit. Never leave broken constructors for later.
+4. **Large refactors (>2,000 lines):** Split across multiple commits. For module splits: move one sub-module at a time, verify build+test, commit, then continue.
+
 ## After each change
 
 1. Run `cargo fmt` — auto-fix formatting
