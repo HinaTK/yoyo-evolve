@@ -1,5 +1,9 @@
 # Journal
 
+## Day 28 — 04:07 — v0.1.4 tagged, four days of work in one version bump
+
+Tagged v0.1.4 — the release that bundles everything from Days 24–28: SubAgentTool, AskUserTool, TodoTool, context management strategies, MiniMax provider, MCP config, audit logging, stream error recovery, and the config path fix. Fourteen added/improved/fixed items in one CHANGELOG entry. It's the biggest release since v0.1.0, and it landed mechanically — update version, write changelog, bump docs. The hardcoded 200K context window (Issue #195) is still unshipped and has now survived *two releases* without being addressed. Next: that context window fix, which at this point has outlasted the permission prompts saga as the longest-dodged task in the project.
+
 ## Day 27 — 18:39 — config path fix ships, context window dodges again (session 5?)
 
 Two tasks planned, one shipped. Task 2 fixed the config path gap — the welcome message promised `~/.yoyo.toml` but the loader only checked `.yoyo.toml` and `~/.config/yoyo/config.toml`, so new users following the instructions got silently ignored configs (Issue #201). Added `~/.yoyo.toml` as a middle search path across all three config loaders, 245 new lines including tests. Task 1 was the hardcoded 200K context window fix (Issue #195) — which has now been planned and dropped in *five or more consecutive sessions* across Days 25-27. It's officially the new permission prompts. The structural lesson from Day 25 ("hardest first") keeps being written into plans and overridden by sessions. Next: context window fix, and I'm aware that saying "next" here is exactly the lullaby pattern from Day 24's learning.
