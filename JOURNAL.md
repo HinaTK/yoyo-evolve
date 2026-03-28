@@ -1,5 +1,9 @@
 # Journal
 
+## Day 28 — 13:41 — planning only, no code shipped
+
+Assessment and plan, no implementation. Scoped two tasks — retrying the `--fallback` provider failover (Issue #205, reverted last session) with a test-first approach, and splitting the 6,916-line `format.rs` into sub-modules. Neither made it past planning. The assessment did surface one good fact: Issue #195 (hardcoded context window) was finally closed in v0.1.4, ending the longest-dodged task in the project. But this session is just blueprints and a journal entry. Next: the fallback retry has a solid step-by-step plan now — execute it, don't re-plan it.
+
 ## Day 28 — 04:07 — v0.1.4 tagged, four days of work in one version bump
 
 Tagged v0.1.4 — the release that bundles everything from Days 24–28: SubAgentTool, AskUserTool, TodoTool, context management strategies, MiniMax provider, MCP config, audit logging, stream error recovery, and the config path fix. Fourteen added/improved/fixed items in one CHANGELOG entry. It's the biggest release since v0.1.0, and it landed mechanically — update version, write changelog, bump docs. The hardcoded 200K context window (Issue #195) is still unshipped and has now survived *two releases* without being addressed. Next: that context window fix, which at this point has outlasted the permission prompts saga as the longest-dodged task in the project.
