@@ -911,7 +911,7 @@ echo ""
 
 # ── Phase B: Implementation loop ──
 echo "  Phase B: Implementation..."
-# Fixed 20 min per implementation task
+# Fixed 20 min per implementation task + up to 2x10 min fix if evaluator rejects
 IMPL_TIMEOUT=1200
 TASK_NUM=0
 TASK_FAILURES=0
@@ -1150,9 +1150,15 @@ and commit if needed."
         fi
     fi
 
-    # ── Phase B-eval: Evaluator agent (runs only if mechanical checks passed) ──
-    if [ "$TASK_OK" = true ]; then
-        echo "    Evaluator: checking Task $TASK_NUM quality..."
+    # ── Phase B-eval: Evaluator agent with fix loop (runs only if mechanical checks passed) ──
+    # On FAIL: give the agent up to 2 chances to fix, then re-evaluate. Revert only after all attempts fail.
+    EVAL_ATTEMPT=0
+    MAX_EVAL_ATTEMPTS=3
+    EVAL_LOG=""
+    while [ "$TASK_OK" = true ] && [ "$EVAL_ATTEMPT" -lt "$MAX_EVAL_ATTEMPTS" ]; do
+        EVAL_ATTEMPT=$((EVAL_ATTEMPT + 1))
+
+        echo "    Evaluator: checking Task $TASK_NUM quality (attempt $EVAL_ATTEMPT)..."
         EVAL_TIMEOUT=180
         EVAL_PROMPT=$(mktemp)
         TASK_DIFF=$(git diff "$PRE_TASK_SHA"..HEAD 2>/dev/null || echo "(git diff failed)")
@@ -1210,23 +1216,100 @@ EVALEOF
         if echo "$EVAL_VERDICT" | grep -qi "FAIL"; then
             EVAL_REASON=$(grep -i '^Reason:' "session_plan/eval_task_${TASK_NUM}.md" | head -1 | sed 's/^Reason:[[:space:]]*//' || true)
             echo "    Evaluator: FAIL — $EVAL_REASON"
-            TASK_OK=false
-            REVERT_REASON="Evaluator rejected: ${EVAL_REASON:-no reason given}"
+
+            if [ "$EVAL_ATTEMPT" -lt "$MAX_EVAL_ATTEMPTS" ]; then
+                # ── Fix attempt: feed evaluator feedback back to agent ──
+                echo "    Giving agent a chance to fix (fix attempt $EVAL_ATTEMPT of $((MAX_EVAL_ATTEMPTS - 1)))..."
+                FIX_TIMEOUT=600
+                FIX_PROMPT=$(mktemp)
+                EVAL_FEEDBACK=$(cat "session_plan/eval_task_${TASK_NUM}.md" 2>/dev/null || echo "$EVAL_REASON")
+                cat > "$FIX_PROMPT" <<FIXEOF
+The evaluator rejected your implementation of this task. Fix the issues and complete the missing work.
+
+=== TASK ===
+$TASK_DESC
+
+=== EVALUATOR FEEDBACK ===
+$EVAL_FEEDBACK
+
+=== WHAT TO DO ===
+Fix the issues the evaluator identified. The build and tests already pass ��� focus on completing the missing functionality, not on refactoring what works.
+
+After fixing, run: cargo fmt && cargo clippy --all-targets -- -D warnings && cargo build && cargo test
+FIXEOF
+                FIX_LOG=$(mktemp)
+                FIX_EXIT=0
+                run_agent_with_fallback "$FIX_TIMEOUT" "$FIX_PROMPT" "$FIX_LOG" "--context-strategy checkpoint" || FIX_EXIT=$?
+                if [ "$FIX_EXIT" -eq 124 ]; then
+                    echo "    WARNING: Fix agent timed out after ${FIX_TIMEOUT}s."
+                elif grep -q '"type":"error"' "$FIX_LOG" 2>/dev/null; then
+                    echo "    WARNING: Fix agent hit API error."
+                elif [ "$FIX_EXIT" -ne 0 ]; then
+                    echo "    WARNING: Fix agent exited with code $FIX_EXIT."
+                fi
+                rm -f "$FIX_PROMPT" "$FIX_LOG"
+
+                # Re-check protected files after fix agent
+                FIX_PROTECTED=$(git diff --name-only "$PRE_TASK_SHA"..HEAD -- \
+                    .github/workflows/ IDENTITY.md PERSONALITY.md \
+                    scripts/evolve.sh scripts/format_issues.py scripts/build_site.py \
+                    skills/self-assess/ skills/evolve/ skills/communicate/ skills/research/ 2>/dev/null || true)
+                FIX_PROTECTED_STAGED=$(git diff --cached --name-only -- \
+                    .github/workflows/ IDENTITY.md PERSONALITY.md \
+                    scripts/evolve.sh scripts/format_issues.py scripts/build_site.py \
+                    skills/self-assess/ skills/evolve/ skills/communicate/ skills/research/ 2>/dev/null || true)
+                if [ -n "$FIX_PROTECTED" ] || [ -n "$FIX_PROTECTED_STAGED" ]; then
+                    echo "    Fix agent modified protected files — reverting"
+                    TASK_OK=false
+                    REVERT_REASON="Fix agent modified protected files: ${FIX_PROTECTED}${FIX_PROTECTED_STAGED}"
+                    break
+                fi
+
+                # Re-check mechanical gates before re-evaluating
+                if ! BUILD_OUT=$(cargo build 2>&1); then
+                    echo "    Build failed after fix attempt"
+                    echo "$BUILD_OUT" | tail -20 | sed 's/^/      /'
+                    TASK_OK=false
+                    REVERT_REASON="Build failed after fix attempt"
+                    break
+                fi
+                if ! TEST_OUT=$(cargo test 2>&1); then
+                    echo "    Tests failed after fix attempt"
+                    echo "$TEST_OUT" | tail -20 | sed 's/^/      /'
+                    TASK_OK=false
+                    REVERT_REASON="Tests failed after fix attempt"
+                    break
+                fi
+                # Loop continues → re-runs evaluator on the fixed code
+                rm -f "$EVAL_LOG"
+                rm -f "session_plan/eval_task_${TASK_NUM}.md"
+                continue
+            else
+                # All fix attempts exhausted → give up
+                TASK_OK=false
+                REVERT_REASON="Evaluator rejected after fix attempts: ${EVAL_REASON:-no reason given}"
+            fi
         elif echo "$EVAL_VERDICT" | grep -qi "PASS"; then
             echo "    Evaluator: PASS"
+            break
         elif [ "$EVAL_EXIT" -eq 124 ]; then
             echo "    Evaluator: timed out — skipping eval (build+test passed)"
+            break
         elif grep -q '"type":"error"' "$EVAL_LOG" 2>/dev/null; then
             echo "    Evaluator: API error — skipping eval (build+test passed)"
+            break
         elif [ -z "$EVAL_VERDICT" ]; then
             echo "    Evaluator: no verdict produced — skipping eval (build+test passed)"
+            break
         else
             echo "    Evaluator: unrecognized verdict '$EVAL_VERDICT' — skipping eval (build+test passed)"
+            break
         fi
 
         # Evaluator infra failures don't block — mechanical checks already passed
         rm -f "$EVAL_LOG"
-    fi
+    done
+    rm -f "${EVAL_LOG:-}" 2>/dev/null
 
     # Revert task if verification or evaluation failed
     if [ "$TASK_OK" = false ]; then
