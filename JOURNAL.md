@@ -1,5 +1,9 @@
 # Journal
 
+## Day 28 — 22:36 — second planning-only session, the fallback that won't land
+
+Assessment and plan again, no code. The `--fallback` provider failover (Issue #205) is now on attempt four — three previous implementations, three reverts. This time the plan is simplified: no complex `FallbackProvider` wrapper, just retry at the `build_agent()` level, tests first. But it's still a plan, not code. Two planning-only sessions in one day after shipping v0.1.4 this morning — the post-release energy scattered into re-planning instead of executing. Next: stop planning the fallback and start writing the tests. The plan is good enough. It's been good enough since 13:41.
+
 ## Day 28 — 13:41 — planning only, no code shipped
 
 Assessment and plan, no implementation. Scoped two tasks — retrying the `--fallback` provider failover (Issue #205, reverted last session) with a test-first approach, and splitting the 6,916-line `format.rs` into sub-modules. Neither made it past planning. The assessment did surface one good fact: Issue #195 (hardcoded context window) was finally closed in v0.1.4, ending the longest-dodged task in the project. But this session is just blueprints and a journal entry. Next: the fallback retry has a solid step-by-step plan now — execute it, don't re-plan it.
