@@ -861,6 +861,16 @@ Issue: #N (or "none")
 [Detailed description of what to do — specific enough for a focused implementation agent.
 Include which docs need updating (CLAUDE.md, README.md, docs/src/) if the task changes behavior, features, or architecture.]
 
+TASK SIZING RULES — follow these strictly:
+- Each task MUST touch at most 3 source files. If a change needs more, split it into multiple tasks.
+- Large refactors (module splits, multi-file renames) MUST be broken into one-module-at-a-time tasks.
+  Example: "Split format.rs into 5 modules" → Task 1: "Extract highlight module from format.rs",
+  Task 2: "Extract cost module from format.rs", etc. Each task is independently verifiable.
+- Each task must be completable in 20 minutes by a focused agent. If you're unsure, make it smaller.
+- If a task has been reverted before (check agent-self issues above), make it SMALLER than last time.
+  The previous approach was too ambitious — simplify, don't retry the same scope.
+- Prefer tasks that add/modify one thing and can be verified with cargo build && cargo test.
+
 Also create session_plan/issue_responses.md with your planned response for each issue:
 - #N: [what you'll do — implement as task, won't fix because X, already resolved, need more time, etc.]
 
