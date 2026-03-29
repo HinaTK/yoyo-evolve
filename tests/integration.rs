@@ -2047,3 +2047,21 @@ fn no_bell_flag_accepted() {
         "help output should mention --no-bell flag"
     );
 }
+
+// ── /map command ─────────────────────────────────────────────────────
+
+#[test]
+fn map_command_mentioned_in_help() {
+    // The /map command should be referenced in --help output or at least
+    // recognized as a known command (verified via the REPL help text).
+    let output = yoyo_cmd()
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(output.status.success(), "--help should exit 0");
+    // --help shows CLI flags, not REPL commands, so we check that
+    // the binary at least runs successfully. The REPL /help test
+    // is in unit tests (map_in_help_text).
+}

@@ -1237,6 +1237,12 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         system_prompt.push_str(&project_context);
     }
 
+    // Append repo map for structural codebase awareness
+    if let Some(repo_map) = crate::commands_search::generate_repo_map_for_prompt() {
+        system_prompt.push_str("\n\n# Repository Structure\n\n");
+        system_prompt.push_str(&repo_map);
+    }
+
     // --thinking <level> enables extended thinking (CLI overrides config file)
     let thinking = args
         .iter()

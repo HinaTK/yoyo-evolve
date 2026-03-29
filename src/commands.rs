@@ -77,6 +77,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/refactor",
     "/watch",
     "/ast",
+    "/map",
     "/stash",
     "/todo",
 ];
@@ -479,7 +480,9 @@ pub use crate::commands_project::{
     handle_refactor, handle_rename, handle_todo,
 };
 
-pub use crate::commands_search::{handle_ast_grep, handle_find, handle_grep, handle_index};
+pub use crate::commands_search::{
+    handle_ast_grep, handle_find, handle_grep, handle_index, handle_map,
+};
 
 pub use crate::commands_dev::{
     handle_doctor, handle_fix, handle_health, handle_lint, handle_run, handle_run_usage,

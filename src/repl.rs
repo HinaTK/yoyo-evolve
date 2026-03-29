@@ -626,6 +626,10 @@ pub async fn run_repl(
                 commands::handle_index();
                 continue;
             }
+            s if s == "/map" || s.starts_with("/map ") => {
+                commands::handle_map(input);
+                continue;
+            }
             "/retry" => {
                 last_error = commands::handle_retry(
                     agent,

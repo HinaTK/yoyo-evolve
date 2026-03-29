@@ -559,6 +559,41 @@ Binary files (images, fonts, archives, etc.) are automatically skipped.
 
 This gives you a quick bird's-eye view of the entire codebase without needing to run `find`, `list_files`, or `wc -l` manually.
 
+### `/map` — Structural codebase map
+
+The `/map` command generates a structural summary of your codebase, extracting function signatures, struct/class/trait/enum definitions, constants, and other symbols from source files. This is like a "table of contents" for your entire project.
+
+```
+/map
+  Building repo map...
+
+src/main.rs (850 lines)
+  pub fn main
+  pub struct AgentConfig
+  impl AgentConfig
+
+src/cli.rs (400 lines)
+  pub fn parse_args
+  pub struct Config
+  pub const SYSTEM_PROMPT
+  ...
+
+  45 symbols across 8 files
+```
+
+**Usage:**
+
+| Command | Description |
+|---------|-------------|
+| `/map` | Map entire project (public symbols only) |
+| `/map src/` | Map only files under a specific directory |
+| `/map --all` | Include private/non-exported symbols |
+| `/map --all src/` | All symbols under a specific directory |
+
+**Supported languages:** Rust, Python, JavaScript, TypeScript, Go, Java.
+
+**Automatic system prompt integration:** The repo map is automatically included in the system prompt at the start of every session, giving the AI structural awareness of your codebase without you needing to manually add files. This is similar to Aider's repo-map feature. The system prompt version is limited to public symbols and capped at ~16K characters to avoid bloating context.
+
 ## Project Onboarding with `/init`
 
 The `/init` command scans your project and generates a `YOYO.md` context file automatically. It:

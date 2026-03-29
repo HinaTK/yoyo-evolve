@@ -235,6 +235,19 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              their sizes, and structure. Useful for giving the AI awareness\n\
              of the full project layout.",
         ),
+        "map" => Some(
+            "/map [path] — Show structural map of the codebase\n\n\
+             Extracts function signatures, struct/class/trait/enum definitions,\n\
+             and other structural symbols from source files.\n\n\
+             Usage:\n\
+             \x20 /map              Map entire project (public symbols)\n\
+             \x20 /map src/         Map only files under src/\n\
+             \x20 /map --all        Include private symbols\n\
+             \x20 /map --all src/   All symbols under src/\n\n\
+             Supported languages: Rust, Python, JavaScript, TypeScript, Go, Java.\n\n\
+             The repo map is also automatically included in the system prompt\n\
+             for structural codebase awareness.",
+        ),
         "status" => Some(
             "/status — Show session info\n\n\
              Displays current session information including: working directory,\n\
@@ -699,6 +712,9 @@ pub fn help_text() -> String {
     out.push_str("  /move <Src>::<method> [file::]<Dst> Move a method between impl blocks\n");
     out.push_str("  /refactor              Show all refactoring tools (rename, extract, move)\n");
     out.push_str("  /index             Build a lightweight index of project source files\n");
+    out.push_str(
+        "  /map [path]        Show structural map of the codebase (functions, types, etc.)\n",
+    );
     out.push_str("  /tree [depth]      Show project directory tree (default depth: 3)\n");
     out.push_str("  /web <url>         Fetch a web page and display clean readable text content\n");
     out.push_str("  /watch [cmd]       Auto-run tests after agent edits (off/status to control)\n");
