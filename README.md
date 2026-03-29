@@ -405,6 +405,10 @@ See `mutants.toml` for the configuration and `docs/src/contributing/mutation-tes
 
 [yoagent](https://github.com/yologdev/yoagent) — minimal agent loop in Rust. The library that makes this possible.
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=yologdev/yoyo-evolve&type=Date)](https://star-history.com/#yologdev/yoyo-evolve&Date)
+
 ## License
 
 [MIT](LICENSE)
