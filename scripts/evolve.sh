@@ -911,7 +911,7 @@ echo ""
 
 # ── Phase B: Implementation loop ──
 echo "  Phase B: Implementation..."
-# Fixed 20 min per implementation task + up to 2x10 min fix if evaluator rejects
+# Fixed 20 min per implementation task + up to 2x10 min build-fix + up to 2x10 min eval-fix
 IMPL_TIMEOUT=1200
 TASK_NUM=0
 TASK_FAILURES=0
@@ -1087,6 +1087,7 @@ and commit if needed."
     # ── Per-task verification gate ──
     TASK_OK=true
     REVERT_REASON=""
+    REVERT_DETAILS=""
 
     # Check 1: Protected files (committed + staged + unstaged)
     PROTECTED_CHANGES=""
@@ -1135,20 +1136,103 @@ and commit if needed."
         REVERT_REASON="Modified protected files: $PROTECTED_CHANGES"
     fi
 
-    # Check 2: Build + tests (capture output for diagnostics)
-    if [ "$TASK_OK" = true ]; then
+    # Check 2: Build + tests with fix loop (up to 2 fix attempts on failure)
+    BUILD_FIX_ATTEMPT=0
+    MAX_BUILD_FIX=2
+    while [ "$TASK_OK" = true ]; do
+        BUILD_FAILED=""
+        BUILD_OUT=""
+        TEST_OUT=""
         if ! BUILD_OUT=$(cargo build 2>&1); then
+            BUILD_FAILED="build"
             echo "    BLOCKED: Task $TASK_NUM broke the build"
             echo "$BUILD_OUT" | tail -20 | sed 's/^/      /'
-            TASK_OK=false
-            REVERT_REASON="Build failed"
         elif ! TEST_OUT=$(cargo test 2>&1); then
+            BUILD_FAILED="tests"
             echo "    BLOCKED: Task $TASK_NUM broke tests"
             echo "$TEST_OUT" | tail -20 | sed 's/^/      /'
-            TASK_OK=false
-            REVERT_REASON="Tests failed"
         fi
-    fi
+
+        if [ -z "$BUILD_FAILED" ]; then
+            break  # Build + tests pass
+        fi
+
+        BUILD_FIX_ATTEMPT=$((BUILD_FIX_ATTEMPT + 1))
+        if [ "$BUILD_FIX_ATTEMPT" -gt "$MAX_BUILD_FIX" ]; then
+            TASK_OK=false
+            REVERT_REASON="Build/tests failed after $MAX_BUILD_FIX fix attempts"
+            if [ "$BUILD_FAILED" = "build" ]; then
+                FAIL_OUT="$BUILD_OUT"
+            else
+                FAIL_OUT="$TEST_OUT"
+            fi
+            REVERT_DETAILS="Last $BUILD_FAILED errors:
+\`\`\`
+$(echo "$FAIL_OUT" | tail -30)
+\`\`\`"
+            break
+        fi
+
+        # Give agent a chance to fix the build/test failure
+        echo "    Giving agent a chance to fix $BUILD_FAILED (fix attempt $BUILD_FIX_ATTEMPT of $MAX_BUILD_FIX)..."
+        BFIX_TIMEOUT=600
+        BFIX_PROMPT=$(mktemp)
+        if [ "$BUILD_FAILED" = "build" ]; then
+            BFIX_ERRORS=$(echo "$BUILD_OUT" | tail -40)
+        else
+            BFIX_ERRORS=$(echo "$TEST_OUT" | tail -40)
+        fi
+        cat > "$BFIX_PROMPT" <<BFIXEOF
+The $BUILD_FAILED broke after your implementation. Fix the errors.
+
+=== TASK YOU WERE IMPLEMENTING ===
+$TASK_DESC
+
+=== ERRORS ===
+$BFIX_ERRORS
+
+=== WHAT TO DO ===
+Fix the $BUILD_FAILED errors. Do not start over — fix the specific errors shown above.
+After fixing, run: cargo fmt && cargo build && cargo test
+BFIXEOF
+        BFIX_LOG=$(mktemp)
+        BFIX_EXIT=0
+        run_agent_with_fallback "$BFIX_TIMEOUT" "$BFIX_PROMPT" "$BFIX_LOG" "--context-strategy checkpoint" || BFIX_EXIT=$?
+        if [ "$BFIX_EXIT" -eq 124 ]; then
+            echo "    WARNING: Build-fix agent timed out after ${BFIX_TIMEOUT}s."
+        elif grep -q '"type":"error"' "$BFIX_LOG" 2>/dev/null; then
+            echo "    WARNING: Build-fix agent hit API error — aborting fix loop."
+            rm -f "$BFIX_PROMPT" "$BFIX_LOG"
+            TASK_OK=false
+            REVERT_REASON="Build-fix agent API error; $BUILD_FAILED still failing"
+            break
+        elif [ "$BFIX_EXIT" -ne 0 ]; then
+            echo "    WARNING: Build-fix agent exited with code $BFIX_EXIT."
+        fi
+        rm -f "$BFIX_PROMPT" "$BFIX_LOG"
+
+        # Re-check protected files after fix agent (committed + staged)
+        if ! BFIX_PROTECTED=$(git diff --name-only "$PRE_TASK_SHA"..HEAD -- \
+            .github/workflows/ IDENTITY.md PERSONALITY.md \
+            scripts/evolve.sh scripts/format_issues.py scripts/build_site.py \
+            skills/self-assess/ skills/evolve/ skills/communicate/ skills/research/ 2>&1); then
+            echo "    Build-fix: git diff failed — cannot verify protected files, reverting"
+            TASK_OK=false
+            REVERT_REASON="git diff failed after build-fix — could not verify protected files"
+            break
+        fi
+        BFIX_PROTECTED_STAGED=$(git diff --cached --name-only -- \
+            .github/workflows/ IDENTITY.md PERSONALITY.md \
+            scripts/evolve.sh scripts/format_issues.py scripts/build_site.py \
+            skills/self-assess/ skills/evolve/ skills/communicate/ skills/research/ 2>/dev/null || true)
+        if [ -n "$BFIX_PROTECTED" ] || [ -n "${BFIX_PROTECTED_STAGED:-}" ]; then
+            echo "    Build-fix agent modified protected files — reverting"
+            TASK_OK=false
+            REVERT_REASON="Build-fix agent modified protected files: ${BFIX_PROTECTED}${BFIX_PROTECTED_STAGED}"
+            break
+        fi
+        # Loop back to re-check build + tests
+    done
 
     # ── Phase B-eval: Evaluator agent with fix loop (runs only if mechanical checks passed) ──
     # On FAIL: give the agent up to 2 chances to fix, then re-evaluate. Revert only after all attempts fail.
@@ -1271,6 +1355,10 @@ FIXEOF
                     echo "$BUILD_OUT" | tail -20 | sed 's/^/      /'
                     TASK_OK=false
                     REVERT_REASON="Build failed after fix attempt"
+                    REVERT_DETAILS="Build errors after eval-fix:
+\`\`\`
+$(echo "$BUILD_OUT" | tail -30)
+\`\`\`"
                     break
                 fi
                 if ! TEST_OUT=$(cargo test 2>&1); then
@@ -1278,6 +1366,10 @@ FIXEOF
                     echo "$TEST_OUT" | tail -20 | sed 's/^/      /'
                     TASK_OK=false
                     REVERT_REASON="Tests failed after fix attempt"
+                    REVERT_DETAILS="Test errors after eval-fix:
+\`\`\`
+$(echo "$TEST_OUT" | tail -30)
+\`\`\`"
                     break
                 fi
                 # Loop continues → re-runs evaluator on the fixed code
@@ -1288,6 +1380,8 @@ FIXEOF
                 # All fix attempts exhausted → give up
                 TASK_OK=false
                 REVERT_REASON="Evaluator rejected after fix attempts: ${EVAL_REASON:-no reason given}"
+                REVERT_DETAILS="Evaluator feedback:
+$(cat "session_plan/eval_task_${TASK_NUM}.md" 2>/dev/null || echo 'no eval file available')"
             fi
         elif echo "$EVAL_VERDICT" | grep -qi "PASS"; then
             echo "    Evaluator: PASS"
@@ -1329,6 +1423,9 @@ FIXEOF
 
 **Reason:** $REVERT_REASON
 
+**Error details:**
+${REVERT_DETAILS:-no details captured}
+
 **What was attempted:**
 $TASK_DESC"
 
@@ -1338,9 +1435,15 @@ $TASK_DESC"
                 --json number --jq '.[0].number' 2>/dev/null || true)
 
             if [ -n "$EXISTING_ISSUE" ]; then
-                gh issue comment "$EXISTING_ISSUE" --repo "$REPO" \
-                    --body "Reverted again on Day $DAY. Reason: $REVERT_REASON" 2>/dev/null || true
-                echo "    Updated existing issue #$EXISTING_ISSUE"
+                if gh issue comment "$EXISTING_ISSUE" --repo "$REPO" \
+                    --body "Reverted again on Day $DAY. Reason: $REVERT_REASON
+
+**Error details:**
+${REVERT_DETAILS:-no details captured}" 2>/dev/null; then
+                    echo "    Updated existing issue #$EXISTING_ISSUE"
+                else
+                    echo "    WARNING: Could not comment on issue #$EXISTING_ISSUE"
+                fi
             else
                 gh issue create --repo "$REPO" \
                     --title "$ISSUE_TITLE" \
@@ -1358,6 +1461,31 @@ if [ "$TASK_NUM" -eq 0 ]; then
     echo "  WARNING: No task files found in session_plan/. Implementation phase did nothing."
 fi
 echo "  Implementation complete. $TASK_FAILURES of $TASK_NUM tasks had issues."
+
+# File issue if ALL tasks were reverted (planning-only session)
+if [ "$TASK_FAILURES" -eq "$TASK_NUM" ] && [ "$TASK_NUM" -gt 0 ]; then
+    echo "  WARNING: All $TASK_NUM tasks were reverted — planning-only session."
+    if command -v gh &>/dev/null; then
+        PLAN_TASK_LIST=""
+        for f in session_plan/task_*.md; do
+            [ -f "$f" ] || continue
+            t=$(grep '^Title:' "$f" | head -1 | sed 's/^Title:[[:space:]]*//' || true)
+            PLAN_TASK_LIST="$PLAN_TASK_LIST
+- ${t:-unknown task}"
+        done
+        PLAN_ISSUE_BODY="All tasks planned on Day $DAY were reverted. No code shipped.
+
+**Tasks attempted:**
+${PLAN_TASK_LIST:-none captured}
+
+**Action for next session:** Focus on smaller, more incremental changes. Consider breaking these tasks into sub-tasks that can each pass verification independently."
+
+        gh issue create --repo "$REPO" \
+            --title "Planning-only session: all $TASK_NUM tasks reverted (Day $DAY)" \
+            --body "$PLAN_ISSUE_BODY" \
+            --label "agent-self" 2>/dev/null || echo "    WARNING: Could not file planning-only session issue"
+    fi
+fi
 echo ""
 
 # Phase C: Issue responses are now agent-driven (Step 7)
