@@ -351,8 +351,9 @@ Crypto wallets:
 ## Architecture
 
 ```
-src/                    14 modules, ~31,000 lines of Rust
+src/                    15 modules, ~31,000 lines of Rust
   main.rs               Entry point, agent config, tool building
+  hooks.rs              Hook trait, registry, AuditHook, tool wrapping
   cli.rs                CLI parsing, config files, permissions
   commands.rs           Slash command dispatch, grouped /help
   commands_git.rs       /diff, /commit, /pr, /review, /git
