@@ -13,10 +13,30 @@ use yoagent::*;
 
 /// Handle the /update command - download and replace the binary with latest release
 pub fn handle_update() -> Result<(), String> {
+    // Check if running from cargo (development mode)
+    if is_cargo_dev_build() {
+        println!(
+            "{}You're running a development build. Use `cargo install yoyo-agent` to update, \
+             or build from source with `cargo build --release`.{}",
+            YELLOW, RESET
+        );
+        return Ok(());
+    }
+
     // Step 1: Check for latest version
     let latest_release = match fetch_latest_release() {
         Ok(release) => release,
-        Err(e) => return Err(format!("Failed to fetch latest release: {}", e)),
+        Err(e) => {
+            let install_cmd = if std::env::consts::OS == "windows" {
+                "irm https://raw.githubusercontent.com/yologdev/yoyo-evolve/main/install.ps1 | iex"
+            } else {
+                "curl -fsSL https://raw.githubusercontent.com/yologdev/yoyo-evolve/main/install.sh | bash"
+            };
+            return Err(format!(
+                "Failed to check for updates: {}. Try manual install:\n  {}",
+                e, install_cmd
+            ));
+        }
     };
 
     let current_version = cli::VERSION;
@@ -25,7 +45,9 @@ pub fn handle_update() -> Result<(), String> {
         .and_then(|v| v.as_str())
         .unwrap_or("unknown");
 
-    if !cli::version_is_newer(tag_name, current_version) {
+    // version_is_newer(current, latest) — current is our version, latest is the tag
+    let tag_version = tag_name.strip_prefix('v').unwrap_or(tag_name);
+    if !cli::version_is_newer(current_version, tag_version) {
         println!(
             "Already on the latest version (v{}). No update needed.",
             current_version
@@ -41,12 +63,9 @@ pub fn handle_update() -> Result<(), String> {
 
     // Step 2: Detect platform and find the right asset
     let (os, arch) = (std::env::consts::OS, std::env::consts::ARCH);
-    let asset_name = match (os, arch) {
-        ("linux", "x86_64") => "yoyo-x86_64-unknown-linux-gnu.tar.gz",
-        ("macos", "x86_64") => "yoyo-x86_64-apple-darwin.tar.gz",
-        ("macos", "aarch64") => "yoyo-aarch64-apple-darwin.tar.gz",
-        ("windows", "x86_64") => "yoyo-x86_64-pc-windows-msvc.zip",
-        _ => {
+    let asset_name = match platform_asset_name(os, arch) {
+        Some(name) => name,
+        None => {
             return Err(format!("Unsupported platform: {} {}", os, arch));
         }
     };
@@ -173,11 +192,41 @@ pub fn handle_update() -> Result<(), String> {
     }
 }
 
+/// Map OS/ARCH to the expected GitHub release asset name.
+/// Returns None for unsupported platforms.
+fn platform_asset_name(os: &str, arch: &str) -> Option<&'static str> {
+    match (os, arch) {
+        ("linux", "x86_64") => Some("yoyo-x86_64-unknown-linux-gnu.tar.gz"),
+        ("macos", "x86_64") => Some("yoyo-x86_64-apple-darwin.tar.gz"),
+        ("macos", "aarch64") => Some("yoyo-aarch64-apple-darwin.tar.gz"),
+        ("windows", "x86_64") => Some("yoyo-x86_64-pc-windows-msvc.zip"),
+        _ => None,
+    }
+}
+
+/// Check if we're running from a cargo build directory (development mode).
+fn is_cargo_dev_build() -> bool {
+    std::env::current_exe()
+        .ok()
+        .and_then(|p| p.to_str().map(|s| s.to_string()))
+        .map(|p| {
+            p.contains("/target/debug/")
+                || p.contains("/target/release/")
+                || p.contains("\\target\\debug\\")
+                || p.contains("\\target\\release\\")
+        })
+        .unwrap_or(false)
+}
+
 /// Fetch the latest release from GitHub API
 fn fetch_latest_release() -> Result<serde_json::Value, String> {
     let output = std::process::Command::new("curl")
         .args([
             "-sf",
+            "--connect-timeout",
+            "10",
+            "--max-time",
+            "30",
             "https://api.github.com/repos/yologdev/yoyo-evolve/releases/latest",
         ])
         .output()
@@ -1200,6 +1249,94 @@ mod tests {
         let prompt = build_fix_prompt(&failures);
         assert!(prompt.contains("## build errors"));
         assert!(prompt.contains("## clippy errors"));
+    }
+
+    // ── update helpers ────────────────────────────────────────────────
+
+    #[test]
+    fn update_platform_linux_x86_64() {
+        let name = platform_asset_name("linux", "x86_64");
+        assert_eq!(name, Some("yoyo-x86_64-unknown-linux-gnu.tar.gz"));
+    }
+
+    #[test]
+    fn update_platform_macos_intel() {
+        let name = platform_asset_name("macos", "x86_64");
+        assert_eq!(name, Some("yoyo-x86_64-apple-darwin.tar.gz"));
+    }
+
+    #[test]
+    fn update_platform_macos_arm() {
+        let name = platform_asset_name("macos", "aarch64");
+        assert_eq!(name, Some("yoyo-aarch64-apple-darwin.tar.gz"));
+    }
+
+    #[test]
+    fn update_platform_windows() {
+        let name = platform_asset_name("windows", "x86_64");
+        assert_eq!(name, Some("yoyo-x86_64-pc-windows-msvc.zip"));
+    }
+
+    #[test]
+    fn update_platform_unsupported() {
+        assert!(platform_asset_name("freebsd", "x86_64").is_none());
+        assert!(platform_asset_name("linux", "arm").is_none());
+        assert!(platform_asset_name("windows", "aarch64").is_none());
+    }
+
+    #[test]
+    fn update_find_asset_url_found() {
+        let assets = vec![
+            serde_json::json!({
+                "name": "yoyo-x86_64-unknown-linux-gnu.tar.gz",
+                "browser_download_url": "https://example.com/download/linux.tar.gz"
+            }),
+            serde_json::json!({
+                "name": "yoyo-aarch64-apple-darwin.tar.gz",
+                "browser_download_url": "https://example.com/download/macos-arm.tar.gz"
+            }),
+        ];
+        let url = find_asset_url(&assets, "yoyo-x86_64-unknown-linux-gnu.tar.gz");
+        assert_eq!(
+            url,
+            Some("https://example.com/download/linux.tar.gz".to_string())
+        );
+    }
+
+    #[test]
+    fn update_find_asset_url_not_found() {
+        let assets = vec![serde_json::json!({
+            "name": "yoyo-x86_64-unknown-linux-gnu.tar.gz",
+            "browser_download_url": "https://example.com/download/linux.tar.gz"
+        })];
+        let url = find_asset_url(&assets, "yoyo-x86_64-pc-windows-msvc.zip");
+        assert!(url.is_none());
+    }
+
+    #[test]
+    fn update_find_asset_url_empty() {
+        let assets: Vec<serde_json::Value> = vec![];
+        let url = find_asset_url(&assets, "yoyo-x86_64-unknown-linux-gnu.tar.gz");
+        assert!(url.is_none());
+    }
+
+    #[test]
+    fn update_version_comparison() {
+        // Sanity check version_is_newer works as expected for our use case
+        assert!(cli::version_is_newer("0.1.5", "0.2.0"));
+        assert!(!cli::version_is_newer("0.2.0", "0.2.0"));
+        assert!(!cli::version_is_newer("0.3.0", "0.2.0"));
+    }
+
+    #[test]
+    fn update_is_cargo_dev_build_runs() {
+        // Just ensure the function runs without panicking
+        // In test context, we're running from target/debug so should return true
+        let result = is_cargo_dev_build();
+        assert!(
+            result,
+            "tests run from target/debug, should detect as dev build"
+        );
     }
 
     // ── format_tree_from_paths ──────────────────────────────────────

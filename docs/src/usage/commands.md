@@ -252,6 +252,7 @@ The subagent has access to the same tools (bash, file operations, etc.) and uses
 | `/test` | Auto-detect and run project tests — shows output with timing |
 | `/lint` | Auto-detect and run project linter — shows output with timing |
 | `/fix` | Auto-fix build/lint errors — runs health checks, sends failures to the AI agent for fixing |
+| `/update` | Self-update yoyo to the latest GitHub release — detects platform, downloads, replaces the binary |
 
 The `/git` command is a convenience wrapper for common git operations without burning AI tokens or using `/run git ...`. For example:
 
@@ -318,6 +319,27 @@ The `/fix` command goes one step further than `/health` — it runs the same hea
 
   Sending 1 failure(s) to AI for fixing...
 ```
+
+### `/update` — Self-update to latest release
+
+The `/update` command checks GitHub for the latest release and downloads the new binary in-place.
+
+```
+/update
+  Update available: v0.1.5 → v0.2.0
+  This will download and replace the current binary.
+  Continue? [y/N] y
+  Downloading yoyo-x86_64-unknown-linux-gnu.tar.gz...
+  ✓ Updated to v0.2.0! Please restart yoyo to use the new version.
+```
+
+The command:
+- Detects your platform (Linux x86_64, macOS Intel/ARM, Windows x86_64)
+- Creates a backup of the current binary before replacing
+- Restores the backup if anything goes wrong
+- Suggests manual install instructions as a fallback
+
+If you're running a development build (from `cargo build`), it will suggest using `cargo install yoyo-agent` instead.
 
 ## Code Review
 

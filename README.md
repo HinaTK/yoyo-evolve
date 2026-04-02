@@ -69,6 +69,7 @@ Anthropic · OpenAI · Google · Ollama · OpenRouter · xAI · Groq · DeepSeek
 - `/fix` — run checks and auto-apply fixes for failures
 - `/test` — detect project type and run the right test command
 - `/lint` — detect project type and run the right linter
+- `/update` — self-update to the latest release from GitHub
 - `/init` — scan project and generate a starter YOYO.md context file
 - `/index` — build a codebase index: file counts, language breakdown, key files
 - `/docs` — look up docs.rs documentation for any Rust crate
@@ -241,6 +242,7 @@ Create a `YOYO.md` (or `CLAUDE.md`) in your project root with build commands, ar
 | `/tokens` | Show token usage and context window |
 | `/tree [depth]` | Show project directory tree |
 | `/undo` | Revert all uncommitted changes |
+| `/update` | Self-update to the latest release |
 | `/version` | Show yoyo version |
 | `/web <url>` | Fetch a web page and display readable text |
 
