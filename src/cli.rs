@@ -369,6 +369,7 @@ pub struct Config {
     pub fallback_provider: Option<String>,
     pub fallback_model: Option<String>,
     pub no_update_check: bool,
+    pub json_output: bool,
 }
 
 /// Whether verbose output is enabled. Set once at startup.
@@ -416,6 +417,7 @@ pub fn print_help() {
     println!(
         "  --no-update-check Skip startup update check (also respects YOYO_NO_UPDATE_CHECK=1 env)"
     );
+    println!("  --json            Output JSON instead of plain text (for -p and piped modes)");
     println!("  --verbose, -v     Show debug info (API errors, request details)");
     println!("  --yes, -y         Auto-approve all tool executions (skip confirmation prompts)");
     println!("  --allow <pat>     Auto-approve bash commands matching glob pattern (repeatable)");
@@ -638,6 +640,7 @@ const KNOWN_FLAGS: &[&str] = &[
     "--no-color",
     "--no-bell",
     "--no-update-check",
+    "--json",
     "--verbose",
     "-v",
     "--yes",
@@ -1351,6 +1354,8 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
             .map(|v| v == "1")
             .unwrap_or(false);
 
+    let json_output = args.iter().any(|a| a == "--json");
+
     // --allow <pattern> flags: collect all allow patterns (repeatable)
     let cli_allow: Vec<String> = args
         .iter()
@@ -1510,6 +1515,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         fallback_provider,
         fallback_model,
         no_update_check,
+        json_output,
     })
 }
 
@@ -3369,5 +3375,33 @@ system_prompt = "You are a Go expert"
         if std::env::var("YOYO_NO_UPDATE_CHECK").unwrap_or_default() != "1" {
             assert!(!config.no_update_check);
         }
+    }
+
+    #[test]
+    fn test_json_flag_in_known_flags() {
+        assert!(KNOWN_FLAGS.contains(&"--json"));
+    }
+
+    #[test]
+    fn test_parse_args_json_flag() {
+        let args = [
+            "yoyo".to_string(),
+            "--json".to_string(),
+            "--api-key".to_string(),
+            "sk-test".to_string(),
+        ];
+        let config = parse_args(&args).expect("should parse");
+        assert!(config.json_output);
+    }
+
+    #[test]
+    fn test_parse_args_json_default() {
+        let args = [
+            "yoyo".to_string(),
+            "--api-key".to_string(),
+            "sk-test".to_string(),
+        ];
+        let config = parse_args(&args).expect("should parse");
+        assert!(!config.json_output);
     }
 }

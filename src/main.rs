@@ -494,6 +494,28 @@ async fn try_fallback_prompt_with_content(
     (retry_response, false)
 }
 
+/// Build a JSON output object for --json mode.
+/// Used by both --prompt and piped modes to produce structured output.
+fn build_json_output(
+    response: &PromptOutcome,
+    model: &str,
+    usage: &Usage,
+    is_error: bool,
+) -> String {
+    let cost_usd = estimate_cost(usage, model);
+    let json_obj = serde_json::json!({
+        "response": response.text,
+        "model": model,
+        "usage": {
+            "input_tokens": usage.input,
+            "output_tokens": usage.output,
+        },
+        "cost_usd": cost_usd,
+        "is_error": is_error,
+    });
+    serde_json::to_string(&json_obj).unwrap_or_else(|_| "{}".to_string())
+}
+
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -523,6 +545,7 @@ async fn main() {
     let openapi_specs = config.openapi_specs;
     let image_path = config.image_path;
     let no_update_check = config.no_update_check;
+    let json_output = config.json_output;
     // Auto-approve in non-interactive modes (piped, --prompt) or when --yes is set
     let is_interactive = io::stdin().is_terminal() && config.prompt_arg.is_none();
     let auto_approve = config.auto_approve || !is_interactive;
@@ -705,7 +728,19 @@ async fn main() {
                     .await;
                     if should_exit_error {
                         format::maybe_ring_bell(prompt_start.elapsed());
-                        write_output_file(&output_path, &final_response.text);
+                        if json_output {
+                            println!(
+                                "{}",
+                                build_json_output(
+                                    &final_response,
+                                    &agent_config.model,
+                                    &session_total,
+                                    true
+                                )
+                            );
+                        } else {
+                            write_output_file(&output_path, &final_response.text);
+                        }
                         std::process::exit(1);
                     }
                     final_response
@@ -735,13 +770,32 @@ async fn main() {
             .await;
             if should_exit_error {
                 format::maybe_ring_bell(prompt_start.elapsed());
-                write_output_file(&output_path, &final_response.text);
+                if json_output {
+                    println!(
+                        "{}",
+                        build_json_output(
+                            &final_response,
+                            &agent_config.model,
+                            &session_total,
+                            true
+                        )
+                    );
+                } else {
+                    write_output_file(&output_path, &final_response.text);
+                }
                 std::process::exit(1);
             }
             final_response
         };
         format::maybe_ring_bell(prompt_start.elapsed());
-        write_output_file(&output_path, &response.text);
+        if json_output {
+            println!(
+                "{}",
+                build_json_output(&response, &agent_config.model, &session_total, false)
+            );
+        } else {
+            write_output_file(&output_path, &response.text);
+        }
         if CHECKPOINT_TRIGGERED.load(Ordering::SeqCst) {
             std::process::exit(2);
         }
@@ -775,7 +829,19 @@ async fn main() {
         )
         .await;
         format::maybe_ring_bell(prompt_start.elapsed());
-        write_output_file(&output_path, &response.text);
+        if json_output {
+            println!(
+                "{}",
+                build_json_output(
+                    &response,
+                    &agent_config.model,
+                    &session_total,
+                    should_exit_error
+                )
+            );
+        } else {
+            write_output_file(&output_path, &response.text);
+        }
         if should_exit_error {
             std::process::exit(1);
         }
@@ -2582,5 +2648,62 @@ mod tests {
         assert!(config.try_switch_to_fallback());
         assert_eq!(config.provider, "google");
         assert_eq!(config.model, "gemini-2.0-flash");
+    }
+
+    #[test]
+    fn test_build_json_output_valid_json_with_expected_keys() {
+        let response = PromptOutcome {
+            text: "Hello, world!".to_string(),
+            last_tool_error: None,
+            was_overflow: false,
+            last_api_error: None,
+        };
+        let usage = Usage {
+            input: 100,
+            output: 50,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 150,
+        };
+        let result = build_json_output(&response, "claude-sonnet-4-20250514", &usage, false);
+
+        // Must be valid JSON
+        let parsed: serde_json::Value =
+            serde_json::from_str(&result).expect("build_json_output should produce valid JSON");
+
+        // Check all expected keys exist
+        assert_eq!(parsed["response"], "Hello, world!");
+        assert_eq!(parsed["model"], "claude-sonnet-4-20250514");
+        assert_eq!(parsed["is_error"], false);
+        assert!(parsed["usage"].is_object());
+        assert_eq!(parsed["usage"]["input_tokens"], 100);
+        assert_eq!(parsed["usage"]["output_tokens"], 50);
+        assert!(parsed["cost_usd"].is_number());
+    }
+
+    #[test]
+    fn test_build_json_output_error_mode() {
+        let response = PromptOutcome {
+            text: "Something went wrong".to_string(),
+            last_tool_error: None,
+            was_overflow: false,
+            last_api_error: Some("API error".to_string()),
+        };
+        let usage = Usage {
+            input: 10,
+            output: 5,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 15,
+        };
+        let result = build_json_output(&response, "claude-sonnet-4-20250514", &usage, true);
+
+        let parsed: serde_json::Value = serde_json::from_str(&result)
+            .expect("build_json_output should produce valid JSON even in error mode");
+
+        assert_eq!(parsed["response"], "Something went wrong");
+        assert_eq!(parsed["is_error"], true);
+        assert!(parsed["usage"].is_object());
+        assert!(parsed["cost_usd"].is_number());
     }
 }
