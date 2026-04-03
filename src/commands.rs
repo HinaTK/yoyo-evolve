@@ -498,8 +498,8 @@ pub use crate::commands_file::{
 pub use crate::commands_session::{
     auto_compact_if_needed, auto_save_on_exit, clear_confirmation_message, handle_compact,
     handle_export, handle_history, handle_jump, handle_load, handle_mark, handle_marks,
-    handle_save, handle_search, handle_spawn, handle_stash, last_session_exists, Bookmarks,
-    SpawnTracker,
+    handle_save, handle_search, handle_spawn, handle_stash, last_session_exists,
+    reset_compact_thrash, Bookmarks, SpawnTracker,
 };
 
 // Memory-related handlers

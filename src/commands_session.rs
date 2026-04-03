@@ -5,6 +5,7 @@ use crate::format::*;
 use crate::prompt::*;
 
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
 use yoagent::agent::Agent;
 use yoagent::context::{compact_messages, total_tokens, ContextConfig};
@@ -16,10 +17,31 @@ use crate::cli::{
     PROACTIVE_COMPACT_THRESHOLD,
 };
 
+// ── compact thrash detection ─────────────────────────────────────────────
+
+/// Tracks consecutive low-yield compactions to avoid thrashing.
+static COMPACT_THRASH_COUNT: AtomicU32 = AtomicU32::new(0);
+
+/// Number of consecutive low-yield compactions before we stop auto-compacting.
+const COMPACT_THRASH_THRESHOLD: u32 = 2;
+
+/// Minimum token reduction ratio to count as a "meaningful" compaction.
+const COMPACT_MIN_REDUCTION: f64 = 0.10;
+
+/// Reset the thrash counter (call when context changes significantly, e.g. /clear, /load).
+pub fn reset_compact_thrash() {
+    COMPACT_THRASH_COUNT.store(0, Ordering::Relaxed);
+}
+
+/// Check whether auto-compaction is currently suppressed due to thrashing.
+pub fn is_compact_thrashing() -> bool {
+    COMPACT_THRASH_COUNT.load(Ordering::Relaxed) >= COMPACT_THRASH_THRESHOLD
+}
+
 // ── compact ──────────────────────────────────────────────────────────────
 
 /// Compact the agent's conversation and return (before_count, before_tokens, after_count, after_tokens).
-/// Returns None if nothing changed.
+/// Returns None if nothing changed. Updates the thrash counter based on reduction quality.
 pub fn compact_agent(agent: &mut Agent) -> Option<(usize, u64, usize, u64)> {
     let messages = agent.messages().to_vec();
     let before_tokens = total_tokens(&messages) as u64;
@@ -32,17 +54,35 @@ pub fn compact_agent(agent: &mut Agent) -> Option<(usize, u64, usize, u64)> {
     if before_tokens == after_tokens {
         None
     } else {
+        // Track whether the compaction was meaningful for thrash detection
+        let reduction = if before_tokens > 0 {
+            (before_tokens - after_tokens) as f64 / before_tokens as f64
+        } else {
+            0.0
+        };
+        if reduction < COMPACT_MIN_REDUCTION {
+            COMPACT_THRASH_COUNT.fetch_add(1, Ordering::Relaxed);
+        } else {
+            COMPACT_THRASH_COUNT.store(0, Ordering::Relaxed);
+        }
         Some((before_count, before_tokens, after_count, after_tokens))
     }
 }
 
 /// Auto-compact conversation if context window usage exceeds threshold.
+/// Skips compaction if recent attempts haven't freed meaningful tokens (thrash detection).
 pub fn auto_compact_if_needed(agent: &mut Agent) {
     let messages = agent.messages().to_vec();
     let used = total_tokens(&messages) as u64;
     let ratio = used as f64 / crate::cli::effective_context_tokens() as f64;
 
     if ratio > AUTO_COMPACT_THRESHOLD {
+        if is_compact_thrashing() {
+            eprintln!(
+                "{DIM}  ⚠ Context is mostly incompressible — consider /clear or starting a new session{RESET}"
+            );
+            return;
+        }
         if let Some((before_count, before_tokens, after_count, after_tokens)) = compact_agent(agent)
         {
             println!(
@@ -57,6 +97,7 @@ pub fn auto_compact_if_needed(agent: &mut Agent) {
 /// Proactively compact conversation if context usage exceeds the proactive threshold.
 /// This runs BEFORE a prompt attempt (not after) to prevent overflow during agentic execution.
 /// Uses a tighter threshold (0.70) than the post-turn auto-compact (0.80).
+/// Skips compaction if recent attempts haven't freed meaningful tokens (thrash detection).
 /// Returns true if compaction was performed.
 pub fn proactive_compact_if_needed(agent: &mut Agent) -> bool {
     let messages = agent.messages().to_vec();
@@ -64,6 +105,12 @@ pub fn proactive_compact_if_needed(agent: &mut Agent) -> bool {
     let ratio = used as f64 / crate::cli::effective_context_tokens() as f64;
 
     if ratio > PROACTIVE_COMPACT_THRESHOLD {
+        if is_compact_thrashing() {
+            eprintln!(
+                "{DIM}  ⚠ Context is mostly incompressible — consider /clear or starting a new session{RESET}"
+            );
+            return false;
+        }
         if let Some((before_count, before_tokens, after_count, after_tokens)) = compact_agent(agent)
         {
             eprintln!(
@@ -1028,6 +1075,70 @@ pub fn clear_confirmation_message(message_count: usize, token_count: u64) -> Opt
 mod tests {
     use super::*;
     use crate::cli::AUTO_SAVE_SESSION_PATH;
+
+    // ── compact thrash detection tests ────────────────────────────────────
+
+    #[test]
+    fn test_compact_thrash_constants() {
+        assert_eq!(COMPACT_THRASH_THRESHOLD, 2);
+        assert!((COMPACT_MIN_REDUCTION - 0.10).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_reset_compact_thrash() {
+        // Set to some value, then reset
+        COMPACT_THRASH_COUNT.store(5, Ordering::Relaxed);
+        reset_compact_thrash();
+        assert_eq!(COMPACT_THRASH_COUNT.load(Ordering::Relaxed), 0);
+    }
+
+    #[test]
+    fn test_compact_thrash_detection_increments_on_low_reduction() {
+        reset_compact_thrash();
+        assert!(!is_compact_thrashing());
+
+        // Simulate two low-yield compactions
+        COMPACT_THRASH_COUNT.fetch_add(1, Ordering::Relaxed);
+        assert!(!is_compact_thrashing()); // 1 < 2
+        COMPACT_THRASH_COUNT.fetch_add(1, Ordering::Relaxed);
+        assert!(is_compact_thrashing()); // 2 >= 2
+
+        reset_compact_thrash(); // cleanup
+    }
+
+    #[test]
+    fn test_compact_thrash_detection_resets_on_meaningful_reduction() {
+        reset_compact_thrash();
+
+        // Simulate hitting thrash state
+        COMPACT_THRASH_COUNT.store(2, Ordering::Relaxed);
+        assert!(is_compact_thrashing());
+
+        // A meaningful compaction resets it
+        COMPACT_THRASH_COUNT.store(0, Ordering::Relaxed);
+        assert!(!is_compact_thrashing());
+
+        reset_compact_thrash(); // cleanup
+    }
+
+    #[test]
+    fn test_is_compact_thrashing_boundary() {
+        reset_compact_thrash();
+
+        // Below threshold
+        COMPACT_THRASH_COUNT.store(1, Ordering::Relaxed);
+        assert!(!is_compact_thrashing());
+
+        // At threshold
+        COMPACT_THRASH_COUNT.store(2, Ordering::Relaxed);
+        assert!(is_compact_thrashing());
+
+        // Above threshold
+        COMPACT_THRASH_COUNT.store(10, Ordering::Relaxed);
+        assert!(is_compact_thrashing());
+
+        reset_compact_thrash(); // cleanup
+    }
 
     #[test]
     fn test_auto_save_session_path_constant() {

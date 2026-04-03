@@ -5,7 +5,7 @@ use std::time::Instant;
 use crate::cli::*;
 use crate::commands::{
     self, auto_compact_if_needed, clear_confirmation_message, command_arg_completions,
-    is_unknown_command, thinking_level_name, KNOWN_COMMANDS,
+    is_unknown_command, reset_compact_thrash, thinking_level_name, KNOWN_COMMANDS,
 };
 use crate::format::*;
 use crate::git::*;
@@ -447,6 +447,7 @@ pub async fn run_repl(
                 *agent = agent_config.build_agent();
                 session_changes.clear();
                 turn_history.clear();
+                reset_compact_thrash();
                 println!("{DIM}  (conversation cleared){RESET}\n");
                 continue;
             }
@@ -454,6 +455,7 @@ pub async fn run_repl(
                 *agent = agent_config.build_agent();
                 session_changes.clear();
                 turn_history.clear();
+                reset_compact_thrash();
                 println!("{DIM}  (conversation force-cleared){RESET}\n");
                 continue;
             }
@@ -526,6 +528,7 @@ pub async fn run_repl(
             }
             s if s == "/load" || s.starts_with("/load ") => {
                 commands::handle_load(agent, input);
+                reset_compact_thrash();
                 continue;
             }
             s if s == "/stash" || s.starts_with("/stash ") => {
