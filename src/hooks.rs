@@ -16,7 +16,6 @@ use yoagent::Content;
 /// A post-hook can inspect or modify the tool's output.
 pub trait Hook: Send + Sync {
     /// Human-readable name for this hook (used in diagnostics/logging).
-    #[allow(dead_code)]
     fn name(&self) -> &str;
 
     /// Pre-execute: return Err to block, Ok(None) to proceed, Ok(Some(result)) to short-circuit.
@@ -60,6 +59,9 @@ impl HookRegistry {
     }
 
     pub fn register(&mut self, hook: Box<dyn Hook>) {
+        if crate::cli::is_verbose() {
+            eprintln!("[hooks] registered: {}", hook.name());
+        }
         self.hooks.push(hook);
     }
 
@@ -97,14 +99,13 @@ impl HookRegistry {
     }
 
     /// Number of registered hooks.
-    #[allow(dead_code)]
     pub fn len(&self) -> usize {
         self.hooks.len()
     }
 
     /// Whether the registry has no hooks.
     pub fn is_empty(&self) -> bool {
-        self.hooks.is_empty()
+        self.len() == 0
     }
 }
 
