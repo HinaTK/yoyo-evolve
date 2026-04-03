@@ -44,17 +44,17 @@ def sanitize_content(text, boundary_begin, boundary_end):
     return text
 
 
-def select_issues(issues, sponsor_logins=None, pick=3, day=0):
-    """Select issues for a session: all sponsors + top 1 by score + random from rest.
+def select_issues(issues, sponsor_logins=None, pick=2, day=0):
+    """Select issues for a session: all sponsors + up to `pick` non-sponsor issues.
 
-    Sponsor issues are always included. The highest-scored non-sponsor issue
-    is always included. Remaining slots are filled randomly from the top 10
-    scored issues, seeded by day for reproducibility.
+    Sponsor issues always bypass the pick limit. The highest-scored non-sponsor
+    issue is always included. Remaining non-sponsor slots are filled randomly
+    from the top 10 scored issues, seeded by day for reproducibility.
     """
     if not issues or pick <= 0:
         return issues or []
 
-    # Separate sponsor issues (always shown)
+    # Separate sponsor issues (always shown, bypass pick limit)
     sponsors = []
     rest = []
     for issue in issues:
@@ -64,19 +64,19 @@ def select_issues(issues, sponsor_logins=None, pick=3, day=0):
         else:
             rest.append(issue)
 
-    # All sponsors always included
+    # All sponsors always included (no truncation)
     selected = list(sponsors)
-    remaining_slots = pick - len(selected)
+    remaining_slots = pick  # pick only limits non-sponsor issues
     if remaining_slots <= 0:
-        return selected[:pick]
+        return selected
 
-    # Top 1 by score (rest is already sorted by score descending from caller)
+    # Top 1 non-sponsor by score (rest is already sorted by score descending from caller)
     if rest:
         selected.append(rest[0])
         rest = rest[1:]
         remaining_slots -= 1
 
-    # Random pick from top 10 scored for remaining slots (seeded by day)
+    # Random pick from top 10 scored for remaining non-sponsor slots (seeded by day)
     if rest and remaining_slots > 0:
         top_pool = rest[:10]
         rng = random.Random(day)
@@ -126,7 +126,7 @@ def classify_issue(issue):
     return "yoyo_last"
 
 
-def format_issues(issues, sponsor_logins=None, pick=3, day=0):
+def format_issues(issues, sponsor_logins=None, pick=2, day=0):
     if not issues:
         return "No community issues today."
 
@@ -253,6 +253,6 @@ if __name__ == "__main__":
             except ValueError:
                 pass
 
-        print(format_issues(issues, sponsor_logins, pick=3, day=day))
+        print(format_issues(issues, sponsor_logins, pick=2, day=day))
     except (json.JSONDecodeError, FileNotFoundError):
         print("No community issues today.")
