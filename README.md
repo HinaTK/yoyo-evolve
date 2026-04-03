@@ -222,6 +222,7 @@ Create a `YOYO.md` (or `CLAUDE.md`) in your project root with build commands, ar
 | `/git <subcmd>` | Quick git: status, log, add, diff, branch, stash |
 | `/health` | Run project health checks |
 | `/history` | Show conversation message summary |
+| `/hooks` | Show active hooks (pre/post tool execution) |
 | `/index` | Build a lightweight codebase index |
 | `/init` | Generate a starter YOYO.md |
 | `/jump <name>` | Jump to a conversation bookmark |

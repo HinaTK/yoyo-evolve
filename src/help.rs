@@ -327,6 +327,23 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              conversation: role, length, and a preview of each message.\n\
              Useful for understanding conversation flow.",
         ),
+        "hooks" => Some(
+            "/hooks — Show active hooks (pre/post tool execution)\n\n\
+             Lists all shell hooks configured in .yoyo.toml.\n\
+             Shows each hook's phase (pre/post), tool pattern, and command.\n\n\
+             Configuration (.yoyo.toml):\n\n\
+             \x20 # Pre-hook: runs before bash tool calls\n\
+             \x20 hooks.pre.bash = \"echo 'About to run bash'\"\n\n\
+             \x20 # Post-hook: runs after every tool call (wildcard)\n\
+             \x20 hooks.post.* = \"echo 'Tool finished'\"\n\n\
+             Pre-hooks that exit non-zero block the tool from executing.\n\
+             Post-hooks always pass through the original tool output.\n\
+             All hooks have a 5-second timeout to prevent hanging.\n\n\
+             Environment variables available to hooks:\n\
+             \x20 TOOL_NAME   — the tool being executed\n\
+             \x20 TOOL_PARAMS — JSON string of tool parameters\n\
+             \x20 TOOL_OUTPUT — (post-hooks only) tool output, truncated to 1000 chars",
+        ),
         "search" => Some(
             "/search <query> — Search conversation history\n\n\
              Usage:\n\
@@ -656,6 +673,7 @@ pub fn help_text() -> String {
     out.push_str("  /tokens            Show token usage and context window\n");
     out.push_str("  /cost              Show estimated session cost\n");
     out.push_str("  /config            Show all current settings\n");
+    out.push_str("  /hooks             Show active hooks (pre/post tool execution)\n");
     out.push_str("  /version           Show yoyo version\n");
     out.push_str("  /update            Check for and install the latest version\n");
     out.push_str("  /history           Show summary of conversation messages\n");
@@ -819,6 +837,7 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "health" => Some("Run project health checks"),
         "help" => Some("Show help for commands"),
         "history" => Some("Show conversation message summary"),
+        "hooks" => Some("Show active hooks (pre/post tool execution)"),
         "index" => Some("Show project file index"),
         "init" => Some("Generate a YOYO.md context file"),
         "jump" => Some("Restore conversation to a bookmark"),

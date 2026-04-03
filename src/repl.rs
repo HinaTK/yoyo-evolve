@@ -613,9 +613,14 @@ pub async fn run_repl(
                     &agent_config.system_prompt,
                     mcp_count,
                     openapi_count,
+                    agent_config.shell_hooks.len(),
                     agent,
                     &cwd,
                 );
+                continue;
+            }
+            "/hooks" => {
+                commands::handle_hooks(&agent_config.shell_hooks);
                 continue;
             }
             "/compact" => {

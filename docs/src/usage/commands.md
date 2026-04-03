@@ -79,6 +79,7 @@ See [Session Persistence](../features/sessions.md) for details.
 | `/tokens` | Show detailed token usage: context window fill level, session totals, and estimated cost |
 | `/cost` | Show estimated session cost |
 | `/config` | Show all current settings |
+| `/hooks` | Show active hooks (pre/post tool execution) |
 | `/version` | Show yoyo version |
 
 The `/tokens` command shows a visual progress bar of your active context:

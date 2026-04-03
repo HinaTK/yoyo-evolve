@@ -44,6 +44,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/diff",
     "/undo",
     "/health",
+    "/hooks",
     "/retry",
     "/history",
     "/search",
@@ -382,6 +383,7 @@ pub fn handle_config(
     system_prompt: &str,
     mcp_count: u32,
     openapi_count: u32,
+    hook_count: usize,
     agent: &Agent,
     cwd: &str,
 ) {
@@ -427,6 +429,9 @@ pub fn handle_config(
     if openapi_count > 0 {
         println!("    openapi:    {openapi_count} spec(s)");
     }
+    if hook_count > 0 {
+        println!("    hooks:      {hook_count} active");
+    }
     println!(
         "    verbose:    {}",
         if is_verbose() { "on" } else { "off" }
@@ -448,6 +453,42 @@ pub fn handle_config(
         "    session:    auto-save on exit ({})",
         crate::cli::AUTO_SAVE_SESSION_PATH
     );
+    println!("{RESET}");
+}
+
+// ── /hooks ───────────────────────────────────────────────────────────────
+
+pub fn handle_hooks(hooks: &[crate::hooks::ShellHook]) {
+    if hooks.is_empty() {
+        println!("{DIM}  No hooks configured.");
+        println!();
+        println!("  Add hooks to .yoyo.toml:");
+        println!();
+        println!("    # Pre-hook: runs before every bash tool call");
+        println!("    hooks.pre.bash = \"echo 'About to run bash'\"");
+        println!();
+        println!("    # Post-hook: runs after every tool call (wildcard)");
+        println!("    hooks.post.* = \"echo 'Tool finished'\"");
+        println!();
+        println!("  Pre-hooks that exit non-zero block the tool.");
+        println!("  Post-hooks always pass through the tool output.");
+        println!("  All hooks have a 5-second timeout.{RESET}");
+        return;
+    }
+
+    println!("{DIM}  Active hooks ({}):", hooks.len());
+    println!();
+    for hook in hooks {
+        let phase = match hook.phase {
+            crate::hooks::HookPhase::Pre => "pre",
+            crate::hooks::HookPhase::Post => "post",
+        };
+        println!(
+            "    {BOLD}{}{RESET}{DIM}  ({}, pattern: {})",
+            hook.name, phase, hook.tool_pattern
+        );
+        println!("      command: {}", hook.command);
+    }
     println!("{RESET}");
 }
 
@@ -2798,6 +2839,44 @@ mod tests {
         let prompt = prompt.unwrap();
         assert!(prompt.contains("Project Memories"));
         assert!(prompt.contains("always run cargo fmt"));
+    }
+
+    // ── /hooks command tests ────────────────────────────────────────────
+
+    #[test]
+    fn test_hooks_command_recognized() {
+        assert!(!is_unknown_command("/hooks"));
+        assert!(
+            KNOWN_COMMANDS.contains(&"/hooks"),
+            "/hooks should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_handle_hooks_empty() {
+        // Should not panic with empty hooks
+        handle_hooks(&[]);
+    }
+
+    #[test]
+    fn test_handle_hooks_with_hooks() {
+        use crate::hooks::{HookPhase, ShellHook};
+        let hooks = vec![
+            ShellHook {
+                name: "pre:bash".to_string(),
+                phase: HookPhase::Pre,
+                tool_pattern: "bash".to_string(),
+                command: "echo before".to_string(),
+            },
+            ShellHook {
+                name: "post:*".to_string(),
+                phase: HookPhase::Post,
+                tool_pattern: "*".to_string(),
+                command: "echo after".to_string(),
+            },
+        ];
+        // Should not panic with hooks present
+        handle_hooks(&hooks);
     }
 
     // ── /changes command tests ───────────────────────────────────────────
