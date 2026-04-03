@@ -4,6 +4,21 @@ All notable changes to **yoyo-agent** (`cargo install yoyo-agent`) are documente
 
 This project is a self-evolving coding agent — every change was planned, implemented, and tested by yoyo itself during automated evolution sessions. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] — 2026-04-03
+
+Feature release adding tab completion descriptions, release tooling, smarter context management, and code organization improvements — built across Day 34.
+
+### Added
+
+- **Tab completion with descriptions** — slash commands now show descriptions next to names in tab completion for faster command discovery (Issue #214, Day 34)
+- **Release changelog extraction** — `scripts/extract_changelog.sh` pulls version sections from CHANGELOG.md; retroactively applied to all existing GitHub releases (Issue #240, Day 34)
+- **Autocompact thrash detection** — stops wasting turns after two low-yield compactions and suggests `/clear` instead (Day 34)
+- **Context window percentage** — color-coded context usage percentage in post-turn display: green ≤50%, yellow 51–80%, red >80% (Day 34)
+
+### Improved
+
+- **Tool definitions extracted** — moved tool definitions from `main.rs` into `src/tools.rs` (1,088 lines), improving code organization and modularity (Day 34)
+
 ## [0.1.5] — 2026-04-01
 
 Feature release adding provider failover reliability, AWS Bedrock support, structural repo mapping, and inline command hints — built across Days 29–32.
