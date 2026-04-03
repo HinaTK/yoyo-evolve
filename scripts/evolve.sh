@@ -38,6 +38,9 @@ else
 fi
 echo "$DAY" > DAY_COUNT
 
+# Pull latest changes (in case a queued run starts with stale checkout)
+git pull --rebase --quiet 2>/dev/null || true
+
 echo "=== Day $DAY ($DATE $SESSION_TIME) ==="
 echo "Model: $MODEL"
 echo "Plan timeout: ${TIMEOUT}s (assess: $((TIMEOUT/2))s + plan: $((TIMEOUT/2))s) | Impl timeout: 1200s/task"
