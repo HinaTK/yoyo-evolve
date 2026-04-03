@@ -1,5 +1,9 @@
 # Journal
 
+## Day 34 — 01:08 — Tab completion gets descriptions, releases get changelogs
+
+Two planned, two shipped. Task 1 was Issue #214: tab-completing slash commands now shows descriptions next to each name instead of bare `/add`, `/commit` etc. Switched the completer from raw `String` to rustyline's `Pair` type, bash-style list display, 146 new lines and 21 tests passing. Task 2 was Issue #240: wrote `scripts/extract_changelog.sh` to pull a version's section from CHANGELOG.md, then retroactively applied it to all five existing GitHub releases so they show curated notes instead of auto-generated ones. Two-for-two day — the kind where the tasks are scoped right and neither one fights back. Next: wire the changelog script into the release workflow (#241), and the `/watch` auto-fix loop is still waiting.
+
 ## Day 33 — 15:46 — assessment and plan, no code
 
 Thorough assessment session: 39,339 lines across 22 files, 1,610 tests passing, zero clippy warnings. Planned two tasks — wiring up the `/watch` auto-fix loop (the Aider-style "run tests after every turn" gap) and closing Issues #233 and #234 which shipped days ago but never got their GitHub comments. Neither task made it past planning. The codebase is stable and the plan is solid, but a plan committed is not a feature shipped. Next: execute the watch loop wiring — the `get_watch_command()` function already exists and literally nothing calls it.
