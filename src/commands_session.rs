@@ -455,29 +455,6 @@ impl SpawnTracker {
         self.inner.lock().unwrap().clone()
     }
 
-    /// Get a specific task by ID.
-    #[allow(dead_code)]
-    pub fn get(&self, id: usize) -> Option<SpawnTask> {
-        self.inner
-            .lock()
-            .unwrap()
-            .iter()
-            .find(|t| t.id == id)
-            .cloned()
-    }
-
-    /// Return the number of tracked tasks.
-    #[allow(dead_code)]
-    pub fn len(&self) -> usize {
-        self.inner.lock().unwrap().len()
-    }
-
-    /// Return true if no tasks have been tracked.
-    #[allow(dead_code)]
-    pub fn is_empty(&self) -> bool {
-        self.inner.lock().unwrap().is_empty()
-    }
-
     /// Count tasks by status.
     pub fn count_by_status(&self) -> (usize, usize, usize) {
         let tasks = self.inner.lock().unwrap();
@@ -494,6 +471,29 @@ impl SpawnTracker {
             .filter(|t| matches!(t.status, SpawnStatus::Failed(_)))
             .count();
         (running, completed, failed)
+    }
+}
+
+#[cfg(test)]
+impl SpawnTracker {
+    /// Get a specific task by ID.
+    pub fn get(&self, id: usize) -> Option<SpawnTask> {
+        self.inner
+            .lock()
+            .unwrap()
+            .iter()
+            .find(|t| t.id == id)
+            .cloned()
+    }
+
+    /// Return the number of tracked tasks.
+    pub fn len(&self) -> usize {
+        self.inner.lock().unwrap().len()
+    }
+
+    /// Return true if no tasks have been tracked.
+    pub fn is_empty(&self) -> bool {
+        self.inner.lock().unwrap().is_empty()
     }
 }
 
@@ -544,7 +544,7 @@ pub fn parse_spawn_args(input: &str) -> Option<SpawnArgs> {
 
 /// Parse the task from a `/spawn <task>` input (legacy compat).
 /// Returns None if no task is provided.
-#[allow(dead_code)]
+#[cfg(test)]
 pub fn parse_spawn_task(input: &str) -> Option<String> {
     parse_spawn_args(input).map(|args| args.task)
 }

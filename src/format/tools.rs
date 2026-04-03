@@ -1,4 +1,4 @@
-//! Spinner, ToolProgressTimer, ActiveToolState, ThinkBlockFilter.
+//! Spinner, ToolProgressTimer, ThinkBlockFilter.
 
 use super::*;
 use std::io::{self, Write};
@@ -192,36 +192,6 @@ pub fn extract_result_text(result: &ToolResult) -> String {
         })
         .collect::<Vec<_>>()
         .join("\n")
-}
-
-/// State tracker for a currently-running tool, used by the event loop
-/// to display live progress updates.
-#[allow(dead_code)]
-pub struct ActiveToolState {
-    pub tool_name: String,
-    pub start: Instant,
-    pub line_count: usize,
-    pub last_output: String,
-}
-
-impl ActiveToolState {
-    /// Create a new state tracker for a tool.
-    #[allow(dead_code)]
-    pub fn new(tool_name: String) -> Self {
-        Self {
-            tool_name,
-            start: Instant::now(),
-            line_count: 0,
-            last_output: String::new(),
-        }
-    }
-
-    /// Update with partial output from a ToolExecutionUpdate event.
-    #[allow(dead_code)]
-    pub fn update_partial(&mut self, text: &str) {
-        self.line_count = text.lines().count();
-        self.last_output = text.to_string();
-    }
 }
 
 /// A handle to a running tool-progress timer task.
@@ -593,22 +563,6 @@ mod tests {
             details: serde_json::Value::Null,
         };
         assert_eq!(extract_result_text(&result), "");
-    }
-
-    #[test]
-    fn test_active_tool_state_new() {
-        let state = ActiveToolState::new("bash".to_string());
-        assert_eq!(state.tool_name, "bash");
-        assert_eq!(state.line_count, 0);
-        assert!(state.last_output.is_empty());
-    }
-
-    #[test]
-    fn test_active_tool_state_update_partial() {
-        let mut state = ActiveToolState::new("bash".to_string());
-        state.update_partial("line1\nline2\nline3");
-        assert_eq!(state.line_count, 3);
-        assert_eq!(state.last_output, "line1\nline2\nline3");
     }
 
     // ── Streaming contract tests ──

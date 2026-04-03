@@ -168,7 +168,7 @@ fn truncate_audit_value(v: &serde_json::Value) -> serde_json::Value {
 
 /// Read the last N entries from the audit log.
 /// Returns an empty vec if the file doesn't exist or can't be read.
-#[allow(dead_code)]
+#[cfg(test)]
 pub fn read_audit_log(n: usize) -> Vec<String> {
     let path = std::path::Path::new(".yoyo").join("audit.jsonl");
     match std::fs::read_to_string(&path) {
@@ -178,18 +178,6 @@ pub fn read_audit_log(n: usize) -> Vec<String> {
             lines[start..].iter().map(|s| s.to_string()).collect()
         }
         Err(_) => Vec::new(),
-    }
-}
-
-/// Clear the audit log file.
-/// Returns true if the file was cleared, false if it didn't exist.
-#[allow(dead_code)]
-pub fn clear_audit_log() -> bool {
-    let path = std::path::Path::new(".yoyo").join("audit.jsonl");
-    if path.exists() {
-        std::fs::write(&path, "").is_ok()
-    } else {
-        false
     }
 }
 
@@ -250,21 +238,22 @@ impl SessionChanges {
         self.inner.lock().unwrap().clone()
     }
 
+    /// Clear all tracked changes.
+    pub fn clear(&self) {
+        self.inner.lock().unwrap().clear();
+    }
+}
+
+#[cfg(test)]
+impl SessionChanges {
     /// Return the number of unique files changed.
-    #[allow(dead_code)]
     pub fn len(&self) -> usize {
         self.inner.lock().unwrap().len()
     }
 
     /// Return true if no files have been changed.
-    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.inner.lock().unwrap().is_empty()
-    }
-
-    /// Clear all tracked changes.
-    pub fn clear(&self) {
-        self.inner.lock().unwrap().clear();
     }
 }
 
@@ -310,12 +299,6 @@ impl TurnSnapshot {
         }
     }
 
-    /// Return the number of files affected (modified + created).
-    #[allow(dead_code)]
-    pub fn file_count(&self) -> usize {
-        self.originals.len() + self.created.len()
-    }
-
     /// Return true if no files were affected.
     pub fn is_empty(&self) -> bool {
         self.originals.is_empty() && self.created.is_empty()
@@ -351,6 +334,14 @@ impl TurnSnapshot {
     }
 }
 
+#[cfg(test)]
+impl TurnSnapshot {
+    /// Return the number of files affected (modified + created).
+    pub fn file_count(&self) -> usize {
+        self.originals.len() + self.created.len()
+    }
+}
+
 /// A stack of turn snapshots for multi-level undo.
 ///
 /// Each completed agent turn pushes a snapshot. `/undo` pops the most recent.
@@ -372,12 +363,6 @@ impl TurnHistory {
         if !snapshot.is_empty() {
             self.turns.push(snapshot);
         }
-    }
-
-    /// Pop the most recent turn snapshot.
-    #[allow(dead_code)]
-    pub fn pop(&mut self) -> Option<TurnSnapshot> {
-        self.turns.pop()
     }
 
     /// Return the number of undoable turns.
@@ -409,6 +394,14 @@ impl TurnHistory {
     }
 }
 
+#[cfg(test)]
+impl TurnHistory {
+    /// Pop the most recent turn snapshot.
+    pub fn pop(&mut self) -> Option<TurnSnapshot> {
+        self.turns.pop()
+    }
+}
+
 /// Outcome of a prompt execution, including the text response and any tool error.
 #[derive(Debug, Clone, Default)]
 pub struct PromptOutcome {
@@ -419,7 +412,6 @@ pub struct PromptOutcome {
     pub last_tool_error: Option<String>,
     /// Whether this prompt triggered an auto-compact due to context overflow.
     /// Callers can use this to inform users or adjust behavior.
-    #[allow(dead_code)]
     pub was_overflow: bool,
     /// The last API-level error after all retries were exhausted, if any.
     /// Set when the provider itself fails (rate limits, outages, auth errors)

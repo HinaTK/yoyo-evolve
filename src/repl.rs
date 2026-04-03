@@ -907,6 +907,11 @@ pub async fn run_repl(
         crate::format::maybe_ring_bell(prompt_start.elapsed());
         last_error = outcome.last_tool_error.clone();
 
+        // Notify the user if the context was auto-compacted due to overflow
+        if outcome.was_overflow {
+            eprintln!("{YELLOW}  ℹ Context was auto-compacted (overflow detected){RESET}");
+        }
+
         // Fallback provider: if the API failed and a fallback is configured, switch and retry
         if outcome.last_api_error.is_some() {
             let old_provider = agent_config.provider.clone();
