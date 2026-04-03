@@ -12,7 +12,7 @@ use crate::git::*;
 use crate::prompt::*;
 use crate::AgentConfig;
 
-use rustyline::completion::Completer;
+use rustyline::completion::{Completer, Pair};
 use rustyline::error::ReadlineError;
 use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
@@ -25,22 +25,36 @@ use yoagent::*;
 pub struct YoyoHelper;
 
 impl Completer for YoyoHelper {
-    type Candidate = String;
+    type Candidate = Pair;
 
     fn complete(
         &self,
         line: &str,
         pos: usize,
         _ctx: &rustyline::Context<'_>,
-    ) -> rustyline::Result<(usize, Vec<String>)> {
+    ) -> rustyline::Result<(usize, Vec<Pair>)> {
         let prefix = &line[..pos];
 
         // Slash command completion: starts with '/' and no space yet
         if prefix.starts_with('/') && !prefix.contains(' ') {
-            let matches: Vec<String> = KNOWN_COMMANDS
+            let matches: Vec<Pair> = KNOWN_COMMANDS
                 .iter()
                 .filter(|cmd| cmd.starts_with(prefix))
-                .map(|cmd| cmd.to_string())
+                .map(|cmd| {
+                    let cmd_name = &cmd[1..]; // strip leading /
+                    let desc = crate::help::command_short_description(cmd_name).unwrap_or("");
+                    if desc.is_empty() {
+                        Pair {
+                            display: cmd.to_string(),
+                            replacement: cmd.to_string(),
+                        }
+                    } else {
+                        Pair {
+                            display: format!("{cmd:<14} {desc}"),
+                            replacement: cmd.to_string(),
+                        }
+                    }
+                })
                 .collect();
             return Ok((0, matches));
         }
@@ -54,7 +68,14 @@ impl Completer for YoyoHelper {
                 if !arg_part.contains(' ') {
                     let candidates = command_arg_completions(cmd, arg_part);
                     if !candidates.is_empty() {
-                        return Ok((space_pos + 1, candidates));
+                        let pairs = candidates
+                            .into_iter()
+                            .map(|c| Pair {
+                                display: c.clone(),
+                                replacement: c,
+                            })
+                            .collect();
+                        return Ok((space_pos + 1, pairs));
                     }
                 }
             }
@@ -67,7 +88,13 @@ impl Completer for YoyoHelper {
             return Ok((pos, Vec::new()));
         }
 
-        let matches = complete_file_path(word);
+        let matches = complete_file_path(word)
+            .into_iter()
+            .map(|p| Pair {
+                display: p.clone(),
+                replacement: p,
+            })
+            .collect();
         Ok((word_start, matches))
     }
 }
@@ -316,7 +343,11 @@ pub async fn run_repl(
     }
 
     // Set up rustyline editor with slash-command tab-completion
-    let mut rl = Editor::new().expect("Failed to initialize readline");
+    let config = rustyline::config::Builder::new()
+        .completion_type(rustyline::config::CompletionType::List)
+        .completion_prompt_limit(50)
+        .build();
+    let mut rl = Editor::with_config(config).expect("Failed to initialize readline");
     rl.set_helper(Some(YoyoHelper));
     if let Some(history_path) = history_file_path() {
         if rl.load_history(&history_path).is_err() {
@@ -1093,6 +1124,11 @@ fn extract_image_label(summary: &str, fallback_mime: &str) -> String {
 mod tests {
     use super::*;
 
+    /// Check if any candidate has the given replacement text.
+    fn has_replacement(candidates: &[Pair], replacement: &str) -> bool {
+        candidates.iter().any(|c| c.replacement == replacement)
+    }
+
     #[test]
     fn test_prompt_has_octopus() {
         // Verify the styled prompt contains the octopus emoji
@@ -1136,15 +1172,15 @@ mod tests {
         let (start, candidates) = helper.complete("/", 1, &ctx).unwrap();
         assert_eq!(start, 0);
         assert!(!candidates.is_empty());
-        assert!(candidates.contains(&"/help".to_string()));
-        assert!(candidates.contains(&"/quit".to_string()));
+        assert!(has_replacement(&candidates, "/help"));
+        assert!(has_replacement(&candidates, "/quit"));
 
         // Typing "/he" should suggest "/help" and "/health"
         let (start, candidates) = helper.complete("/he", 3, &ctx).unwrap();
         assert_eq!(start, 0);
-        assert!(candidates.contains(&"/help".to_string()));
-        assert!(candidates.contains(&"/health".to_string()));
-        assert!(!candidates.contains(&"/quit".to_string()));
+        assert!(has_replacement(&candidates, "/help"));
+        assert!(has_replacement(&candidates, "/health"));
+        assert!(!has_replacement(&candidates, "/quit"));
 
         // Typing "/model " (with space) should return model completions
         let (start, candidates) = helper.complete("/model ", 7, &ctx).unwrap();
@@ -1154,7 +1190,7 @@ mod tests {
             "Should offer model name completions after /model "
         );
         assert!(
-            candidates.iter().any(|c| c.contains("claude")),
+            candidates.iter().any(|c| c.replacement.contains("claude")),
             "Should include Claude models"
         );
 
@@ -1163,8 +1199,9 @@ mod tests {
         assert_eq!(start, 7);
         for c in &candidates {
             assert!(
-                c.starts_with("cl"),
-                "All completions should start with 'cl': {c}"
+                c.replacement.starts_with("cl"),
+                "All completions should start with 'cl': {:?}",
+                c.replacement
             );
         }
 
@@ -1183,7 +1220,7 @@ mod tests {
         // "Cargo" should match Cargo.toml (and possibly Cargo.lock)
         let (start, candidates) = helper.complete("Cargo", 5, &ctx).unwrap();
         assert_eq!(start, 0);
-        assert!(candidates.iter().any(|c| c == "Cargo.toml"));
+        assert!(has_replacement(&candidates, "Cargo.toml"));
     }
 
     #[test]
@@ -1196,7 +1233,7 @@ mod tests {
         // "src/ma" should match "src/main.rs"
         let (start, candidates) = helper.complete("src/ma", 6, &ctx).unwrap();
         assert_eq!(start, 0);
-        assert!(candidates.contains(&"src/main.rs".to_string()));
+        assert!(has_replacement(&candidates, "src/main.rs"));
     }
 
     #[test]
@@ -1222,7 +1259,7 @@ mod tests {
         let input = "read the src/ma";
         let (start, candidates) = helper.complete(input, input.len(), &ctx).unwrap();
         assert_eq!(start, 9); // "read the " is 9 chars
-        assert!(candidates.contains(&"src/main.rs".to_string()));
+        assert!(has_replacement(&candidates, "src/main.rs"));
     }
 
     #[test]
@@ -1235,7 +1272,7 @@ mod tests {
         // "sr" should match "src/" (directory with trailing slash)
         let (start, candidates) = helper.complete("sr", 2, &ctx).unwrap();
         assert_eq!(start, 0);
-        assert!(candidates.contains(&"src/".to_string()));
+        assert!(has_replacement(&candidates, "src/"));
     }
 
     #[test]
@@ -1248,8 +1285,8 @@ mod tests {
         // Slash commands should still complete normally
         let (start, candidates) = helper.complete("/he", 3, &ctx).unwrap();
         assert_eq!(start, 0);
-        assert!(candidates.contains(&"/help".to_string()));
-        assert!(candidates.contains(&"/health".to_string()));
+        assert!(has_replacement(&candidates, "/help"));
+        assert!(has_replacement(&candidates, "/health"));
     }
 
     #[test]
@@ -1262,15 +1299,15 @@ mod tests {
         // "/think " should offer thinking level completions
         let (start, candidates) = helper.complete("/think ", 7, &ctx).unwrap();
         assert_eq!(start, 7);
-        assert!(candidates.contains(&"off".to_string()));
-        assert!(candidates.contains(&"high".to_string()));
+        assert!(has_replacement(&candidates, "off"));
+        assert!(has_replacement(&candidates, "high"));
 
         // "/think m" should filter to medium/minimal
         let (start, candidates) = helper.complete("/think m", 8, &ctx).unwrap();
         assert_eq!(start, 7);
-        assert!(candidates.contains(&"medium".to_string()));
-        assert!(candidates.contains(&"minimal".to_string()));
-        assert!(!candidates.contains(&"off".to_string()));
+        assert!(has_replacement(&candidates, "medium"));
+        assert!(has_replacement(&candidates, "minimal"));
+        assert!(!has_replacement(&candidates, "off"));
     }
 
     #[test]
@@ -1283,15 +1320,15 @@ mod tests {
         // "/git " should offer git subcommand completions
         let (start, candidates) = helper.complete("/git ", 5, &ctx).unwrap();
         assert_eq!(start, 5);
-        assert!(candidates.contains(&"status".to_string()));
-        assert!(candidates.contains(&"branch".to_string()));
+        assert!(has_replacement(&candidates, "status"));
+        assert!(has_replacement(&candidates, "branch"));
 
         // "/git s" should filter to status and stash
         let (start, candidates) = helper.complete("/git s", 6, &ctx).unwrap();
         assert_eq!(start, 5);
-        assert!(candidates.contains(&"status".to_string()));
-        assert!(candidates.contains(&"stash".to_string()));
-        assert!(!candidates.contains(&"log".to_string()));
+        assert!(has_replacement(&candidates, "status"));
+        assert!(has_replacement(&candidates, "stash"));
+        assert!(!has_replacement(&candidates, "log"));
     }
 
     #[test]
@@ -1304,8 +1341,8 @@ mod tests {
         // "/pr " should offer PR subcommand completions
         let (start, candidates) = helper.complete("/pr ", 4, &ctx).unwrap();
         assert_eq!(start, 4);
-        assert!(candidates.contains(&"create".to_string()));
-        assert!(candidates.contains(&"checkout".to_string()));
+        assert!(has_replacement(&candidates, "create"));
+        assert!(has_replacement(&candidates, "checkout"));
     }
 
     #[test]
@@ -1318,17 +1355,17 @@ mod tests {
         // "/provider " should offer provider name completions
         let (start, candidates) = helper.complete("/provider ", 10, &ctx).unwrap();
         assert_eq!(start, 10);
-        assert!(candidates.contains(&"anthropic".to_string()));
-        assert!(candidates.contains(&"openai".to_string()));
-        assert!(candidates.contains(&"google".to_string()));
+        assert!(has_replacement(&candidates, "anthropic"));
+        assert!(has_replacement(&candidates, "openai"));
+        assert!(has_replacement(&candidates, "google"));
 
         // "/provider o" should filter to providers starting with 'o'
         let (start, candidates) = helper.complete("/provider o", 11, &ctx).unwrap();
         assert_eq!(start, 10);
-        assert!(candidates.contains(&"openai".to_string()));
-        assert!(candidates.contains(&"openrouter".to_string()));
-        assert!(candidates.contains(&"ollama".to_string()));
-        assert!(!candidates.contains(&"anthropic".to_string()));
+        assert!(has_replacement(&candidates, "openai"));
+        assert!(has_replacement(&candidates, "openrouter"));
+        assert!(has_replacement(&candidates, "ollama"));
+        assert!(!has_replacement(&candidates, "anthropic"));
     }
 
     #[test]
@@ -1342,7 +1379,7 @@ mod tests {
         // has no custom argument completions
         let (start, candidates) = helper.complete("/docs Cargo", 11, &ctx).unwrap();
         assert_eq!(start, 6); // after "/docs "
-        assert!(candidates.iter().any(|c| c == "Cargo.toml"));
+        assert!(has_replacement(&candidates, "Cargo.toml"));
     }
 
     #[test]
@@ -1359,9 +1396,71 @@ mod tests {
         // Should be file path completing "sr" → "src/"
         assert_eq!(start, 12); // after "/git status "
         assert!(
-            candidates.contains(&"src/".to_string()),
-            "Second arg should use file path completion: {candidates:?}"
+            has_replacement(&candidates, "src/"),
+            "Second arg should use file path completion"
         );
+    }
+
+    // ── Pair description tests ─────────────────────────────────────
+
+    #[test]
+    fn test_slash_completion_pairs_include_descriptions() {
+        let helper = YoyoHelper;
+        let history = rustyline::history::DefaultHistory::new();
+        let ctx = rustyline::Context::new(&history);
+
+        // "/" completion should return Pairs where display contains descriptions
+        let (_, candidates) = helper.complete("/", 1, &ctx).unwrap();
+        let help_pair = candidates.iter().find(|c| c.replacement == "/help");
+        assert!(help_pair.is_some(), "Should include /help");
+        let help_display = &help_pair.unwrap().display;
+        assert!(
+            help_display.contains("Show help"),
+            "Display should include description: {help_display}"
+        );
+
+        let add_pair = candidates.iter().find(|c| c.replacement == "/add");
+        assert!(add_pair.is_some(), "Should include /add");
+        let add_display = &add_pair.unwrap().display;
+        assert!(
+            add_display.contains("Add file"),
+            "Display should include description: {add_display}"
+        );
+    }
+
+    #[test]
+    fn test_slash_completion_display_is_padded() {
+        let helper = YoyoHelper;
+        let history = rustyline::history::DefaultHistory::new();
+        let ctx = rustyline::Context::new(&history);
+
+        let (_, candidates) = helper.complete("/", 1, &ctx).unwrap();
+        // All slash command pairs should have display wider than replacement
+        // (because display includes padding + description)
+        for c in &candidates {
+            assert!(
+                c.display.len() > c.replacement.len(),
+                "Display '{}' should be wider than replacement '{}'",
+                c.display,
+                c.replacement
+            );
+        }
+    }
+
+    #[test]
+    fn test_subcommand_pairs_have_matching_display_and_replacement() {
+        let helper = YoyoHelper;
+        let history = rustyline::history::DefaultHistory::new();
+        let ctx = rustyline::Context::new(&history);
+
+        // Subcommand completions (like /think off) should have display == replacement
+        let (_, candidates) = helper.complete("/think ", 7, &ctx).unwrap();
+        for c in &candidates {
+            assert_eq!(
+                c.display, c.replacement,
+                "Subcommand display and replacement should match"
+            );
+        }
     }
 
     // ── build_add_content_blocks ─────────────────────────────────────

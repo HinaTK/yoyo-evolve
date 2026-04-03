@@ -30,7 +30,7 @@ yoyo uses [rustyline](https://crates.io/crates/rustyline) for a full readline ex
 
 - **Arrow keys**: Navigate within the current line (← →) and through command history (↑ ↓)
 - **Inline hints**: As you type a slash command, a dimmed suggestion appears after the cursor showing the completion and a short description — e.g. typing `/he` shows `lp — Show help for commands`. Press Tab or → to accept.
-- **Tab completion**: Type `/` and press Tab to see available slash commands. Partial matches work too — `/he<Tab>` suggests `/help` and `/health`. After typing a command + space, argument-aware completions kick in:
+- **Tab completion**: Type `/` and press Tab to see available slash commands with descriptions — each command is shown alongside a short summary of what it does. Partial matches work too — `/he<Tab>` suggests `/help` and `/health`. After typing a command + space, argument-aware completions kick in:
   - `/model <Tab>` — suggests known model names (Claude, GPT, Gemini, etc.)
   - `/provider <Tab>` — suggests known provider names (anthropic, openai, google, etc.)
   - `/think <Tab>` — suggests thinking levels (off, minimal, low, medium, high)
