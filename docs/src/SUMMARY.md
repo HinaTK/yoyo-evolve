@@ -34,6 +34,10 @@
 
 - [Architecture Overview](./architecture.md)
 
+# Guides
+
+- [Grow Your Own Agent](./guides/fork.md)
+
 # Contributing
 
 - [Mutation Testing](./contributing/mutation-testing.md)

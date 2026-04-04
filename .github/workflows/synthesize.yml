@@ -39,11 +39,20 @@ jobs:
           cargo build --release
           echo "$PWD/target/release" >> "$GITHUB_PATH"
 
+      - name: Detect bot identity
+        if: steps.check.outputs.skip != 'true'
+        id: bot-info
+        run: |
+          # No app token in this workflow — hardcode default bot identity.
+          # Forks: update these values or add app token detection.
+          echo "login=yoyo-evolve[bot]" >> "$GITHUB_OUTPUT"
+          echo "email=yoyo-evolve[bot]@users.noreply.github.com" >> "$GITHUB_OUTPUT"
+
       - name: Configure git
         if: steps.check.outputs.skip != 'true'
         run: |
-          git config user.name "yoyo-evolve[bot]"
-          git config user.email "yoyo-evolve[bot]@users.noreply.github.com"
+          git config user.name "${{ steps.bot-info.outputs.login }}"
+          git config user.email "${{ steps.bot-info.outputs.email }}"
 
       - name: Backup active files
         if: steps.check.outputs.skip != 'true'

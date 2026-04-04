@@ -53,16 +53,34 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
+      - name: Detect bot identity
+        id: bot-info
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+        run: |
+          SLUG=$(gh api /app --jq '.slug') || {
+            echo "::error::Failed to detect bot identity. Verify APP_ID, APP_PRIVATE_KEY, and APP_INSTALLATION_ID secrets."
+            exit 1
+          }
+          if [ -z "$SLUG" ]; then
+            echo "::error::GitHub App slug is empty. Check that your GitHub App exists and the token is valid."
+            exit 1
+          fi
+          echo "slug=${SLUG}" >> "$GITHUB_OUTPUT"
+          echo "login=${SLUG}[bot]" >> "$GITHUB_OUTPUT"
+          echo "email=${SLUG}[bot]@users.noreply.github.com" >> "$GITHUB_OUTPUT"
+
       - name: Configure git
         run: |
-          git config user.name "yoyo-evolve[bot]"
-          git config user.email "yoyo-evolve[bot]@users.noreply.github.com"
+          git config user.name "${{ steps.bot-info.outputs.login }}"
+          git config user.email "${{ steps.bot-info.outputs.email }}"
 
       - name: Notify dashboard (start)
+        if: vars.DASHBOARD_REPO != ''
         env:
           GH_TOKEN: ${{ secrets.DASHBOARD_TOKEN }}
         run: |
-          gh api repos/yuanhao/yoyo-dashboard/dispatches \
+          gh api repos/${{ vars.DASHBOARD_REPO }}/dispatches \
             -f event_type=activity-update \
             -f 'client_payload[action]=start' \
             -f 'client_payload[workflow]=Evolution' || true
@@ -83,6 +101,8 @@ jobs:
           APP_ID: ${{ secrets.APP_ID }}
           APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
           APP_INSTALLATION_ID: ${{ secrets.APP_INSTALLATION_ID }}
+          BOT_LOGIN: ${{ steps.bot-info.outputs.login }}
+          BOT_SLUG: ${{ steps.bot-info.outputs.slug }}
         run: |
           chmod +x scripts/evolve.sh
           ./scripts/evolve.sh
@@ -104,6 +124,8 @@ jobs:
           APP_ID: ${{ secrets.APP_ID }}
           APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
           APP_INSTALLATION_ID: ${{ secrets.APP_INSTALLATION_ID }}
+          BOT_LOGIN: ${{ steps.bot-info.outputs.login }}
+          BOT_SLUG: ${{ steps.bot-info.outputs.slug }}
         run: |
           echo "Waiting 15 minutes before retry..."
           sleep 900
@@ -126,6 +148,8 @@ jobs:
           APP_ID: ${{ secrets.APP_ID }}
           APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
           APP_INSTALLATION_ID: ${{ secrets.APP_INSTALLATION_ID }}
+          BOT_LOGIN: ${{ steps.bot-info.outputs.login }}
+          BOT_SLUG: ${{ steps.bot-info.outputs.slug }}
         run: |
           echo "Waiting 45 minutes before retry..."
           sleep 2700
@@ -136,14 +160,14 @@ jobs:
         run: cargo clippy --quiet --all-targets 2>&1 || true
 
       - name: Notify dashboard (end)
-        if: always()
+        if: always() && vars.DASHBOARD_REPO != ''
         env:
           GH_TOKEN: ${{ secrets.DASHBOARD_TOKEN }}
         run: |
-          gh api repos/yuanhao/yoyo-dashboard/dispatches \
+          gh api repos/${{ vars.DASHBOARD_REPO }}/dispatches \
             -f event_type=activity-update \
             -f 'client_payload[action]=end' \
             -f 'client_payload[workflow]=Evolution' \
             -f 'client_payload[conclusion]=${{ job.status }}' || true
-          gh api repos/yuanhao/yoyo-dashboard/dispatches \
+          gh api repos/${{ vars.DASHBOARD_REPO }}/dispatches \
             -f event_type=dashboard-update || true

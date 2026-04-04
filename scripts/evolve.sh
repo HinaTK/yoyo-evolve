@@ -18,12 +18,13 @@
 
 set -euo pipefail
 
-REPO="${REPO:-yologdev/yoyo-evolve}"
+# Auto-detect REPO, BOT_LOGIN, BIRTH_DATE (fork-friendly)
+source "$(dirname "$0")/common.sh"
+
 MODEL="${MODEL:-claude-opus-4-6}"
 TIMEOUT="${TIMEOUT:-1200}"
 FALLBACK_PROVIDER="${FALLBACK_PROVIDER:-}"
 FALLBACK_MODEL="${FALLBACK_MODEL:-}"
-BIRTH_DATE="2026-02-28"
 DATE=$(date +%Y-%m-%d)
 SESSION_TIME=$(date +%H:%M)
 # Security nonce for content boundary markers (prevents spoofing)
@@ -685,7 +686,7 @@ if command -v gh &>/dev/null; then
     echo "→ Fetching self-issues..."
     SELF_ISSUES=$(gh issue list --repo "$REPO" --state open \
         --label "agent-self" --limit 5 \
-        --author "yoyo-evolve[bot]" \
+        --author "${BOT_LOGIN}" \
         --json number,title,body \
         --jq '.[] | "'"$BOUNDARY_BEGIN"'\n### Issue #\(.number)\n**Title:** \(.title)\n\(.body)\n'"$BOUNDARY_END"'\n"' 2>/dev/null \
         | python3 -c "import sys,re; print(re.sub(r'<!--.*?-->','',sys.stdin.read(),flags=re.DOTALL))" 2>/dev/null || true)
@@ -702,7 +703,7 @@ if command -v gh &>/dev/null; then
     echo "→ Fetching help-wanted issues..."
     HELP_ISSUES=$(gh issue list --repo "$REPO" --state open \
         --label "agent-help-wanted" --limit 5 \
-        --author "yoyo-evolve[bot]" \
+        --author "${BOT_LOGIN}" \
         --json number,title,body,comments \
         --jq '.[] | "'"$BOUNDARY_BEGIN"'\n### Issue #\(.number)\n**Title:** \(.title)\n\(.body)\n\(if (.comments | length) > 0 then "⚠️ Human replied:\n" + (.comments | map(.body) | join("\n---\n")) else "No replies yet." end)\n'"$BOUNDARY_END"'\n"' 2>/dev/null \
         | python3 -c "import sys,re; print(re.sub(r'<!--.*?-->','',sys.stdin.read(),flags=re.DOTALL))" 2>/dev/null || true)
@@ -723,7 +724,7 @@ if command -v gh &>/dev/null; then
     else
         RESOLVED_HELP=$(gh issue list --repo "$REPO" --state closed \
             --label "agent-help-wanted" --limit 5 \
-            --author "yoyo-evolve[bot]" \
+            --author "${BOT_LOGIN}" \
             --json number,title,closedAt,comments \
             --jq "[.[] | select(.closedAt > \"$CUTOFF_DATE\")] | .[] | \"${BOUNDARY_BEGIN}\n### Issue #\(.number) ✅ RESOLVED\n**Title:** \(.title)\n\(if (.comments | length) > 0 then \"Human's comment:\\n\" + (.comments[-1].body) else \"Closed without comment.\" end)\n${BOUNDARY_END}\n\"" 2>/dev/null \
             | python3 -c "import sys,re; print(re.sub(r'<!--.*?-->','',sys.stdin.read(),flags=re.DOTALL))" 2>/dev/null || true)
@@ -749,9 +750,10 @@ if command -v gh &>/dev/null; then
         2>/dev/null || true)
 
     if [ -n "$REPLY_ISSUES" ]; then
-        PENDING_REPLIES=$(echo "$REPLY_ISSUES" | python3 -c "
-import json, sys
+        PENDING_REPLIES=$(echo "$REPLY_ISSUES" | BOT_LOGIN="$BOT_LOGIN" python3 -c "
+import json, sys, os
 
+bot_login = os.environ['BOT_LOGIN']
 data = json.load(sys.stdin)
 results = []
 for issue in data:
@@ -759,21 +761,21 @@ for issue in data:
     if not comments:
         continue
 
-    # Find yoyo's last comment index
+    # Find bot's last comment index
     last_yoyo_idx = -1
     for i, c in enumerate(comments):
         author = (c.get('author') or {}).get('login', '')
-        if author == 'yoyo-evolve[bot]':
+        if author == bot_login:
             last_yoyo_idx = i
 
     if last_yoyo_idx == -1:
-        continue  # yoyo never commented on this issue
+        continue  # bot never commented on this issue
 
-    # Check for human replies after yoyo's last comment
+    # Check for human replies after bot's last comment
     human_replies = []
     for c in comments[last_yoyo_idx + 1:]:
         author = (c.get('author') or {}).get('login', '')
-        if author != 'yoyo-evolve[bot]':
+        if author != bot_login:
             body = c.get('body', '')[:300]
             human_replies.append(f'@{author}: {body}')
 

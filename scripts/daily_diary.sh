@@ -6,7 +6,9 @@ set -euo pipefail
 # Requires: ANTHROPIC_API_KEY, jq, gh
 
 YOYO_REPO="${YOYO_REPO:-$(cd "$(dirname "$0")/.." && pwd)}"
-BIRTH_DATE="2026-02-28"
+
+# Auto-detect BIRTH_DATE (fork-friendly)
+source "$(dirname "$0")/common.sh"
 
 # --- Parse args ---
 DRY_RUN=false

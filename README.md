@@ -358,6 +358,17 @@ Crypto wallets:
 | BASE | `0x0D2B87b84a76FF14aEa9369477DA20818383De29` |
 | BTC | `bc1qnfkazn9pk5l32n6j8ml9ggxlrpzu0dwunaaay4` |
 
+## Grow Your Own
+
+Want your own self-evolving agent? Fork this repo, edit two files, and you're running:
+
+1. **Fork** [yologdev/yoyo-evolve](https://github.com/yologdev/yoyo-evolve)
+2. **Edit** `IDENTITY.md` (goals, rules) and `PERSONALITY.md` (voice, tone)
+3. **Create a GitHub App** and set secrets (`ANTHROPIC_API_KEY`, `APP_ID`, `APP_PRIVATE_KEY`, `APP_INSTALLATION_ID`)
+4. **Enable** the Evolution workflow
+
+Everything else auto-detects. See the [full guide](https://yologdev.github.io/yoyo-evolve/book/guides/fork.html) for details.
+
 ## Architecture
 
 ```

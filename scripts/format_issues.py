@@ -85,7 +85,11 @@ def select_issues(issues, sponsor_logins=None, pick=2, day=0):
     return selected
 
 
-BOT_LOGINS = {"yoyo-evolve[bot]", "yoyo-evolve"}
+# GitHub Apps appear as both "slug[bot]" (API commits/comments) and "slug" (some UI contexts)
+_bot_slug = os.environ.get("BOT_SLUG", "yoyo-evolve")
+BOT_LOGINS = set(
+    s.strip() for s in os.environ.get("BOT_LOGINS", f"{_bot_slug}[bot],{_bot_slug}").split(",")
+)
 
 
 def _is_bot(comment):
