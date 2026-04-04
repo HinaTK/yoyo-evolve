@@ -55,15 +55,10 @@ jobs:
 
       - name: Detect bot identity
         id: bot-info
-        env:
-          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
         run: |
-          SLUG=$(gh api /app --jq '.slug') || {
-            echo "::error::Failed to detect bot identity. Verify APP_ID, APP_PRIVATE_KEY, and APP_INSTALLATION_ID secrets."
-            exit 1
-          }
+          SLUG="${{ steps.bot-token.outputs.app-slug }}"
           if [ -z "$SLUG" ]; then
-            echo "::error::GitHub App slug is empty. Check that your GitHub App exists and the token is valid."
+            echo "::error::GitHub App slug is empty. Check that your GitHub App is configured correctly."
             exit 1
           fi
           echo "slug=${SLUG}" >> "$GITHUB_OUTPUT"
