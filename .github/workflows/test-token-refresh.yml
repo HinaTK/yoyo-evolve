@@ -1,0 +1,83 @@
+name: Test Token Refresh
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test token refresh
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+          APP_INSTALLATION_ID: ${{ secrets.APP_INSTALLATION_ID }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          echo "=== Step 1: Check env vars ==="
+          echo "APP_ID length: ${#APP_ID}"
+          echo "APP_PRIVATE_KEY length: ${#APP_PRIVATE_KEY}"
+          echo "APP_INSTALLATION_ID: ${APP_INSTALLATION_ID}"
+
+          echo ""
+          echo "=== Step 2: Convert PEM ==="
+          pem="${APP_PRIVATE_KEY//\\n/$'\n'}"
+          echo "PEM length after conversion: ${#pem}"
+          echo "PEM first line: $(echo "$pem" | head -1)"
+          echo "PEM line count: $(echo "$pem" | wc -l)"
+
+          echo ""
+          echo "=== Step 3: Validate PEM ==="
+          pem_file=$(mktemp)
+          trap "rm -f '$pem_file'" EXIT
+          printf '%s\n' "$pem" > "$pem_file"
+          openssl rsa -in "$pem_file" -check -noout 2>&1 && echo "PEM OK" || echo "PEM INVALID"
+
+          echo ""
+          echo "=== Step 4: Generate JWT ==="
+          b64url() { openssl base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n'; }
+
+          now=$(date +%s)
+          iat=$((now - 60))
+          exp=$((now + 600))
+
+          header=$(echo -n '{"typ":"JWT","alg":"RS256"}' | b64url)
+          payload=$(echo -n "{\"iat\":${iat},\"exp\":${exp},\"iss\":\"${APP_ID}\"}" | b64url)
+          signature=$(echo -n "${header}.${payload}" | openssl dgst -sha256 -sign "$pem_file" | b64url)
+          jwt="${header}.${payload}.${signature}"
+
+          echo "JWT length: ${#jwt}"
+          echo "JWT parts: $(echo "$jwt" | tr '.' '\n' | wc -l)"
+
+          echo ""
+          echo "=== Step 5: Call GitHub API ==="
+          echo "URL: https://api.github.com/app/installations/${APP_INSTALLATION_ID}/access_tokens"
+
+          http_response=$(curl --verbose --write-out "\nHTTP_CODE:%{http_code}" --request POST \
+            --url "https://api.github.com/app/installations/${APP_INSTALLATION_ID}/access_tokens" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${jwt}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" 2>&1)
+
+          echo "$http_response" | grep -v "Authorization:"
+
+          echo ""
+          echo "=== Step 6: Try with actions/create-github-app-token for comparison ==="
+
+      - name: Generate token via action (comparison)
+        id: bot-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Verify action token works
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+        run: |
+          echo "Action-generated token works:"
+          gh api /repos/${{ github.repository }} --jq '.full_name'

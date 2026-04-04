@@ -583,7 +583,10 @@ refresh_gh_token() {
 
         jwt="${header}.${payload}.${signature}"
 
-        response=$(curl --silent --write-out "\n%{http_code}" --request POST \
+        # Log JWT header for debugging (safe — only contains alg/typ/iss, no secrets)
+        echo "JWT iss=${APP_ID}, install=${APP_INSTALLATION_ID}, jwt_len=${#jwt}" >&2
+
+        response=$(curl --silent --show-error --write-out "\n%{http_code}" --request POST \
             --url "https://api.github.com/app/installations/${APP_INSTALLATION_ID}/access_tokens" \
             --header "Accept: application/vnd.github+json" \
             --header "Authorization: Bearer ${jwt}" \
