@@ -553,7 +553,7 @@ refresh_gh_token() {
     # Stderr passes through to the log for diagnostics; only stdout is captured as the token.
     local token
     token=$( (
-        set -e
+        set -eo pipefail
 
         # Convert escaped \n to real newlines (GitHub Secrets may store PEM with literal \n)
         pem="${APP_PRIVATE_KEY//\\n/$'\n'}"
@@ -572,6 +572,13 @@ refresh_gh_token() {
         pem_file=$(mktemp)
         trap "rm -f '$pem_file'" EXIT
         printf '%s\n' "$pem" > "$pem_file"
+
+        # Validate PEM before signing
+        if ! openssl rsa -in "$pem_file" -check -noout 2>/dev/null; then
+            echo "PEM key validation failed (first line: $(head -1 "$pem_file"))" >&2
+            exit 1
+        fi
+
         signature=$(echo -n "${header}.${payload}" | openssl dgst -sha256 -sign "$pem_file" | b64url)
 
         jwt="${header}.${payload}.${signature}"
