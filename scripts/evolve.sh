@@ -572,19 +572,9 @@ refresh_gh_token() {
         pem_file=$(mktemp)
         trap "rm -f '$pem_file'" EXIT
         printf '%s\n' "$pem" > "$pem_file"
-
-        # Validate PEM before signing
-        if ! openssl rsa -in "$pem_file" -check -noout 2>/dev/null; then
-            echo "PEM key validation failed (first line: $(head -1 "$pem_file"))" >&2
-            exit 1
-        fi
-
         signature=$(echo -n "${header}.${payload}" | openssl dgst -sha256 -sign "$pem_file" | b64url)
 
         jwt="${header}.${payload}.${signature}"
-
-        # Log JWT header for debugging (safe — only contains alg/typ/iss, no secrets)
-        echo "JWT iss=${APP_ID}, install=${APP_INSTALLATION_ID}, jwt_len=${#jwt}" >&2
 
         response=$(curl --silent --show-error --write-out "\n%{http_code}" --request POST \
             --url "https://api.github.com/app/installations/${APP_INSTALLATION_ID}/access_tokens" \
