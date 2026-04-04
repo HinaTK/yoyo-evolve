@@ -1000,26 +1000,40 @@ pub async fn run_repl(
                         output.clone()
                     };
                     eprintln!("{DIM}{display_output}{RESET}");
-                    eprintln!("{YELLOW}  → Auto-fixing...{RESET}");
+                    // Multi-attempt auto-fix loop
+                    let mut current_output = output;
+                    for attempt in 1..=MAX_WATCH_FIX_ATTEMPTS {
+                        eprintln!(
+                            "{YELLOW}  → Auto-fixing (attempt {attempt}/{MAX_WATCH_FIX_ATTEMPTS})...{RESET}"
+                        );
 
-                    // One auto-fix attempt
-                    let fix_prompt = build_watch_fix_prompt(&watch_cmd, &output);
-                    let fix_outcome = run_prompt_auto_retry(
-                        agent,
-                        &fix_prompt,
-                        &mut session_total,
-                        &agent_config.model,
-                        &session_changes,
-                    )
-                    .await;
-                    last_error = fix_outcome.last_tool_error.clone();
+                        let fix_prompt = build_watch_fix_prompt(&watch_cmd, &current_output);
+                        let fix_outcome = run_prompt_auto_retry(
+                            agent,
+                            &fix_prompt,
+                            &mut session_total,
+                            &agent_config.model,
+                            &session_changes,
+                        )
+                        .await;
+                        last_error = fix_outcome.last_tool_error.clone();
 
-                    // Re-run watch command to see if fix worked
-                    let (fix_ok, _fix_output) = run_watch_command(&watch_cmd);
-                    if fix_ok {
-                        eprintln!("{GREEN}  ✓ Watch passed after fix{RESET}");
-                    } else {
-                        eprintln!("{RED}  ✗ Watch still failing — manual fix needed{RESET}");
+                        // Re-run watch command to see if fix worked
+                        let (fix_ok, fix_output) = run_watch_command(&watch_cmd);
+                        if fix_ok {
+                            eprintln!(
+                                "{GREEN}  ✓ Watch passed after fix (attempt {attempt}){RESET}"
+                            );
+                            break;
+                        } else if attempt == MAX_WATCH_FIX_ATTEMPTS {
+                            eprintln!(
+                                "{RED}  ✗ Watch still failing after {MAX_WATCH_FIX_ATTEMPTS} attempts — manual fix needed{RESET}"
+                            );
+                        } else {
+                            eprintln!("{RED}  ✗ Attempt {attempt} failed, retrying...{RESET}");
+                            // Feed the latest failure output into the next fix attempt
+                            current_output = fix_output;
+                        }
                     }
                 }
             }

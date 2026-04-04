@@ -38,6 +38,9 @@ pub fn clear_watch_command() {
 /// Maximum characters of watch command output to include in fix prompts.
 const WATCH_OUTPUT_MAX: usize = 5000;
 
+/// Maximum number of auto-fix attempts when watch mode detects failures.
+pub const MAX_WATCH_FIX_ATTEMPTS: usize = 3;
+
 /// Build a prompt asking the agent to fix failures from a watch command.
 pub fn build_watch_fix_prompt(watch_cmd: &str, output: &str) -> String {
     let truncated = if output.len() > WATCH_OUTPUT_MAX {
@@ -2941,6 +2944,15 @@ mod tests {
             prompt.contains("```"),
             "prompt should wrap output in code fence"
         );
+    }
+
+    #[test]
+    fn test_max_watch_fix_attempts_constant() {
+        // The constant should exist and be a reasonable retry count (1..=10)
+        let attempts = MAX_WATCH_FIX_ATTEMPTS;
+        assert!(attempts >= 1, "should allow at least 1 attempt");
+        assert!(attempts <= 10, "should not retry excessively");
+        assert_eq!(attempts, 3, "default should be 3 attempts");
     }
 
     #[test]
