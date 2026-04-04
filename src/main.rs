@@ -202,7 +202,15 @@ pub fn create_model_config(provider: &str, model: &str, base_url: Option<&str>) 
             ModelConfig::local(url, model)
         }
         _ => {
-            // Unknown provider — treat as OpenAI-compatible with custom base URL
+            // Unknown provider — treat as OpenAI-compatible with custom base URL.
+            // Note: parse_args and /provider already warn about unknown names,
+            // but log here too as defense-in-depth for any future call sites.
+            eprintln!(
+                "{}warning:{} treating unknown provider '{}' as OpenAI-compatible (localhost:8080)",
+                crate::format::YELLOW,
+                crate::format::RESET,
+                provider
+            );
             let url = base_url.unwrap_or("http://localhost:8080/v1");
             let mut config = ModelConfig::local(url, model);
             config.provider = provider.to_string();
@@ -1057,6 +1065,28 @@ mod tests {
     }
 
     #[test]
+    fn test_build_sub_agent_tool_inherits_dir_restrictions() {
+        // Sub-agent should inherit directory restrictions from parent config
+        let mut config = test_agent_config("anthropic", "claude-sonnet-4-20250514");
+        config.dir_restrictions = cli::DirectoryRestrictions {
+            allow: vec!["./src".to_string()],
+            deny: vec!["/etc".to_string()],
+        };
+        // Should build without panic — restrictions are applied to file tools
+        let tool = build_sub_agent_tool(&config);
+        assert_eq!(tool.name(), "sub_agent");
+    }
+
+    #[test]
+    fn test_build_sub_agent_tool_no_restrictions_still_works() {
+        // Empty restrictions shouldn't break sub-agent building
+        let config = test_agent_config("anthropic", "claude-sonnet-4-20250514");
+        assert!(config.dir_restrictions.is_empty());
+        let tool = build_sub_agent_tool(&config);
+        assert_eq!(tool.name(), "sub_agent");
+    }
+
+    #[test]
     fn test_build_tools_count_unchanged_with_sub_agent() {
         // Verify build_tools still returns exactly 8 — SubAgentTool is added via with_sub_agent
         let perms = cli::PermissionConfig::default();
@@ -1679,6 +1709,26 @@ mod tests {
         );
         assert_eq!(config.provider, "minimax");
         assert_eq!(config.base_url, "https://custom.minimax.example/v1");
+    }
+
+    #[test]
+    fn test_create_model_config_unknown_provider_falls_through() {
+        // Unknown providers should be treated as OpenAI-compatible on localhost
+        let config = create_model_config("typo_provider", "some-model", None);
+        assert_eq!(config.provider, "typo_provider");
+        assert_eq!(config.base_url, "http://localhost:8080/v1");
+    }
+
+    #[test]
+    fn test_create_model_config_unknown_provider_with_base_url() {
+        // Unknown provider with explicit base URL should use that URL
+        let config = create_model_config(
+            "typo_provider",
+            "some-model",
+            Some("https://my-server.com/v1"),
+        );
+        assert_eq!(config.provider, "typo_provider");
+        assert_eq!(config.base_url, "https://my-server.com/v1");
     }
 
     #[test]

@@ -153,6 +153,62 @@ fn maybe_guard(
     }
 }
 
+/// A wrapper tool that checks directory restrictions before delegating to an Arc-wrapped inner tool.
+/// Used by sub-agents to inherit the parent's directory restrictions without needing Box ownership.
+struct ArcGuardedTool {
+    inner: Arc<dyn AgentTool>,
+    restrictions: cli::DirectoryRestrictions,
+}
+
+#[async_trait::async_trait]
+impl AgentTool for ArcGuardedTool {
+    fn name(&self) -> &str {
+        self.inner.name()
+    }
+
+    fn label(&self) -> &str {
+        self.inner.label()
+    }
+
+    fn description(&self) -> &str {
+        self.inner.description()
+    }
+
+    fn parameters_schema(&self) -> serde_json::Value {
+        self.inner.parameters_schema()
+    }
+
+    async fn execute(
+        &self,
+        params: serde_json::Value,
+        ctx: yoagent::types::ToolContext,
+    ) -> Result<yoagent::types::ToolResult, yoagent::types::ToolError> {
+        // Check the "path" parameter against directory restrictions
+        if let Some(path) = params.get("path").and_then(|v| v.as_str()) {
+            if let Err(reason) = self.restrictions.check_path(path) {
+                return Err(yoagent::types::ToolError::Failed(reason));
+            }
+        }
+        self.inner.execute(params, ctx).await
+    }
+}
+
+/// Wrap an Arc-based tool with directory restrictions if any are configured.
+/// Used for sub-agent tools which require `Arc<dyn AgentTool>`.
+fn maybe_guard_arc(
+    tool: Arc<dyn AgentTool>,
+    restrictions: &cli::DirectoryRestrictions,
+) -> Arc<dyn AgentTool> {
+    if restrictions.is_empty() {
+        tool
+    } else {
+        Arc::new(ArcGuardedTool {
+            inner: tool,
+            restrictions: restrictions.clone(),
+        })
+    }
+}
+
 /// A wrapper tool that prompts for user confirmation before executing write_file or edit_file.
 /// Shares the same `always_approved` flag with bash confirmation so "always" applies everywhere.
 /// Checks `--allow`/`--deny` patterns against file paths before prompting.
@@ -1046,17 +1102,21 @@ pub fn build_tools(
 }
 
 /// Build a SubAgentTool that inherits the parent's provider/model/key.
-/// The sub-agent gets basic tools (no permission prompts, no sub-agent recursion).
+/// The sub-agent gets basic tools with inherited directory restrictions
+/// (no permission prompts, no sub-agent recursion).
 pub(crate) fn build_sub_agent_tool(config: &AgentConfig) -> SubAgentTool {
     // Sub-agent gets standard yoagent tools — no permission guards needed
     // since the parent already authorized the delegation.
+    // Directory restrictions ARE inherited to prevent sub-agents from bypassing
+    // path-based security boundaries.
+    let restrictions = &config.dir_restrictions;
     let child_tools: Vec<Arc<dyn AgentTool>> = vec![
         Arc::new(yoagent::tools::bash::BashTool::default()),
-        Arc::new(ReadFileTool::default()),
-        Arc::new(WriteFileTool::new()),
-        Arc::new(EditFileTool::new()),
-        Arc::new(ListFilesTool::default()),
-        Arc::new(SearchTool::default()),
+        maybe_guard_arc(Arc::new(ReadFileTool::default()), restrictions),
+        maybe_guard_arc(Arc::new(WriteFileTool::new()), restrictions),
+        maybe_guard_arc(Arc::new(EditFileTool::new()), restrictions),
+        maybe_guard_arc(Arc::new(ListFilesTool::default()), restrictions),
+        maybe_guard_arc(Arc::new(SearchTool::default()), restrictions),
     ];
 
     // Select the right provider

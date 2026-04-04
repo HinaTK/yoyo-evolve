@@ -82,6 +82,23 @@ pub fn run_watch_command(cmd: &str) -> (bool, String) {
 static AUDIT_ENABLED: AtomicBool = AtomicBool::new(false);
 
 /// Enable audit logging for this session.
+/// Convert days since Unix epoch (1970-01-01) to (year, month, day).
+/// Uses the civil calendar algorithm — no external crate needed.
+fn days_from_epoch(days: u64) -> (u64, u64, u64) {
+    // Algorithm from http://howardhinnant.github.io/date_algorithms.html
+    let z = days + 719468;
+    let era = z / 146097;
+    let doe = z - era * 146097; // day of era [0, 146096]
+    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365; // year of era [0, 399]
+    let y = yoe + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100); // day of year [0, 365]
+    let mp = (5 * doy + 2) / 153; // [0, 11]
+    let d = doy - (153 * mp + 2) / 5 + 1; // [1, 31]
+    let m = if mp < 10 { mp + 3 } else { mp - 9 }; // [1, 12]
+    let y = if m <= 2 { y + 1 } else { y };
+    (y, m, d)
+}
+
 pub fn enable_audit_log() {
     AUDIT_ENABLED.store(true, Ordering::Relaxed);
 }
@@ -120,14 +137,29 @@ fn write_audit_entry(
         .append(true)
         .open(&path)?;
 
-    // Get current timestamp
-    let ts = std::process::Command::new("date")
-        .arg("+%Y-%m-%dT%H:%M:%S")
-        .output()
-        .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .map(|s| s.trim().to_string())
-        .unwrap_or_else(|| "unknown".to_string());
+    // Get current timestamp using Rust's SystemTime (no shell-out needed)
+    let ts = {
+        use std::time::SystemTime;
+        SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .map(|d| {
+                let secs = d.as_secs();
+                // Manual ISO 8601 formatting without external crate
+                let days_since_epoch = secs / 86400;
+                let time_of_day = secs % 86400;
+                let hours = time_of_day / 3600;
+                let minutes = (time_of_day % 3600) / 60;
+                let seconds = time_of_day % 60;
+
+                // Calculate year/month/day from days since epoch (1970-01-01)
+                let (year, month, day) = days_from_epoch(days_since_epoch);
+                format!(
+                    "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}",
+                    year, month, day, hours, minutes, seconds
+                )
+            })
+            .unwrap_or_else(|_| "unknown".to_string())
+    };
 
     // Truncate args to avoid huge entries (e.g., file content in write_file)
     let truncated_args = truncate_audit_args(args);
@@ -2973,5 +3005,33 @@ mod tests {
             prompt.contains(&"x".repeat(5000)),
             "first 5000 chars should appear"
         );
+    }
+
+    #[test]
+    fn test_days_from_epoch_unix_epoch() {
+        // 1970-01-01 is day 0
+        let (y, m, d) = days_from_epoch(0);
+        assert_eq!((y, m, d), (1970, 1, 1));
+    }
+
+    #[test]
+    fn test_days_from_epoch_known_date() {
+        // 2024-01-01 is 19723 days after epoch
+        let (y, m, d) = days_from_epoch(19723);
+        assert_eq!((y, m, d), (2024, 1, 1));
+    }
+
+    #[test]
+    fn test_days_from_epoch_leap_year() {
+        // 2024-02-29 is 19723 + 31 (Jan) + 28 (Feb 1-28) = 19782
+        let (y, m, d) = days_from_epoch(19782);
+        assert_eq!((y, m, d), (2024, 2, 29));
+    }
+
+    #[test]
+    fn test_days_from_epoch_y2k() {
+        // 2000-01-01 is 10957 days after epoch
+        let (y, m, d) = days_from_epoch(10957);
+        assert_eq!((y, m, d), (2000, 1, 1));
     }
 }
