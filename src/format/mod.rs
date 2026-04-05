@@ -204,28 +204,37 @@ pub fn compress_tool_output(output: &str) -> String {
 ///
 /// Matches `ESC [ <params> <final byte>` where params are digits/semicolons
 /// and final byte is an ASCII letter.
+///
+/// Uses char-based iteration to correctly handle multi-byte UTF-8 content.
+/// ANSI escape sequences are purely ASCII, so we can safely detect them
+/// by checking for ESC (\x1b) and then consuming ASCII parameter/final bytes.
 fn strip_ansi_codes(s: &str) -> String {
     let mut result = String::with_capacity(s.len());
-    let bytes = s.as_bytes();
-    let len = bytes.len();
-    let mut i = 0;
+    let mut chars = s.chars().peekable();
 
-    while i < len {
-        if bytes[i] == b'\x1b' && i + 1 < len && bytes[i + 1] == b'[' {
-            // Skip ESC [
-            i += 2;
-            // Skip parameter bytes (digits, semicolons)
-            while i < len && (bytes[i].is_ascii_digit() || bytes[i] == b';') {
-                i += 1;
+    while let Some(c) = chars.next() {
+        if c == '\x1b' {
+            // Check for CSI sequence: ESC [
+            if chars.peek() == Some(&'[') {
+                chars.next(); // consume '['
+                              // Skip parameter bytes (digits, semicolons)
+                while let Some(&p) = chars.peek() {
+                    if p.is_ascii_digit() || p == ';' {
+                        chars.next();
+                    } else {
+                        break;
+                    }
+                }
+                // Skip final byte (ASCII letter)
+                if let Some(&f) = chars.peek() {
+                    if f.is_ascii_alphabetic() {
+                        chars.next();
+                    }
+                }
             }
-            // Skip final byte (ASCII letter)
-            if i < len && bytes[i].is_ascii_alphabetic() {
-                i += 1;
-            }
+            // Non-CSI escape sequences: just skip the ESC
         } else {
-            // Safe because we're copying byte-by-byte from valid UTF-8
-            result.push(bytes[i] as char);
-            i += 1;
+            result.push(c);
         }
     }
 
@@ -249,7 +258,12 @@ fn line_category(line: &str) -> &str {
 
     // Include leading whitespace length + first word
     let prefix_len = (line.len() - trimmed.len()) + first_word_end;
-    let end = prefix_len.min(CATEGORY_PREFIX_MAX).min(line.len());
+    let mut end = prefix_len.min(CATEGORY_PREFIX_MAX).min(line.len());
+
+    // Ensure we don't slice inside a multi-byte UTF-8 character
+    while end > 0 && !line.is_char_boundary(end) {
+        end -= 1;
+    }
 
     &line[..end]
 }
@@ -1706,5 +1720,69 @@ mod tests {
         let result_lines: Vec<&str> = result.lines().collect();
         assert_eq!(result_lines.len(), 3, "got: {result}");
         assert!(result_lines[1].contains("6 more similar"));
+    }
+
+    #[test]
+    fn test_strip_ansi_preserves_multibyte_utf8() {
+        // ✓ is 3 bytes (0xE2 0x9C 0x93), 日本語 has 3-byte chars
+        let input = "\x1b[32m✓\x1b[0m passed: 日本語テスト";
+        let result = strip_ansi_codes(input);
+        assert_eq!(result, "✓ passed: 日本語テスト");
+    }
+
+    #[test]
+    fn test_strip_ansi_preserves_emoji() {
+        // Emoji are 4-byte UTF-8 characters
+        let input = "\x1b[1m🦀 Rust\x1b[0m is 🔥";
+        let result = strip_ansi_codes(input);
+        assert_eq!(result, "🦀 Rust is 🔥");
+    }
+
+    #[test]
+    fn test_strip_ansi_preserves_accented_chars() {
+        // é is 2 bytes (0xC3 0xA9)
+        let input = "\x1b[33mcafé\x1b[0m résumé";
+        let result = strip_ansi_codes(input);
+        assert_eq!(result, "café résumé");
+    }
+
+    #[test]
+    fn test_compress_multibyte_content() {
+        // End-to-end: compress_tool_output should handle multi-byte chars
+        let input = "\x1b[32m✓\x1b[0m テスト完了";
+        let result = compress_tool_output(input);
+        assert_eq!(result, "✓ テスト完了");
+    }
+
+    #[test]
+    fn test_line_category_multibyte_prefix() {
+        // "日本語テストの結" = 8 chars × 3 bytes = 24 bytes, no spaces.
+        // first_word_end = 24 (no whitespace found), prefix_len = 24,
+        // min(24, CATEGORY_PREFIX_MAX=20) = 20, but byte 20 is inside
+        // the 7th character (bytes 18-20). Must not panic.
+        let line = "日本語テストの結";
+        let _cat = line_category(line); // Should not panic
+    }
+
+    #[test]
+    fn test_line_category_multibyte_short_word() {
+        // "café something" — first word "café" is 5 chars but 6 bytes
+        let line = "café something";
+        let cat = line_category(line);
+        assert_eq!(cat, "café");
+    }
+
+    #[test]
+    fn test_collapse_repetitive_multibyte_lines() {
+        // Lines with multi-byte content that share a category
+        let mut lines = Vec::new();
+        for i in 0..6 {
+            lines.push(format!("コンパイル中 パッケージ-{i} v1.0"));
+        }
+        let input = lines.join("\n");
+        let result = collapse_repetitive_lines(&input);
+        let result_lines: Vec<&str> = result.lines().collect();
+        assert_eq!(result_lines.len(), 3, "got: {result}");
+        assert!(result_lines[1].contains("4 more similar"));
     }
 }
