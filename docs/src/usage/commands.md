@@ -83,6 +83,7 @@ See [Session Persistence](../features/sessions.md) for details.
 | `/cost` | Show estimated session cost |
 | `/config` | Show all current settings |
 | `/hooks` | Show active hooks (pre/post tool execution) |
+| `/permissions` | Show active security and permission configuration |
 | `/version` | Show yoyo version |
 
 The `/tokens` command shows a visual progress bar of your active context:

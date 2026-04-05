@@ -110,6 +110,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/teach",
     "/todo",
     "/mcp",
+    "/permissions",
 ];
 
 /// Well-known model names for `/model <Tab>` completion.
@@ -531,6 +532,70 @@ pub fn handle_hooks(hooks: &[crate::hooks::ShellHook]) {
         println!("      command: {}", hook.command);
     }
     println!("{RESET}");
+}
+
+// ── /permissions ─────────────────────────────────────────────────────────
+
+pub fn handle_permissions(
+    auto_approve: bool,
+    permissions: &crate::cli::PermissionConfig,
+    dir_restrictions: &crate::cli::DirectoryRestrictions,
+) {
+    println!("{DIM}  Security Configuration:\n");
+
+    // Auto-approve status
+    if auto_approve {
+        println!("    {YELLOW}⚠ Auto-approve: ON{RESET}{DIM} (--yes flag active)");
+        println!("      All tool operations run without confirmation{RESET}");
+    } else {
+        println!("    {GREEN}✓ Confirmation: required{RESET}");
+        println!("    {DIM}  Tools will prompt before write/edit/bash operations{RESET}");
+    }
+    println!();
+
+    // Bash command permissions
+    if permissions.is_empty() {
+        println!("    Command patterns: none configured");
+    } else {
+        if !permissions.allow.is_empty() {
+            println!("    {GREEN}Allow patterns:{RESET}");
+            for pat in &permissions.allow {
+                println!("      {GREEN}✓{RESET} {pat}");
+            }
+        }
+        if !permissions.deny.is_empty() {
+            println!("    {RED}Deny patterns:{RESET}");
+            for pat in &permissions.deny {
+                println!("      {RED}✗{RESET} {pat}");
+            }
+        }
+    }
+    println!();
+
+    // Directory restrictions
+    if dir_restrictions.is_empty() {
+        println!("    Directory restrictions: none (full filesystem access)");
+    } else {
+        if !dir_restrictions.allow.is_empty() {
+            println!("    {GREEN}Allowed directories:{RESET}");
+            for dir in &dir_restrictions.allow {
+                println!("      {GREEN}✓{RESET} {dir}");
+            }
+        }
+        if !dir_restrictions.deny.is_empty() {
+            println!("    {RED}Denied directories:{RESET}");
+            for dir in &dir_restrictions.deny {
+                println!("      {RED}✗{RESET} {dir}");
+            }
+        }
+    }
+    println!();
+
+    // Quick reference
+    println!(
+        "    {DIM}Configure with: --allow <pat>, --deny <pat>, --allow-dir <d>, --deny-dir <d>"
+    );
+    println!("    Or in .yoyo.toml: allow = [...], deny = [...]{RESET}\n");
 }
 
 // ── /changes ─────────────────────────────────────────────────────────────
@@ -3368,5 +3433,64 @@ mod tests {
     fn test_handle_mcp_unknown_subcommand() {
         // Should not panic on unknown subcommand
         handle_mcp("/mcp foobar", &[], &[], 0);
+    }
+
+    // ── /permissions command tests ──────────────────────────────────────
+
+    #[test]
+    fn test_permissions_command_recognized() {
+        assert!(!is_unknown_command("/permissions"));
+        assert!(
+            KNOWN_COMMANDS.contains(&"/permissions"),
+            "/permissions should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_handle_permissions_defaults() {
+        // No permissions, no dir restrictions, auto_approve off
+        let perms = crate::cli::PermissionConfig::default();
+        let dirs = crate::cli::DirectoryRestrictions::default();
+        handle_permissions(false, &perms, &dirs);
+    }
+
+    #[test]
+    fn test_handle_permissions_auto_approve() {
+        let perms = crate::cli::PermissionConfig::default();
+        let dirs = crate::cli::DirectoryRestrictions::default();
+        handle_permissions(true, &perms, &dirs);
+    }
+
+    #[test]
+    fn test_handle_permissions_with_patterns() {
+        let perms = crate::cli::PermissionConfig {
+            allow: vec!["cargo *".to_string(), "git *".to_string()],
+            deny: vec!["rm -rf *".to_string()],
+        };
+        let dirs = crate::cli::DirectoryRestrictions::default();
+        handle_permissions(false, &perms, &dirs);
+    }
+
+    #[test]
+    fn test_handle_permissions_with_dir_restrictions() {
+        let perms = crate::cli::PermissionConfig::default();
+        let dirs = crate::cli::DirectoryRestrictions {
+            allow: vec!["/home/user/project".to_string()],
+            deny: vec!["/etc".to_string(), "/usr".to_string()],
+        };
+        handle_permissions(false, &perms, &dirs);
+    }
+
+    #[test]
+    fn test_handle_permissions_fully_configured() {
+        let perms = crate::cli::PermissionConfig {
+            allow: vec!["cargo *".to_string()],
+            deny: vec!["rm *".to_string()],
+        };
+        let dirs = crate::cli::DirectoryRestrictions {
+            allow: vec!["/project".to_string()],
+            deny: vec!["/secret".to_string()],
+        };
+        handle_permissions(true, &perms, &dirs);
     }
 }

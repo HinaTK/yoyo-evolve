@@ -640,6 +640,14 @@ pub async fn run_repl(
                 commands::handle_hooks(&agent_config.shell_hooks);
                 continue;
             }
+            "/permissions" => {
+                commands::handle_permissions(
+                    agent_config.auto_approve,
+                    &agent_config.permissions,
+                    &agent_config.dir_restrictions,
+                );
+                continue;
+            }
             "/compact" => {
                 commands::handle_compact(agent);
                 continue;

@@ -171,3 +171,5 @@ This denies all bash commands except read-only ones, and restricts file access t
 | `--deny-dir <dir>` | File tools | Block paths under these dirs |
 | `[permissions]` in config | Bash commands | Same as `--allow`/`--deny` |
 | `[directories]` in config | File tools | Same as `--allow-dir`/`--deny-dir` |
+
+> **Tip:** Use `/permissions` during a session to see the full security posture — auto-approve status, command patterns, and directory restrictions all in one view.

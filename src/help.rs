@@ -344,6 +344,23 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 TOOL_PARAMS — JSON string of tool parameters\n\
              \x20 TOOL_OUTPUT — (post-hooks only) tool output, truncated to 1000 chars",
         ),
+        "permissions" => Some(
+            "/permissions — Show active security and permission configuration\n\n\
+             Displays the full security posture of the current session:\n\n\
+             \x20 • Auto-approve mode (--yes flag)\n\
+             \x20 • Bash command allow/deny patterns\n\
+             \x20 • Directory access restrictions\n\n\
+             Configure permissions via CLI flags:\n\
+             \x20 --allow <pattern>     Auto-approve matching bash commands\n\
+             \x20 --deny <pattern>      Block matching bash commands\n\
+             \x20 --allow-dir <path>    Restrict file access to these directories\n\
+             \x20 --deny-dir <path>     Block file access to these directories\n\n\
+             Or in .yoyo.toml:\n\
+             \x20 allow = [\"cargo *\", \"git *\"]\n\
+             \x20 deny = [\"rm -rf *\"]\n\
+             \x20 allow_dir = [\"/home/user/project\"]\n\
+             \x20 deny_dir = [\"/etc\", \"/usr\"]",
+        ),
         "search" => Some(
             "/search <query> — Search conversation history\n\n\
              Usage:\n\
@@ -706,6 +723,7 @@ pub fn help_text() -> String {
     out.push_str("  /cost              Show estimated session cost\n");
     out.push_str("  /config            Show all current settings\n");
     out.push_str("  /hooks             Show active hooks (pre/post tool execution)\n");
+    out.push_str("  /permissions       Show active security and permission configuration\n");
     out.push_str("  /version           Show yoyo version\n");
     out.push_str("  /update            Check for and install the latest version\n");
     out.push_str("  /history           Show summary of conversation messages\n");
@@ -885,6 +903,7 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "model" => Some("Switch or show current model"),
         "move" => Some("Move a method between files"),
         "plan" => Some("AI-generate a task plan"),
+        "permissions" => Some("Show active security and permission configuration"),
         "pr" => Some("List, view, or create pull requests"),
         "provider" => Some("Switch or show current provider"),
         "quit" => Some("Exit yoyo"),
@@ -1003,9 +1022,27 @@ mod tests {
         // Session commands should appear between Session and Git headers
         let session_section = &text[session_start..git_start];
         for cmd in &[
-            "/help", "/quit", "/clear", "/compact", "/save", "/load", "/retry", "/status",
-            "/tokens", "/cost", "/config", "/version", "/history", "/search", "/mark", "/jump",
-            "/marks", "/changes", "/stash", "/todo",
+            "/help",
+            "/quit",
+            "/clear",
+            "/compact",
+            "/save",
+            "/load",
+            "/retry",
+            "/status",
+            "/tokens",
+            "/cost",
+            "/config",
+            "/version",
+            "/history",
+            "/search",
+            "/mark",
+            "/jump",
+            "/marks",
+            "/changes",
+            "/stash",
+            "/todo",
+            "/permissions",
         ] {
             assert!(
                 session_section.contains(cmd),
