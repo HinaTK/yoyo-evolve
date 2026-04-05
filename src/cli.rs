@@ -341,6 +341,172 @@ pub fn parse_directories_from_config(content: &str) -> DirectoryRestrictions {
     config
 }
 
+/// Parse `[mcp_servers.<name>]` sections from raw config content.
+///
+/// Each section defines a named MCP server with a command, optional args, and optional env vars:
+/// ```toml
+/// [mcp_servers.filesystem]
+/// command = "npx"
+/// args = ["-y", "@modelcontextprotocol/server-filesystem", "/path"]
+///
+/// [mcp_servers.postgres]
+/// command = "npx"
+/// args = ["-y", "@modelcontextprotocol/server-postgres"]
+/// env = { DATABASE_URL = "postgresql://localhost/mydb" }
+/// ```
+pub fn parse_mcp_servers_from_config(content: &str) -> Vec<McpServerConfig> {
+    let mut servers: Vec<McpServerConfig> = Vec::new();
+    let mut current_name: Option<String> = None;
+    let mut current_command: Option<String> = None;
+    let mut current_args: Vec<String> = Vec::new();
+    let mut current_env: Vec<(String, String)> = Vec::new();
+
+    // Helper: flush accumulated server data into the result vec
+    let flush = |name: &mut Option<String>,
+                 command: &mut Option<String>,
+                 args: &mut Vec<String>,
+                 env: &mut Vec<(String, String)>,
+                 servers: &mut Vec<McpServerConfig>| {
+        if let (Some(n), Some(c)) = (name.take(), command.take()) {
+            servers.push(McpServerConfig {
+                name: n,
+                command: c,
+                args: std::mem::take(args),
+                env: std::mem::take(env),
+            });
+        } else {
+            // Reset even if incomplete
+            *name = None;
+            *command = None;
+            args.clear();
+            env.clear();
+        }
+    };
+
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+
+        // Detect section headers
+        if trimmed.starts_with('[') && trimmed.ends_with(']') {
+            // Flush any previous MCP server
+            flush(
+                &mut current_name,
+                &mut current_command,
+                &mut current_args,
+                &mut current_env,
+                &mut servers,
+            );
+
+            let section = &trimmed[1..trimmed.len() - 1];
+            if let Some(name) = section.strip_prefix("mcp_servers.") {
+                let name = name.trim();
+                if !name.is_empty() {
+                    current_name = Some(name.to_string());
+                }
+            }
+            continue;
+        }
+
+        // Only parse key=value lines inside an mcp_servers section
+        if current_name.is_none() {
+            continue;
+        }
+
+        if let Some((key, value)) = trimmed.split_once('=') {
+            let key = key.trim();
+            let value = value.trim();
+            match key {
+                "command" => {
+                    let v = strip_quotes(value);
+                    if !v.is_empty() {
+                        current_command = Some(v);
+                    }
+                }
+                "args" => {
+                    current_args = parse_toml_array(value);
+                }
+                "env" => {
+                    current_env = parse_inline_table(value);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    // Flush the last server
+    flush(
+        &mut current_name,
+        &mut current_command,
+        &mut current_args,
+        &mut current_env,
+        &mut servers,
+    );
+
+    servers
+}
+
+/// Strip surrounding quotes from a TOML string value.
+fn strip_quotes(s: &str) -> String {
+    let s = s.trim();
+    if (s.starts_with('"') && s.ends_with('"')) || (s.starts_with('\'') && s.ends_with('\'')) {
+        if s.len() >= 2 {
+            s[1..s.len() - 1].to_string()
+        } else {
+            String::new()
+        }
+    } else {
+        s.to_string()
+    }
+}
+
+/// Parse a simple inline TOML table like `{ KEY = "value", KEY2 = "value2" }`.
+/// Returns a list of (key, value) pairs.
+fn parse_inline_table(s: &str) -> Vec<(String, String)> {
+    let s = s.trim();
+    // Strip surrounding braces
+    let inner = if s.starts_with('{') && s.ends_with('}') {
+        &s[1..s.len() - 1]
+    } else {
+        return Vec::new();
+    };
+
+    let mut result = Vec::new();
+    for pair in inner.split(',') {
+        let pair = pair.trim();
+        if pair.is_empty() {
+            continue;
+        }
+        if let Some((k, v)) = pair.split_once('=') {
+            let k = k.trim().to_string();
+            let v = strip_quotes(v);
+            if !k.is_empty() {
+                result.push((k, v));
+            }
+        }
+    }
+    result
+}
+
+/// Configuration for an MCP (Model Context Protocol) server defined in config TOML sections.
+///
+/// Parsed from `[mcp_servers.<name>]` sections in `.yoyo.toml` or user config:
+/// ```toml
+/// [mcp_servers.filesystem]
+/// command = "npx"
+/// args = ["-y", "@modelcontextprotocol/server-filesystem", "/path"]
+/// env = { DATABASE_URL = "postgresql://localhost/mydb" }
+/// ```
+#[derive(Debug, Clone)]
+pub struct McpServerConfig {
+    pub name: String,
+    pub command: String,
+    pub args: Vec<String>,
+    pub env: Vec<(String, String)>,
+}
+
 /// Parsed CLI configuration.
 pub struct Config {
     pub model: String,
@@ -359,6 +525,7 @@ pub struct Config {
     pub image_path: Option<String>,
     pub verbose: bool,
     pub mcp_servers: Vec<String>,
+    pub mcp_server_configs: Vec<McpServerConfig>,
     pub openapi_specs: Vec<String>,
     pub auto_approve: bool,
     pub permissions: PermissionConfig,
@@ -1482,6 +1649,9 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         }
     }
 
+    // Parse structured [mcp_servers.*] sections from config file
+    let mcp_server_configs = parse_mcp_servers_from_config(&raw_config_content);
+
     // --openapi <spec-path> flags: collect all OpenAPI spec paths (repeatable)
     let openapi_specs: Vec<String> = args
         .iter()
@@ -1524,6 +1694,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         image_path,
         verbose,
         mcp_servers,
+        mcp_server_configs,
         openapi_specs,
         auto_approve,
         permissions,
@@ -3472,5 +3643,174 @@ system_prompt = "You are a Go expert"
         let args: Vec<String> = vec!["yoyo".into(), "--api-key".into(), "sk-test".into()];
         let config = parse_args(&args).expect("should parse");
         assert!(!config.print_system_prompt);
+    }
+
+    #[test]
+    fn test_mcp_server_config_struct() {
+        let cfg = McpServerConfig {
+            name: "filesystem".to_string(),
+            command: "npx".to_string(),
+            args: vec![
+                "-y".to_string(),
+                "@modelcontextprotocol/server-filesystem".to_string(),
+                "/path/to/dir".to_string(),
+            ],
+            env: vec![("NODE_ENV".to_string(), "production".to_string())],
+        };
+        assert_eq!(cfg.name, "filesystem");
+        assert_eq!(cfg.command, "npx");
+        assert_eq!(cfg.args.len(), 3);
+        assert_eq!(cfg.env.len(), 1);
+        assert_eq!(cfg.env[0].0, "NODE_ENV");
+        assert_eq!(cfg.env[0].1, "production");
+    }
+
+    #[test]
+    fn test_parse_mcp_servers_basic() {
+        let content = r#"
+model = "claude-sonnet-4-20250514"
+
+[mcp_servers.filesystem]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/dir"]
+
+[mcp_servers.postgres]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-postgres"]
+env = { DATABASE_URL = "postgresql://localhost/mydb" }
+"#;
+        let servers = parse_mcp_servers_from_config(content);
+        assert_eq!(servers.len(), 2);
+
+        assert_eq!(servers[0].name, "filesystem");
+        assert_eq!(servers[0].command, "npx");
+        assert_eq!(
+            servers[0].args,
+            vec![
+                "-y",
+                "@modelcontextprotocol/server-filesystem",
+                "/path/to/dir"
+            ]
+        );
+        assert!(servers[0].env.is_empty());
+
+        assert_eq!(servers[1].name, "postgres");
+        assert_eq!(servers[1].command, "npx");
+        assert_eq!(
+            servers[1].args,
+            vec!["-y", "@modelcontextprotocol/server-postgres"]
+        );
+        assert_eq!(servers[1].env.len(), 1);
+        assert_eq!(servers[1].env[0].0, "DATABASE_URL");
+        assert_eq!(servers[1].env[0].1, "postgresql://localhost/mydb");
+    }
+
+    #[test]
+    fn test_parse_mcp_servers_empty_config() {
+        let content = r#"
+model = "claude-sonnet-4-20250514"
+
+[permissions]
+allow = ["git *"]
+"#;
+        let servers = parse_mcp_servers_from_config(content);
+        assert!(servers.is_empty());
+    }
+
+    #[test]
+    fn test_parse_mcp_servers_no_args_or_env() {
+        let content = r#"
+[mcp_servers.simple]
+command = "my-server"
+"#;
+        let servers = parse_mcp_servers_from_config(content);
+        assert_eq!(servers.len(), 1);
+        assert_eq!(servers[0].name, "simple");
+        assert_eq!(servers[0].command, "my-server");
+        assert!(servers[0].args.is_empty());
+        assert!(servers[0].env.is_empty());
+    }
+
+    #[test]
+    fn test_parse_mcp_servers_multiple_env_vars() {
+        let content = r#"
+[mcp_servers.mydb]
+command = "db-server"
+args = ["--verbose"]
+env = { DB_HOST = "localhost", DB_PORT = "5432", DB_NAME = "mydb" }
+"#;
+        let servers = parse_mcp_servers_from_config(content);
+        assert_eq!(servers.len(), 1);
+        assert_eq!(servers[0].env.len(), 3);
+        // Check all env vars are present (order may vary within inline table)
+        let env_keys: Vec<&str> = servers[0].env.iter().map(|(k, _)| k.as_str()).collect();
+        assert!(env_keys.contains(&"DB_HOST"));
+        assert!(env_keys.contains(&"DB_PORT"));
+        assert!(env_keys.contains(&"DB_NAME"));
+    }
+
+    #[test]
+    fn test_parse_mcp_servers_skips_incomplete() {
+        // Missing command should be skipped
+        let content = r#"
+[mcp_servers.broken]
+args = ["-y", "something"]
+
+[mcp_servers.valid]
+command = "good-server"
+"#;
+        let servers = parse_mcp_servers_from_config(content);
+        assert_eq!(servers.len(), 1);
+        assert_eq!(servers[0].name, "valid");
+    }
+
+    #[test]
+    fn test_parse_mcp_servers_mixed_with_other_sections() {
+        let content = r#"
+model = "gpt-4o"
+
+[permissions]
+allow = ["git *"]
+
+[mcp_servers.first]
+command = "server-one"
+args = ["-a"]
+
+[directories]
+allow = ["./src"]
+
+[mcp_servers.second]
+command = "server-two"
+"#;
+        let servers = parse_mcp_servers_from_config(content);
+        assert_eq!(servers.len(), 2);
+        assert_eq!(servers[0].name, "first");
+        assert_eq!(servers[1].name, "second");
+    }
+
+    #[test]
+    fn test_strip_quotes() {
+        assert_eq!(strip_quotes("\"hello\""), "hello");
+        assert_eq!(strip_quotes("'hello'"), "hello");
+        assert_eq!(strip_quotes("hello"), "hello");
+        assert_eq!(strip_quotes("\"\""), "");
+        assert_eq!(strip_quotes(""), "");
+    }
+
+    #[test]
+    fn test_parse_inline_table() {
+        let result = parse_inline_table("{ KEY = \"value\", OTHER = \"val2\" }");
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0], ("KEY".to_string(), "value".to_string()));
+        assert_eq!(result[1], ("OTHER".to_string(), "val2".to_string()));
+    }
+
+    #[test]
+    fn test_parse_inline_table_empty() {
+        let result = parse_inline_table("{}");
+        assert!(result.is_empty());
+
+        let result = parse_inline_table("not a table");
+        assert!(result.is_empty());
     }
 }

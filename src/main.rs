@@ -527,6 +527,7 @@ async fn main() {
     let continue_session = config.continue_session;
     let output_path = config.output_path;
     let mcp_servers = config.mcp_servers;
+    let mcp_server_configs = config.mcp_server_configs;
     let openapi_specs = config.openapi_specs;
     let image_path = config.image_path;
     let no_update_check = config.no_update_check;
@@ -620,6 +621,39 @@ async fn main() {
             Err(e) => {
                 eprintln!("{RED}  ✗ mcp: failed to connect to '{mcp_cmd}': {e}{RESET}");
                 // Agent was consumed on error — rebuild it with previous MCP connections lost
+                agent = agent_config.build_agent();
+                eprintln!("{DIM}  mcp: agent rebuilt (previous MCP connections lost){RESET}");
+            }
+        }
+    }
+
+    // Connect to structured MCP servers ([mcp_servers.*] config sections)
+    for server_cfg in &mcp_server_configs {
+        let args_refs: Vec<&str> = server_cfg.args.iter().map(|s| s.as_str()).collect();
+        let env_map: Option<std::collections::HashMap<String, String>> =
+            if server_cfg.env.is_empty() {
+                None
+            } else {
+                Some(server_cfg.env.iter().cloned().collect())
+            };
+        eprintln!(
+            "{DIM}  mcp: connecting to {} ({})...{RESET}",
+            server_cfg.name, server_cfg.command
+        );
+        let result = agent
+            .with_mcp_server_stdio(&server_cfg.command, &args_refs, env_map)
+            .await;
+        match result {
+            Ok(updated) => {
+                agent = updated;
+                mcp_count += 1;
+                eprintln!("{GREEN}  ✓ mcp: {} connected{RESET}", server_cfg.name);
+            }
+            Err(e) => {
+                eprintln!(
+                    "{RED}  ✗ mcp: failed to connect to '{}': {e}{RESET}",
+                    server_cfg.name
+                );
                 agent = agent_config.build_agent();
                 eprintln!("{DIM}  mcp: agent rebuilt (previous MCP connections lost){RESET}");
             }
@@ -855,6 +889,8 @@ async fn main() {
         openapi_count,
         continue_session,
         update_available,
+        mcp_servers,
+        mcp_server_configs,
     )
     .await;
 }

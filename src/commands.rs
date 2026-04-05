@@ -109,6 +109,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/stash",
     "/teach",
     "/todo",
+    "/mcp",
 ];
 
 /// Well-known model names for `/model <Tab>` completion.
@@ -698,6 +699,95 @@ pub fn handle_teach(input: &str) {
         _ => {
             println!("{DIM}  usage: /teach [on|off]");
             println!("  Toggle teach mode. When active, yoyo explains its reasoning as it works.{RESET}\n");
+        }
+    }
+}
+
+/// Handle the `/mcp` command: list configured MCP servers and show help.
+pub fn handle_mcp(
+    input: &str,
+    cli_servers: &[String],
+    server_configs: &[crate::cli::McpServerConfig],
+    mcp_count: u32,
+) {
+    let arg = input.strip_prefix("/mcp").unwrap_or("").trim();
+
+    match arg {
+        "help" => {
+            println!("{DIM}  MCP (Model Context Protocol) Server Configuration");
+            println!();
+            println!("  Add MCP servers to .yoyo.toml or ~/.config/yoyo/config.toml:");
+            println!();
+            println!("  # Structured format (recommended):");
+            println!("  [mcp_servers.filesystem]");
+            println!("  command = \"npx\"");
+            println!("  args = [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/path\"]");
+            println!();
+            println!("  [mcp_servers.postgres]");
+            println!("  command = \"npx\"");
+            println!("  args = [\"-y\", \"@modelcontextprotocol/server-postgres\"]");
+            println!("  env = {{ DATABASE_URL = \"postgresql://localhost/mydb\" }}");
+            println!();
+            println!("  # Simple format (legacy):");
+            println!("  mcp = [\"npx -y @modelcontextprotocol/server-filesystem /path\"]");
+            println!();
+            println!("  Or pass via CLI:");
+            println!("  yoyo --mcp \"npx -y @modelcontextprotocol/server-filesystem /path\"");
+            println!();
+            println!("  Subcommands:");
+            println!("    /mcp         List configured MCP servers");
+            println!("    /mcp list    List configured MCP servers");
+            println!("    /mcp help    Show this help{RESET}\n");
+        }
+        "" | "list" => {
+            let has_cli = !cli_servers.is_empty();
+            let has_configs = !server_configs.is_empty();
+
+            if !has_cli && !has_configs {
+                println!("{DIM}  No MCP servers configured.");
+                println!();
+                println!("  Add servers to .yoyo.toml:");
+                println!("    [mcp_servers.myserver]");
+                println!("    command = \"npx\"");
+                println!("    args = [\"-y\", \"@modelcontextprotocol/server-example\"]");
+                println!();
+                println!("  See /mcp help for more details.{RESET}\n");
+                return;
+            }
+
+            println!("{DIM}  MCP Servers:");
+
+            // List structured configs first
+            for cfg in server_configs {
+                let full_cmd = if cfg.args.is_empty() {
+                    cfg.command.clone()
+                } else {
+                    format!("{} {}", cfg.command, cfg.args.join(" "))
+                };
+                println!("    {:<14}{}", cfg.name, full_cmd);
+            }
+
+            // List CLI --mcp servers
+            for cmd in cli_servers {
+                // Use the command name (first word) as an identifier
+                let label = cmd.split_whitespace().next().unwrap_or("unknown");
+                println!("    {:<14}{}", label, cmd);
+            }
+
+            let total = cli_servers.len() + server_configs.len();
+            println!();
+            if mcp_count > 0 {
+                println!(
+                    "  {} server(s) configured, {} connected{RESET}\n",
+                    total, mcp_count
+                );
+            } else {
+                println!("  {} server(s) configured (not connected — MCP protocol support coming soon){RESET}\n", total);
+            }
+        }
+        _ => {
+            println!("{DIM}  Unknown /mcp subcommand: {arg}");
+            println!("  Usage: /mcp [list|help]{RESET}\n");
         }
     }
 }
@@ -3233,5 +3323,50 @@ mod tests {
     fn test_teach_short_description_exists() {
         let desc = crate::help::command_short_description("teach");
         assert!(desc.is_some(), "teach should have a short description");
+    }
+
+    #[test]
+    fn test_mcp_in_known_commands() {
+        assert!(
+            KNOWN_COMMANDS.contains(&"/mcp"),
+            "/mcp should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_mcp_short_description_exists() {
+        let desc = crate::help::command_short_description("mcp");
+        assert!(desc.is_some(), "mcp should have a short description");
+    }
+
+    #[test]
+    fn test_handle_mcp_no_servers() {
+        // Should not panic with empty server lists
+        handle_mcp("/mcp", &[], &[], 0);
+        handle_mcp("/mcp list", &[], &[], 0);
+        handle_mcp("/mcp help", &[], &[], 0);
+    }
+
+    #[test]
+    fn test_handle_mcp_with_configs() {
+        use crate::cli::McpServerConfig;
+        let configs = vec![McpServerConfig {
+            name: "filesystem".to_string(),
+            command: "npx".to_string(),
+            args: vec![
+                "-y".to_string(),
+                "@modelcontextprotocol/server-filesystem".to_string(),
+            ],
+            env: vec![],
+        }];
+        // Should not panic
+        handle_mcp("/mcp", &[], &configs, 0);
+        handle_mcp("/mcp list", &[], &configs, 1);
+    }
+
+    #[test]
+    fn test_handle_mcp_unknown_subcommand() {
+        // Should not panic on unknown subcommand
+        handle_mcp("/mcp foobar", &[], &[], 0);
     }
 }

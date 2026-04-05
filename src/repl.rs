@@ -272,6 +272,7 @@ pub fn collect_multiline_rl(
 ///
 /// Takes ownership of the agent config and agent, plus state flags from main.
 /// Returns when the user exits (via /quit, /exit, Ctrl-D, etc.).
+#[allow(clippy::too_many_arguments)]
 pub async fn run_repl(
     agent_config: &mut AgentConfig,
     agent: &mut yoagent::agent::Agent,
@@ -279,6 +280,8 @@ pub async fn run_repl(
     openapi_count: u32,
     continue_session: bool,
     update_available: Option<String>,
+    mcp_cli_servers: Vec<String>,
+    mcp_server_configs: Vec<crate::cli::McpServerConfig>,
 ) {
     let cwd = std::env::current_dir()
         .map(|p| p.display().to_string())
@@ -771,6 +774,10 @@ pub async fn run_repl(
             }
             s if s == "/teach" || s.starts_with("/teach ") => {
                 commands::handle_teach(input);
+                continue;
+            }
+            s if s == "/mcp" || s.starts_with("/mcp ") => {
+                commands::handle_mcp(input, &mcp_cli_servers, &mcp_server_configs, mcp_count);
                 continue;
             }
             s if s == "/ast" || s.starts_with("/ast ") => {

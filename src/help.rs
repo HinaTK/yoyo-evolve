@@ -669,6 +669,20 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 • Summarizes what you should learn after each task\n\n\
              Great for learning while the agent codes. Session-only — resets when you exit.",
         ),
+        "mcp" => Some(
+            "/mcp — List and manage MCP server connections\n\n\
+             Usage:\n\
+             \x20 /mcp         List configured MCP servers\n\
+             \x20 /mcp list    List configured MCP servers\n\
+             \x20 /mcp help    Show configuration guide\n\n\
+             MCP (Model Context Protocol) lets you connect external tool servers.\n\
+             Configure servers in .yoyo.toml:\n\n\
+             \x20 [mcp_servers.filesystem]\n\
+             \x20 command = \"npx\"\n\
+             \x20 args = [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/path\"]\n\n\
+             Or pass via CLI:\n\
+             \x20 yoyo --mcp \"npx -y @modelcontextprotocol/server-filesystem /path\"",
+        ),
         _ => None,
     }
 }
@@ -792,6 +806,7 @@ pub fn help_text() -> String {
     );
     out.push_str("  /memories          List project-specific memories for this directory\n");
     out.push_str("  /forget <n>        Remove a project memory by index\n");
+    out.push_str("  /mcp [list|help]   List and manage MCP server connections\n");
     out.push('\n');
 
     // ── Input ──
@@ -863,6 +878,7 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "lint" => Some("Run project linter"),
         "load" => Some("Load session from file"),
         "map" => Some("Show project symbol map"),
+        "mcp" => Some("List and manage MCP server connections"),
         "mark" => Some("Bookmark current conversation state"),
         "marks" => Some("List saved bookmarks"),
         "memories" => Some("Show saved memories"),
