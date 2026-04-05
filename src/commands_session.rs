@@ -572,7 +572,7 @@ pub fn spawn_context_prompt(
     // Include project context if available
     if let Some(ctx) = project_context {
         let truncated = if ctx.len() > 8000 {
-            format!("{}...\n(truncated)", &ctx[..8000])
+            format!("{}...\n(truncated)", safe_truncate(ctx, 8000))
         } else {
             ctx.to_string()
         };

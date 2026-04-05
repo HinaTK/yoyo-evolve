@@ -916,7 +916,7 @@ pub fn build_review_prompt(label: &str, content: &str) -> String {
     // Truncate if very large
     let max_chars = 30_000;
     let content_preview = if content.len() > max_chars {
-        let truncated = &content[..max_chars];
+        let truncated = safe_truncate(content, max_chars);
         format!(
             "{truncated}\n\n... (truncated, {} more chars)",
             content.len() - max_chars

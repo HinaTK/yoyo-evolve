@@ -1027,7 +1027,7 @@ pub async fn run_repl(
                     eprintln!("{RED}  ✗ Watch failed: `{watch_cmd}`{RESET}");
                     // Show truncated output
                     let display_output = if output.len() > 2000 {
-                        format!("{}...\n(truncated)", &output[..2000])
+                        format!("{}...\n(truncated)", safe_truncate(&output, 2000))
                     } else {
                         output.clone()
                     };

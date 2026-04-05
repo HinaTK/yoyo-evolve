@@ -476,7 +476,7 @@ pub fn build_pr_description_prompt(branch: &str, base: &str, commits: &str, diff
     // Truncate diff if it's very large to stay within context limits
     let max_diff_chars = 15_000;
     let diff_preview = if diff.len() > max_diff_chars {
-        let truncated = &diff[..max_diff_chars];
+        let truncated = safe_truncate(diff, max_diff_chars);
         format!(
             "{truncated}\n\n... (diff truncated, {} more chars)",
             diff.len() - max_diff_chars
