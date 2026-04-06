@@ -1921,6 +1921,10 @@ $ALL_ISSUES
 ${ISSUE_RESPONSE_PLAN:+
 Here is what the planning agent decided for each issue:
 $ISSUE_RESPONSE_PLAN
+
+IMPORTANT: If the planning agent drafted a response for an issue, you MUST post it.
+The planning agent already decided this issue deserves a reply — do not second-guess that.
+Adapt the wording to your voice, but always post the response.
 }
 Here are the commits you made this session:
 $SESSION_COMMITS
