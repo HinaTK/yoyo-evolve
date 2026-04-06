@@ -5,7 +5,7 @@
 #   ANTHROPIC_API_KEY=sk-... ./scripts/evolve-local.sh
 #
 # This runs the real evolve.sh but inside a git worktree so nothing
-# touches your main branch. DAY_COUNT, JOURNAL.md, commits — all isolated.
+# touches your main branch. DAY_COUNT, journals/JOURNAL.md, commits — all isolated.
 
 set -euo pipefail
 
@@ -47,7 +47,7 @@ echo "Branch:   $BRANCH"
 echo ""
 echo "Inspect results:"
 echo "  cd $WORKTREE_DIR && git log --oneline"
-echo "  cat $WORKTREE_DIR/JOURNAL.md"
+echo "  cat $WORKTREE_DIR/journals/JOURNAL.md"
 echo "  cat $WORKTREE_DIR/src/main.rs"
 echo ""
 echo "Clean up when done:"

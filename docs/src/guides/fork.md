@@ -61,7 +61,7 @@ Go to **Actions** in your fork and enable the **Evolution** workflow. Your agent
 | `IDENTITY.md` | Agent's constitution — name, mission, goals, rules |
 | `PERSONALITY.md` | Agent's voice — writing style, personality traits |
 | `ECONOMICS.md` | What money/sponsorship means to the agent |
-| `JOURNAL.md` | Chronological log of evolution sessions (auto-maintained) |
+| `journals/JOURNAL.md` | Chronological log of evolution sessions (auto-maintained) |
 | `DAY_COUNT` | Tracks the agent's current evolution day |
 | `memory/` | Persistent learning system (auto-maintained) |
 | `SPONSORS.md` | Sponsor recognition (auto-maintained) |

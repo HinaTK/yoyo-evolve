@@ -841,7 +841,7 @@ Steps:
 
 1. **Read your source code** — all .rs files under src/ (this is YOU). Note module structure, line counts, key entry points.
 
-2. **Read recent history** — JOURNAL.md (last 10 entries), git log (last 10 commits). Summarize what changed recently.
+2. **Read recent history** — journals/JOURNAL.md (last 10 entries), git log (last 10 commits). Summarize what changed recently. Also check journals/ for any external project journals (e.g., journals/llm-wiki.md) and briefly note recent external work.
 
 3. **Read memory files** — memory/active_learnings.md, memory/active_social_learnings.md. Note any recurring themes or blockers.
 
@@ -936,7 +936,7 @@ else
     ASSESSMENT_SECTION="=== NO ASSESSMENT AVAILABLE ===
 The assessment agent did not produce output. Before writing tasks, quickly read:
 1. All .rs files under src/ — note module structure and recent changes
-2. JOURNAL.md — last 5 entries for recent context
+2. journals/JOURNAL.md — last 5 entries for recent context
 3. git log --oneline -10 — recent commit history
 Keep this investigation brief — focus on gathering enough context to write good tasks."
 fi
@@ -1753,7 +1753,9 @@ FIXEOF
 done
 
 # ── Step 6b: Ensure journal was written ──
-if ! grep -q "## Day $DAY.*$SESSION_TIME" JOURNAL.md 2>/dev/null; then
+mkdir -p journals
+[ -f journals/JOURNAL.md ] || echo "# Journal" > journals/JOURNAL.md
+if ! grep -q "## Day $DAY.*$SESSION_TIME" journals/JOURNAL.md 2>/dev/null; then
     echo "  No journal entry found — running agent to write one..."
     COMMITS=$(git log --oneline "$SESSION_START_SHA"..HEAD --format="%s" | grep -v "session wrap-up\|cargo fmt" | sed "s/Day $DAY[^:]*: //" | paste -sd ", " - || true)
     if [ -z "$COMMITS" ]; then
@@ -1772,14 +1774,15 @@ This session's commits: $COMMITS
 ${ACCELERATED_BY:+
 This was an ACCELERATED run funded by @$ACCELERATED_BY (one-time sponsor). Thank them in your journal entry!
 }
-Read JOURNAL.md to see your previous entries and match the voice/style.
+Read journals/JOURNAL.md to see your previous entries and match the voice/style.
+Also check for other .md files in journals/ (e.g., journals/llm-wiki.md) — these are journals from external projects you work on. If there are recent entries, briefly mention that work too.
 Then read the communicate skill for formatting rules.
 
-Write a journal entry at the TOP of JOURNAL.md (below the # Journal heading).
+Write a journal entry at the TOP of journals/JOURNAL.md (below the # Journal heading).
 Format: ## Day $DAY — $SESSION_TIME — [short title]
-Then 2-4 sentences: what you did, what worked, what's next.
+Then 2-4 sentences: what you did, what worked, what's next. If you worked on external projects, mention it briefly.
 
-Be specific and honest. Then commit: git add JOURNAL.md && git commit -m "Day $DAY ($SESSION_TIME): journal entry"
+Be specific and honest. Then commit: git add journals/JOURNAL.md && git commit -m "Day $DAY ($SESSION_TIME): journal entry"
 JEOF
 
     ${TIMEOUT_CMD:+$TIMEOUT_CMD 120} "$YOYO_BIN" \
@@ -1789,7 +1792,7 @@ JEOF
     rm -f "$JOURNAL_PROMPT"
 
     # Final fallback if agent still didn't write it
-    if ! grep -q "## Day $DAY.*$SESSION_TIME" JOURNAL.md 2>/dev/null; then
+    if ! grep -q "## Day $DAY.*$SESSION_TIME" journals/JOURNAL.md 2>/dev/null; then
         echo "  Agent still skipped journal — using fallback."
         TMPJ=$(mktemp)
         {
@@ -1799,9 +1802,9 @@ JEOF
             echo ""
             echo "Session commits: $COMMITS."
             echo ""
-            tail -n +2 JOURNAL.md
+            tail -n +2 journals/JOURNAL.md
         } > "$TMPJ"
-        mv "$TMPJ" JOURNAL.md
+        mv "$TMPJ" journals/JOURNAL.md
     fi
 fi
 
@@ -1817,7 +1820,7 @@ $YOYO_CONTEXT
 
 This session's commits: $COMMITS_FOR_REFLECTION
 
-Read JOURNAL.md. Then reflect: what did this session teach you about how you work, what you value, or how you're growing? (Your learnings are already loaded above in SELF-WISDOM.)
+Read journals/JOURNAL.md. Then reflect: what did this session teach you about how you work, what you value, or how you're growing? (Your learnings are already loaded above in SELF-WISDOM.)
 
 This is self-reflection — not technical notes. A good lesson is about YOU:
 - A habit or tendency you noticed in yourself

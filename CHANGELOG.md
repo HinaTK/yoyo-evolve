@@ -301,7 +301,7 @@ The codebase evolved from a single 200-line `main.rs` to 12 focused modules (~17
 
 - **3-phase evolution pipeline** (`scripts/evolve.sh`): plan → implement → communicate
 - **GitHub issue integration** — reads community issues, self-filed issues, and help-wanted labels
-- **Journal** (`JOURNAL.md`) — chronological log of every evolution session
+- **Journal** (`journals/JOURNAL.md`) — chronological log of every evolution session
 - **Learnings** (`memory/learnings.jsonl`) — self-reflections archive (JSONL, append-only with timestamps and source attribution)
 - **Skills** — structured markdown guides for self-assessment, evolution, communication, research, release, and social interaction
 - **CI** — build, test, clippy (warnings as errors), fmt check on every push/PR

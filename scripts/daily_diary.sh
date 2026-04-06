@@ -40,7 +40,7 @@ JOURNAL=$(awk -v day="$DAY" '
         if (n == day) { printing=1 } else { printing=0 }
     }
     printing { print }
-' "$YOYO_REPO/JOURNAL.md")
+' "$YOYO_REPO/journals/JOURNAL.md")
 
 if [ -z "$JOURNAL" ]; then
     echo "No journal entries found for Day $DAY" >&2

@@ -506,7 +506,7 @@ def build():
     except (ValueError, AttributeError):
         pass
 
-    journal_html = render_journal(parse_journal(read_file("JOURNAL.md")))
+    journal_html = render_journal(parse_journal(read_file("journals/JOURNAL.md")))
     identity_html = render_identity(parse_identity(read_file("IDENTITY.md")))
 
     page = HTML_TEMPLATE.format(

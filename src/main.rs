@@ -1,7 +1,7 @@
 //! yoyo — a coding agent that evolves itself.
 //!
 //! Started as ~200 lines. Grows one commit at a time.
-//! Read IDENTITY.md and JOURNAL.md for the full story.
+//! Read IDENTITY.md and journals/JOURNAL.md for the full story.
 //!
 //! Usage:
 //!   ANTHROPIC_API_KEY=sk-... cargo run

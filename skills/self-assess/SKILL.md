@@ -21,7 +21,7 @@ You are assessing yourself. Your source code is your body. Read it critically.
    - Did you give a bad error message? What should it say?
    - Was something slow or clunky?
    - Is there a feature you needed but didn't have?
-5. **Check JOURNAL.md.** Have you tried something before that failed? Don't repeat the same mistake.
+5. **Check journals/JOURNAL.md.** Have you tried something before that failed? Don't repeat the same mistake.
 
 ## What to look for
 

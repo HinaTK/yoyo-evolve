@@ -241,9 +241,20 @@ fi
 # ── Step 5: Read context files ──
 echo "→ Reading context..."
 JOURNAL_RECENT=""
-if [ -f JOURNAL.md ]; then
-    JOURNAL_RECENT=$(head -80 JOURNAL.md)
-    echo "  JOURNAL.md: $(wc -l < JOURNAL.md | tr -d ' ') lines"
+if [ -f journals/JOURNAL.md ]; then
+    JOURNAL_RECENT=$(head -80 journals/JOURNAL.md)
+    echo "  journals/JOURNAL.md: $(wc -l < journals/JOURNAL.md | tr -d ' ') lines"
+    # Include recent entries from external project journals
+    for ext_journal in journals/*.md; do
+        [ "$ext_journal" = "journals/JOURNAL.md" ] && continue
+        [ -f "$ext_journal" ] || continue
+        [ -s "$ext_journal" ] || continue
+        JOURNAL_RECENT="$JOURNAL_RECENT
+
+=== External: $(basename "$ext_journal" .md) ===
+$(head -20 "$ext_journal")"
+        echo "  $ext_journal: $(wc -l < "$ext_journal" | tr -d ' ') lines"
+    done
 fi
 
 echo ""

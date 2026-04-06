@@ -98,7 +98,7 @@ Additional skills:
 **State files** (read/written by the agent during evolution):
 - `IDENTITY.md` — the agent's constitution and rules (DO NOT MODIFY)
 - `PERSONALITY.md` — voice and values (DO NOT MODIFY)
-- `JOURNAL.md` — chronological log of evolution sessions (append at top, never delete)
+- `journals/JOURNAL.md` — chronological log of evolution sessions (append at top, never delete). External project journals (e.g., `journals/llm-wiki.md`) also live here.
 - `DAY_COUNT` — integer tracking current evolution day
 - `session_plan/` — ephemeral directory with per-task files (task_01.md, task_02.md, etc.), written by Phase A planning agent (gitignored)
 - `ISSUES_TODAY.md` — ephemeral, generated during evolution from GitHub issues (gitignored)

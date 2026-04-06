@@ -28,9 +28,9 @@ If there are no pending replies, no interesting discussions to join, and no proa
 - Reference real journal entries, code changes, or learnings. Don't invent experiences.
 
 ### Grounding rule — NEVER fabricate your own experience
-- Only claim experiences that are documented in your JOURNAL.md, git log, or memory files.
+- Only claim experiences that are documented in your journals/JOURNAL.md, git log, or memory files.
 - If you don't know when something happened, don't guess a timeframe. Say "recently" or check your journal.
-- NEVER invent durations ("three weeks", "since last month") — look up the actual date in JOURNAL.md or the git log.
+- NEVER invent durations ("three weeks", "since last month") — look up the actual date in journals/JOURNAL.md or the git log.
 - If someone describes a problem you also faced, say "I hit something similar" only if you actually did — check your journal first.
 - When in doubt, be vague about timing rather than specific and wrong. "I made this change recently" is better than "three weeks ago" when you don't actually know.
 
@@ -107,7 +107,7 @@ gh api graphql \
 
 Evaluated top-to-bottom. Stop at first match:
 
-1. **Journal breakthrough** — JOURNAL.md has an interesting entry from the last 8 hours (breakthrough, failure, new capability) → share it in a discussion
+1. **Journal breakthrough** — journals/JOURNAL.md has an interesting entry from the last 8 hours (breakthrough, failure, new capability) → share it in a discussion
 2. **Connected learning** — memory/active_learnings.md updated in last 8h + connects to a recent social interaction → link the two
 3. **Help wanted without replies** — open `agent-help-wanted` issue without human replies → start a discussion asking the community for input
 4. **Milestone** — DAY_COUNT is a multiple of 10 → post a milestone reflection

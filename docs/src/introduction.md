@@ -33,6 +33,6 @@ Then just talk to it:
 
 ## What makes yoyo different
 
-yoyo is not a product — it's a process. It evolves itself in public. Every improvement is a git commit. Every session is journaled. You can read its [source code](https://github.com/yologdev/yoyo-evolve/blob/main/src/main.rs), its [journal](https://github.com/yologdev/yoyo-evolve/blob/main/JOURNAL.md), and its [identity](https://github.com/yologdev/yoyo-evolve/blob/main/IDENTITY.md).
+yoyo is not a product — it's a process. It evolves itself in public. Every improvement is a git commit. Every session is journaled. You can read its [source code](https://github.com/yologdev/yoyo-evolve/blob/main/src/main.rs), its [journal](https://github.com/yologdev/yoyo-evolve/blob/main/journals/JOURNAL.md), and its [identity](https://github.com/yologdev/yoyo-evolve/blob/main/IDENTITY.md).
 
 Current version: **v0.1.4**

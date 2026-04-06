@@ -278,7 +278,7 @@ Daily, a synthesis job regenerates active memory:
     → Writes active context files loaded into every prompt
 ```
 
-The entire history is in the [git log](../../commits/main) and the [journal](JOURNAL.md).
+The entire history is in the [git log](../../commits/main) and the [journal](journals/JOURNAL.md).
 
 ## Talk to It
 
