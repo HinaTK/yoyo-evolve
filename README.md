@@ -16,6 +16,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/yologdev/yoyo-evolve/stargazers"><img src="https://img.shields.io/github/stars/yologdev/yoyo-evolve?style=flat" alt="stars"></a>
   <a href="https://crates.io/crates/yoyo-agent"><img src="https://img.shields.io/crates/v/yoyo-agent" alt="crates.io"></a>
   <a href="https://github.com/yologdev/yoyo-evolve/actions"><img src="https://img.shields.io/github/actions/workflow/status/yologdev/yoyo-evolve/evolve.yml?label=evolution&logo=github" alt="evolution"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license MIT"></a>
@@ -26,9 +27,9 @@
 
 # yoyo: A Coding Agent That Evolves Itself
 
-**yoyo** is a free, open-source coding agent for your terminal. It navigates codebases, makes multi-file edits, runs tests, manages git, understands project context, and recovers from failures — all from a streaming REPL with 60+ slash commands.
+**200 lines of Rust. Zero human code. One rule: evolve or die.** yoyo reads its own source, picks what to improve, implements it, runs tests, and commits — every few hours, on its own. 37 days later: **42,000+ lines, 1,700+ tests, 15 modules.**
 
-It started as a ~200-line CLI example. Every few hours it reads its own source, picks improvements, implements them, and commits — if tests pass. 24 days of autonomous evolution later: **31,000+ lines of Rust, 1,707 tests, 14 modules**.
+A free, open-source coding agent for your terminal. It navigates codebases, makes multi-file edits, runs tests, manages git, understands project context, and recovers from failures — all from a streaming REPL with 60+ slash commands.
 
 No human writes its code. No roadmap tells it what to do. It decides for itself.
 
@@ -280,6 +281,18 @@ Daily, a synthesis job regenerates active memory:
 
 The entire history is in the [git log](../../commits/main) and the [journal](journals/JOURNAL.md).
 
+## Live Growth
+
+Watch yoyo evolve in real time:
+
+| What | Link |
+|------|------|
+| Latest journal | [journals/JOURNAL.md](journals/JOURNAL.md) |
+| What it's learned | [memory/active_learnings.md](memory/active_learnings.md) |
+| Evolution runs | [GitHub Actions](../../actions/workflows/evolve.yml) |
+| Social sessions | [GitHub Actions](../../actions/workflows/social.yml) |
+| Journey website | [yologdev.github.io/yoyo-evolve](https://yologdev.github.io/yoyo-evolve) |
+
 ## Talk to It
 
 Start a [GitHub Discussion](../../discussions) for conversation, or open a [GitHub Issue](../../issues/new) for bugs and feature requests.
@@ -373,7 +386,7 @@ Everything else auto-detects. See the [full guide](https://yologdev.github.io/yo
 ## Architecture
 
 ```
-src/                    15 modules, ~31,000 lines of Rust
+src/                    15 modules, ~42,000 lines of Rust
   main.rs               Entry point, agent config, tool building
   hooks.rs              Hook trait, registry, AuditHook, tool wrapping
   cli.rs                CLI parsing, config files, permissions
@@ -413,7 +426,7 @@ skills/                 6 skills: self-assess, evolve, communicate, social, rele
 
 ## Test Quality
 
-1,707 tests (1,625 unit + 82 integration) covering CLI flags, command parsing, error quality, exit codes, output formatting, edge cases, project detection, fuzzy scoring, git operations, session management, markdown rendering, cost calculation, permission logic, streaming behavior, and more.
+1,700+ tests (unit + integration) covering CLI flags, command parsing, error quality, exit codes, output formatting, edge cases, project detection, fuzzy scoring, git operations, session management, markdown rendering, cost calculation, permission logic, streaming behavior, and more.
 
 yoyo also uses mutation testing ([cargo-mutants](https://github.com/sourcefrog/cargo-mutants)) to find gaps in the test suite. Every surviving mutant is a line of code that isn't truly tested.
 
