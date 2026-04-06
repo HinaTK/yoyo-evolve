@@ -888,7 +888,10 @@ Steps:
 
 Keep the assessment to ~3 pages max. Be specific and factual — the planning agent will use this to prioritize tasks.
 
-After writing, commit: git add session_plan/assessment.md && git commit -m "Day $DAY ($SESSION_TIME): assessment"
+After writing, commit:
+  git add session_plan/assessment.md
+  git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): assessment"
+(The diff check avoids exit 1 when there's nothing new to commit.)
 
 Then STOP. Do not write task files. Do not implement anything.
 ASSESSEOF
@@ -1064,7 +1067,9 @@ Also create session_plan/issue_responses.md with your planned response for each 
 - #N: [what you'll do — implement as task, won't fix because X, already resolved, need more time, etc.]
 
 After writing all files, commit:
-git add session_plan/ && git commit -m "Day $DAY ($SESSION_TIME): session plan"
+  git add session_plan/
+  git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): session plan"
+(The diff check avoids exit 1 when there's nothing new to commit.)
 
 Then STOP. Do not implement anything. Your job is planning only.
 PLANEOF
@@ -1170,7 +1175,10 @@ Follow the evolve skill rules:
 - Run cargo fmt && cargo clippy --all-targets -- -D warnings && cargo build && cargo test after changes
 - If any check fails, read the error and fix it. Keep trying until it passes.
 - Only if you've tried 3+ times and are stuck, revert with: git checkout -- . (keeps previous commits)
-- After ALL checks pass, commit: git add -A && git commit -m "Day $DAY ($SESSION_TIME): $task_title (Task $TASK_NUM)"
+- After ALL checks pass, commit:
+    git add -A
+    git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): $task_title (Task $TASK_NUM)"
+  (The diff check avoids exit 1 when there's nothing new to commit.)
 - If you changed behavior, added features, or modified architecture, update the docs:
   - CLAUDE.md — keep the "What This Is", "Build & Test", "Architecture", and "State files" sections accurate
   - README.md — keep "How It Evolves", commands table, and feature descriptions accurate
@@ -1737,7 +1745,10 @@ Steps:
 2. Fix the errors above
 3. Run: cargo fmt && cargo clippy --all-targets -- -D warnings && cargo build && cargo test
 4. Keep fixing until all checks pass
-5. Commit: git add -A && git commit -m "Day $DAY ($SESSION_TIME): fix build errors"
+5. Commit:
+     git add -A
+     git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): fix build errors"
+   (The diff check avoids exit 1 when there's nothing new to commit.)
 FIXEOF
         ${TIMEOUT_CMD:+$TIMEOUT_CMD 300} "$YOYO_BIN" \
             --model "$MODEL" \
@@ -1807,7 +1818,10 @@ For example, if this is the first sponsor, a milestone, a new external project, 
 else worth calling out — give it its own line or section. Don't force structure when there's
 nothing special to report, but when something new happens, make it visible.
 
-Be specific and honest. Then commit: git add journals/JOURNAL.md && git commit -m "Day $DAY ($SESSION_TIME): journal entry"
+Be specific and honest. Then commit:
+  git add journals/JOURNAL.md
+  git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): journal entry"
+(The diff check avoids exit 1 when there's nothing new to commit.)
 JEOF
 
     ${TIMEOUT_CMD:+$TIMEOUT_CMD 120} "$YOYO_BIN" \
@@ -1877,7 +1891,10 @@ with open("memory/learnings.jsonl", "a") as f:
 print("Appended learning:", entry["title"])
 PYEOF
 
-Then commit: git add memory/learnings.jsonl && git commit -m "Day $DAY ($SESSION_TIME): update learnings"
+Then commit:
+  git add memory/learnings.jsonl
+  git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): update learnings"
+(The diff check avoids exit 1 when there's nothing new to commit.)
 
 If nothing non-obvious came up, do nothing. Not every session produces a lesson.
 REOF
