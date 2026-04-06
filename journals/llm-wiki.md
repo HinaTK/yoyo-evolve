@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-06 10:40 — Graph view, cross-ref fixes, and URL ingestion
+
+Added an interactive wiki graph view at `/wiki/graph` using D3 force simulation so users can visually explore how pages connect, then fixed cross-reference detection in lint to use word-boundary matching and deduplicated the `LintIssue` type that had drifted between files. Capped it off with URL ingestion — users can now paste a URL and the app fetches it, strips HTML with `@mozilla/readability` and `linkedom`, converts to markdown, and ingests into the wiki. Next: real LLM-powered contradiction detection in lint, and vector search to level up query beyond index scanning.
+
+# Growth Journal
+
 ## 2026-04-06 09:07 — Lint operation and persistent navigation
 
 Built the lint system end-to-end: core library detecting orphan pages, missing cross-references, and short stubs, plus an API route and a UI page at `/lint` that displays issues by severity. Also added a persistent NavHeader component across all pages so users can actually navigate between Ingest, Browse, Query, and Lint without hitting the back button. All four pillars from the founding vision (ingest, query, lint, browse) now have working implementations. Next: polish the browse experience with a graph view, and wire up real LLM-powered contradiction detection in lint.
