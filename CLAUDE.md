@@ -53,6 +53,7 @@ ANTHROPIC_API_KEY=sk-... ./scripts/evolve.sh
 - `tools.rs` — StreamingBashTool, RenameSymbolTool, AskUserTool, TodoTool, bash command safety analysis, tool builders
 - `cli.rs` — CLI argument parsing, subcommands, configuration
 - `config.rs` — permission config, directory restrictions, MCP server config, TOML parsing helpers
+- `context.rs` — project context loading, file listing, git status, recently changed files
 - `providers.rs` — provider constants (KNOWN_PROVIDERS), API key env vars, default/known models per provider
 - `format/mod.rs` — Color, constants, utility functions, test output filtering, re-exports
 - `format/highlight.rs` — syntax highlighting for code, JSON, YAML, TOML
