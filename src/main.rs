@@ -44,6 +44,7 @@ mod commands_project;
 mod commands_refactor;
 mod commands_search;
 mod commands_session;
+mod config;
 mod docs;
 mod format;
 mod git;
