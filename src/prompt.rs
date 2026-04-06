@@ -1061,9 +1061,8 @@ async fn handle_prompt_events(
                             if batch_start.is_none() {
                                 batch_start = Some(Instant::now());
                             }
-                            // Show turn boundary if we've had text before (multi-turn)
-                            if had_text {
-                                turn_number += 1;
+                            // Show turn boundary for multi-turn (turn 2+)
+                            if turn_number > 1 && had_text {
                                 println!("{}", turn_boundary(turn_number));
                             }
                         }
@@ -1373,6 +1372,13 @@ async fn handle_prompt_events(
                             println!();
                             in_text = false;
                         }
+                    }
+                    AgentEvent::TurnStart => {
+                        turn_number += 1;
+                    }
+                    AgentEvent::TurnEnd { .. } => {
+                        // Turn complete — nothing needed here for now.
+                        // Explicitly matched to keep event handling exhaustive.
                     }
                     _ => {}
                 }
