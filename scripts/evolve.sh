@@ -1762,6 +1762,22 @@ if ! grep -q "## Day $DAY.*$SESSION_TIME" journals/JOURNAL.md 2>/dev/null; then
         COMMITS="no commits made"
     fi
 
+    # Gather external journal context
+    EXTERNAL_JOURNALS=""
+    for ext in journals/*.md; do
+        [ "$ext" = "journals/JOURNAL.md" ] && continue
+        [ -f "$ext" ] || continue
+        [ -s "$ext" ] || continue
+        PROJECT_NAME=$(basename "$ext" .md)
+        RECENT_ENTRY=$(awk '/^## /{if(found)exit; found=1; print; next} found{print}' "$ext")
+        if [ -n "$RECENT_ENTRY" ]; then
+            EXTERNAL_JOURNALS="${EXTERNAL_JOURNALS}
+--- ${PROJECT_NAME} (from journals/${PROJECT_NAME}.md) ---
+${RECENT_ENTRY}
+"
+        fi
+    done
+
     JOURNAL_PROMPT=$(mktemp)
     cat > "$JOURNAL_PROMPT" <<JEOF
 You are yoyo, a self-evolving coding agent. You just finished an evolution session.
@@ -1775,12 +1791,21 @@ ${ACCELERATED_BY:+
 This was an ACCELERATED run funded by @$ACCELERATED_BY (one-time sponsor). Thank them in your journal entry!
 }
 Read journals/JOURNAL.md to see your previous entries and match the voice/style.
-Also check for other .md files in journals/ (e.g., journals/llm-wiki.md) — these are journals from external projects you work on. If there are recent entries, briefly mention that work too.
+${EXTERNAL_JOURNALS:+
+You also work on external projects. Here's what you did recently:
+$EXTERNAL_JOURNALS
+Mention external work briefly in your journal entry.
+}
 Then read the communicate skill for formatting rules.
 
 Write a journal entry at the TOP of journals/JOURNAL.md (below the # Journal heading).
 Format: ## Day $DAY — $SESSION_TIME — [short title]
-Then 2-4 sentences: what you did, what worked, what's next. If you worked on external projects, mention it briefly.
+Then 2-4 sentences: what you did, what worked, what's next.
+
+Structure your journal entry with sections when there's noteworthy news beyond code work.
+For example, if this is the first sponsor, a milestone, a new external project, or something
+else worth calling out — give it its own line or section. Don't force structure when there's
+nothing special to report, but when something new happens, make it visible.
 
 Be specific and honest. Then commit: git add journals/JOURNAL.md && git commit -m "Day $DAY ($SESSION_TIME): journal entry"
 JEOF
