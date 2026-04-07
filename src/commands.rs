@@ -747,11 +747,6 @@ pub fn handle_mcp(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::commands_dev::{
-        build_fix_prompt, build_project_tree, format_tree_from_paths, health_checks_for_project,
-        lint_command_for_project, run_health_check_for_project, run_health_checks_full_output,
-        run_shell_command, test_command_for_project,
-    };
     use crate::commands_git::{
         build_review_content, build_review_prompt, format_diff_stat, parse_diff_stat,
         parse_pr_args, DiffStatEntry, DiffStatSummary, PrSubcommand,
@@ -867,8 +862,6 @@ mod tests {
         assert_eq!(input, "/model");
         assert!(!input.starts_with("/model "));
     }
-
-    // ── /provider tests ──────────────────────────────────────────────────
 
     #[test]
     fn test_provider_command_recognized() {
@@ -1054,29 +1047,6 @@ mod tests {
     }
 
     #[test]
-    fn test_health_check_function() {
-        // run_health_check_for_project skips "cargo test" under #[cfg(test)] to avoid recursion
-        let project_type = detect_project_type(&std::env::current_dir().unwrap());
-        assert_eq!(project_type, ProjectType::Rust);
-        let results = run_health_check_for_project(&project_type);
-        assert!(
-            !results.is_empty(),
-            "Health check should return at least one result"
-        );
-        for (name, passed, _) in &results {
-            assert!(!name.is_empty(), "Check name should not be empty");
-            if *name == "build" {
-                assert!(passed, "cargo build should pass in test environment");
-            }
-        }
-        // "test" check should be excluded under cfg(test)
-        assert!(
-            !results.iter().any(|(name, _, _)| *name == "test"),
-            "cargo test check should be skipped to avoid recursion"
-        );
-    }
-
-    #[test]
     fn test_detect_project_type_rust() {
         // Current directory has Cargo.toml, so should detect Rust
         let cwd = std::env::current_dir().unwrap();
@@ -1149,49 +1119,6 @@ mod tests {
     }
 
     #[test]
-    fn test_health_checks_for_rust_project() {
-        let checks = health_checks_for_project(&ProjectType::Rust);
-        let names: Vec<&str> = checks.iter().map(|(n, _)| *n).collect();
-        assert!(names.contains(&"build"), "Rust should have build check");
-        assert!(names.contains(&"clippy"), "Rust should have clippy check");
-        assert!(names.contains(&"fmt"), "Rust should have fmt check");
-        // test is excluded under cfg(test)
-        assert!(
-            !names.contains(&"test"),
-            "test should be excluded in cfg(test)"
-        );
-    }
-
-    #[test]
-    fn test_health_checks_for_node_project() {
-        let checks = health_checks_for_project(&ProjectType::Node);
-        let names: Vec<&str> = checks.iter().map(|(n, _)| *n).collect();
-        assert!(names.contains(&"lint"), "Node should have lint check");
-    }
-
-    #[test]
-    fn test_health_checks_for_go_project() {
-        let checks = health_checks_for_project(&ProjectType::Go);
-        let names: Vec<&str> = checks.iter().map(|(n, _)| *n).collect();
-        assert!(names.contains(&"build"), "Go should have build check");
-        assert!(names.contains(&"vet"), "Go should have vet check");
-    }
-
-    #[test]
-    fn test_health_checks_for_python_project() {
-        let checks = health_checks_for_project(&ProjectType::Python);
-        let names: Vec<&str> = checks.iter().map(|(n, _)| *n).collect();
-        assert!(names.contains(&"lint"), "Python should have lint check");
-        assert!(names.contains(&"typecheck"), "Python should have typecheck");
-    }
-
-    #[test]
-    fn test_health_checks_for_unknown_returns_empty() {
-        let checks = health_checks_for_project(&ProjectType::Unknown);
-        assert!(checks.is_empty(), "Unknown project should return no checks");
-    }
-
-    #[test]
     fn test_project_type_display() {
         assert_eq!(format!("{}", ProjectType::Rust), "Rust (Cargo)");
         assert_eq!(format!("{}", ProjectType::Node), "Node.js (npm)");
@@ -1199,155 +1126,6 @@ mod tests {
         assert_eq!(format!("{}", ProjectType::Go), "Go");
         assert_eq!(format!("{}", ProjectType::Make), "Makefile");
         assert_eq!(format!("{}", ProjectType::Unknown), "Unknown");
-    }
-
-    #[test]
-    fn test_run_command_recognized() {
-        assert!(!is_unknown_command("/run"));
-        assert!(!is_unknown_command("/run echo hello"));
-        assert!(!is_unknown_command("/run ls -la"));
-    }
-
-    #[test]
-    fn test_run_shell_command_basic() {
-        // Verify run_shell_command doesn't panic on basic commands
-        // (output goes to stdout/stderr, we just check it doesn't crash)
-        run_shell_command("echo hello");
-    }
-
-    #[test]
-    fn test_run_shell_command_failing() {
-        // Non-zero exit should not panic
-        run_shell_command("false");
-    }
-
-    #[test]
-    fn test_bang_shortcut_matching() {
-        // ! prefix should match for /run shortcut
-        let bang_matches = |s: &str| s.starts_with('!') && s.len() > 1;
-        assert!(bang_matches("!ls"));
-        assert!(bang_matches("!echo hello"));
-        assert!(bang_matches("! ls")); // space after bang is fine
-        assert!(!bang_matches("!")); // bare bang alone should not match
-    }
-
-    #[test]
-    fn test_run_command_matching() {
-        // /run should only match /run or /run <cmd>, not /running
-        let run_matches = |s: &str| s == "/run" || s.starts_with("/run ");
-        assert!(run_matches("/run"));
-        assert!(run_matches("/run echo hello"));
-        assert!(!run_matches("/running"));
-        assert!(!run_matches("/runaway"));
-    }
-
-    #[test]
-    fn test_format_tree_from_paths_basic() {
-        let paths = vec![
-            "Cargo.toml".to_string(),
-            "README.md".to_string(),
-            "src/cli.rs".to_string(),
-            "src/format.rs".to_string(),
-            "src/main.rs".to_string(),
-        ];
-        let tree = format_tree_from_paths(&paths, 3);
-        assert!(tree.contains("Cargo.toml"));
-        assert!(tree.contains("README.md"));
-        assert!(tree.contains("src/"));
-        assert!(tree.contains("  main.rs"));
-        assert!(tree.contains("  cli.rs"));
-    }
-
-    #[test]
-    fn test_format_tree_from_paths_nested() {
-        let paths = vec![
-            "src/main.rs".to_string(),
-            "src/utils/helpers.rs".to_string(),
-            "src/utils/format.rs".to_string(),
-        ];
-        let tree = format_tree_from_paths(&paths, 3);
-        assert!(tree.contains("src/"));
-        assert!(tree.contains("  utils/"));
-        assert!(tree.contains("    helpers.rs"));
-        assert!(tree.contains("    format.rs"));
-    }
-
-    #[test]
-    fn test_format_tree_from_paths_depth_limit() {
-        let paths = vec![
-            "a/b/c/d/deep.txt".to_string(),
-            "a/shallow.txt".to_string(),
-            "top.txt".to_string(),
-        ];
-        // depth 1: show dirs at level 0 ('a/'), files at depth ≤ 1
-        let tree = format_tree_from_paths(&paths, 1);
-        assert!(tree.contains("top.txt"));
-        assert!(tree.contains("a/"));
-        assert!(tree.contains("  shallow.txt"));
-        // Files deeper than max_depth should not appear
-        assert!(!tree.contains("deep.txt"));
-        // Directory 'b/' is at level 1, beyond max_depth=1 for dirs
-        assert!(!tree.contains("b/"));
-    }
-
-    #[test]
-    fn test_format_tree_from_paths_empty() {
-        let paths: Vec<String> = vec![];
-        let tree = format_tree_from_paths(&paths, 3);
-        assert!(tree.is_empty());
-    }
-
-    #[test]
-    fn test_format_tree_from_paths_root_files_only() {
-        let paths = vec![
-            "Cargo.lock".to_string(),
-            "Cargo.toml".to_string(),
-            "README.md".to_string(),
-        ];
-        let tree = format_tree_from_paths(&paths, 3);
-        // No directories, just root files
-        assert!(!tree.contains('/'));
-        assert!(tree.contains("Cargo.lock"));
-        assert!(tree.contains("Cargo.toml"));
-        assert!(tree.contains("README.md"));
-    }
-
-    #[test]
-    fn test_format_tree_from_paths_depth_zero() {
-        let paths = vec!["README.md".to_string(), "src/main.rs".to_string()];
-        let tree = format_tree_from_paths(&paths, 0);
-        // Depth 0: only root-level files shown
-        assert!(tree.contains("README.md"));
-        // main.rs is at depth 1, should not show at depth 0
-        assert!(!tree.contains("main.rs"));
-    }
-
-    #[test]
-    fn test_format_tree_dir_printed_once() {
-        let paths = vec![
-            "src/a.rs".to_string(),
-            "src/b.rs".to_string(),
-            "src/c.rs".to_string(),
-        ];
-        let tree = format_tree_from_paths(&paths, 3);
-        // "src/" should appear exactly once
-        assert_eq!(tree.matches("src/").count(), 1);
-    }
-
-    #[test]
-    fn test_build_project_tree_runs() {
-        // build_project_tree should return something non-empty
-        let tree = build_project_tree(3);
-        assert!(!tree.is_empty());
-        // In a git repo, should contain Cargo.toml; outside one (e.g. cargo-mutants
-        // temp dir) the tree still works but uses filesystem walk instead of git ls-files
-    }
-
-    #[test]
-    fn test_tree_command_recognized() {
-        assert!(!is_unknown_command("/tree"));
-        assert!(!is_unknown_command("/tree 2"));
-        assert!(!is_unknown_command("/tree 5"));
     }
 
     #[test]
@@ -1509,216 +1287,6 @@ mod tests {
         assert!(load_matches("/load myfile.json"));
         assert!(!load_matches("/loadfile"));
         assert!(!load_matches("/loadXYZ"));
-    }
-
-    #[test]
-    fn test_fix_command_recognized() {
-        assert!(!is_unknown_command("/fix"));
-        assert!(
-            KNOWN_COMMANDS.contains(&"/fix"),
-            "/fix should be in KNOWN_COMMANDS"
-        );
-    }
-
-    #[test]
-    fn test_run_health_checks_full_output_returns_results() {
-        // In a Rust project, should return results with full error output
-        let project_type = detect_project_type(&std::env::current_dir().unwrap());
-        assert_eq!(project_type, ProjectType::Rust);
-        let results = run_health_checks_full_output(&project_type);
-        assert!(
-            !results.is_empty(),
-            "Should return at least one check result"
-        );
-        for (name, passed, _output) in &results {
-            assert!(!name.is_empty(), "Check name should not be empty");
-            if *name == "build" {
-                assert!(passed, "cargo build should pass in test environment");
-            }
-        }
-    }
-
-    #[test]
-    fn test_build_fix_prompt_with_failures() {
-        let failures = vec![
-            (
-                "build",
-                "error[E0308]: mismatched types\n  --> src/main.rs:42",
-            ),
-            (
-                "clippy",
-                "warning: unused variable `x`\n  --> src/lib.rs:10",
-            ),
-        ];
-        let prompt = build_fix_prompt(&failures);
-        assert!(prompt.contains("build"), "Prompt should mention build");
-        assert!(prompt.contains("clippy"), "Prompt should mention clippy");
-        assert!(
-            prompt.contains("error[E0308]"),
-            "Prompt should include build error"
-        );
-        assert!(
-            prompt.contains("unused variable"),
-            "Prompt should include clippy warning"
-        );
-    }
-
-    #[test]
-    fn test_build_fix_prompt_empty_failures() {
-        let failures: Vec<(&str, &str)> = vec![];
-        let prompt = build_fix_prompt(&failures);
-        assert!(
-            prompt.is_empty() || prompt.contains("Fix"),
-            "Empty failures should produce empty or minimal prompt"
-        );
-    }
-
-    #[test]
-    fn test_test_command_recognized() {
-        assert!(!is_unknown_command("/test"));
-        assert!(
-            KNOWN_COMMANDS.contains(&"/test"),
-            "/test should be in KNOWN_COMMANDS"
-        );
-    }
-
-    #[test]
-    fn test_test_command_for_rust_project() {
-        let cmd = test_command_for_project(&ProjectType::Rust);
-        assert!(cmd.is_some(), "Rust project should have a test command");
-        let (label, args) = cmd.unwrap();
-        assert!(
-            label.contains("cargo"),
-            "Rust test label should mention cargo"
-        );
-        assert_eq!(args[0], "cargo");
-        assert!(args.contains(&"test"));
-    }
-
-    #[test]
-    fn test_test_command_for_node_project() {
-        let cmd = test_command_for_project(&ProjectType::Node);
-        assert!(cmd.is_some(), "Node project should have a test command");
-        let (label, args) = cmd.unwrap();
-        assert!(label.contains("npm"), "Node test label should mention npm");
-        assert_eq!(args[0], "npm");
-        assert!(args.contains(&"test"));
-    }
-
-    #[test]
-    fn test_test_command_for_python_project() {
-        let cmd = test_command_for_project(&ProjectType::Python);
-        assert!(cmd.is_some(), "Python project should have a test command");
-        let (label, _args) = cmd.unwrap();
-        assert!(
-            label.contains("pytest"),
-            "Python test label should mention pytest"
-        );
-    }
-
-    #[test]
-    fn test_test_command_for_go_project() {
-        let cmd = test_command_for_project(&ProjectType::Go);
-        assert!(cmd.is_some(), "Go project should have a test command");
-        let (label, args) = cmd.unwrap();
-        assert!(label.contains("go"), "Go test label should mention go");
-        assert_eq!(args[0], "go");
-        assert!(args.contains(&"test"));
-    }
-
-    #[test]
-    fn test_test_command_for_make_project() {
-        let cmd = test_command_for_project(&ProjectType::Make);
-        assert!(cmd.is_some(), "Make project should have a test command");
-        let (label, args) = cmd.unwrap();
-        assert!(
-            label.contains("make"),
-            "Make test label should mention make"
-        );
-        assert_eq!(args[0], "make");
-        assert!(args.contains(&"test"));
-    }
-
-    #[test]
-    fn test_test_command_for_unknown_project() {
-        let cmd = test_command_for_project(&ProjectType::Unknown);
-        assert!(
-            cmd.is_none(),
-            "Unknown project should not have a test command"
-        );
-    }
-
-    #[test]
-    fn test_lint_command_recognized() {
-        assert!(!is_unknown_command("/lint"));
-        assert!(
-            KNOWN_COMMANDS.contains(&"/lint"),
-            "/lint should be in KNOWN_COMMANDS"
-        );
-    }
-
-    #[test]
-    fn test_lint_command_for_rust_project() {
-        let cmd = lint_command_for_project(&ProjectType::Rust);
-        assert!(cmd.is_some(), "Rust project should have a lint command");
-        let (label, args) = cmd.unwrap();
-        assert!(
-            label.contains("clippy"),
-            "Rust lint label should mention clippy"
-        );
-        assert_eq!(args[0], "cargo");
-        assert!(args.contains(&"clippy"));
-    }
-
-    #[test]
-    fn test_lint_command_for_node_project() {
-        let cmd = lint_command_for_project(&ProjectType::Node);
-        assert!(cmd.is_some(), "Node project should have a lint command");
-        let (label, args) = cmd.unwrap();
-        assert!(
-            label.contains("eslint"),
-            "Node lint label should mention eslint"
-        );
-        assert_eq!(args[0], "npx");
-        assert!(args.contains(&"eslint"));
-    }
-
-    #[test]
-    fn test_lint_command_for_python_project() {
-        let cmd = lint_command_for_project(&ProjectType::Python);
-        assert!(cmd.is_some(), "Python project should have a lint command");
-        let (label, _args) = cmd.unwrap();
-        assert!(
-            label.contains("ruff"),
-            "Python lint label should mention ruff"
-        );
-    }
-
-    #[test]
-    fn test_lint_command_for_go_project() {
-        let cmd = lint_command_for_project(&ProjectType::Go);
-        assert!(cmd.is_some(), "Go project should have a lint command");
-        let (label, args) = cmd.unwrap();
-        assert!(
-            label.contains("golangci-lint"),
-            "Go lint label should mention golangci-lint"
-        );
-        assert_eq!(args[0], "golangci-lint");
-    }
-
-    #[test]
-    fn test_lint_command_for_make_project() {
-        let cmd = lint_command_for_project(&ProjectType::Make);
-        assert!(cmd.is_none(), "Make project should not have a lint command");
-    }
-
-    #[test]
-    fn test_lint_command_for_unknown_project() {
-        let cmd = lint_command_for_project(&ProjectType::Unknown);
-        assert!(
-            cmd.is_none(),
-            "Unknown project should not have a lint command"
-        );
     }
 
     #[test]
@@ -1941,8 +1509,6 @@ mod tests {
         assert!(result.contains(".rs"));
     }
 
-    // ── /review tests ──────────────────────────────────────────────────────
-
     #[test]
     fn test_review_command_recognized() {
         assert!(!is_unknown_command("/review"));
@@ -2038,8 +1604,6 @@ mod tests {
         // and that the help text format is correct
         assert!(KNOWN_COMMANDS.contains(&"/review"));
     }
-
-    // ── /init scanning tests ─────────────────────────────────────────────
 
     #[test]
     fn test_init_command_recognized() {
@@ -2278,8 +1842,6 @@ mod tests {
         let _ = std::fs::remove_dir_all(&tmp);
     }
 
-    // ── /diff stat parsing tests ────────────────────────────────────────
-
     #[test]
     fn test_parse_diff_stat_basic() {
         let stat_output = " src/commands.rs | 42 ++++++++++++++++++++++++++++--------------
@@ -2446,8 +2008,6 @@ mod tests {
         assert!(!formatted.contains("-0"), "Should not show zero deletions");
     }
 
-    // ── bookmark (/mark, /jump, /marks) tests ────────────────────────────
-
     #[test]
     fn test_mark_command_recognized() {
         assert!(!is_unknown_command("/mark"));
@@ -2580,8 +2140,6 @@ mod tests {
         assert!(!jump_matches("/jumper"));
         assert!(!jump_matches("/jumping"));
     }
-
-    // ── command_arg_completions tests ─────────────────────────────────────
 
     #[test]
     fn test_arg_completions_model_empty_prefix() {
@@ -2739,8 +2297,6 @@ mod tests {
         );
     }
 
-    // ── /index tests ─────────────────────────────────────────────────────
-
     #[test]
     fn test_extract_first_meaningful_line_skips_blanks() {
         let content = "\n\n\n//! Module docs here\nfn main() {}";
@@ -2854,8 +2410,6 @@ mod tests {
         assert!(result.contains("1 file, 1 total lines"));
     }
 
-    // ── memory command tests ─────────────────────────────────────────────
-
     #[test]
     fn test_remember_command_recognized() {
         assert!(!is_unknown_command("/remember"));
@@ -2952,8 +2506,6 @@ mod tests {
         assert!(prompt.contains("always run cargo fmt"));
     }
 
-    // ── /hooks command tests ────────────────────────────────────────────
-
     #[test]
     fn test_hooks_command_recognized() {
         assert!(!is_unknown_command("/hooks"));
@@ -2990,8 +2542,6 @@ mod tests {
         handle_hooks(&hooks);
     }
 
-    // ── /changes command tests ───────────────────────────────────────────
-
     #[test]
     fn test_changes_command_recognized() {
         assert!(!is_unknown_command("/changes"));
@@ -3025,8 +2575,6 @@ mod tests {
         // Should not panic
         handle_changes(&changes);
     }
-
-    // ── /add command tests ───────────────────────────────────────────
 
     #[test]
     fn test_add_command_recognized() {
@@ -3117,8 +2665,6 @@ mod tests {
         let results = handle_add("/add Cargo.toml LICENSE");
         assert_eq!(results.len(), 2, "Should return results for both files");
     }
-
-    // ── /plan tests ─────────────────────────────────────────────────────
 
     #[test]
     fn test_parse_plan_task_extracts_task() {
@@ -3224,8 +2770,6 @@ mod tests {
         );
     }
 
-    // ── teach mode tests ──────────────────────────────────────────────────
-
     #[test]
     fn test_teach_mode_default_off() {
         // Reset to known state (tests may run in any order)
@@ -3321,8 +2865,6 @@ mod tests {
         // Should not panic on unknown subcommand
         handle_mcp("/mcp foobar", &[], &[], 0);
     }
-
-    // ── /permissions command tests ──────────────────────────────────────
 
     #[test]
     fn test_permissions_command_recognized() {
