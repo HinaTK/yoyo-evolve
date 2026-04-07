@@ -94,7 +94,7 @@ jobs:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
         run: |
           set -euo pipefail
-          git add sponsors/active.json sponsors/sponsor_info.json sponsors/credits.json sponsors/shoutouts.json SPONSORS.md README.md
+          git add sponsors/active.json sponsors/sponsor_info.json SPONSORS.md README.md
           if git diff --cached --quiet; then
             echo "→ No sponsor changes to commit."
             exit 0

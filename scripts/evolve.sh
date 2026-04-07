@@ -59,8 +59,6 @@ echo ""
 #             $20→+SPONSORS.md (30d), $50→priority 60d+SPONSORS.md+README,
 #             $1200→💎 Genesis (permanent priority, SPONSORS.md, README, journal ack)
 SPONSOR_INFO_FILE="sponsors/sponsor_info.json"
-CREDITS_FILE="sponsors/credits.json"
-SHOUTOUTS_FILE="sponsors/shoutouts.json"
 ACTIVE_FILE="sponsors/active.json"
 
 MONTHLY_TOTAL=0
@@ -83,20 +81,27 @@ except (json.JSONDecodeError, OSError, AttributeError) as e:
 ")
 fi
 
-if [ -f "$CREDITS_FILE" ]; then
+if [ -f "$SPONSOR_INFO_FILE" ]; then
     HAS_ONETIME_CREDITS=$(python3 -c "
 import json, sys
+def _onetime(entry):
+    if not isinstance(entry, dict):
+        return None
+    if entry.get('type') == 'onetime':
+        return entry
+    nested = entry.get('onetime')
+    return nested if isinstance(nested, dict) else None
 try:
-    credits = json.load(open('$CREDITS_FILE'))
-    has = any(
-        isinstance(info, dict)
-        and info.get('total_cents', 0) >= 200
-        and not info.get('run_used', False)
-        for info in credits.values()
-    )
+    info = json.load(open('$SPONSOR_INFO_FILE'))
+    has = False
+    for entry in info.values():
+        ot = _onetime(entry)
+        if ot and ot.get('total_cents', 0) >= 200 and not ot.get('run_used', False):
+            has = True
+            break
     print('true' if has else 'false')
 except (json.JSONDecodeError, OSError, AttributeError) as e:
-    print(f'WARNING: Could not read {\"$CREDITS_FILE\"}: {e}', file=sys.stderr)
+    print(f'WARNING: Could not read {\"$SPONSOR_INFO_FILE\"}: {e}', file=sys.stderr)
     print('false')
 ")
 fi
@@ -121,10 +126,18 @@ if [ "$HAS_ONETIME_CREDITS" = "true" ]; then
         fi
     done < <(python3 -c "
 import json, sys
+def _onetime(entry):
+    if not isinstance(entry, dict):
+        return None
+    if entry.get('type') == 'onetime':
+        return entry
+    nested = entry.get('onetime')
+    return nested if isinstance(nested, dict) else None
 try:
-    credits = json.load(open('$CREDITS_FILE'))
-    for login, info in credits.items():
-        if info.get('total_cents', 0) >= 200 and not info.get('run_used', False):
+    info = json.load(open('$SPONSOR_INFO_FILE'))
+    for login, entry in info.items():
+        ot = _onetime(entry)
+        if ot and ot.get('total_cents', 0) >= 200 and not ot.get('run_used', False):
             print(login)
 except (json.JSONDecodeError, FileNotFoundError, KeyError, TypeError, AttributeError) as e:
     print(f'WARNING: Could not enumerate sponsor credits: {e}', file=sys.stderr)
@@ -164,37 +177,50 @@ fi
 # Consume one-time sponsor accelerated run.
 # This is the ONLY sponsor-state write in evolve.sh. It MUST fail loudly:
 # a partial/failed write means the next run will re-consume the same
-# credit (or leave credits.json truncated), which is worse than aborting
-# the current session. The python heredoc writes atomically (tempfile
-# + os.replace) and lets any OSError propagate; no `|| true` here.
+# credit (or leave sponsor_info.json truncated), which is worse than
+# aborting the current session. The python heredoc writes atomically
+# (tempfile + os.replace) and lets any OSError propagate; no `|| true`.
+# Mutates only the run_used flag on the matched onetime entry; the rest
+# of sponsor_info.json (recurring sponsors, other one-time entries, etc.)
+# is preserved.
 ACCELERATED_BY=""
 if [ "$HAS_ONETIME_CREDITS" = "true" ]; then
     ACCELERATED_BY=$(python3 <<'PYEOF'
 import json, os, sys
-CREDITS_FILE = "sponsors/credits.json"
+SPONSOR_INFO_FILE = "sponsors/sponsor_info.json"
 try:
-    with open(CREDITS_FILE) as f:
-        credits = json.load(f)
+    with open(SPONSOR_INFO_FILE) as f:
+        info = json.load(f)
 except (json.JSONDecodeError, FileNotFoundError):
     # Read failure is survivable: HAS_ONETIME_CREDITS was already true
     # based on an earlier successful read, so the file became
     # unreadable between steps — just skip acceleration this session.
     print("", end="")
     sys.exit(0)
+
+def _onetime(entry):
+    if not isinstance(entry, dict):
+        return None
+    if entry.get("type") == "onetime":
+        return entry
+    nested = entry.get("onetime")
+    return nested if isinstance(nested, dict) else None
+
 consumed_login = ""
-for login, info in credits.items():
-    if info.get('total_cents', 0) >= 200 and not info.get('run_used', False):
-        info['run_used'] = True
+for login, entry in info.items():
+    ot = _onetime(entry)
+    if ot and ot.get("total_cents", 0) >= 200 and not ot.get("run_used", False):
+        ot["run_used"] = True
         consumed_login = login
         break  # consume one run per session
 if consumed_login:
     # Atomic write: tempfile + os.replace so a mid-write crash cannot
-    # leave credits.json truncated. Any OSError here propagates and
-    # kills the session (by design — see the comment above).
-    tmp = f"{CREDITS_FILE}.tmp.{os.getpid()}"
+    # leave sponsor_info.json truncated. Any OSError here propagates
+    # and kills the session (by design — see the comment above).
+    tmp = f"{SPONSOR_INFO_FILE}.tmp.{os.getpid()}"
     with open(tmp, "w") as f:
-        json.dump(credits, f, indent=2)
-    os.replace(tmp, CREDITS_FILE)
+        json.dump(info, f, indent=2)
+    os.replace(tmp, SPONSOR_INFO_FILE)
 print(consumed_login)
 PYEOF
     )

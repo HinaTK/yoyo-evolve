@@ -5,10 +5,14 @@ This is the single source of truth for sponsor state. Reads the raw
 GraphQL response from /tmp/sponsor_raw.json (written by the caller's
 `gh api graphql` invocation) and updates:
 
-  - sponsors/credits.json      — one-time sponsor credit ledger
-  - sponsors/active.json       — flat list of currently-active sponsors
-  - sponsors/sponsor_info.json — rich per-login dict (committed, read by evolve.sh)
-  - sponsors/shoutouts.json    — recurring sponsor shoutout tracker
+  - sponsors/sponsor_info.json — THE single source of truth for sponsor state.
+                                 Contains every sponsor (recurring + one-time) keyed
+                                 by login, with computed benefits, first_seen,
+                                 benefit_expires, run_used, and shouted_out flags.
+                                 Both this script and evolve.sh read it; this script
+                                 rebuilds it, evolve.sh only mutates run_used.
+  - sponsors/active.json       — flat list of currently-active sponsors for display
+                                 (derived from sponsor_info.json)
   - SPONSORS.md                — append-only sponsor wall
   - README.md                  — auto-maintained block between SPONSORS_START/END markers
 
@@ -27,9 +31,9 @@ Exit codes:
       GraphQL errors, unexpected response shape, or truncated results
       (totalCount > len(nodes)). On exit 2 NO files are written, so a
       transient API failure cannot wipe the committed sponsor state.
-  3 — an existing state file (credits.json, shoutouts.json) is unreadable
-      (corrupt JSON or I/O error). Refuses to overwrite with defaults
-      because that would destroy sponsors' run_used flags.
+  3 — sponsor_info.json is unreadable (corrupt JSON or I/O error).
+      Refuses to overwrite with defaults because that would destroy
+      sponsors' run_used / shouted_out flags.
   4 — SPONSORS.md is missing a required section header for a sponsor we
       need to add (e.g. "## 💎 Genesis ($1,200)"). Human must add the
       section before the refresh can proceed.
@@ -46,10 +50,12 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 RAW_JSON = "/tmp/sponsor_raw.json"
-CREDITS_FILE = "sponsors/credits.json"
-SHOUTOUTS_FILE = "sponsors/shoutouts.json"
 ACTIVE_FILE = "sponsors/active.json"
 SPONSOR_INFO_FILE = "sponsors/sponsor_info.json"
+# 90-day grace period: one-time sponsors stay in sponsor_info for this many
+# days after first_seen, so we remember their run_used/shouted_out flags
+# even after they stop appearing in the GitHub Sponsors API response.
+GRACE_DAYS = 90
 SPONSORS_MD = "SPONSORS.md"
 README_MD = "README.md"
 
@@ -183,78 +189,140 @@ def load_json_or_default(path, default):
         sys.exit(3)
 
 
-def update_credits(credits, onetime_sponsors, today):
-    """Add new one-time sponsors to the ledger and compute benefit_expires."""
-    for s in onetime_sponsors:
-        login = s["login"]
-        if login not in credits:
-            credits[login] = {
-                "total_cents": s["cents"],
-                "run_used": False,
-                "first_seen": today,
-                "benefit_expires": "",
-                "shouted_out": False,
-            }
+def _compute_benefit_expires(total_cents, first_seen):
+    """Compute benefit_expires for a one-time sponsor based on amount + first_seen.
 
-    # Compute benefit_expires for one-time sponsors based on amount
-    # (only set once at creation — never overwrite)
-    for login, info in credits.items():
-        if info.get("benefit_expires", ""):
-            continue
-        dollars = info.get("total_cents", 0) / 100
-        first_seen = info.get("first_seen", today)
-        try:
-            fs_date = datetime.strptime(first_seen, "%Y-%m-%d")
-        except ValueError:
-            fs_date = datetime.now(timezone.utc)
-        if dollars >= 1200:
-            info["benefit_expires"] = "never"
-        elif dollars >= 50:
-            info["benefit_expires"] = (fs_date + timedelta(days=60)).strftime("%Y-%m-%d")
-        elif dollars >= 10:
-            info["benefit_expires"] = (fs_date + timedelta(days=30)).strftime("%Y-%m-%d")
-        elif dollars >= 5:
-            info["benefit_expires"] = (fs_date + timedelta(days=14)).strftime("%Y-%m-%d")
-
-    # Expire credit entries older than 90 days, except Genesis sponsors.
-    # Any row lacking first_seen (legacy data, partial write) is KEPT —
-    # empty-string compare against the cutoff would evaluate False and
-    # silently drop the row, which is a data-loss path we refuse to take.
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=90)).strftime("%Y-%m-%d")
-    return {
-        k: v
-        for k, v in credits.items()
-        if v.get("benefit_expires") == "never"
-        or (v.get("first_seen") or today) >= cutoff
-    }
+    Returns the string to store in `benefit_expires`. Genesis ($1,200+) → "never".
+    Everything else gets a rolling window from first_seen.
+    """
+    dollars = total_cents / 100
+    try:
+        fs_date = datetime.strptime(first_seen, "%Y-%m-%d")
+    except (ValueError, TypeError):
+        fs_date = datetime.now(timezone.utc)
+    if dollars >= 1200:
+        return "never"
+    if dollars >= 50:
+        return (fs_date + timedelta(days=60)).strftime("%Y-%m-%d")
+    if dollars >= 10:
+        return (fs_date + timedelta(days=30)).strftime("%Y-%m-%d")
+    if dollars >= 5:
+        return (fs_date + timedelta(days=14)).strftime("%Y-%m-%d")
+    return ""
 
 
-def build_sponsor_info(recurring, credits, shoutouts, today):
-    """Merge recurring + one-time data into a unified per-login dict."""
+def _extract_onetime(entry):
+    """Pull the one-time portion out of an existing sponsor_info entry.
+
+    Handles both shapes: a top-level onetime entry, and a onetime nested
+    under a recurring entry. Returns the onetime dict or None.
+    """
+    if not isinstance(entry, dict):
+        return None
+    if entry.get("type") == "onetime":
+        return entry
+    nested = entry.get("onetime")
+    if isinstance(nested, dict):
+        return nested
+    return None
+
+
+def build_sponsor_info(recurring, onetime_from_api, existing_state, today):
+    """Merge live API data with on-disk state into a fresh sponsor_info dict.
+
+    - `recurring` (dict login→monthly_cents) is authoritative: recurring
+      sponsors not in the API response are dropped (sponsorship ended).
+    - `onetime_from_api` seeds new one-time entries stamped first_seen=today.
+    - `existing_state` preserves mutation fields (run_used, shouted_out,
+      first_seen) for any login still within its grace window. One-time
+      sponsors linger 90 days after first_seen even after they leave the
+      API, so we remember whether they used their accelerated run.
+    """
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=GRACE_DAYS)).strftime("%Y-%m-%d")
     sponsor_info = {}
 
+    # --- Recurring entries ---
     for login, cents in recurring.items():
+        existing = existing_state.get(login) or {}
         sponsor_info[login] = {
             "type": "recurring",
             "monthly_cents": cents,
             "benefits": recurring_benefits(cents),
-            "shouted_out": shoutouts.get(login, False),
+            "first_seen": existing.get("first_seen") or today,
+            "shouted_out": bool(existing.get("shouted_out", False)),
         }
 
-    for login, info in credits.items():
-        dollars = info.get("total_cents", 0) / 100
+    # --- One-time entries: gather prior state first, then overlay API ---
+    # Start from every existing one-time entry (top-level or nested), so
+    # sponsors within their grace window survive even if they disappear
+    # from the API.
+    onetime_state = {}
+    for login, entry in existing_state.items():
+        prev = _extract_onetime(entry)
+        if prev is None:
+            continue
+        onetime_state[login] = {
+            "total_cents": prev.get("total_cents", 0),
+            "first_seen": prev.get("first_seen") or "",
+            "benefit_expires": prev.get("benefit_expires") or "",
+            "run_used": bool(prev.get("run_used", False)),
+            "shouted_out": bool(prev.get("shouted_out", False)),
+        }
+
+    # Add/refresh API one-time sponsors. New entries get first_seen=today
+    # and benefit_expires computed from the tier. Existing entries keep
+    # their first_seen / benefit_expires (set once, never overwritten).
+    for s in onetime_from_api:
+        login = s["login"]
+        cents = s["cents"]
+        if login not in onetime_state:
+            onetime_state[login] = {
+                "total_cents": cents,
+                "first_seen": today,
+                "benefit_expires": "",
+                "run_used": False,
+                "shouted_out": False,
+            }
+
+    # Fill benefit_expires for any entry missing it (new entries, or
+    # legacy ones that never had it computed). Never overwrite an
+    # existing value — that would extend a sponsor's window retroactively.
+    for login, info in onetime_state.items():
+        if info.get("benefit_expires"):
+            continue
+        info["benefit_expires"] = _compute_benefit_expires(
+            info.get("total_cents", 0),
+            info.get("first_seen") or today,
+        )
+
+    # Expire entries past the grace window. Genesis never expires. Rows
+    # with an empty first_seen are KEPT (treated as seen-today), since a
+    # lexicographic compare against "" would drop them, which is the
+    # exact silent-data-loss class the refactor exists to eliminate.
+    onetime_state = {
+        login: info
+        for login, info in onetime_state.items()
+        if info.get("benefit_expires") == "never"
+        or (info.get("first_seen") or today) >= cutoff
+    }
+
+    # --- Fold one-time entries into sponsor_info ---
+    for login, info in onetime_state.items():
+        total_cents = info.get("total_cents", 0)
+        dollars = total_cents / 100
         benefit_expires = info.get("benefit_expires", "")
         active = True
         if benefit_expires and benefit_expires != "never" and benefit_expires < today:
             active = False
-        benefits = onetime_benefits(info.get("total_cents", 0)) if (active and dollars >= 5) else []
+        benefits = onetime_benefits(total_cents) if (active and dollars >= 5) else []
         entry = {
             "type": "onetime",
-            "total_cents": info.get("total_cents", 0),
+            "total_cents": total_cents,
             "benefits": benefits,
+            "first_seen": info.get("first_seen") or today,
             "benefit_expires": benefit_expires,
-            "shouted_out": info.get("shouted_out", False),
-            "run_used": info.get("run_used", False),
+            "run_used": info["run_used"],
+            "shouted_out": info["shouted_out"],
         }
         if login in sponsor_info:
             # Recurring takes precedence; nest the one-time entry under it
@@ -437,79 +505,102 @@ def write_active_json(sponsor_info, path=ACTIVE_FILE):
     return active
 
 
-def create_shoutout_issues(sponsor_info, credits, shoutouts):
+def create_shoutout_issues(sponsor_info):
     """Open GitHub issues for newly-eligible shoutout sponsors.
 
-    Eligibility: $10+/mo recurring OR $10+ one-time, NOT yet shouted out.
-    Dedup: query existing issues with `Shoutout: @login` in title before
-    creating. On any subprocess failure, warn and continue (this is a
-    side effect — don't take down the whole refresh job over a flaky API).
+    Eligibility: `shoutout` benefit + not yet shouted out. Dedup: query
+    existing issues with `Shoutout: @login` in title before creating.
+    On any subprocess failure, warn and continue — this is a side
+    effect that shouldn't take down the whole refresh job.
 
-    Mutates `credits` and `shoutouts` in-place when an issue is created
-    (or when an existing one is found). Caller is responsible for
-    persisting them.
+    Mutates `sponsor_info` in-place, setting `shouted_out=True` on the
+    entry that earned the benefit (either the top-level entry or a
+    nested one-time entry under a recurring sponsor).
     """
     if not _gh_available():
         warn("gh CLI not available — skipping shoutout issue creation")
         return
 
-    for login, info in sponsor_info.items():
-        if "shoutout" not in info.get("benefits", []):
-            continue
-        if info.get("shouted_out", False):
-            continue
+    # Iterate over a snapshot of (login, entry) pairs so we can also
+    # process nested one-time entries under recurring logins.
+    for login, top_entry in list(sponsor_info.items()):
+        _maybe_shoutout(login, top_entry)
+        nested = top_entry.get("onetime") if isinstance(top_entry, dict) else None
+        if isinstance(nested, dict):
+            _maybe_shoutout(login, nested)
 
-        # Dedup against existing issues
-        try:
-            result = subprocess.run(
-                ["gh", "issue", "list", "--repo", REPO, "--state", "all",
-                 "--search", f'"Shoutout: @{login}" in:title',
-                 "--json", "number", "--jq", "length"],
-                capture_output=True, text=True, timeout=15,
-            )
-        except (subprocess.TimeoutExpired, FileNotFoundError) as e:
-            warn(f"could not check shoutouts for @{login}: {e}")
-            continue
 
-        if result.returncode != 0:
-            warn(f"could not check shoutouts for @{login}: {result.stderr.strip()}")
-            continue
-        if result.stdout.strip() not in ("", "0"):
-            # Already exists — mark as shouted out so we don't query again
-            _mark_shouted_out(login, info, credits, shoutouts)
-            continue
+def _maybe_shoutout(login, entry):
+    """Attempt to create a shoutout issue for this (login, entry) pair.
 
-        # Compose title and body
-        if info.get("type") == "recurring":
-            dollars = info.get("monthly_cents", 0) // 100
-            amount_str = f"${dollars}/mo"
-        else:
-            dollars = info.get("total_cents", 0) // 100
-            amount_str = f"${dollars}"
+    Mutates `entry["shouted_out"] = True` only on confirmed success
+    (issue created, or existing issue found via dedup). Failures warn
+    and leave shouted_out as-is so the next run retries.
+    """
+    if "shoutout" not in entry.get("benefits", []):
+        return
+    if entry.get("shouted_out", False):
+        return
 
-        title = f"Shoutout: @{login} — {amount_str} sponsor"
-        body = (
-            f"Thank you @{login} for sponsoring yoyo! 🐙💖\n\n"
-            f"Tier: {amount_str}\n\n"
-            f"Your support helps keep yoyo evolving."
+    # Dedup against existing issues
+    try:
+        result = subprocess.run(
+            ["gh", "issue", "list", "--repo", REPO, "--state", "all",
+             "--search", f'"Shoutout: @{login}" in:title',
+             "--json", "number", "--jq", "length"],
+            capture_output=True, text=True, timeout=15,
         )
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+        warn(f"could not check shoutouts for @{login}: {e}")
+        return
 
-        try:
-            result = subprocess.run(
-                ["gh", "issue", "create", "--repo", REPO,
-                 "--title", title, "--label", "shoutout", "--body", body],
-                capture_output=True, text=True, timeout=15,
-            )
-        except (subprocess.TimeoutExpired, FileNotFoundError) as e:
-            warn(f"failed to create shoutout for @{login}: {e}")
-            continue
+    if result.returncode != 0:
+        warn(f"could not check shoutouts for @{login}: {result.stderr.strip()}")
+        return
 
-        if result.returncode != 0:
-            warn(f"failed to create shoutout for @{login}: {result.stderr.strip()}")
-            continue
+    # Treat non-numeric output as "can't verify" rather than "exists"
+    count_str = result.stdout.strip()
+    try:
+        count = int(count_str) if count_str else 0
+    except ValueError:
+        warn(f"unexpected gh output while deduping @{login}: {count_str!r}")
+        return
+    if count > 0:
+        # Already exists — mark as shouted out so we don't query again
+        entry["shouted_out"] = True
+        return
 
-        print(f"  Created shoutout issue for @{login}")
-        _mark_shouted_out(login, info, credits, shoutouts)
+    # Compose title and body
+    if entry.get("type") == "recurring":
+        dollars = entry.get("monthly_cents", 0) // 100
+        amount_str = f"${dollars}/mo"
+    else:
+        dollars = entry.get("total_cents", 0) // 100
+        amount_str = f"${dollars}"
+
+    title = f"Shoutout: @{login} — {amount_str} sponsor"
+    body = (
+        f"Thank you @{login} for sponsoring yoyo! 🐙💖\n\n"
+        f"Tier: {amount_str}\n\n"
+        f"Your support helps keep yoyo evolving."
+    )
+
+    try:
+        result = subprocess.run(
+            ["gh", "issue", "create", "--repo", REPO,
+             "--title", title, "--label", "shoutout", "--body", body],
+            capture_output=True, text=True, timeout=15,
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+        warn(f"failed to create shoutout for @{login}: {e}")
+        return
+
+    if result.returncode != 0:
+        warn(f"failed to create shoutout for @{login}: {result.stderr.strip()}")
+        return
+
+    print(f"  Created shoutout issue for @{login}")
+    entry["shouted_out"] = True
 
 
 def _gh_available():
@@ -518,14 +609,6 @@ def _gh_available():
         return True
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
         return False
-
-
-def _mark_shouted_out(login, info, credits, shoutouts):
-    """Mutate the right ledger so we don't shout out the same sponsor twice."""
-    if info.get("type") == "recurring":
-        shoutouts[login] = True
-    elif login in credits:
-        credits[login]["shouted_out"] = True
 
 
 def _atomic_write_text(path, text):
@@ -549,6 +632,21 @@ def write_json(path, data):
     _atomic_write_text(path, json.dumps(data, indent=2))
 
 
+def _onetime_with_unused_run(sponsor_info):
+    """Return list of logins that have $2+ onetime credit not yet consumed.
+
+    Checks both top-level one-time entries and onetime-nested-under-recurring.
+    """
+    out = []
+    for login, entry in sponsor_info.items():
+        nested = _extract_onetime(entry)
+        if nested is None:
+            continue
+        if nested.get("total_cents", 0) >= 200 and not nested.get("run_used", False):
+            out.append(login)
+    return out
+
+
 def main():
     # Phase 1: fetch + validate. Any failure raises FetchFailed and we
     # exit BEFORE touching any committed file.
@@ -558,50 +656,39 @@ def main():
         err(f"sponsor fetch failed — refusing to update committed files: {e}")
         sys.exit(2)
 
-    recurring, onetime_sponsors, monthly_cents = split_nodes(nodes)
+    recurring, onetime_from_api, monthly_cents = split_nodes(nodes)
 
-    # Phase 2: load existing state (missing files OK, unreadable files fatal)
-    credits = load_json_or_default(CREDITS_FILE, {})
-    shoutouts = load_json_or_default(SHOUTOUTS_FILE, {})
+    # Phase 2: load existing state. Missing is fine (fresh checkout);
+    # unreadable is fatal (exit 3) — we refuse to silently overwrite a
+    # corrupt file with defaults because that would destroy run_used flags.
+    existing_state = load_json_or_default(SPONSOR_INFO_FILE, {})
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    credits = update_credits(credits, onetime_sponsors, today)
-    sponsor_info = build_sponsor_info(recurring, credits, shoutouts, today)
+    # Phase 3: build fresh sponsor_info, preserving mutation fields from
+    # existing_state (first_seen, run_used, shouted_out).
+    sponsor_info = build_sponsor_info(recurring, onetime_from_api, existing_state, today)
 
-    # Phase 3: side effects (issue creation) — mutates shoutouts/credits
-    # in-place. Side-effect failures warn but don't abort.
-    create_shoutout_issues(sponsor_info, credits, shoutouts)
+    # Phase 4: side effects (issue creation) — mutates sponsor_info
+    # in-place, setting shouted_out=true on confirmed issue creation.
+    # Failures warn and leave shouted_out=false so the next run retries.
+    create_shoutout_issues(sponsor_info)
 
-    # Rebuild sponsor_info after shoutout mutations so the dump reflects
-    # current shouted_out flags
-    sponsor_info = build_sponsor_info(recurring, credits, shoutouts, today)
-
-    # Phase 4: write all files. Any unhandled write error here propagates
-    # as a non-zero exit (loud) — we never silently continue past a
-    # failed write.
+    # Phase 5: write files. Any unhandled write error propagates loudly.
     #
-    # Write order matters: listings (SPONSORS.md, README.md, active.json,
-    # sponsor_info.json) happen BEFORE the mutation ledgers (credits.json,
-    # shoutouts.json). Rationale: if a listing write fails, we abort
-    # without persisting the in-memory mutations from create_shoutout_issues.
-    # The next run will then re-load the on-disk ledger, re-derive the
-    # same sponsor_info, and re-attempt shoutout creation — which hits the
-    # dedup path (existing issue found) and self-heals. If we persisted
-    # the ledger first and then failed on a listing, the ledger would
-    # claim shouted_out=true while the listing never got updated.
+    # Write order: listings (SPONSORS.md, README.md, active.json) BEFORE
+    # the single state file (sponsor_info.json). Rationale: if a listing
+    # write fails, we abort without persisting the in-memory shouted_out
+    # mutations from create_shoutout_issues. The next run reloads the
+    # on-disk state, re-derives sponsor_info, and hits the dedup path
+    # (existing issue found) — self-healing. If we persisted state
+    # first and then failed on a listing, state would claim
+    # shouted_out=true while the listing never got the update.
     update_sponsors_md(sponsor_info)
     update_readme(sponsor_info)
     write_active_json(sponsor_info)
     write_json(SPONSOR_INFO_FILE, sponsor_info)
-    write_json(CREDITS_FILE, credits)
-    write_json(SHOUTOUTS_FILE, shoutouts)
 
-    onetime_with_run = [
-        login
-        for login, info in credits.items()
-        if info.get("total_cents", 0) >= 200 and not info.get("run_used", False)
-    ]
-    has_credits = "true" if onetime_with_run else "false"
+    has_credits = "true" if _onetime_with_unused_run(sponsor_info) else "false"
     print(f"{monthly_cents}|{has_credits}")
 
 

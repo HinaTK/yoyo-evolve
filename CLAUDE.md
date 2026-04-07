@@ -108,8 +108,7 @@ Additional skills:
 - `ISSUES_TODAY.md` — ephemeral, generated during evolution from GitHub issues (gitignored)
 - `ECONOMICS.md` — what money and sponsorship mean to yoyo (DO NOT MODIFY)
 - `SPONSORS.md` — auto-maintained sponsor recognition (only additions, never removals; amounts shown so yoyo understands the investment)
-- `sponsors/credits.json` — one-time sponsor credit tracking (total_cents, run_used, benefit_expires, etc.)
-- `sponsors/shoutouts.json` — tracks which recurring sponsors have received shoutout issues (dedup)
+- `sponsors/sponsor_info.json` — single source of truth for sponsor state (recurring + one-time, with run_used, shouted_out, benefit_expires). Rebuilt by `scripts/refresh_sponsors.py`; only the `run_used` flag is mutated by `evolve.sh` when consuming an accelerated run.
 
 
 ## yoagent: Don't Reinvent the Wheel
