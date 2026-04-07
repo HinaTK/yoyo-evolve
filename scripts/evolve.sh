@@ -888,9 +888,8 @@ Steps:
 
 Keep the assessment to ~3 pages max. Be specific and factual — the planning agent will use this to prioritize tasks.
 
-After writing, commit (the diff check skips the commit when nothing is staged, avoiding exit 1):
-  git add session_plan/assessment.md
-  git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): assessment"
+After writing, commit:
+  git add session_plan/assessment.md && git commit -m "Day $DAY ($SESSION_TIME): assessment" || true
 
 Then STOP. Do not write task files. Do not implement anything.
 ASSESSEOF
@@ -1065,9 +1064,8 @@ TASK SIZING RULES — follow these strictly:
 Also create session_plan/issue_responses.md with your planned response for each issue:
 - #N: [what you'll do — implement as task, won't fix because X, already resolved, need more time, etc.]
 
-After writing all files, commit (the diff check skips the commit when nothing is staged, avoiding exit 1):
-  git add session_plan/
-  git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): session plan"
+After writing all files, commit:
+  git add session_plan/ && git commit -m "Day $DAY ($SESSION_TIME): session plan" || true
 
 Then STOP. Do not implement anything. Your job is planning only.
 PLANEOF
@@ -1173,9 +1171,8 @@ Follow the evolve skill rules:
 - Run cargo fmt && cargo clippy --all-targets -- -D warnings && cargo build && cargo test after changes
 - If any check fails, read the error and fix it. Keep trying until it passes.
 - Only if you've tried 3+ times and are stuck, revert with: git checkout -- . (keeps previous commits)
-- After ALL checks pass, commit (the diff check skips the commit when nothing is staged, avoiding exit 1):
-    git add -A
-    git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): $task_title (Task $TASK_NUM)"
+- After ALL checks pass, commit:
+    git add -A && git commit -m "Day $DAY ($SESSION_TIME): $task_title (Task $TASK_NUM)" || true
 - If you changed behavior, added features, or modified architecture, update the docs:
   - CLAUDE.md — keep the "What This Is", "Build & Test", "Architecture", and "State files" sections accurate
   - README.md — keep "How It Evolves", commands table, and feature descriptions accurate
@@ -1742,9 +1739,8 @@ Steps:
 2. Fix the errors above
 3. Run: cargo fmt && cargo clippy --all-targets -- -D warnings && cargo build && cargo test
 4. Keep fixing until all checks pass
-5. Commit (the diff check skips the commit when nothing is staged, avoiding exit 1):
-     git add -A
-     git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): fix build errors"
+5. Commit:
+     git add -A && git commit -m "Day $DAY ($SESSION_TIME): fix build errors" || true
 FIXEOF
         ${TIMEOUT_CMD:+$TIMEOUT_CMD 300} "$YOYO_BIN" \
             --model "$MODEL" \
@@ -1799,7 +1795,7 @@ This was an ACCELERATED run funded by @$ACCELERATED_BY (one-time sponsor). Thank
 }
 Read journals/JOURNAL.md to see your previous entries and match the voice/style.
 ${EXTERNAL_JOURNALS:+
-You also work on external projects. Here's what you did recently:
+You also work on external projects. Here is what you did recently:
 $EXTERNAL_JOURNALS
 Mention external work briefly in your journal entry.
 }
@@ -1814,9 +1810,8 @@ For example, if this is the first sponsor, a milestone, a new external project, 
 else worth calling out — give it its own line or section. Don't force structure when there's
 nothing special to report, but when something new happens, make it visible.
 
-Be specific and honest. Then commit (the diff check skips the commit when nothing is staged, avoiding exit 1):
-  git add journals/JOURNAL.md
-  git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): journal entry"
+Be specific and honest. Then commit:
+  git add journals/JOURNAL.md && git commit -m "Day $DAY ($SESSION_TIME): journal entry" || true
 JEOF
 
     ${TIMEOUT_CMD:+$TIMEOUT_CMD 120} "$YOYO_BIN" \
@@ -1886,9 +1881,8 @@ with open("memory/learnings.jsonl", "a") as f:
 print("Appended learning:", entry["title"])
 PYEOF
 
-Then commit (the diff check skips the commit when nothing is staged, avoiding exit 1):
-  git add memory/learnings.jsonl
-  git diff --cached --quiet || git commit -m "Day $DAY ($SESSION_TIME): update learnings"
+Then commit:
+  git add memory/learnings.jsonl && git commit -m "Day $DAY ($SESSION_TIME): update learnings" || true
 
 If nothing non-obvious came up, do nothing. Not every session produces a lesson.
 REOF
