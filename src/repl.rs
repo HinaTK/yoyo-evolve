@@ -1043,6 +1043,12 @@ pub async fn run_repl(
                     // Multi-attempt auto-fix loop
                     let mut current_output = output;
                     for attempt in 1..=MAX_WATCH_FIX_ATTEMPTS {
+                        if session_budget_exhausted(30) {
+                            eprintln!(
+                                "{DIM}  ⏱ session budget nearly exhausted, stopping watch fix loop early{RESET}"
+                            );
+                            break;
+                        }
                         eprintln!(
                             "{YELLOW}  → Auto-fixing (attempt {attempt}/{MAX_WATCH_FIX_ATTEMPTS})...{RESET}"
                         );

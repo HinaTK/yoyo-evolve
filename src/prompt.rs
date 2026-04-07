@@ -228,23 +228,23 @@ pub fn read_audit_log(n: usize) -> Vec<String> {
 // callers should treat the session as unbounded.
 //
 // This is the foundation only — wiring it into the spawn loop and individual
-// task dispatch happens in a follow-up task. Keep blast radius zero.
+// task dispatch happens in `session_budget_exhausted` below, which is called
+// at retry-loop boundaries (`run_prompt_auto_retry`, the watch-mode fix loop).
+// Unbounded sessions remain the default — `session_budget_exhausted` returns
+// `false` when the env var is unset, so interactive use is unaffected.
 
 /// Default soft budget in seconds (45 min) when `YOYO_SESSION_BUDGET_SECS`
 /// is set but doesn't parse as a positive integer.
-#[allow(dead_code)] // wired in by a follow-up task; foundation only
 const DEFAULT_SESSION_BUDGET_SECS: u64 = 2700;
 
 /// Cached parse of `YOYO_SESSION_BUDGET_SECS`. `None` if the env var was unset
 /// or empty at first read; `Some(secs)` otherwise. Read once and frozen for
 /// the lifetime of the process so the budget can't shift mid-session.
-#[allow(dead_code)] // wired in by a follow-up task; foundation only
 static SESSION_BUDGET_SECS: OnceLock<Option<u64>> = OnceLock::new();
 
 /// Wall-clock instant of the first call to `session_budget_remaining()`.
 /// Recorded lazily so the budget starts ticking from real agent work, not
 /// from process startup (which may include slow CI cold-start time).
-#[allow(dead_code)] // wired in by a follow-up task; foundation only
 static SESSION_BUDGET_START: OnceLock<Instant> = OnceLock::new();
 
 /// Look up the configured budget, reading the env var exactly once.
@@ -252,7 +252,6 @@ static SESSION_BUDGET_START: OnceLock<Instant> = OnceLock::new();
 /// Returns `None` if `YOYO_SESSION_BUDGET_SECS` is unset or empty.
 /// Returns `Some(DEFAULT_SESSION_BUDGET_SECS)` if it's set but unparseable
 /// (so a typo doesn't silently disable the guard).
-#[allow(dead_code)] // wired in by a follow-up task; foundation only
 fn configured_session_budget() -> Option<u64> {
     *SESSION_BUDGET_SECS
         .get_or_init(|| parse_session_budget(std::env::var("YOYO_SESSION_BUDGET_SECS").ok()))
@@ -261,7 +260,6 @@ fn configured_session_budget() -> Option<u64> {
 /// Pure parser for the budget env var. Extracted so it can be tested
 /// without the OnceLock dance — the cache only memoizes the result of
 /// this function once per process.
-#[allow(dead_code)] // wired in by a follow-up task; foundation only
 fn parse_session_budget(raw: Option<String>) -> Option<u64> {
     match raw {
         Some(s) if s.is_empty() => None,
@@ -278,13 +276,27 @@ fn parse_session_budget(raw: Option<String>) -> Option<u64> {
 ///
 /// The budget timer starts on the first call to this function, not at
 /// process startup, so cold-start overhead doesn't eat into agent work.
-#[allow(dead_code)] // wired in by a follow-up task; foundation only
 pub fn session_budget_remaining() -> Option<Duration> {
     let budget_secs = configured_session_budget()?;
     let start = SESSION_BUDGET_START.get_or_init(Instant::now);
     let elapsed = start.elapsed();
     let budget = Duration::from_secs(budget_secs);
     Some(budget.saturating_sub(elapsed))
+}
+
+/// Returns `true` if the session budget is set and has `≤ grace_secs`
+/// remaining. Returns `false` if the budget is unset (unbounded) or if
+/// there's still headroom above the grace window.
+///
+/// Used at retry-loop boundaries (`run_prompt_auto_retry`, the watch-mode
+/// fix loop) to stop kicking off new attempts when the GH Actions runner
+/// is about to cancel us mid-push (#262). Unbounded sessions never report
+/// exhausted, so interactive use is unaffected.
+pub fn session_budget_exhausted(grace_secs: u64) -> bool {
+    match session_budget_remaining() {
+        Some(remaining) => remaining.as_secs() <= grace_secs,
+        None => false,
+    }
 }
 
 /// Tracks files modified during a session via write_file and edit_file tool calls.
@@ -1699,6 +1711,12 @@ pub async fn run_prompt_auto_retry(
     for attempt in 1..=MAX_AUTO_RETRIES {
         match outcome.last_tool_error {
             Some(ref err) => {
+                if session_budget_exhausted(30) {
+                    eprintln!(
+                        "{DIM}  ⏱ session budget nearly exhausted, stopping retries early{RESET}"
+                    );
+                    break;
+                }
                 let retry_prompt = build_auto_retry_prompt(input, err, attempt);
                 eprintln!(
                     "{DIM}  ⚡ auto-retrying after tool error (attempt {attempt}/{MAX_AUTO_RETRIES})...{RESET}"
@@ -1752,6 +1770,12 @@ pub async fn run_prompt_auto_retry_with_content(
     for attempt in 1..=MAX_AUTO_RETRIES {
         match outcome.last_tool_error {
             Some(ref err) => {
+                if session_budget_exhausted(30) {
+                    eprintln!(
+                        "{DIM}  ⏱ session budget nearly exhausted, stopping retries early{RESET}"
+                    );
+                    break;
+                }
                 // Retry with a text-only follow-up — the original content blocks
                 // (files, images) are already in conversation history from the first attempt
                 let retry_prompt = build_auto_retry_prompt(original_text, err, attempt);
@@ -3244,5 +3268,57 @@ mod tests {
         let elapsed = Duration::from_secs(10);
         let remaining = budget.saturating_sub(elapsed);
         assert_eq!(remaining, Duration::ZERO);
+    }
+
+    // ── session_budget_exhausted tests ──────────────────────────────────
+    // We follow the same OnceLock-respecting pattern as the
+    // `session_budget_remaining` tests above: hit the live helper only
+    // when the env var is naturally unset, and simulate the math
+    // directly for the configured cases. This keeps the tests order-
+    // independent and free of cross-test OnceLock pollution.
+
+    #[test]
+    fn test_session_budget_exhausted_unset_returns_false() {
+        // With no budget configured, sessions are unbounded — exhausted
+        // must always be false, regardless of grace window. This is the
+        // critical safety property: interactive use is unaffected.
+        if std::env::var("YOYO_SESSION_BUDGET_SECS").is_err() {
+            assert!(!session_budget_exhausted(0));
+            assert!(!session_budget_exhausted(30));
+            assert!(!session_budget_exhausted(99_999));
+        }
+    }
+
+    #[test]
+    fn test_session_budget_exhausted_with_headroom_returns_false() {
+        // Simulate a 9999-second budget with negligible elapsed time.
+        // Mirrors session_budget_remaining()'s math without touching the
+        // global OnceLock. Plenty of headroom above the 30s grace → not
+        // exhausted.
+        let budget = Duration::from_secs(9999);
+        let elapsed = Duration::from_millis(5);
+        let remaining = budget.saturating_sub(elapsed);
+        // The same comparison session_budget_exhausted performs:
+        let exhausted = remaining.as_secs() <= 30;
+        assert!(
+            !exhausted,
+            "9999s budget with 5ms elapsed should have headroom"
+        );
+    }
+
+    #[test]
+    fn test_session_budget_exhausted_after_expiry_returns_true() {
+        // Simulate a 1-second budget after sleeping past it. The live
+        // helper would wrap to ZERO via saturating_sub; the predicate
+        // then returns true because 0 ≤ 30.
+        let budget = Duration::from_secs(1);
+        let start = Instant::now();
+        std::thread::sleep(Duration::from_millis(20));
+        // Pretend a long time has passed by adding to the real elapsed.
+        let elapsed = start.elapsed() + Duration::from_secs(10);
+        let remaining = budget.saturating_sub(elapsed);
+        let exhausted = remaining.as_secs() <= 30;
+        assert_eq!(remaining, Duration::ZERO);
+        assert!(exhausted, "expired budget must report exhausted");
     }
 }
