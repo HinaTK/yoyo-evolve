@@ -557,15 +557,37 @@ fn load_config_file() -> (HashMap<String, String>, String) {
 
 /// Parse CLI arguments into a Config, or exit with help/version.
 /// Returns None if --help or --version was handled (program should exit).
-pub fn parse_args(args: &[String]) -> Option<Config> {
-    // Handle --help and --version before anything else
+/// Try to dispatch an early-exit "subcommand" before flag parsing.
+///
+/// Today, yoyo's only short-circuit dispatch is for `--help`/`-h` and
+/// `--version`/`-V` — both print and bail out before any config is built.
+/// This helper is the first slice of the parse_args refactor (#261); it
+/// exists so the "did I handle this?" decision can be unit-tested in
+/// isolation, and so future positional subcommands (`yoyo setup`,
+/// `yoyo doctor`, etc., once they exist) have an obvious place to land.
+///
+/// Returns:
+/// - `Some(None)` — a subcommand matched, was handled (printed output),
+///   and `parse_args` should return `None` to its caller.
+/// - `Some(Some(cfg))` — a subcommand matched and produced a usable
+///   `Config` (no current subcommand does this; reserved for future use).
+/// - `None` — no subcommand matched; fall through to flag parsing.
+pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>> {
     if args.iter().any(|a| a == "--help" || a == "-h") {
         print_help();
-        return None;
+        return Some(None);
     }
     if args.iter().any(|a| a == "--version" || a == "-V") {
         println!("yoyo v{VERSION}");
-        return None;
+        return Some(None);
+    }
+    None
+}
+
+pub fn parse_args(args: &[String]) -> Option<Config> {
+    // Handle early-exit subcommands (--help, --version) before anything else.
+    if let Some(result) = try_dispatch_subcommand(args) {
+        return result;
     }
 
     // Load config file defaults (CLI flags override these)
@@ -1116,6 +1138,89 @@ mod tests {
         assert!(
             VERSION.contains('.'),
             "Version should contain a dot: {VERSION}"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_help_long() {
+        // --help should be dispatched (returns Some(None) — handled, parse_args returns None)
+        let args = vec!["yoyo".into(), "--help".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for --help"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_help_short() {
+        // -h alias should also dispatch
+        let args = vec!["yoyo".into(), "-h".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(matches!(result, Some(None)), "expected Some(None) for -h");
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_version_long() {
+        let args = vec!["yoyo".into(), "--version".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for --version"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_version_short() {
+        let args = vec!["yoyo".into(), "-V".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(matches!(result, Some(None)), "expected Some(None) for -V");
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_falls_through_on_unknown_flag() {
+        // An unknown flag should NOT be dispatched as a subcommand —
+        // returns None so parse_args continues to flag parsing.
+        let args = vec!["yoyo".into(), "--unknown-flag".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(result.is_none(), "expected None for --unknown-flag");
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_falls_through_on_empty_args() {
+        // Empty args list should fall through (no subcommand to dispatch).
+        let args: Vec<String> = vec![];
+        let result = try_dispatch_subcommand(&args);
+        assert!(result.is_none(), "expected None for empty args");
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_falls_through_on_normal_flags() {
+        // Normal flag combinations should fall through to parse_args's main loop.
+        let args = vec![
+            "yoyo".into(),
+            "--model".into(),
+            "claude-sonnet-4-5".into(),
+            "--prompt".into(),
+            "hello".into(),
+        ];
+        let result = try_dispatch_subcommand(&args);
+        assert!(result.is_none(), "expected None for normal flag combo");
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_help_wins_over_other_flags() {
+        // If --help appears anywhere in the args, it should still dispatch.
+        let args = vec![
+            "yoyo".into(),
+            "--model".into(),
+            "claude-sonnet-4-5".into(),
+            "--help".into(),
+        ];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected --help to dispatch even with other flags"
         );
     }
 
