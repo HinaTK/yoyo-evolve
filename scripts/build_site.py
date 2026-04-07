@@ -438,14 +438,28 @@ section {
 }
 
 .entry-subheading {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: var(--text-bright);
-  margin: 1.2rem 0 0.4rem;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 1.6rem 0 0.6rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.entry-subheading::before {
+  content: "▸";
+  color: var(--cyan);
+  font-size: 0.75rem;
+  opacity: 0.85;
 }
 
 .entry-subheading:first-child {
-  margin-top: 0;
+  margin-top: 0.2rem;
 }
 
 
