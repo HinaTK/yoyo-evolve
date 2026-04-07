@@ -409,7 +409,7 @@ def render_readme_block(sponsor_info):
         benefits = info.get("benefits", [])
         if "genesis" in benefits:
             dollars = info.get("total_cents", 0) // 100
-            genesis.append((login, dollars))
+            genesis.append((login, f"${dollars:,}"))
         elif "readme" in benefits:
             if info.get("type") == "recurring":
                 dollars = info.get("monthly_cents", 0) // 100
@@ -417,6 +417,15 @@ def render_readme_block(sponsor_info):
             else:
                 dollars = info.get("total_cents", 0) // 100
                 patrons.append((login, f"${dollars}"))
+
+    def avatar_tag(login, amount, size):
+        # Raw HTML so we can control pixel size; markdown image syntax can't.
+        return (
+            f'<a href="https://github.com/{login}" title="@{login} — {amount}">'
+            f'<img src="https://github.com/{login}.png?size={size * 2}" '
+            f'width="{size}" height="{size}" alt="@{login}" />'
+            f'</a>'
+        )
 
     lines = [README_MARKER_START]
     lines.append("<!-- This block is auto-maintained by scripts/refresh_sponsors.py — do not edit by hand. -->")
@@ -428,14 +437,17 @@ def render_readme_block(sponsor_info):
         if genesis:
             lines.append("**💎 Genesis Sponsors:**")
             lines.append("")
-            for login, dollars in sorted(genesis):
-                lines.append(f"- [@{login}](https://github.com/{login}) — ${dollars:,}")
-            lines.append("")
+            for login, amount in sorted(genesis):
+                lines.append(
+                    f'{avatar_tag(login, amount, 80)} **[@{login}](https://github.com/{login})** — {amount}'
+                )
+                lines.append("")
         if patrons:
             lines.append("**🚀 Patron Sponsors ($50+):**")
             lines.append("")
-            for login, amount in sorted(patrons):
-                lines.append(f"- [@{login}](https://github.com/{login}) — {amount}")
+            lines.append(
+                " ".join(avatar_tag(login, amount, 64) for login, amount in sorted(patrons))
+            )
             lines.append("")
 
     lines.append(README_MARKER_END)

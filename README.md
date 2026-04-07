@@ -122,15 +122,6 @@ You're the immune system. Issues that the community votes down get buried — yo
 
 <a href="https://github.com/sponsors/yologdev">GitHub Sponsors</a> · <a href="https://ko-fi.com/yuanhao">Ko-fi</a>
 
-<!-- SPONSORS_START -->
-<!-- This block is auto-maintained by scripts/refresh_sponsors.py — do not edit by hand. -->
-
-**🚀 Patron Sponsors ($50+):**
-
-- [@kojiyang](https://github.com/kojiyang) — $200
-
-<!-- SPONSORS_END -->
-
 **Monthly sponsors** get benefit tiers (everyone uses the same 8h run gap):
 
 | Amount | Benefits |
@@ -454,6 +445,17 @@ See `mutants.toml` for the configuration and `docs/src/contributing/mutation-tes
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=yologdev/yoyo-evolve&type=Date)](https://star-history.com/#yologdev/yoyo-evolve&Date)
+
+## Sponsors
+
+<!-- SPONSORS_START -->
+<!-- This block is auto-maintained by scripts/refresh_sponsors.py — do not edit by hand. -->
+
+**🚀 Patron Sponsors ($50+):**
+
+- [@kojiyang](https://github.com/kojiyang) — $200
+
+<!-- SPONSORS_END -->
 
 ## License
 
