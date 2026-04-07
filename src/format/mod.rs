@@ -869,6 +869,21 @@ pub fn context_usage_color(pct: u32) -> &'static Color {
     }
 }
 
+/// Format the context usage label string.
+/// Returns "0%" for true zero, "<1%" for non-zero usage that rounds to 0%,
+/// otherwise the integer percentage like "42%".
+pub fn context_usage_label(used_tokens: u64, max_tokens: u64) -> String {
+    if max_tokens == 0 {
+        return "0%".to_string();
+    }
+    let pct = ((used_tokens as f64 / max_tokens as f64) * 100.0).min(100.0) as u32;
+    if used_tokens > 0 && pct == 0 {
+        "<1%".to_string()
+    } else {
+        format!("{pct}%")
+    }
+}
+
 /// Print a context window usage indicator line.
 /// Shows percentage of context consumed, color-coded by fullness.
 pub fn print_context_usage(used_tokens: u64, max_tokens: u64) {
@@ -877,7 +892,8 @@ pub fn print_context_usage(used_tokens: u64, max_tokens: u64) {
     }
     let pct = ((used_tokens as f64 / max_tokens as f64) * 100.0).min(100.0) as u32;
     let color = context_usage_color(pct);
-    println!("{DIM}  {color}⬤{RESET}{DIM} {pct}% of context window used{RESET}");
+    let label = context_usage_label(used_tokens, max_tokens);
+    println!("{DIM}  {color}⬤{RESET}{DIM} {label} of context window used{RESET}");
 }
 
 #[cfg(test)]
@@ -915,6 +931,40 @@ mod tests {
     #[test]
     fn test_truncate_empty() {
         assert_eq!(truncate("", 5), "");
+    }
+
+    // Issue #263: tiny non-zero usage rendered as "0%" because integer math
+    // truncated to 0; the label should say "<1%" so the user can tell tokens
+    // were actually consumed.
+    #[test]
+    fn context_usage_label_tiny_usage_shows_less_than_one_percent() {
+        let label = context_usage_label(500, 200_000);
+        assert_eq!(label, "<1%");
+    }
+
+    #[test]
+    fn context_usage_label_zero_usage_is_zero_percent() {
+        let label = context_usage_label(0, 200_000);
+        assert_eq!(label, "0%");
+    }
+
+    #[test]
+    fn context_usage_label_normal_usage_unchanged() {
+        let label = context_usage_label(50_000, 200_000);
+        assert_eq!(label, "25%");
+    }
+
+    #[test]
+    fn context_usage_label_full_usage() {
+        let label = context_usage_label(200_000, 200_000);
+        assert_eq!(label, "100%");
+    }
+
+    #[test]
+    fn context_usage_label_zero_max_safe() {
+        // Defensive: should not divide by zero.
+        let label = context_usage_label(100, 0);
+        assert_eq!(label, "0%");
     }
 
     #[test]

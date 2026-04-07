@@ -216,7 +216,15 @@ pub fn context_bar(used: u64, max: u64) -> String {
     let filled = (pct * width as f64).round() as usize;
     let empty = width - filled;
     let bar: String = "█".repeat(filled) + &"░".repeat(empty);
-    format!("{bar} {:.0}%", pct * 100.0)
+    let pct_int = (pct * 100.0) as u32;
+    // Issue #263: integer truncation rendered tiny non-zero usage as "0%".
+    // Show "<1%" so the user can tell tokens were actually consumed.
+    let label = if used > 0 && pct_int == 0 {
+        "<1%".to_string()
+    } else {
+        format!("{pct_int}%")
+    };
+    format!("{bar} {label}")
 }
 
 /// Truncate a string with an ellipsis if it exceeds `max` characters.
@@ -259,6 +267,31 @@ mod tests {
 
         let bar_full = context_bar(200000, 200000);
         assert!(bar_full.contains("100%"));
+    }
+
+    // Issue #263: tiny non-zero usage was rendering as "0%" due to integer
+    // truncation, making the bar look broken even when tokens had been spent.
+    #[test]
+    fn context_bar_shows_less_than_one_percent_for_tiny_usage() {
+        let bar = context_bar(500, 200_000);
+        assert!(!bar.contains(" 0%"), "expected non-0% label, got: {bar}");
+        assert!(bar.contains("<1%"), "expected <1% label, got: {bar}");
+    }
+
+    #[test]
+    fn context_bar_zero_usage_still_shows_zero() {
+        let bar = context_bar(0, 200_000);
+        assert!(
+            bar.contains("0%"),
+            "expected literal 0% for zero usage, got: {bar}"
+        );
+        assert!(!bar.contains("<1%"));
+    }
+
+    #[test]
+    fn context_bar_normal_usage_unchanged() {
+        let bar = context_bar(50_000, 200_000);
+        assert!(bar.contains("25%"), "expected 25%, got: {bar}");
     }
 
     #[test]

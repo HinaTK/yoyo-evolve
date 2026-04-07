@@ -1589,6 +1589,11 @@ pub async fn run_prompt_with_changes(
     session_total.cache_read += total_usage.cache_read;
     session_total.cache_write += total_usage.cache_write;
     print_usage(&total_usage, session_total, model, prompt_start.elapsed());
+    // Issue #258: yoagent 0.7.x runs the agent loop in a background task; the
+    // agent's internal `self.messages` is only updated when `finish()` is awaited.
+    // Without this, `agent.messages()` returns stale state and the context bar
+    // permanently reads "0% used". Call finish() before reading messages.
+    agent.finish().await;
     let ctx_used = total_tokens(agent.messages()) as u64;
     let ctx_max = crate::cli::effective_context_tokens();
     print_context_usage(ctx_used, ctx_max);
@@ -1788,6 +1793,9 @@ pub async fn run_prompt_with_content_and_changes(
     session_total.cache_read += total_usage.cache_read;
     session_total.cache_write += total_usage.cache_write;
     print_usage(&total_usage, session_total, model, prompt_start.elapsed());
+    // Issue #258: see run_prompt_with_changes — yoagent 0.7.x requires finish()
+    // before reading messages, otherwise the context bar reads stale "0%".
+    agent.finish().await;
     let ctx_used = total_tokens(agent.messages()) as u64;
     let ctx_max = crate::cli::effective_context_tokens();
     print_context_usage(ctx_used, ctx_max);
@@ -1834,6 +1842,50 @@ mod tests {
         assert_eq!(retry_delay(1), Duration::from_secs(1));
         assert_eq!(retry_delay(2), Duration::from_secs(2));
         assert_eq!(retry_delay(3), Duration::from_secs(4));
+    }
+
+    // Issue #258 / Day 33 lesson (test from the user's perspective):
+    // After draining the event stream from prompt_messages, the agent's
+    // internal `messages` field is still empty until `finish().await` is
+    // called. This is exactly the bug yoyo had: it read `agent.messages()`
+    // immediately after the loop ended and saw 0, so the context bar
+    // permanently said "0% used".
+    //
+    // This test reproduces the failure mode against yoagent's MockProvider
+    // and verifies that calling `finish()` is what makes messages visible.
+    #[tokio::test]
+    async fn agent_messages_empty_until_finish_is_called() {
+        use yoagent::provider::MockProvider;
+        use yoagent::Agent;
+
+        let provider = MockProvider::text("hello back");
+        let mut agent = Agent::new(provider)
+            .with_model("mock-model")
+            .with_api_key("not-a-real-key");
+
+        // Sanity: starts empty.
+        assert_eq!(agent.messages().len(), 0);
+
+        // Drive a prompt and drain all events.
+        let mut rx = agent.prompt("hi").await;
+        while rx.recv().await.is_some() {}
+
+        // Without finish(), yoagent 0.7.x leaves messages stale. This is the
+        // root cause of Issue #258 — and exactly why yoyo's context bar read 0%.
+        let stale_count = agent.messages().len();
+
+        // After finish(), the loop's messages are restored into the agent.
+        agent.finish().await;
+        let real_count = agent.messages().len();
+
+        assert!(
+            real_count > 0,
+            "expected agent.messages() to be non-empty after finish(), got {real_count}"
+        );
+        assert!(
+            real_count > stale_count || stale_count == 0,
+            "finish() should restore messages: stale={stale_count}, real={real_count}"
+        );
     }
 
     #[test]
