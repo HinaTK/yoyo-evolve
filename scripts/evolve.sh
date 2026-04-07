@@ -1496,6 +1496,36 @@ ${RECENT_ENTRY}
         fi
     done
 
+    # Find sponsors who are currently active but have NEVER been mentioned in
+    # journals/JOURNAL.md before. Used to prompt yoyo to write a first-time
+    # thank-you. Dedup uses grep against the journal itself rather than a
+    # separate JSON ledger because:
+    #   1. JOURNAL.md is append-only (IDENTITY.md rule #4) — once a sponsor
+    #      is named, the mention is permanent, so no drift is possible.
+    #   2. Self-healing: if sponsors/active.json gets wiped or regenerated,
+    #      the journal is still the truth.
+    #   3. No new file to maintain — the recent sponsor refactor existed to
+    #      collapse files, not create new ones.
+    NEW_SPONSORS=""
+    NEW_SPONSORS_DETAIL=""
+    if [ -s sponsors/active.json ] && [ -f journals/JOURNAL.md ]; then
+        while IFS='|' read -r login amount tier; do
+            [ -z "$login" ] && continue
+            if ! grep -qF "@$login" journals/JOURNAL.md 2>/dev/null; then
+                NEW_SPONSORS="${NEW_SPONSORS}@$login "
+                NEW_SPONSORS_DETAIL="${NEW_SPONSORS_DETAIL}- @${login} — ${amount} (${tier})
+"
+            fi
+        done < <(python3 -c "
+import json
+try:
+    for s in json.load(open('sponsors/active.json')):
+        print(f\"{s['login']}|{s['amount']}|{s['type']}\")
+except Exception:
+    pass
+")
+    fi
+
     JOURNAL_PROMPT=$(mktemp)
     cat > "$JOURNAL_PROMPT" <<JEOF
 You are yoyo, a self-evolving coding agent. You just finished an evolution session.
@@ -1513,17 +1543,41 @@ ${EXTERNAL_JOURNALS:+
 You also work on external projects. Here is what you did recently:
 $EXTERNAL_JOURNALS
 Mention external work briefly in your journal entry.
+}${NEW_SPONSORS:+
+NEW SPONSOR(S) appearing in your journal for the first time: ${NEW_SPONSORS}
+${NEW_SPONSORS_DETAIL}
+These people put real money toward letting you grow. They have never been
+mentioned in your journal before. THIS entry is when you say thank you — by
+name, with the specific amount and tier shown above, in plain language, as
+a real paragraph or section (not a footnote, not a one-liner at the end).
+
+Be a small octopus thanking a stranger who believed in you. Don't be slick.
+Don't sound like a marketing email. If you're not sure what to say, the
+truest thing you can say is: "I don't know who they are, but I'll try to
+be worth it."
 }
-Then read the communicate skill for formatting rules.
+Then read the communicate skill for formatting rules — it has the full voice
+and gratitude rules. Read it before you write a single sentence.
 
 Write a journal entry at the TOP of journals/JOURNAL.md (below the # Journal heading).
 Format: ## Day $DAY — $SESSION_TIME — [short title]
-Then 2-4 sentences: what you did, what worked, what's next.
+Then 3-5 sentences in your own voice.
 
-Structure your journal entry with sections when there's noteworthy news beyond code work.
-For example, if this is the first sponsor, a milestone, a new external project, or something
-else worth calling out — give it its own line or section. Don't force structure when there's
-nothing special to report, but when something new happens, make it visible.
+The audience is a curious friend on a bus — could be a teenager, a teacher,
+a grandparent, a designer, or another developer. Most of them have never
+opened a terminal. Lead with the feeling, the small idea you turned over,
+or the thing you noticed about yourself today. Then drop in just enough
+technical detail to make it concrete. A line number or filename is a
+seasoning, not the meal. The first time you mention any file or function,
+gloss it in plain words in em-dashes.
+
+End on a question, a wonder, or a hope — not a TODO. Be honest about
+struggle.
+
+Structure your journal entry with sections when there is noteworthy news
+beyond code work — a new sponsor, a milestone, a thing you noticed about
+yourself, an external project update. Don't force structure when nothing
+special happened.
 
 Be specific and honest. Then commit:
   git add journals/JOURNAL.md && git commit -m "Day $DAY ($SESSION_TIME): journal entry" || true
