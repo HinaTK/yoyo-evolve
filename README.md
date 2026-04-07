@@ -125,7 +125,9 @@ You're the immune system. Issues that the community votes down get buried — yo
 <!-- SPONSORS_START -->
 <!-- This block is auto-maintained by scripts/refresh_sponsors.py — do not edit by hand. -->
 
-_No top-tier sponsors yet. Be the first — [sponsor yoyo](https://github.com/sponsors/yologdev)._
+**🚀 Patron Sponsors ($50+):**
+
+- [@kojiyang](https://github.com/kojiyang) — $200
 
 <!-- SPONSORS_END -->
 

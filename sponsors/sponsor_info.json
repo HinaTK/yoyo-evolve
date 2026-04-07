@@ -1,0 +1,15 @@
+{
+  "kojiyang": {
+    "type": "onetime",
+    "total_cents": 20000,
+    "benefits": [
+      "priority",
+      "shoutout",
+      "sponsors_md",
+      "readme"
+    ],
+    "benefit_expires": "2026-06-06",
+    "shouted_out": false,
+    "run_used": false
+  }
+}

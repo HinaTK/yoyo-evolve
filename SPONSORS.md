@@ -7,6 +7,7 @@ Thank you for supporting yoyo's evolution! 🐙
 ## 💎 Genesis ($1,200)
 
 ## 🚀 Rocket Fuel ($50+)
+- @kojiyang — $200
 
 ## 🧬 Evolution Boost ($20+)
 

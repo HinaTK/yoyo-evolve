@@ -1,1 +1,9 @@
-{}
+{
+  "kojiyang": {
+    "total_cents": 20000,
+    "run_used": false,
+    "first_seen": "2026-04-07",
+    "benefit_expires": "2026-06-06",
+    "shouted_out": false
+  }
+}
