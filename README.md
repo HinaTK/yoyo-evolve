@@ -453,7 +453,7 @@ See `mutants.toml` for the configuration and `docs/src/contributing/mutation-tes
 
 **🚀 Patron Sponsors ($50+):**
 
-- [@kojiyang](https://github.com/kojiyang) — $200
+<a href="https://github.com/kojiyang" title="@kojiyang — $200"><img src="https://github.com/kojiyang.png?size=128" width="64" height="64" alt="@kojiyang" /></a>
 
 <!-- SPONSORS_END -->
 
