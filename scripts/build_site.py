@@ -3,6 +3,7 @@
 
 import html
 import re
+from itertools import groupby
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -115,18 +116,23 @@ def render_journal(entries):
             "</div>"
         )
     parts = []
-    for entry in entries:
-        body_html = render_entry_body(entry["body"]) if entry["body"] else ""
-        parts.append(
-            f'      <article class="entry">\n'
-            f'        <div class="entry-marker"></div>\n'
-            f'        <div class="entry-content">\n'
-            f'          <span class="entry-day">Day {entry["day"]}</span>\n'
-            f'          <h3 class="entry-title">{md_inline(entry["title"])}</h3>\n'
-            f'          <div class="entry-body">\n          {body_html}\n          </div>\n'
-            f"        </div>\n"
-            f"      </article>"
-        )
+    # Group consecutive entries by day so multi-session days share one header.
+    # Works automatically for future entries since it operates on parsed data.
+    for day, day_entries in groupby(entries, key=lambda e: e["day"]):
+        parts.append(f'      <div class="day-group">')
+        parts.append(f'        <div class="day-separator">Day {day}</div>')
+        for entry in day_entries:
+            body_html = render_entry_body(entry["body"]) if entry["body"] else ""
+            parts.append(
+                f'        <article class="entry">\n'
+                f'          <div class="entry-marker"></div>\n'
+                f'          <div class="entry-content">\n'
+                f'            <h3 class="entry-title">{md_inline(entry["title"])}</h3>\n'
+                f'            <div class="entry-body">\n            {body_html}\n            </div>\n'
+                f"          </div>\n"
+                f"        </article>"
+            )
+        parts.append(f'      </div>')
     return "\n".join(parts)
 
 
@@ -176,9 +182,12 @@ HTML_TEMPLATE = """\
 
   <main>
     <header class="hero">
+      <div class="hero-prompt">
+        <span class="hero-prompt-sigil">$</span>
+        <span class="hero-cmd">yoyo --status</span>
+      </div>
       <h1>yoyo<span class="cursor">_</span></h1>
-      <p class="day-count">Day {day_count}</p>
-      <p class="tagline">a coding agent growing up in public</p>
+      <p class="hero-status">day {day_count}<span class="sep">·</span><span class="status-tag">growing up in public</span></p>
     </header>
 
     <section id="journal">
@@ -217,6 +226,17 @@ CSS = """\
   --amber: #f59e0b;
   --red: #ef4444;
   --font: "JetBrains Mono", "Fira Code", "Cascadia Code", "Source Code Pro", monospace;
+
+  /* type scale */
+  --fs-micro: 0.72rem;
+  --fs-small: 0.82rem;
+  --fs-body:  0.9rem;
+  --fs-lead:  1rem;
+  --fs-title: 1.1rem;
+  --fs-hero:  3.25rem;
+
+  /* layout */
+  --col:      720px;
 }
 
 *, *::before, *::after {
@@ -234,8 +254,8 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 14.5px;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -270,7 +290,7 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 640px;
+  max-width: var(--col);
   width: 90%;
   margin: 0 auto;
   padding: 1rem 0;
@@ -280,7 +300,7 @@ nav {
 
 .nav-name {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: var(--fs-small);
   color: var(--cyan);
   letter-spacing: 0.05em;
 }
@@ -297,7 +317,7 @@ nav {
 
 .nav-links a {
   color: var(--text-dim);
-  font-size: 0.75rem;
+  font-size: var(--fs-micro);
   letter-spacing: 0.08em;
 }
 
@@ -310,7 +330,7 @@ nav {
 /* ── main ── */
 
 main {
-  max-width: 640px;
+  max-width: var(--col);
   width: 90%;
   margin: 0 auto;
 }
@@ -322,8 +342,27 @@ main {
   padding: 5rem 0 4rem;
 }
 
+.hero-prompt {
+  font-size: var(--fs-small);
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  margin-bottom: 1.25rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.hero-prompt-sigil {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.hero-cmd {
+  color: var(--text);
+}
+
 .hero h1 {
-  font-size: 3.5rem;
+  font-size: var(--fs-hero);
   font-weight: 700;
   color: var(--cyan);
   line-height: 1;
@@ -341,18 +380,24 @@ main {
   font-weight: 300;
 }
 
-.day-count {
+.hero-status {
   margin-top: 1rem;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: var(--green);
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
-.tagline {
-  margin-top: 0.5rem;
+.hero-status .sep {
   color: var(--text-dim);
-  font-size: 0.85rem;
+  margin: 0 0.5rem;
+  font-weight: 400;
+}
+
+.hero-status .status-tag {
+  color: var(--text-dim);
   font-style: italic;
+  font-weight: 400;
 }
 
 
@@ -363,7 +408,7 @@ section {
 }
 
 .section-label {
-  font-size: 0.7rem;
+  font-size: var(--fs-micro);
   font-weight: 400;
   color: var(--text-dim);
   letter-spacing: 0.12em;
@@ -394,9 +439,47 @@ section {
   padding-left: 28px;
 }
 
+.day-group {
+  margin-bottom: 3rem;
+}
+
+.day-group:last-child {
+  margin-bottom: 0;
+}
+
+.day-separator {
+  position: relative;
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1.75rem;
+  padding-left: 0.25rem;
+}
+
+.day-separator::before {
+  content: '';
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  width: 13px;
+  height: 1px;
+  background: var(--green);
+  opacity: 0.6;
+}
+
 .entry {
   position: relative;
-  margin-bottom: 2.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1.75rem;
+  margin-top: 1.75rem;
+}
+
+.entry:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
 }
 
 .entry-marker {
@@ -408,25 +491,23 @@ section {
   background: var(--green);
 }
 
-.entry-day {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--green);
-  letter-spacing: 0.05em;
+.entry:first-of-type .entry-marker {
+  top: 6px;
 }
 
 .entry-title {
-  font-size: 1.05rem;
+  font-size: var(--fs-title);
   font-weight: 500;
   color: var(--text-bright);
-  margin: 0.25rem 0 0.5rem;
+  margin: 0 0 0.6rem;
   line-height: 1.4;
+  letter-spacing: -0.005em;
 }
 
 .entry-body {
   color: var(--text);
-  font-size: 0.85rem;
-  line-height: 1.7;
+  font-size: var(--fs-body);
+  line-height: 1.72;
 }
 
 .entry-body-para {
@@ -438,7 +519,7 @@ section {
 }
 
 .entry-subheading {
-  font-size: 0.82rem;
+  font-size: var(--fs-small);
   font-weight: 600;
   color: var(--cyan);
   text-transform: uppercase;
@@ -454,7 +535,7 @@ section {
 .entry-subheading::before {
   content: "▸";
   color: var(--cyan);
-  font-size: 0.75rem;
+  font-size: var(--fs-micro);
   opacity: 0.85;
 }
 
@@ -466,16 +547,16 @@ section {
 /* ── identity ── */
 
 .mission {
-  font-size: 1rem;
+  font-size: var(--fs-lead);
   color: var(--text-bright);
-  line-height: 1.8;
+  line-height: 1.75;
   margin-bottom: 1.5rem;
   padding-left: 1rem;
   border-left: 2px solid var(--cyan);
 }
 
 .identity-text {
-  font-size: 0.85rem;
+  font-size: var(--fs-body);
   line-height: 1.7;
   margin-bottom: 1rem;
 }
@@ -492,7 +573,7 @@ section {
   position: relative;
   padding-left: 2.5rem;
   margin-bottom: 0.75rem;
-  font-size: 0.85rem;
+  font-size: var(--fs-body);
   line-height: 1.7;
 }
 
@@ -501,7 +582,7 @@ section {
   position: absolute;
   left: 0;
   color: var(--text-dim);
-  font-size: 0.75rem;
+  font-size: var(--fs-micro);
   font-weight: 300;
   top: 0.15rem;
 }
@@ -510,7 +591,7 @@ section {
 /* ── footer ── */
 
 footer {
-  max-width: 640px;
+  max-width: var(--col);
   width: 90%;
   margin: 4rem auto 0;
   padding: 2rem 0 4rem;
@@ -518,13 +599,13 @@ footer {
 }
 
 footer p {
-  font-size: 0.75rem;
+  font-size: var(--fs-micro);
   color: var(--text-dim);
   margin-bottom: 0.25rem;
 }
 
 footer a {
-  font-size: 0.75rem;
+  font-size: var(--fs-micro);
   color: var(--text-dim);
 }
 
@@ -536,8 +617,8 @@ footer a:hover {
 /* ── responsive ── */
 
 @media (max-width: 480px) {
-  .hero h1 {
-    font-size: 2.5rem;
+  :root {
+    --fs-hero: 2.5rem;
   }
 
   nav {
