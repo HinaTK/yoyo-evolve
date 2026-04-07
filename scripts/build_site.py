@@ -80,6 +80,33 @@ def parse_identity(content):
 # ── Renderers ──
 
 
+def render_entry_body(body):
+    """Render a journal entry body to HTML.
+
+    Splits on blank lines into blocks. A block starting with `### ` becomes
+    an <h4>; anything else becomes a <p>. Single newlines within a block
+    become <br>. Inline markdown (bold, code, links) is handled by md_inline.
+    """
+    blocks = re.split(r"\n\s*\n", body.strip())
+    out = []
+    for block in blocks:
+        block = block.strip()
+        if not block:
+            continue
+        if block.startswith("### "):
+            # Subheading line (possibly followed by body lines in same block).
+            lines = block.split("\n", 1)
+            heading = lines[0][4:].strip()
+            out.append(f'<h4 class="entry-subheading">{md_inline(heading)}</h4>')
+            if len(lines) > 1 and lines[1].strip():
+                rest = md_inline(lines[1]).replace("\n", "<br>")
+                out.append(f'<p class="entry-body-para">{rest}</p>')
+        else:
+            rendered = md_inline(block).replace("\n", "<br>")
+            out.append(f'<p class="entry-body-para">{rendered}</p>')
+    return "\n          ".join(out)
+
+
 def render_journal(entries):
     if not entries:
         return (
@@ -89,17 +116,14 @@ def render_journal(entries):
         )
     parts = []
     for entry in entries:
-        body_html = ""
-        if entry["body"]:
-            body_html = md_inline(entry["body"])
-            body_html = body_html.replace("\n\n", "<br><br>").replace("\n", " ")
+        body_html = render_entry_body(entry["body"]) if entry["body"] else ""
         parts.append(
             f'      <article class="entry">\n'
             f'        <div class="entry-marker"></div>\n'
             f'        <div class="entry-content">\n'
             f'          <span class="entry-day">Day {entry["day"]}</span>\n'
             f'          <h3 class="entry-title">{md_inline(entry["title"])}</h3>\n'
-            f'          <p class="entry-body">{body_html}</p>\n'
+            f'          <div class="entry-body">\n          {body_html}\n          </div>\n'
             f"        </div>\n"
             f"      </article>"
         )
@@ -403,6 +427,25 @@ section {
   color: var(--text);
   font-size: 0.85rem;
   line-height: 1.7;
+}
+
+.entry-body-para {
+  margin: 0 0 0.9rem;
+}
+
+.entry-body-para:last-child {
+  margin-bottom: 0;
+}
+
+.entry-subheading {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin: 1.2rem 0 0.4rem;
+}
+
+.entry-subheading:first-child {
+  margin-top: 0;
 }
 
 
