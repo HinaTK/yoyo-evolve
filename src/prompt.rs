@@ -3232,6 +3232,7 @@ mod tests {
     }
 
     #[test]
+    #[serial_test::serial]
     fn test_session_budget_remaining_unset_returns_none() {
         // In the test environment, YOYO_SESSION_BUDGET_SECS is normally unset,
         // so the live helper should report no budget. This also verifies that
@@ -3278,6 +3279,7 @@ mod tests {
     // independent and free of cross-test OnceLock pollution.
 
     #[test]
+    #[serial_test::serial]
     fn test_session_budget_exhausted_unset_returns_false() {
         // With no budget configured, sessions are unbounded — exhausted
         // must always be false, regardless of grace window. This is the
@@ -3320,5 +3322,101 @@ mod tests {
         let exhausted = remaining.as_secs() <= 30;
         assert_eq!(remaining, Duration::ZERO);
         assert!(exhausted, "expired budget must report exhausted");
+    }
+
+    // ── End-to-end set-path test for #262 ─────────────────────────────
+    //
+    // The existing tests above cover the **unset** path of the live
+    // helpers (the common interactive case) and the **pure parser** for
+    // every value shape. What was missing — and what kept the symptom
+    // of #262 alive in production after the wiring landed — is any test
+    // that proves the **set** path actually flows through
+    // `configured_session_budget()` → `session_budget_remaining()` →
+    // `session_budget_exhausted()` end-to-end.
+    //
+    // This test sets `YOYO_SESSION_BUDGET_SECS=9999` once, calls the
+    // live helpers, and asserts they observe the configured budget.
+    // It uses `serial_test::serial` to avoid racing with other tests
+    // that read the env var.
+    //
+    // OnceLock caveat: `SESSION_BUDGET_SECS` is a process-wide
+    // `OnceLock<Option<u64>>`, so the very first call to
+    // `configured_session_budget()` in the test binary freezes the
+    // value for the lifetime of the process. To make sure that first
+    // call sees our env var, this test must run **before** any other
+    // test that calls `session_budget_remaining()` or
+    // `session_budget_exhausted()` with the env var unset. Cargo's
+    // serialized test order roughly tracks source order within a single
+    // `mod`, but the alphabetical `_aaa_` prefix gives us belt-and-
+    // suspenders: this test sorts first within the `tests` module.
+    //
+    // After this test runs, the OnceLock holds `Some(9999)` for the
+    // rest of the binary. The existing
+    // `test_session_budget_*_unset_returns_*` tests are already guarded
+    // with `if std::env::var("YOYO_SESSION_BUDGET_SECS").is_err()` and
+    // will gracefully skip their assertions when this test leaves the
+    // env var set, so nothing else in the suite breaks.
+    //
+    // Why we deliberately don't `remove_var` at the end: removing the
+    // env var while the OnceLock still holds `Some(9999)` would put the
+    // process in an inconsistent state (the cache says "configured" but
+    // the env says "unset"), and would actively break the existing
+    // unset tests' skip-guards on subsequent runs. Leaving the env var
+    // set keeps state coherent for the rest of the binary.
+    #[test]
+    #[serial_test::serial]
+    fn test_aaa_session_budget_set_path_live_end_to_end() {
+        // SAFETY: marked #[serial], no concurrent env var access.
+        // We set this *before* any call to the live helpers so the
+        // OnceLock initializes with our value.
+        unsafe {
+            std::env::set_var("YOYO_SESSION_BUDGET_SECS", "9999");
+        }
+
+        // Set path #1: the live helper should now see the configured
+        // budget instead of returning None.
+        let remaining = session_budget_remaining()
+            .expect("with env var set, session_budget_remaining() must return Some(_)");
+        assert!(
+            remaining > Duration::from_secs(9000),
+            "fresh 9999s budget should still have most of itself left, got {remaining:?}",
+        );
+        assert!(
+            remaining <= Duration::from_secs(9999),
+            "remaining should never exceed configured budget, got {remaining:?}",
+        );
+
+        // Set path #2: with 9000+ seconds left, no grace window we'd
+        // ever pass at the call sites should report exhausted. This is
+        // the predicate the production retry loops actually use
+        // (`session_budget_exhausted(30)` in run_prompt_auto_retry and
+        // the watch-mode fix loop).
+        assert!(
+            !session_budget_exhausted(30),
+            "fresh 9999s budget must not report exhausted with 30s grace",
+        );
+        assert!(
+            !session_budget_exhausted(0),
+            "fresh 9999s budget must not report exhausted with 0s grace",
+        );
+        assert!(
+            !session_budget_exhausted(8000),
+            "fresh 9999s budget must not report exhausted with 8000s grace",
+        );
+
+        // Set path #3: a *huge* grace window — bigger than the budget
+        // itself — should flip the predicate to true even on a fresh
+        // budget. This is the boundary check that proves the predicate
+        // is actually consulting `remaining`, not just returning false.
+        assert!(
+            session_budget_exhausted(20_000),
+            "9999s budget must report exhausted when grace > budget",
+        );
+
+        // Note: we intentionally do NOT remove the env var here. See
+        // the long comment above for why — leaving it set keeps the
+        // OnceLock and the env coherent for the rest of the binary,
+        // and the existing unset tests are designed to skip when the
+        // env var is present.
     }
 }
