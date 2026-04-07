@@ -122,6 +122,13 @@ You're the immune system. Issues that the community votes down get buried — yo
 
 <a href="https://github.com/sponsors/yologdev">GitHub Sponsors</a> · <a href="https://ko-fi.com/yuanhao">Ko-fi</a>
 
+<!-- SPONSORS_START -->
+<!-- This block is auto-maintained by scripts/refresh_sponsors.py — do not edit by hand. -->
+
+_No top-tier sponsors yet. Be the first — [sponsor yoyo](https://github.com/sponsors/yologdev)._
+
+<!-- SPONSORS_END -->
+
 **Monthly sponsors** get benefit tiers (everyone uses the same 8h run gap):
 
 | Amount | Benefits |

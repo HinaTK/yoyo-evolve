@@ -47,46 +47,58 @@ echo "Model: $MODEL"
 echo "Plan timeout: ${TIMEOUT}s (assess: $((TIMEOUT/2))s + plan: $((TIMEOUT/2))s) | Impl timeout: 1200s/task"
 echo ""
 
-# ── Step 0: Fetch sponsors & run-frequency gate ──
+# ── Step 0: Load sponsor state & run-frequency gate ──
+# Sponsor files are maintained by .github/workflows/sponsors-refresh.yml
+# (hourly, decoupled from the 8h evolution gap). This script only READS
+# the committed sponsor files — no API calls, no writes except consuming
+# a one-time sponsor's accelerated run (see "Consume accelerated run" below).
+#
 # Sponsor benefits (no run-frequency speedup):
 #   Monthly: $5→priority, $10→+shoutout, $25→+SPONSORS.md, $50→+README
 #   One-time: $2→1 accelerated run, $5→priority, $10→+shoutout (30d),
 #             $20→+SPONSORS.md (30d), $50→priority 60d+SPONSORS.md+README,
 #             $1200→💎 Genesis (permanent priority, SPONSORS.md, README, journal ack)
-SPONSORS_FILE="/tmp/sponsor_logins.json"
-SPONSOR_INFO_FILE="/tmp/sponsor_info.json"
+SPONSOR_INFO_FILE="sponsors/sponsor_info.json"
 CREDITS_FILE="sponsors/credits.json"
 SHOUTOUTS_FILE="sponsors/shoutouts.json"
+ACTIVE_FILE="sponsors/active.json"
+
 MONTHLY_TOTAL=0
 HAS_ONETIME_CREDITS="false"
-if command -v gh &>/dev/null; then
-    # Use GH_PAT for sponsor query (needs read:user scope), fall back to GH_TOKEN
-    SPONSOR_GH_TOKEN="${GH_PAT:-${GH_TOKEN:-}}"
-    # Capture both stdout (response body, including GraphQL error envelopes) and
-    # stderr to the same file the script reads — non-zero exit is fine because
-    # gh writes a {"errors":[...]} body for INSUFFICIENT_SCOPES etc., and
-    # refresh_sponsors.py surfaces those loudly instead of swallowing them.
-    GH_TOKEN="$SPONSOR_GH_TOKEN" gh api graphql -f query='{ viewer { sponsorshipsAsMaintainer(first: 100, activeOnly: true) { nodes { isOneTimePayment sponsorEntity { ... on User { login } ... on Organization { login } } tier { monthlyPriceInCents isOneTime } } } } }' > /tmp/sponsor_raw.json 2>/tmp/sponsor_query_stderr.log || true
-    if [ -s /tmp/sponsor_query_stderr.log ]; then
-        echo "  WARNING: gh sponsor query stderr:"
-        sed 's/^/    /' /tmp/sponsor_query_stderr.log
-    fi
 
-    MONTHLY_TOTAL=$(python3 scripts/refresh_sponsors.py 2>/tmp/sponsor_stderr.log) || MONTHLY_TOTAL="0|false"
-    if [ -s /tmp/sponsor_stderr.log ]; then
-        echo "  WARNING: Sponsor processing errors:"
-        cat /tmp/sponsor_stderr.log | sed 's/^/    /'
-    fi
-    rm -f /tmp/sponsor_raw.json /tmp/sponsor_query_stderr.log /tmp/sponsor_stderr.log
+if [ -f "$SPONSOR_INFO_FILE" ]; then
+    MONTHLY_TOTAL=$(python3 -c "
+import json, sys
+try:
+    info = json.load(open('$SPONSOR_INFO_FILE'))
+    total = sum(
+        d.get('monthly_cents', 0)
+        for d in info.values()
+        if isinstance(d, dict) and d.get('type') == 'recurring'
+    )
+    print(total)
+except (json.JSONDecodeError, OSError, AttributeError) as e:
+    print(f'WARNING: Could not read {\"$SPONSOR_INFO_FILE\"}: {e}', file=sys.stderr)
+    print(0)
+")
+fi
 
-    # Parse output: monthly_cents|has_onetime_credits
-    HAS_ONETIME_CREDITS="${MONTHLY_TOTAL#*|}"
-    MONTHLY_TOTAL="${MONTHLY_TOTAL%%|*}"
-    MONTHLY_TOTAL="${MONTHLY_TOTAL:-0}"
-    HAS_ONETIME_CREDITS="${HAS_ONETIME_CREDITS:-false}"
-else
-    echo '[]' > "$SPONSORS_FILE"
-    echo '{}' > "$SPONSOR_INFO_FILE"
+if [ -f "$CREDITS_FILE" ]; then
+    HAS_ONETIME_CREDITS=$(python3 -c "
+import json, sys
+try:
+    credits = json.load(open('$CREDITS_FILE'))
+    has = any(
+        isinstance(info, dict)
+        and info.get('total_cents', 0) >= 200
+        and not info.get('run_used', False)
+        for info in credits.values()
+    )
+    print('true' if has else 'false')
+except (json.JSONDecodeError, OSError, AttributeError) as e:
+    print(f'WARNING: Could not read {\"$CREDITS_FILE\"}: {e}', file=sys.stderr)
+    print('false')
+")
 fi
 
 # Log sponsor summary
@@ -149,17 +161,26 @@ if [ "$SKIP_RUN" = "true" ] && [ "${FORCE_RUN:-}" != "true" ]; then
     exit 0
 fi
 
-# Consume one-time sponsor accelerated run
+# Consume one-time sponsor accelerated run.
+# This is the ONLY sponsor-state write in evolve.sh. It MUST fail loudly:
+# a partial/failed write means the next run will re-consume the same
+# credit (or leave credits.json truncated), which is worse than aborting
+# the current session. The python heredoc writes atomically (tempfile
+# + os.replace) and lets any OSError propagate; no `|| true` here.
 ACCELERATED_BY=""
 if [ "$HAS_ONETIME_CREDITS" = "true" ]; then
     ACCELERATED_BY=$(python3 <<'PYEOF'
-import json, os
-from datetime import datetime, timezone
+import json, os, sys
 CREDITS_FILE = "sponsors/credits.json"
 try:
-    credits = json.load(open(CREDITS_FILE))
+    with open(CREDITS_FILE) as f:
+        credits = json.load(f)
 except (json.JSONDecodeError, FileNotFoundError):
-    credits = {}
+    # Read failure is survivable: HAS_ONETIME_CREDITS was already true
+    # based on an earlier successful read, so the file became
+    # unreadable between steps — just skip acceleration this session.
+    print("", end="")
+    sys.exit(0)
 consumed_login = ""
 for login, info in credits.items():
     if info.get('total_cents', 0) >= 200 and not info.get('run_used', False):
@@ -167,11 +188,16 @@ for login, info in credits.items():
         consumed_login = login
         break  # consume one run per session
 if consumed_login:
-    with open(CREDITS_FILE, 'w') as f:
+    # Atomic write: tempfile + os.replace so a mid-write crash cannot
+    # leave credits.json truncated. Any OSError here propagates and
+    # kills the session (by design — see the comment above).
+    tmp = f"{CREDITS_FILE}.tmp.{os.getpid()}"
+    with open(tmp, "w") as f:
         json.dump(credits, f, indent=2)
+    os.replace(tmp, CREDITS_FILE)
 print(consumed_login)
 PYEOF
-    ) || true
+    )
     if [ -n "$ACCELERATED_BY" ]; then
         IS_ACCELERATED="true"
         echo "  Consumed accelerated run (from @$ACCELERATED_BY)."
@@ -180,104 +206,8 @@ PYEOF
     fi
 fi
 
-# ── Step 0c: Shoutout issue creation ──
-if [ -f "$SPONSOR_INFO_FILE" ] && command -v gh &>/dev/null; then
-    python3 <<'PYEOF' || echo "  WARNING: Shoutout creation failed (non-fatal)."
-import json, os, subprocess, sys
-
-SPONSOR_INFO_FILE = "/tmp/sponsor_info.json"
-CREDITS_FILE = "sponsors/credits.json"
-SHOUTOUTS_FILE = "sponsors/shoutouts.json"
-REPO = os.environ.get("REPO", "yologdev/yoyo-evolve")
-
-try:
-    sponsor_info = json.load(open(SPONSOR_INFO_FILE))
-except (json.JSONDecodeError, FileNotFoundError):
-    sponsor_info = {}
-
-try:
-    credits = json.load(open(CREDITS_FILE))
-except (json.JSONDecodeError, FileNotFoundError):
-    credits = {}
-
-try:
-    shoutouts = json.load(open(SHOUTOUTS_FILE))
-except (json.JSONDecodeError, FileNotFoundError):
-    shoutouts = {}
-
-changed_credits = False
-changed_shoutouts = False
-
-for login, info in sponsor_info.items():
-    if 'shoutout' not in info.get('benefits', []):
-        continue
-    if info.get('shouted_out', False):
-        continue
-
-    # Check GitHub for existing shoutout issue (dedup)
-    try:
-        result = subprocess.run(
-            ['gh', 'issue', 'list', '--repo', REPO, '--state', 'all',
-             '--search', f'"Shoutout: @{login}" in:title', '--json', 'number', '--jq', 'length'],
-            capture_output=True, text=True, timeout=15
-        )
-        if result.returncode != 0:
-            print(f"  WARNING: Could not check shoutouts for @{login}: {result.stderr.strip()}", file=sys.stderr)
-            continue  # Don't create if we can't verify dedup
-        if result.stdout.strip() not in ('', '0'):
-            # Already exists — mark as shouted out
-            if info.get('type') == 'recurring':
-                shoutouts[login] = True
-                changed_shoutouts = True
-            elif login in credits:
-                credits[login]['shouted_out'] = True
-                changed_credits = True
-            continue
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        continue
-
-    # Determine amount for title
-    if info.get('type') == 'recurring':
-        dollars = info.get('monthly_cents', 0) // 100
-        amount_str = f"${dollars}/mo"
-    else:
-        dollars = info.get('total_cents', 0) // 100
-        amount_str = f"${dollars}"
-
-    # Create shoutout issue
-    try:
-        result = subprocess.run(
-            ['gh', 'issue', 'create', '--repo', REPO,
-             '--title', f'Shoutout: @{login} — {amount_str} sponsor',
-             '--label', 'shoutout',
-             '--body', f'Thank you @{login} for sponsoring yoyo! 🐙💖\n\nYour support helps keep yoyo evolving.'],
-            capture_output=True, text=True, timeout=15
-        )
-        if result.returncode != 0:
-            print(f"  WARNING: Failed to create shoutout for @{login}: {result.stderr.strip()}", file=sys.stderr)
-            continue  # Don't mark as shouted out if creation failed
-        print(f"  Created shoutout issue for @{login}")
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        print(f"  WARNING: Shoutout creation timed out for @{login}", file=sys.stderr)
-        continue
-
-    # Mark as shouted out (only reached if creation succeeded)
-    if info.get('type') == 'recurring':
-        shoutouts[login] = True
-        changed_shoutouts = True
-    elif login in credits:
-        credits[login]['shouted_out'] = True
-        changed_credits = True
-
-if changed_credits:
-    with open(CREDITS_FILE, 'w') as f:
-        json.dump(credits, f, indent=2)
-if changed_shoutouts:
-    os.makedirs(os.path.dirname(SHOUTOUTS_FILE), exist_ok=True)
-    with open(SHOUTOUTS_FILE, 'w') as f:
-        json.dump(shoutouts, f, indent=2)
-PYEOF
-fi
+# Shoutout issue creation lives in scripts/refresh_sponsors.py now, invoked
+# by .github/workflows/sponsors-refresh.yml. evolve.sh stays out of it.
 echo ""
 
 # Ensure memory directory exists
@@ -424,10 +354,9 @@ if command -v gh &>/dev/null; then
         > /tmp/issues_raw.json 2>/dev/null || true
 
     FORMAT_STDERR=$(mktemp)
-    # Prefer rich sponsor info (format_issues.py handles both dict and array)
-    _SPONSOR_ARG="$SPONSORS_FILE"
-    [ -f "$SPONSOR_INFO_FILE" ] && _SPONSOR_ARG="$SPONSOR_INFO_FILE"
-    python3 scripts/format_issues.py /tmp/issues_raw.json "$_SPONSOR_ARG" "$DAY" > "$ISSUES_FILE" 2>"$FORMAT_STDERR" || echo "No issues found." > "$ISSUES_FILE"
+    # format_issues.py handles both dict (sponsor_info.json) and array forms,
+    # and tolerates a missing file gracefully.
+    python3 scripts/format_issues.py /tmp/issues_raw.json "$SPONSOR_INFO_FILE" "$DAY" > "$ISSUES_FILE" 2>"$FORMAT_STDERR" || echo "No issues found." > "$ISSUES_FILE"
     if [ -s "$FORMAT_STDERR" ]; then
         echo "  format_issues.py stderr:"
         cat "$FORMAT_STDERR" | sed 's/^/    /'
@@ -1806,7 +1735,7 @@ if [ -f "$SPONSOR_INFO_FILE" ]; then
     python3 <<'PYEOF'
 import json
 try:
-    info = json.load(open('/tmp/sponsor_info.json'))
+    info = json.load(open('sponsors/sponsor_info.json'))
     gn = [l for l, d in info.items() if isinstance(d, dict) and 'genesis' in d.get('benefits', [])]
     sm = [l for l, d in info.items() if isinstance(d, dict) and 'sponsors_md' in d.get('benefits', [])]
     rm = [l for l, d in info.items() if isinstance(d, dict) and 'readme' in d.get('benefits', [])]
