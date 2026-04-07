@@ -9,7 +9,6 @@ use crate::cli::{default_model_for_provider, KNOWN_PROVIDERS};
 use crate::cli::{is_verbose, AUTO_COMPACT_THRESHOLD};
 use crate::format::*;
 use crate::git::*;
-use crate::prompt::*;
 
 pub use crate::help::*;
 
@@ -20,6 +19,10 @@ pub use crate::commands_info::{
     handle_cost, handle_model_show, handle_provider_show, handle_status, handle_think_show,
     handle_tokens, handle_version,
 };
+
+// Re-export /retry and /changes handlers extracted to commands_retry.rs
+// (issue #260 slice). Same stability contract as commands_info above.
+pub use crate::commands_retry::{handle_changes, handle_retry};
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use yoagent::agent::Agent;
@@ -234,32 +237,8 @@ pub fn thinking_level_name(level: ThinkingLevel) -> &'static str {
 // ── /version ─────────────────────────────────────────────────────────────
 
 // ── /retry ───────────────────────────────────────────────────────────────
-
-pub async fn handle_retry(
-    agent: &mut Agent,
-    last_input: &Option<String>,
-    last_error: &Option<String>,
-    session_total: &mut Usage,
-    model: &str,
-) -> Option<String> {
-    match last_input {
-        Some(prev) => {
-            let retry_input = build_retry_prompt(prev, last_error);
-            if last_error.is_some() {
-                println!("{DIM}  (retrying with error context){RESET}");
-            } else {
-                println!("{DIM}  (retrying last input){RESET}");
-            }
-            let outcome = run_prompt(agent, &retry_input, session_total, model).await;
-            auto_compact_if_needed(agent);
-            outcome.last_tool_error
-        }
-        None => {
-            eprintln!("{DIM}  (nothing to retry — no previous input){RESET}\n");
-            None
-        }
-    }
-}
+// Moved to commands_retry.rs (issue #260 slice). Re-exported below so
+// `commands::handle_retry` still resolves from repl.rs without churn.
 
 // ── /model ───────────────────────────────────────────────────────────────
 
@@ -486,19 +465,8 @@ pub fn handle_permissions(
 }
 
 // ── /changes ─────────────────────────────────────────────────────────────
-
-pub fn handle_changes(changes: &crate::prompt::SessionChanges) {
-    use crate::prompt::format_changes;
-    let output = format_changes(changes);
-    if output.is_empty() {
-        println!("{DIM}  No files modified yet this session.");
-        println!(
-            "  Files touched by write_file or edit_file tool calls will appear here.{RESET}\n"
-        );
-    } else {
-        println!("{DIM}{output}{RESET}");
-    }
-}
+// Moved to commands_retry.rs (issue #260 slice). Re-exported below so
+// `commands::handle_changes` still resolves from repl.rs without churn.
 
 // ── Re-exports from submodules ────────────────────────────────────────────
 // These re-exports keep the public API stable so repl.rs continues to work
@@ -2241,24 +2209,6 @@ mod tests {
         // /changes should match exactly, /changelog etc. should be unknown
         assert!(is_unknown_command("/changelog"));
         assert!(is_unknown_command("/changed"));
-    }
-
-    #[test]
-    fn test_handle_changes_empty_does_not_panic() {
-        use crate::prompt::SessionChanges;
-        let changes = SessionChanges::new();
-        // Should not panic — just prints a message
-        handle_changes(&changes);
-    }
-
-    #[test]
-    fn test_handle_changes_with_entries_does_not_panic() {
-        use crate::prompt::{ChangeKind, SessionChanges};
-        let changes = SessionChanges::new();
-        changes.record("src/main.rs", ChangeKind::Write);
-        changes.record("src/cli.rs", ChangeKind::Edit);
-        // Should not panic
-        handle_changes(&changes);
     }
 
     #[test]
