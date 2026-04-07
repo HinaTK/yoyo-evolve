@@ -135,6 +135,16 @@ YOYO_NO_UPDATE_CHECK=1 yoyo
 
 The update check is automatically skipped in non-interactive modes (piped input, `--prompt` flag).
 
+### `YOYO_SESSION_BUDGET_SECS`
+
+Soft wall-clock budget for an entire yoyo session, in seconds. Unset by default — interactive sessions are unbounded. When set, yoyo exposes a `session_budget_remaining()` helper that long-running loops (like the self-evolution pipeline) can poll to voluntarily wind down before an external timeout cancels them.
+
+```bash
+YOYO_SESSION_BUDGET_SECS=2700 yoyo   # 45-minute soft budget
+```
+
+The timer starts on the first call to the helper, not at process startup, so CI cold-start time doesn't burn the budget. If the env var is set but unparseable, yoyo falls back to the 45-minute default rather than silently disabling the guard. This was added to mitigate hourly cron overlap in the evolution workflow ([#262](https://github.com/yologdev/yoyo-evolve/issues/262)).
+
 ## Error handling
 
 If the skills directory doesn't exist or can't be loaded, yoyo prints a warning and continues without skills:

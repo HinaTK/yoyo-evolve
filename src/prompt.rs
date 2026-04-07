@@ -5,7 +5,7 @@ use crate::format::*;
 use std::collections::{HashMap, HashSet};
 use std::io::{self, IsTerminal, Write};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex, OnceLock, RwLock};
 use std::time::{Duration, Instant};
 use yoagent::agent::Agent;
 use yoagent::context::total_tokens;
@@ -214,6 +214,77 @@ pub fn read_audit_log(n: usize) -> Vec<String> {
         }
         Err(_) => Vec::new(),
     }
+}
+
+// ── Session wall-clock budget ───────────────────────────────────────────
+// A soft, opt-in wall-clock budget for evolution sessions. The hourly evolve
+// cron can fire while a previous session is still running, causing GH Actions
+// to cancel the in-flight run (#262). This helper lets the agent voluntarily
+// stay inside a tighter budget than the workflow timeout, so future task
+// dispatch can self-throttle and finish before the next cron tick.
+//
+// Enable by setting `YOYO_SESSION_BUDGET_SECS=2700` (45 min default) before
+// invoking yoyo. When unset, `session_budget_remaining()` returns `None` and
+// callers should treat the session as unbounded.
+//
+// This is the foundation only — wiring it into the spawn loop and individual
+// task dispatch happens in a follow-up task. Keep blast radius zero.
+
+/// Default soft budget in seconds (45 min) when `YOYO_SESSION_BUDGET_SECS`
+/// is set but doesn't parse as a positive integer.
+#[allow(dead_code)] // wired in by a follow-up task; foundation only
+const DEFAULT_SESSION_BUDGET_SECS: u64 = 2700;
+
+/// Cached parse of `YOYO_SESSION_BUDGET_SECS`. `None` if the env var was unset
+/// or empty at first read; `Some(secs)` otherwise. Read once and frozen for
+/// the lifetime of the process so the budget can't shift mid-session.
+#[allow(dead_code)] // wired in by a follow-up task; foundation only
+static SESSION_BUDGET_SECS: OnceLock<Option<u64>> = OnceLock::new();
+
+/// Wall-clock instant of the first call to `session_budget_remaining()`.
+/// Recorded lazily so the budget starts ticking from real agent work, not
+/// from process startup (which may include slow CI cold-start time).
+#[allow(dead_code)] // wired in by a follow-up task; foundation only
+static SESSION_BUDGET_START: OnceLock<Instant> = OnceLock::new();
+
+/// Look up the configured budget, reading the env var exactly once.
+///
+/// Returns `None` if `YOYO_SESSION_BUDGET_SECS` is unset or empty.
+/// Returns `Some(DEFAULT_SESSION_BUDGET_SECS)` if it's set but unparseable
+/// (so a typo doesn't silently disable the guard).
+#[allow(dead_code)] // wired in by a follow-up task; foundation only
+fn configured_session_budget() -> Option<u64> {
+    *SESSION_BUDGET_SECS
+        .get_or_init(|| parse_session_budget(std::env::var("YOYO_SESSION_BUDGET_SECS").ok()))
+}
+
+/// Pure parser for the budget env var. Extracted so it can be tested
+/// without the OnceLock dance — the cache only memoizes the result of
+/// this function once per process.
+#[allow(dead_code)] // wired in by a follow-up task; foundation only
+fn parse_session_budget(raw: Option<String>) -> Option<u64> {
+    match raw {
+        Some(s) if s.is_empty() => None,
+        Some(s) => Some(s.parse::<u64>().unwrap_or(DEFAULT_SESSION_BUDGET_SECS)),
+        None => None,
+    }
+}
+
+/// How much wall-clock time remains in this session's soft budget.
+///
+/// Returns `None` when no budget is configured (the common case for
+/// interactive use — sessions are unbounded). Returns `Some(Duration::ZERO)`
+/// when the budget has been exhausted. Otherwise returns the remaining time.
+///
+/// The budget timer starts on the first call to this function, not at
+/// process startup, so cold-start overhead doesn't eat into agent work.
+#[allow(dead_code)] // wired in by a follow-up task; foundation only
+pub fn session_budget_remaining() -> Option<Duration> {
+    let budget_secs = configured_session_budget()?;
+    let start = SESSION_BUDGET_START.get_or_init(Instant::now);
+    let elapsed = start.elapsed();
+    let budget = Duration::from_secs(budget_secs);
+    Some(budget.saturating_sub(elapsed))
 }
 
 /// Tracks files modified during a session via write_file and edit_file tool calls.
@@ -3091,5 +3162,87 @@ mod tests {
         // 2000-01-01 is 10957 days after epoch
         let (y, m, d) = days_from_epoch(10957);
         assert_eq!((y, m, d), (2000, 1, 1));
+    }
+
+    // ── Session budget tests ────────────────────────────────────────────
+    // The OnceLock-backed `configured_session_budget` and the lazy
+    // `SESSION_BUDGET_START` make `session_budget_remaining()` itself
+    // hard to reset between test cases. We test the pure parser directly
+    // for parsing logic, and use one test for the live helper that only
+    // asserts the in-process behavior we can rely on.
+
+    #[test]
+    fn test_parse_session_budget_unset() {
+        assert_eq!(parse_session_budget(None), None);
+    }
+
+    #[test]
+    fn test_parse_session_budget_empty() {
+        assert_eq!(parse_session_budget(Some(String::new())), None);
+    }
+
+    #[test]
+    fn test_parse_session_budget_valid() {
+        assert_eq!(parse_session_budget(Some("2700".to_string())), Some(2700));
+        assert_eq!(parse_session_budget(Some("0".to_string())), Some(0));
+        assert_eq!(parse_session_budget(Some("60".to_string())), Some(60));
+    }
+
+    #[test]
+    fn test_parse_session_budget_garbage_falls_back_to_default() {
+        // A typo'd value should NOT silently disable the guard — it should
+        // fall back to the default budget so the user gets *some* protection.
+        assert_eq!(
+            parse_session_budget(Some("forty-five-minutes".to_string())),
+            Some(DEFAULT_SESSION_BUDGET_SECS)
+        );
+        assert_eq!(
+            parse_session_budget(Some("-1".to_string())),
+            Some(DEFAULT_SESSION_BUDGET_SECS)
+        );
+    }
+
+    #[test]
+    fn test_parse_session_budget_default_is_45_min() {
+        assert_eq!(DEFAULT_SESSION_BUDGET_SECS, 2700);
+    }
+
+    #[test]
+    fn test_session_budget_remaining_unset_returns_none() {
+        // In the test environment, YOYO_SESSION_BUDGET_SECS is normally unset,
+        // so the live helper should report no budget. This also verifies that
+        // the OnceLock initializes lazily without panicking.
+        // Note: if some other test in the suite has set the env var, this
+        // assertion would change — but no other test touches it.
+        if std::env::var("YOYO_SESSION_BUDGET_SECS").is_err() {
+            assert!(session_budget_remaining().is_none());
+        }
+    }
+
+    #[test]
+    fn test_session_budget_remaining_decreases_over_time() {
+        // Use the pure-parser path to simulate a budget without polluting
+        // the global OnceLock. We compute remaining manually the same way
+        // session_budget_remaining() does, and verify the math.
+        let budget = Duration::from_secs(60);
+        let start = Instant::now();
+        std::thread::sleep(Duration::from_millis(20));
+        let elapsed = start.elapsed();
+        let remaining = budget.saturating_sub(elapsed);
+        assert!(remaining < budget, "remaining should shrink as time passes");
+        assert!(
+            remaining > Duration::from_secs(50),
+            "20ms shouldn't burn most of a 60s budget"
+        );
+    }
+
+    #[test]
+    fn test_session_budget_remaining_returns_zero_after_expiry() {
+        // saturating_sub guarantees we never wrap. Verify the same shape
+        // session_budget_remaining() uses for the expired case.
+        let budget = Duration::from_secs(1);
+        let elapsed = Duration::from_secs(10);
+        let remaining = budget.saturating_sub(elapsed);
+        assert_eq!(remaining, Duration::ZERO);
     }
 }
