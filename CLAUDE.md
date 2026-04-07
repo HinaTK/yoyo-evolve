@@ -61,6 +61,7 @@ ANTHROPIC_API_KEY=sk-... ./scripts/evolve.sh
 - `format/markdown.rs` — MarkdownRenderer for streaming markdown output
 - `format/tools.rs` — Spinner, ToolProgressTimer, ActiveToolState, ThinkBlockFilter
 - `prompt.rs` — prompt construction for evolution sessions
+- `prompt_budget.rs` — session wall-clock budget + audit log helpers (extracted from `prompt.rs`)
 
 Uses `yoagent::Agent` with `AnthropicProvider`, `default_tools()`, and an optional `SkillSet`.
 
