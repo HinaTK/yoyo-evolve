@@ -584,6 +584,23 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
     None
 }
 
+/// Look up the value that follows a `--flag VALUE` pair in `args`.
+///
+/// Returns the cloned value string if `flag` (or any of its aliases, like
+/// `-p` for `--prompt`) appears in `args` and is followed by another token.
+/// Returns `None` if the flag is missing or has no value after it.
+///
+/// Centralizes the `args.iter().position(...).and_then(get(i+1)).cloned()`
+/// pattern that's repeated ~16 times across `parse_args`. This is the
+/// follow-up to the Day 38 09:55 task that landed `try_dispatch_subcommand`
+/// (#261) — see `journals/JOURNAL.md` for the full premise correction.
+pub(crate) fn flag_value(args: &[String], flag_names: &[&str]) -> Option<String> {
+    args.iter()
+        .position(|a| flag_names.contains(&a.as_str()))
+        .and_then(|i| args.get(i + 1))
+        .cloned()
+}
+
 pub fn parse_args(args: &[String]) -> Option<Config> {
     // Handle early-exit subcommands (--help, --version) before anything else.
     if let Some(result) = try_dispatch_subcommand(args) {
@@ -647,11 +664,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     warn_unknown_flags(args, &flags_needing_values);
 
     // Parse --provider flag (CLI > config file > default "anthropic")
-    let provider = args
-        .iter()
-        .position(|a| a == "--provider")
-        .and_then(|i| args.get(i + 1))
-        .cloned()
+    let provider = flag_value(args, &["--provider"])
         .or_else(|| file_config.get("provider").cloned())
         .unwrap_or_else(|| "anthropic".into())
         .to_lowercase();
@@ -665,25 +678,13 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     }
 
     // Parse --base-url flag (CLI > config file)
-    let base_url = args
-        .iter()
-        .position(|a| a == "--base-url")
-        .and_then(|i| args.get(i + 1))
-        .cloned()
-        .or_else(|| file_config.get("base_url").cloned());
+    let base_url =
+        flag_value(args, &["--base-url"]).or_else(|| file_config.get("base_url").cloned());
 
     // Parse prompt and image flags early so we can validate --image before API key check
-    let prompt_arg = args
-        .iter()
-        .position(|a| a == "--prompt" || a == "-p")
-        .and_then(|i| args.get(i + 1))
-        .cloned();
+    let prompt_arg = flag_value(args, &["--prompt", "-p"]);
 
-    let image_path_raw = args
-        .iter()
-        .position(|a| a == "--image")
-        .and_then(|i| args.get(i + 1))
-        .cloned();
+    let image_path_raw = flag_value(args, &["--image"]);
 
     // Validate --image flag usage
     if let Some(ref img_path) = image_path_raw {
@@ -716,11 +717,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     };
 
     // API key: --api-key flag > provider-specific env > ANTHROPIC_API_KEY > API_KEY > config file
-    let api_key_from_flag = args
-        .iter()
-        .position(|a| a == "--api-key")
-        .and_then(|i| args.get(i + 1))
-        .cloned();
+    let api_key_from_flag = flag_value(args, &["--api-key"]);
 
     // Choose provider-specific env var name
     let provider_env_var = provider_api_key_env(&provider);
@@ -765,11 +762,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         }
     };
 
-    let model = args
-        .iter()
-        .position(|a| a == "--model")
-        .and_then(|i| args.get(i + 1))
-        .cloned()
+    let model = flag_value(args, &["--model"])
         .or_else(|| file_config.get("model").cloned())
         .unwrap_or_else(|| default_model_for_provider(&provider));
 
@@ -793,11 +786,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     };
 
     // Custom system prompt: --system "text" or --system-file path
-    let custom_system = args
-        .iter()
-        .position(|a| a == "--system")
-        .and_then(|i| args.get(i + 1))
-        .cloned();
+    let custom_system = flag_value(args, &["--system"]);
 
     let system_from_file = args
         .iter()
@@ -894,11 +883,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
                 .and_then(|s| s.parse::<usize>().ok())
         });
 
-    let output_path = args
-        .iter()
-        .position(|a| a == "--output" || a == "-o")
-        .and_then(|i| args.get(i + 1))
-        .cloned();
+    let output_path = flag_value(args, &["--output", "-o"]);
 
     let verbose = args.iter().any(|a| a == "--verbose" || a == "-v");
 
@@ -1044,11 +1029,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     let shell_hooks = crate::hooks::parse_hooks_from_config(&file_config);
 
     // --fallback <provider>: fallback provider if primary fails
-    let fallback_provider = args
-        .iter()
-        .position(|a| a == "--fallback")
-        .and_then(|i| args.get(i + 1))
-        .cloned()
+    let fallback_provider = flag_value(args, &["--fallback"])
         .or_else(|| file_config.get("fallback").cloned())
         .map(|s| s.to_lowercase());
 
@@ -1138,6 +1119,67 @@ mod tests {
         assert!(
             VERSION.contains('.'),
             "Version should contain a dot: {VERSION}"
+        );
+    }
+
+    #[test]
+    fn test_flag_value_finds_value_for_single_flag() {
+        let args = vec!["yoyo".into(), "--model".into(), "claude-sonnet".into()];
+        assert_eq!(
+            flag_value(&args, &["--model"]),
+            Some("claude-sonnet".into()),
+            "expected to find the value following --model"
+        );
+    }
+
+    #[test]
+    fn test_flag_value_returns_none_when_flag_missing() {
+        let args = vec!["yoyo".into(), "--verbose".into()];
+        assert_eq!(
+            flag_value(&args, &["--model"]),
+            None,
+            "expected None when --model is not present"
+        );
+    }
+
+    #[test]
+    fn test_flag_value_returns_none_when_value_missing() {
+        // Flag is the last argument — there's no value after it.
+        let args = vec!["yoyo".into(), "--model".into()];
+        assert_eq!(
+            flag_value(&args, &["--model"]),
+            None,
+            "expected None when --model has no value after it"
+        );
+    }
+
+    #[test]
+    fn test_flag_value_supports_aliases() {
+        // -p is an alias for --prompt; both should resolve.
+        let short = vec!["yoyo".into(), "-p".into(), "hello".into()];
+        let long = vec!["yoyo".into(), "--prompt".into(), "hello".into()];
+        assert_eq!(
+            flag_value(&short, &["--prompt", "-p"]),
+            Some("hello".into())
+        );
+        assert_eq!(flag_value(&long, &["--prompt", "-p"]), Some("hello".into()));
+    }
+
+    #[test]
+    fn test_flag_value_finds_first_occurrence() {
+        // If a flag is repeated, take the first value (matches existing
+        // .position()-based behavior in parse_args).
+        let args = vec![
+            "yoyo".into(),
+            "--model".into(),
+            "first".into(),
+            "--model".into(),
+            "second".into(),
+        ];
+        assert_eq!(
+            flag_value(&args, &["--model"]),
+            Some("first".into()),
+            "expected the first --model value (matches prior position-based behavior)"
         );
     }
 
