@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "login": "kojiyang",
+    "amount": "$200",
+    "type": "onetime"
+  }
+]
