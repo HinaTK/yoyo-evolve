@@ -3,9 +3,9 @@
 ## Build Status
 
 - `cargo build` — **pass** (clean, 0.13s incremental)
-- `cargo test` — **pass** (82 passing, 1 ignored, 0 failed) — note: full suite count is higher when each module's `#[cfg(test)]` runs; this tail showed 82 in the final binary's test summary
+- `cargo test` — **pass** (1,697 unit tests + 82 integration = **1,779 total**, 1 ignored, 0 failed)
 - `cargo clippy --all-targets -- -D warnings` — **pass** (clean)
-- `cargo fmt -- --check` — **pass**
+- `cargo fmt -- --check` — **pass** (no drift)
 - `cargo run -p "what's 2+2?"` — **pass** (returned `4`, $0.095, 6.1s, <1% context)
 
 Everything is green.
