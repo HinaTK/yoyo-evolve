@@ -110,130 +110,300 @@ pub fn is_verbose() -> bool {
 pub use crate::context::{list_project_context_files, load_project_context};
 
 pub fn print_help() {
-    println!("yoyo v{VERSION} — a coding agent growing up in public");
-    println!();
-    println!("Usage: yoyo [OPTIONS]");
-    println!();
-    println!("Options:");
-    println!("  --model <name>    Model to use (default: claude-opus-4-6)");
-    println!("  --provider <name> Provider: anthropic (default), openai, google, openrouter,");
-    println!("                    ollama, xai, groq, deepseek, mistral, cerebras, zai, custom");
-    println!("  --base-url <url>  Custom API endpoint (e.g., http://localhost:11434/v1)");
-    println!("  --thinking <lvl>  Enable extended thinking (off, minimal, low, medium, high)");
-    println!("  --max-tokens <n>  Maximum output tokens per response (default: 8192)");
-    println!("  --max-turns <n>   Maximum agent turns per prompt (default: 50)");
-    println!("  --temperature <f> Sampling temperature (0.0-1.0, default: model default)");
-    println!("  --skills <dir>    Directory containing skill files");
-    println!("  --system <text>   Custom system prompt (overrides default)");
-    println!("  --system-file <f> Read system prompt from file");
-    println!("  --prompt, -p <t>  Run a single prompt and exit (no REPL)");
-    println!("  --output, -o <f>  Write final response text to a file");
-    println!("  --api-key <key>   API key (overrides provider-specific env var)");
-    println!("  --mcp <cmd>       Connect to an MCP server via stdio (repeatable)");
-    println!("  --openapi <spec>  Load OpenAPI spec file and register API tools (repeatable)");
-    println!("  --no-color        Disable colored output (also respects NO_COLOR env)");
-    println!("  --no-bell         Disable terminal bell on long completions (also respects YOYO_NO_BELL env)");
-    println!(
+    print!("{}", help_text());
+}
+
+/// Build the full `--help` output as a string. Kept public so tests can assert
+/// on its contents without capturing stdout.
+pub fn help_text() -> String {
+    let mut s = String::new();
+    use std::fmt::Write as _;
+    let _ = writeln!(s, "yoyo v{VERSION} — a coding agent growing up in public");
+    let _ = writeln!(s);
+    let _ = writeln!(s, "Usage: yoyo [OPTIONS]");
+    let _ = writeln!(s);
+    let _ = writeln!(s, "Options:");
+    let _ = writeln!(
+        s,
+        "  --model <name>    Model to use (default: claude-opus-4-6)"
+    );
+    let _ = writeln!(
+        s,
+        "  --provider <name> Provider: anthropic (default), openai, google, openrouter,"
+    );
+    let _ = writeln!(
+        s,
+        "                    ollama, xai, groq, deepseek, mistral, cerebras, zai, custom"
+    );
+    let _ = writeln!(
+        s,
+        "  --base-url <url>  Custom API endpoint (e.g., http://localhost:11434/v1)"
+    );
+    let _ = writeln!(
+        s,
+        "  --thinking <lvl>  Enable extended thinking (off, minimal, low, medium, high)"
+    );
+    let _ = writeln!(
+        s,
+        "  --max-tokens <n>  Maximum output tokens per response (default: 8192)"
+    );
+    let _ = writeln!(
+        s,
+        "  --max-turns <n>   Maximum agent turns per prompt (default: 50)"
+    );
+    let _ = writeln!(
+        s,
+        "  --temperature <f> Sampling temperature (0.0-1.0, default: model default)"
+    );
+    let _ = writeln!(s, "  --skills <dir>    Directory containing skill files");
+    let _ = writeln!(
+        s,
+        "  --system <text>   Custom system prompt (overrides default)"
+    );
+    let _ = writeln!(s, "  --system-file <f> Read system prompt from file");
+    let _ = writeln!(
+        s,
+        "  --prompt, -p <t>  Run a single prompt and exit (no REPL)"
+    );
+    let _ = writeln!(s, "  --output, -o <f>  Write final response text to a file");
+    let _ = writeln!(
+        s,
+        "  --api-key <key>   API key (overrides provider-specific env var)"
+    );
+    let _ = writeln!(
+        s,
+        "  --mcp <cmd>       Connect to an MCP server via stdio (repeatable)"
+    );
+    let _ = writeln!(
+        s,
+        "  --openapi <spec>  Load OpenAPI spec file and register API tools (repeatable)"
+    );
+    let _ = writeln!(
+        s,
+        "  --no-color        Disable colored output (also respects NO_COLOR env)"
+    );
+    let _ = writeln!(s, "  --no-bell         Disable terminal bell on long completions (also respects YOYO_NO_BELL env)");
+    let _ = writeln!(
+        s,
         "  --no-update-check Skip startup update check (also respects YOYO_NO_UPDATE_CHECK=1 env)"
     );
-    println!("  --json            Output JSON instead of plain text (for -p and piped modes)");
-    println!("  --audit           Enable audit logging of all tool calls to .yoyo/audit.jsonl");
-    println!("                    (also respects YOYO_AUDIT=1 env or audit = true in config)");
-    println!("  --verbose, -v     Show debug info (API errors, request details)");
-    println!("  --yes, -y         Auto-approve all tool executions (skip confirmation prompts)");
-    println!("  --allow <pat>     Auto-approve bash commands matching glob pattern (repeatable)");
-    println!("  --deny <pat>      Auto-deny bash commands matching glob pattern (repeatable)");
-    println!("  --allow-dir <d>   Restrict file access to this directory (repeatable)");
-    println!("  --deny-dir <d>    Block file access to this directory (repeatable)");
-    println!("  --context-strategy <s>  Context management: compaction (default) or checkpoint");
-    println!(
+    let _ = writeln!(
+        s,
+        "  --json            Output JSON instead of plain text (for -p and piped modes)"
+    );
+    let _ = writeln!(
+        s,
+        "  --audit           Enable audit logging of all tool calls to .yoyo/audit.jsonl"
+    );
+    let _ = writeln!(
+        s,
+        "                    (also respects YOYO_AUDIT=1 env or audit = true in config)"
+    );
+    let _ = writeln!(
+        s,
+        "  --verbose, -v     Show debug info (API errors, request details)"
+    );
+    let _ = writeln!(
+        s,
+        "  --yes, -y         Auto-approve all tool executions (skip confirmation prompts)"
+    );
+    let _ = writeln!(
+        s,
+        "  --allow <pat>     Auto-approve bash commands matching glob pattern (repeatable)"
+    );
+    let _ = writeln!(
+        s,
+        "  --deny <pat>      Auto-deny bash commands matching glob pattern (repeatable)"
+    );
+    let _ = writeln!(
+        s,
+        "  --allow-dir <d>   Restrict file access to this directory (repeatable)"
+    );
+    let _ = writeln!(
+        s,
+        "  --deny-dir <d>    Block file access to this directory (repeatable)"
+    );
+    let _ = writeln!(
+        s,
+        "  --context-strategy <s>  Context management: compaction (default) or checkpoint"
+    );
+    let _ = writeln!(
+        s,
         "  --context-window <n>    Override context window size (tokens). Default: auto-detected"
     );
-    println!(
+    let _ = writeln!(
+        s,
         "                          per provider (200K Anthropic, 1M Google, 128K OpenAI, etc.)"
     );
-    println!("  --continue, -c    Resume last saved session");
-    println!("  --fallback <prov> Fallback provider if primary fails (e.g. --fallback google)");
-    println!("  --print-system-prompt  Print the fully assembled system prompt and exit");
-    println!("  --help, -h        Show this help message");
-    println!("  --version, -V     Show version");
-    println!();
-    println!("Commands (in REPL):");
-    println!("  /quit, /exit      Exit the agent");
-    println!("  /clear            Clear conversation history");
-    println!("  /compact          Compact conversation to save context space");
-    println!("  /commit [msg]     Commit staged changes (AI-generates message if no msg)");
-    println!("  /config           Show all current settings");
-    println!("  /context          Show loaded project context files (YOYO.md)");
-    println!("  /cost             Show estimated session cost");
-    println!("  /diff             Show git diff summary of uncommitted changes");
-    println!("  /docs <crate>     Look up docs.rs documentation for a Rust crate");
-    println!("  /find <pattern>   Fuzzy-search project files by name");
-    println!("  /fix              Auto-fix build/lint errors (runs checks, sends failures to AI)");
-    println!("  /forget <n>       Remove a project memory by index");
-    println!("  /git <subcmd>     Quick git: status, log [n], add <path>, stash, stash pop");
-    println!("  /health           Run project health checks (auto-detects project type)");
-    println!("  /pr [number]      List open PRs, or view details of a specific PR");
-    println!("  /history          Show summary of conversation messages");
-    println!("  /search <query>   Search conversation history for matching messages");
-    println!("  /init             Create a starter YOYO.md project context file");
-    println!("  /lint             Auto-detect and run project linter");
-    println!("  /load [path]      Load session from file");
-    println!("  /memories         List project-specific memories");
-    println!("  /model <name>     Switch model mid-session");
-    println!("  /retry            Re-send the last user input");
-    println!("  /remember <note>  Save a project-specific memory (persists across sessions)");
-    println!("  /review [path]    AI code review: staged changes (default) or a specific file");
-    println!("  /run <cmd>        Run a shell command directly (no AI, no tokens)");
-    println!("  /save [path]      Save session to file");
-    println!("  /spawn <task>     Spawn a subagent with fresh context to handle a task");
-    println!("  /status           Show session info");
-    println!("  /test             Auto-detect and run project tests");
-    println!("  /think [level]    Show or change thinking level (off/low/medium/high)");
-    println!("  /tokens           Show token usage and context window");
-    println!("  /tree [depth]     Show project directory tree (default depth: 3)");
-    println!("  /undo             Revert all uncommitted changes (git checkout)");
-    println!("  /version          Show yoyo version");
-    println!();
-    println!("Environment:");
-    println!("  ANTHROPIC_API_KEY  API key for Anthropic (default provider)");
-    println!("  OPENAI_API_KEY    API key for OpenAI");
-    println!("  GOOGLE_API_KEY    API key for Google/Gemini");
-    println!("  GROQ_API_KEY      API key for Groq");
-    println!("  XAI_API_KEY       API key for xAI");
-    println!("  DEEPSEEK_API_KEY  API key for DeepSeek");
-    println!("  OPENROUTER_API_KEY API key for OpenRouter");
-    println!("  ZAI_API_KEY       API key for ZAI (Zhipu AI / z.ai)");
-    println!("  API_KEY            Fallback API key (any provider)");
-    println!("  YOYO_NO_UPDATE_CHECK  Set to 1 to skip startup update check");
-    println!("  YOYO_AUDIT            Set to 1 to enable audit logging");
-    println!();
-    println!("Config files (searched in order, first found wins):");
-    println!("  .yoyo.toml                  Project-level config (current directory)");
-    println!("  ~/.yoyo.toml                Home directory config");
-    println!("  ~/.config/yoyo/config.toml  User-level config (XDG)");
-    println!();
-    println!("Config file format (key = value):");
-    println!("  model = \"claude-sonnet-4-20250514\"");
-    println!("  provider = \"openai\"");
-    println!("  base_url = \"http://localhost:11434/v1\"");
-    println!("  thinking = \"medium\"");
-    println!("  max_tokens = 4096");
-    println!("  max_turns = 20");
-    println!("  api_key = \"sk-ant-...\"");
-    println!("  system_prompt = \"You are a Go expert\"");
-    println!("  system_file = \"prompts/system.txt\"");
-    println!("  mcp = [\"npx open-websearch@latest\", \"npx @mcp/server-filesystem /tmp\"]");
-    println!();
-    println!("  [permissions]");
-    println!("  allow = [\"git *\", \"cargo *\"]");
-    println!("  deny = [\"rm -rf *\"]");
-    println!();
-    println!("  [directories]");
-    println!("  allow = [\"./src\", \"./tests\"]");
-    println!("  deny = [\"~/.ssh\", \"/etc\"]");
-    println!();
-    println!("CLI flags override config file values.");
+    let _ = writeln!(s, "  --continue, -c    Resume last saved session");
+    let _ = writeln!(
+        s,
+        "  --fallback <prov> Fallback provider if primary fails (e.g. --fallback google)"
+    );
+    let _ = writeln!(
+        s,
+        "  --print-system-prompt  Print the fully assembled system prompt and exit"
+    );
+    let _ = writeln!(s, "  --help, -h        Show this help message");
+    let _ = writeln!(s, "  --version, -V     Show version");
+    let _ = writeln!(s);
+    let _ = writeln!(s, "Commands (in REPL):");
+    let _ = writeln!(s, "  /quit, /exit      Exit the agent");
+    let _ = writeln!(s, "  /clear            Clear conversation history");
+    let _ = writeln!(
+        s,
+        "  /compact          Compact conversation to save context space"
+    );
+    let _ = writeln!(
+        s,
+        "  /commit [msg]     Commit staged changes (AI-generates message if no msg)"
+    );
+    let _ = writeln!(s, "  /config           Show all current settings");
+    let _ = writeln!(
+        s,
+        "  /context          Show loaded project context files (YOYO.md)"
+    );
+    let _ = writeln!(s, "  /cost             Show estimated session cost");
+    let _ = writeln!(
+        s,
+        "  /diff             Show git diff summary of uncommitted changes"
+    );
+    let _ = writeln!(
+        s,
+        "  /docs <crate>     Look up docs.rs documentation for a Rust crate"
+    );
+    let _ = writeln!(s, "  /find <pattern>   Fuzzy-search project files by name");
+    let _ = writeln!(
+        s,
+        "  /fix              Auto-fix build/lint errors (runs checks, sends failures to AI)"
+    );
+    let _ = writeln!(s, "  /forget <n>       Remove a project memory by index");
+    let _ = writeln!(
+        s,
+        "  /git <subcmd>     Quick git: status, log [n], add <path>, stash, stash pop"
+    );
+    let _ = writeln!(
+        s,
+        "  /health           Run project health checks (auto-detects project type)"
+    );
+    let _ = writeln!(
+        s,
+        "  /pr [number]      List open PRs, or view details of a specific PR"
+    );
+    let _ = writeln!(
+        s,
+        "  /history          Show summary of conversation messages"
+    );
+    let _ = writeln!(
+        s,
+        "  /search <query>   Search conversation history for matching messages"
+    );
+    let _ = writeln!(
+        s,
+        "  /init             Create a starter YOYO.md project context file"
+    );
+    let _ = writeln!(s, "  /lint             Auto-detect and run project linter");
+    let _ = writeln!(s, "  /load [path]      Load session from file");
+    let _ = writeln!(s, "  /memories         List project-specific memories");
+    let _ = writeln!(s, "  /model <name>     Switch model mid-session");
+    let _ = writeln!(s, "  /retry            Re-send the last user input");
+    let _ = writeln!(
+        s,
+        "  /remember <note>  Save a project-specific memory (persists across sessions)"
+    );
+    let _ = writeln!(
+        s,
+        "  /review [path]    AI code review: staged changes (default) or a specific file"
+    );
+    let _ = writeln!(
+        s,
+        "  /run <cmd>        Run a shell command directly (no AI, no tokens)"
+    );
+    let _ = writeln!(s, "  /save [path]      Save session to file");
+    let _ = writeln!(
+        s,
+        "  /spawn <task>     Spawn a subagent with fresh context to handle a task"
+    );
+    let _ = writeln!(s, "  /status           Show session info");
+    let _ = writeln!(s, "  /test             Auto-detect and run project tests");
+    let _ = writeln!(
+        s,
+        "  /think [level]    Show or change thinking level (off/low/medium/high)"
+    );
+    let _ = writeln!(s, "  /tokens           Show token usage and context window");
+    let _ = writeln!(
+        s,
+        "  /tree [depth]     Show project directory tree (default depth: 3)"
+    );
+    let _ = writeln!(
+        s,
+        "  /undo             Revert all uncommitted changes (git checkout)"
+    );
+    let _ = writeln!(s, "  /version          Show yoyo version");
+    let _ = writeln!(s);
+    let _ = writeln!(s, "Environment:");
+    let _ = writeln!(
+        s,
+        "  ANTHROPIC_API_KEY  API key for Anthropic (default provider)"
+    );
+    let _ = writeln!(s, "  OPENAI_API_KEY    API key for OpenAI");
+    let _ = writeln!(s, "  GOOGLE_API_KEY    API key for Google/Gemini");
+    let _ = writeln!(s, "  GROQ_API_KEY      API key for Groq");
+    let _ = writeln!(s, "  XAI_API_KEY       API key for xAI");
+    let _ = writeln!(s, "  DEEPSEEK_API_KEY  API key for DeepSeek");
+    let _ = writeln!(s, "  OPENROUTER_API_KEY API key for OpenRouter");
+    let _ = writeln!(s, "  ZAI_API_KEY       API key for ZAI (Zhipu AI / z.ai)");
+    let _ = writeln!(s, "  API_KEY            Fallback API key (any provider)");
+    let _ = writeln!(
+        s,
+        "  YOYO_NO_UPDATE_CHECK  Set to 1 to skip startup update check"
+    );
+    let _ = writeln!(
+        s,
+        "  YOYO_AUDIT            Set to 1 to enable audit logging"
+    );
+    let _ = writeln!(
+        s,
+        "  YOYO_SESSION_BUDGET_SECS  Soft wall-clock budget in seconds; retry loops bail"
+    );
+    let _ = writeln!(
+        s,
+        "                            early when <30s remain (default: unbounded)"
+    );
+    let _ = writeln!(s);
+    let _ = writeln!(s, "Config files (searched in order, first found wins):");
+    let _ = writeln!(
+        s,
+        "  .yoyo.toml                  Project-level config (current directory)"
+    );
+    let _ = writeln!(s, "  ~/.yoyo.toml                Home directory config");
+    let _ = writeln!(s, "  ~/.config/yoyo/config.toml  User-level config (XDG)");
+    let _ = writeln!(s);
+    let _ = writeln!(s, "Config file format (key = value):");
+    let _ = writeln!(s, "  model = \"claude-sonnet-4-20250514\"");
+    let _ = writeln!(s, "  provider = \"openai\"");
+    let _ = writeln!(s, "  base_url = \"http://localhost:11434/v1\"");
+    let _ = writeln!(s, "  thinking = \"medium\"");
+    let _ = writeln!(s, "  max_tokens = 4096");
+    let _ = writeln!(s, "  max_turns = 20");
+    let _ = writeln!(s, "  api_key = \"sk-ant-...\"");
+    let _ = writeln!(s, "  system_prompt = \"You are a Go expert\"");
+    let _ = writeln!(s, "  system_file = \"prompts/system.txt\"");
+    let _ = writeln!(
+        s,
+        "  mcp = [\"npx open-websearch@latest\", \"npx @mcp/server-filesystem /tmp\"]"
+    );
+    let _ = writeln!(s);
+    let _ = writeln!(s, "  [permissions]");
+    let _ = writeln!(s, "  allow = [\"git *\", \"cargo *\"]");
+    let _ = writeln!(s, "  deny = [\"rm -rf *\"]");
+    let _ = writeln!(s);
+    let _ = writeln!(s, "  [directories]");
+    let _ = writeln!(s, "  allow = [\"./src\", \"./tests\"]");
+    let _ = writeln!(s, "  deny = [\"~/.ssh\", \"/etc\"]");
+    let _ = writeln!(s);
+    let _ = writeln!(s, "CLI flags override config file values.");
+    s
 }
 
 pub fn print_banner() {
@@ -1824,8 +1994,6 @@ mcp = ["npx open-websearch@latest", "npx @mcp/server-filesystem /tmp"]
     #[test]
     fn test_help_text_mentions_home_config() {
         // The help output should mention all three config paths.
-        // We can't capture print_help() output easily, but we can verify
-        // the welcome text mentions the paths.
         let welcome = get_welcome_text();
         assert!(
             welcome.contains(".yoyo.toml"),
@@ -1835,6 +2003,33 @@ mcp = ["npx open-websearch@latest", "npx @mcp/server-filesystem /tmp"]
             welcome.contains("config/yoyo/config.toml"),
             "welcome should mention XDG config path"
         );
+    }
+
+    #[test]
+    fn help_text_documents_session_budget_env_var() {
+        // YOYO_SESSION_BUDGET_SECS is a live behavior-modifying knob (retry loops
+        // bail early when the budget is near zero). The only way operators can
+        // discover it should be `yoyo --help`, not spelunking src/prompt_budget.rs.
+        let help = help_text();
+        assert!(
+            help.contains("YOYO_SESSION_BUDGET_SECS"),
+            "--help output must document YOYO_SESSION_BUDGET_SECS"
+        );
+    }
+
+    #[test]
+    fn help_text_documents_known_env_vars() {
+        // Regression guard: the refactor from println! to a String builder
+        // must preserve every env var the old print_help() listed.
+        let help = help_text();
+        for var in [
+            "ANTHROPIC_API_KEY",
+            "YOYO_AUDIT",
+            "YOYO_NO_UPDATE_CHECK",
+            "YOYO_SESSION_BUDGET_SECS",
+        ] {
+            assert!(help.contains(var), "--help should mention {var}");
+        }
     }
 
     #[test]
