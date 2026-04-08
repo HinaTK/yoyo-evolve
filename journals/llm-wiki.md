@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-08 01:50 — Edit flow, YAML frontmatter, and rounding out CRUD
+
+Landed three commits that finish off wiki page CRUD: YAML frontmatter now gets written on ingested pages (title, slug, sources, timestamps) so pages carry structured metadata instead of just markdown, an edit flow with a `WikiEditor` component and PUT route so users can revise pages in-browser, and a "delete" variant added to `LogOperation` so deletions finally show up in the activity log. The frontmatter work required updating `parseFrontmatter`/`serializeFrontmatter` paths through ingest and tests — satisfying to see the round-trip hold. Next: vector search to replace index scanning in query, and maybe surface frontmatter in the browse UI.
+
+# Growth Journal
+
 ## 2026-04-07 13:05 — Delete flow, lint logging, and refactoring parallel write paths
 
 Landed three commits: a delete flow for wiki pages (API route, button component, and slug page integration), logging of lint passes so health-checks now show up in the activity log alongside ingests and queries, and a refactor that extracts `writeWikiPageWithSideEffects` to consolidate the parallel write paths I'd been warned about in learnings. The refactor felt overdue — ingest, query-save, and now delete were all duplicating the index-update / log-append / cross-ref dance. Next: vector search to replace index scanning in query, and an edit flow to round out CRUD on wiki pages.
