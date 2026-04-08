@@ -112,6 +112,14 @@ Additional skills:
 - `sponsors/sponsor_info.json` — single source of truth for sponsor state (recurring + one-time, with run_used, shouted_out, benefit_expires). Rebuilt by `scripts/refresh_sponsors.py`; only the `run_used` flag is mutated by `evolve.sh` when consuming an accelerated run.
 
 
+## MCP gotchas
+
+**Tool-name collisions (Day 39):** If an MCP server exposes a tool whose name matches one of yoyo's builtins (`bash`, `read_file`, `write_file`, `edit_file`, `list_files`, `search`, `rename_symbol`, `ask_user`, `todo`, `sub_agent`), the Anthropic API will reject the first turn with `"Tool names must be unique"` and the session dies. The flagship reference server `@modelcontextprotocol/server-filesystem` collides on `read_file` AND `write_file`, so the common case was broken until the guard landed.
+
+yoyo now runs a pre-flight tool listing (via a short-lived `yoagent::mcp::McpClient`) before every `with_mcp_server_stdio` call. If any MCP tool name appears in `BUILTIN_TOOL_NAMES` (defined in `src/main.rs`), the whole server is skipped with a clear stderr warning naming the colliding tool(s). Non-colliding servers connect normally. If the pre-flight itself fails (e.g. server can't spawn), we fall through to yoagent's connect so the user sees the real diagnostic.
+
+Keep `BUILTIN_TOOL_NAMES` in sync with `tools::build_tools` whenever a new builtin is added — the pure helper `detect_mcp_collisions` is unit-tested in `src/main.rs` against the filesystem server's known tool set as a regression guard.
+
 ## yoagent: Don't Reinvent the Wheel
 
 yoyo is built on [yoagent](https://github.com/yologdev/yoagent). Before implementing any agent-related or low-level agent feature, **check if yoagent already provides it**. Past examples of reinvented wheels:

@@ -87,6 +87,60 @@ fn yoyo_user_agent() -> String {
     format!("yoyo/{}", env!("CARGO_PKG_VERSION"))
 }
 
+/// Names of yoyo's builtin tools. MCP servers that expose a tool with one of
+/// these names would cause the Anthropic API to reject the first turn with
+/// `"Tool names must be unique"`, killing the session. We detect the collision
+/// at connect time and skip the colliding MCP server with a clear warning.
+///
+/// This list must stay in sync with `tools::build_tools` and any tool added
+/// via yoagent's `with_sub_agent` (currently `sub_agent`, see
+/// `build_sub_agent_tool`).
+pub(crate) const BUILTIN_TOOL_NAMES: &[&str] = &[
+    "bash",
+    "read_file",
+    "write_file",
+    "edit_file",
+    "list_files",
+    "search",
+    "rename_symbol",
+    "ask_user",
+    "todo",
+    "sub_agent",
+];
+
+/// Pure helper: return the subset of `mcp_tools` whose names collide with any
+/// entry in `builtins`. Order is preserved from `mcp_tools`. Extracted so it
+/// can be unit-tested without spinning up a real MCP server.
+pub(crate) fn detect_mcp_collisions(mcp_tools: &[String], builtins: &[&str]) -> Vec<String> {
+    mcp_tools
+        .iter()
+        .filter(|name| builtins.iter().any(|b| b == &name.as_str()))
+        .cloned()
+        .collect()
+}
+
+/// Pre-enumerate the tool names an MCP server exposes by opening a short-lived
+/// `McpClient` against it. Used to detect collisions with yoyo's builtins
+/// BEFORE we hand the connection to yoagent (which would otherwise push the
+/// colliding tool onto the agent and kill the first LLM turn).
+///
+/// Returns `Ok(tool_names)` on success, `Err(message)` on any protocol or
+/// spawn error. Errors are non-fatal at the call site — we fall through and
+/// let yoagent's own connect attempt surface the real diagnostic.
+async fn fetch_mcp_tool_names(
+    command: &str,
+    args: &[&str],
+    env: Option<std::collections::HashMap<String, String>>,
+) -> Result<Vec<String>, String> {
+    let client = yoagent::mcp::McpClient::connect_stdio(command, args, env)
+        .await
+        .map_err(|e| format!("{e}"))?;
+    let tools = client.list_tools().await.map_err(|e| format!("{e}"))?;
+    // Best-effort close; ignore errors since we're about to drop the client.
+    let _ = client.close().await;
+    Ok(tools.into_iter().map(|t| t.name).collect())
+}
+
 /// Insert standard yoyo identification headers into a ModelConfig.
 /// All providers get User-Agent. OpenRouter also gets HTTP-Referer and X-Title.
 fn insert_client_headers(config: &mut ModelConfig) {
@@ -614,6 +668,33 @@ async fn main() {
         let command = parts[0];
         let args_slice: Vec<&str> = parts[1..].to_vec();
         eprintln!("{DIM}  mcp: connecting to {mcp_cmd}...{RESET}");
+
+        // Pre-flight: enumerate tool names and detect collisions with yoyo
+        // builtins. yoagent would otherwise push colliding tools onto the
+        // agent and the Anthropic API would reject the first turn with
+        // "Tool names must be unique". See #MCP collision guard (Day 39).
+        match fetch_mcp_tool_names(command, &args_slice, None).await {
+            Ok(tool_names) => {
+                let collisions = detect_mcp_collisions(&tool_names, BUILTIN_TOOL_NAMES);
+                if !collisions.is_empty() {
+                    for tool in &collisions {
+                        eprintln!(
+                            "{YELLOW}warning:{RESET} MCP server '{command}' exposes tool '{tool}' which collides with yoyo's builtin; skipping this server"
+                        );
+                    }
+                    eprintln!(
+                        "{DIM}  mcp: skipping '{mcp_cmd}' — rename/exclude the colliding tool(s) or use a different server{RESET}"
+                    );
+                    continue;
+                }
+            }
+            Err(e) => {
+                eprintln!(
+                    "{DIM}  mcp: pre-flight tool listing failed ({e}); proceeding to yoagent connect for diagnostics{RESET}"
+                );
+            }
+        }
+
         // with_mcp_server_stdio consumes self; we must always update agent
         let result = agent
             .with_mcp_server_stdio(command, &args_slice, None)
@@ -646,6 +727,32 @@ async fn main() {
             "{DIM}  mcp: connecting to {} ({})...{RESET}",
             server_cfg.name, server_cfg.command
         );
+
+        // Pre-flight collision check (see comment above).
+        match fetch_mcp_tool_names(&server_cfg.command, &args_refs, env_map.clone()).await {
+            Ok(tool_names) => {
+                let collisions = detect_mcp_collisions(&tool_names, BUILTIN_TOOL_NAMES);
+                if !collisions.is_empty() {
+                    for tool in &collisions {
+                        eprintln!(
+                            "{YELLOW}warning:{RESET} MCP server '{}' exposes tool '{tool}' which collides with yoyo's builtin; skipping this server",
+                            server_cfg.name
+                        );
+                    }
+                    eprintln!(
+                        "{DIM}  mcp: skipping '{}' — rename/exclude the colliding tool(s) or use a different server{RESET}",
+                        server_cfg.name
+                    );
+                    continue;
+                }
+            }
+            Err(e) => {
+                eprintln!(
+                    "{DIM}  mcp: pre-flight tool listing failed ({e}); proceeding to yoagent connect for diagnostics{RESET}"
+                );
+            }
+        }
+
         let result = agent
             .with_mcp_server_stdio(&server_cfg.command, &args_refs, env_map)
             .await;
@@ -2788,5 +2895,66 @@ mod tests {
         assert_eq!(parsed["is_error"], true);
         assert!(parsed["usage"].is_object());
         assert!(parsed["cost_usd"].is_number());
+    }
+
+    #[test]
+    fn mcp_builtin_collision_detection() {
+        // The canonical collision: filesystem MCP server exposes read_file,
+        // which collides with yoyo's builtin. Non-colliding tools pass through.
+        let builtins = vec!["read_file", "write_file", "bash", "search"];
+        let mcp_tools = vec!["read_file".to_string(), "fetch_url".to_string()];
+        let collisions = detect_mcp_collisions(&mcp_tools, &builtins);
+        assert_eq!(collisions, vec!["read_file".to_string()]);
+    }
+
+    #[test]
+    fn mcp_collision_detection_no_collisions() {
+        let builtins = vec!["read_file", "write_file"];
+        let mcp_tools = vec!["fetch_url".to_string(), "query_db".to_string()];
+        let collisions = detect_mcp_collisions(&mcp_tools, &builtins);
+        assert!(collisions.is_empty());
+    }
+
+    #[test]
+    fn mcp_collision_detection_multiple_collisions_preserves_order() {
+        let builtins = vec!["read_file", "write_file", "bash"];
+        let mcp_tools = vec![
+            "write_file".to_string(),
+            "safe_tool".to_string(),
+            "read_file".to_string(),
+        ];
+        let collisions = detect_mcp_collisions(&mcp_tools, &builtins);
+        assert_eq!(
+            collisions,
+            vec!["write_file".to_string(), "read_file".to_string()]
+        );
+    }
+
+    #[test]
+    fn mcp_collision_detection_against_real_builtins() {
+        // Verify the real BUILTIN_TOOL_NAMES constant catches the flagship
+        // filesystem server's known collisions. If any of these slip through,
+        // yoyo will die on the first LLM turn with "Tool names must be unique".
+        let filesystem_server_tools = vec![
+            "read_file".to_string(),
+            "write_file".to_string(),
+            "list_directory".to_string(),
+            "move_file".to_string(),
+        ];
+        let collisions = detect_mcp_collisions(&filesystem_server_tools, BUILTIN_TOOL_NAMES);
+        assert!(collisions.contains(&"read_file".to_string()));
+        assert!(collisions.contains(&"write_file".to_string()));
+        assert_eq!(
+            collisions.len(),
+            2,
+            "only read_file and write_file should collide"
+        );
+    }
+
+    #[test]
+    fn mcp_collision_detection_empty_inputs() {
+        assert!(detect_mcp_collisions(&[], &["read_file"]).is_empty());
+        assert!(detect_mcp_collisions(&["foo".to_string()], &[]).is_empty());
+        assert!(detect_mcp_collisions(&[], &[]).is_empty());
     }
 }

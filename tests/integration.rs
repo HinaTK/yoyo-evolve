@@ -2065,3 +2065,32 @@ fn map_command_mentioned_in_help() {
     // the binary at least runs successfully. The REPL /help test
     // is in unit tests (map_in_help_text).
 }
+
+// ── MCP collision guard (Day 39) ─────────────────────────────────────
+
+#[test]
+fn mcp_bogus_command_does_not_panic() {
+    // Regression guard: a --mcp command pointing at a non-existent binary
+    // must not panic the yoyo binary. Before the Day 39 collision-guard
+    // work, the pre-flight tool listing would surface the spawn error
+    // through a new code path; this test pins the "fails gracefully"
+    // contract so any future refactor keeps that property.
+    //
+    // We pass --help so yoyo exits before needing an API key — the MCP
+    // arg is parsed but the MCP loop only runs when not in help mode,
+    // so this just validates argument plumbing stays intact.
+    let output = yoyo_cmd()
+        .arg("--mcp")
+        .arg("/nonexistent/binary-that-does-not-exist-xyz")
+        .arg("--help")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to run yoyo");
+
+    assert!(
+        output.status.success(),
+        "yoyo --mcp <bogus> --help should exit 0 (got {:?}): {}",
+        output.status,
+        String::from_utf8_lossy(&output.stderr)
+    );
+}

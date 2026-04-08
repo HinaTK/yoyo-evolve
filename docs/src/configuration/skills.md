@@ -71,6 +71,12 @@ MCP servers from the config file are merged with any `--mcp` CLI flags — both 
 
 Each `--mcp` command is launched as a child process. yoyo communicates with it over stdio using the MCP protocol, discovers the tools it offers, and makes them available to the agent alongside the built-in tools.
 
+### Tool-name collisions
+
+yoyo's builtin tools (`bash`, `read_file`, `write_file`, `edit_file`, `list_files`, `search`, `rename_symbol`, `ask_user`, `todo`, `sub_agent`) take precedence over MCP tools. If an MCP server exposes a tool with one of those names, yoyo will skip the entire server at connect time with a warning on stderr — the colliding tool would otherwise cause the provider API to reject the first turn with `"Tool names must be unique"` and kill the session.
+
+Note: `@modelcontextprotocol/server-filesystem` exposes `read_file` and `write_file` and will therefore be skipped. Use a server with distinct tool names, or a filesystem server that prefixes its tools (e.g. `fs_read_file`).
+
 ## OpenAPI specs
 
 You can give yoyo access to any HTTP API by pointing it at an OpenAPI specification file. yoyo parses the spec and registers each endpoint as a callable tool:
