@@ -24,6 +24,10 @@ pub use crate::commands_info::{
 // (issue #260 slice). Same stability contract as commands_info above.
 pub use crate::commands_retry::{handle_changes, handle_retry};
 
+// Re-export /remember, /memories, /forget handlers extracted to
+// commands_memory.rs (issue #260 slice). Same stability contract as above.
+pub use crate::commands_memory::{handle_forget, handle_memories, handle_remember};
+
 use std::sync::atomic::{AtomicBool, Ordering};
 use yoagent::agent::Agent;
 use yoagent::*;
@@ -504,95 +508,11 @@ pub use crate::commands_session::{
     reset_compact_thrash, Bookmarks, SpawnTracker,
 };
 
-// Memory-related handlers
-pub use crate::memory::{add_memory, load_memories, remove_memory, save_memories};
-
-// ── /remember ────────────────────────────────────────────────────────────
-
-pub fn handle_remember(input: &str) {
-    let note = input
-        .strip_prefix("/remember")
-        .unwrap_or("")
-        .trim()
-        .to_string();
-    if note.is_empty() {
-        println!("{DIM}  usage: /remember <note>");
-        println!("  Save a project-specific memory that persists across sessions.");
-        println!("  Examples:");
-        println!("    /remember this project uses sqlx for database access");
-        println!("    /remember tests require docker running");
-        println!("    /remember always run cargo fmt before committing{RESET}\n");
-        return;
-    }
-    let mut memory = load_memories();
-    add_memory(&mut memory, &note);
-    match save_memories(&memory) {
-        Ok(_) => {
-            println!(
-                "{GREEN}  ✓ Remembered: \"{note}\" ({} total memories){RESET}\n",
-                memory.entries.len()
-            );
-        }
-        Err(e) => {
-            eprintln!("{RED}  error saving memory: {e}{RESET}\n");
-        }
-    }
-}
-
-// ── /memories ────────────────────────────────────────────────────────────
-
-pub fn handle_memories() {
-    let memory = load_memories();
-    if memory.entries.is_empty() {
-        println!("{DIM}  No project memories yet.");
-        println!("  Use /remember <note> to add one.{RESET}\n");
-        return;
-    }
-    println!("{DIM}  Project memories ({}):", memory.entries.len());
-    for (i, entry) in memory.entries.iter().enumerate() {
-        println!("    [{i}] {} ({})", entry.note, entry.timestamp);
-    }
-    println!("  Use /forget <n> to remove a memory.{RESET}\n");
-}
-
-// ── /forget ──────────────────────────────────────────────────────────────
-
-pub fn handle_forget(input: &str) {
-    let arg = input.strip_prefix("/forget").unwrap_or("").trim();
-    if arg.is_empty() {
-        println!("{DIM}  usage: /forget <n>");
-        println!("  Remove a project memory by index. Use /memories to see indexes.{RESET}\n");
-        return;
-    }
-    let index = match arg.parse::<usize>() {
-        Ok(i) => i,
-        Err(_) => {
-            eprintln!("{RED}  error: '{arg}' is not a valid index. Use /memories to see indexes.{RESET}\n");
-            return;
-        }
-    };
-    let mut memory = load_memories();
-    match remove_memory(&mut memory, index) {
-        Some(removed) => match save_memories(&memory) {
-            Ok(_) => {
-                println!(
-                    "{GREEN}  ✓ Forgot: \"{}\" ({} memories remaining){RESET}\n",
-                    removed.note,
-                    memory.entries.len()
-                );
-            }
-            Err(e) => {
-                eprintln!("{RED}  error saving memory: {e}{RESET}\n");
-            }
-        },
-        None => {
-            eprintln!(
-                "{RED}  error: index {index} out of range (have {} memories). Use /memories to see indexes.{RESET}\n",
-                memory.entries.len()
-            );
-        }
-    }
-}
+// Memory-related handlers live in commands_memory.rs (#260 slice).
+// The memory-module helpers they use (add_memory, load_memories,
+// remove_memory, save_memories) are imported directly from crate::memory
+// in that file and in the test module below — no module-level re-export
+// is needed here since nothing in commands.rs itself calls them anymore.
 
 /// Toggle teach mode on/off. When active, yoyo explains its reasoning as it works.
 pub fn handle_teach(input: &str) {
@@ -725,7 +645,8 @@ mod tests {
     };
     use crate::commands_session::{parse_bookmark_name, parse_spawn_args, parse_spawn_task};
     use crate::memory::{
-        format_memories_for_prompt, load_memories_from, MemoryEntry, ProjectMemory,
+        add_memory, format_memories_for_prompt, load_memories_from, remove_memory, MemoryEntry,
+        ProjectMemory,
     };
     use yoagent::ThinkingLevel;
 

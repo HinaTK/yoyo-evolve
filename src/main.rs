@@ -41,6 +41,7 @@ mod commands_dev;
 mod commands_file;
 mod commands_git;
 mod commands_info;
+mod commands_memory;
 mod commands_project;
 mod commands_refactor;
 mod commands_retry;
