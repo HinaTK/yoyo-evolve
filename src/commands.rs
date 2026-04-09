@@ -368,6 +368,165 @@ pub fn handle_config(
     println!("{RESET}");
 }
 
+// ── /config show ─────────────────────────────────────────────────────────
+//
+// `/config show` is the runtime config-introspection surface (Day 40,
+// Crush-parity work). Unlike `/config` which shows the *agent's live
+// runtime state* (model, thinking level, message count, etc.),
+// `/config show` answers a different question: "what did my config
+// file actually contribute to this session, and which file was it?"
+//
+// The split matters for debugging: when a user says "why isn't my
+// override being picked up?", they need to see (a) which file was
+// read and (b) the merged key=value pairs that came out of it —
+// not a snapshot of in-memory runtime values that might have been
+// further mutated by CLI flags, env vars, or interactive /model
+// switches. Keeping the two handlers separate means `/config` stays
+// a runtime mirror and `/config show` stays a file-introspection
+// tool. They're complementary, not redundant.
+
+/// Detect which on-disk config file (if any) would be loaded by
+/// `cli::load_config_file()`, using the same precedence order:
+/// 1. `./.yoyo.toml` (project-level)
+/// 2. `~/.yoyo.toml` (home shorthand)
+/// 3. `~/.config/yoyo/config.toml` (XDG user-level)
+///
+/// Returns the path to the first file that exists, or `None` if no
+/// config file is present in any location. This is a read-only
+/// introspection helper — it never reads or parses the file itself,
+/// it just tells you which path would be chosen.
+///
+/// Kept as a separate function (rather than calling `load_config_file`
+/// directly) because the existing loader is private to `cli.rs` and
+/// this path-only view is all `/config show` needs. The loader path
+/// and this one are unit-tested together indirectly via
+/// `test_config_file_path_precedence` below.
+fn detect_loaded_config_path() -> Option<std::path::PathBuf> {
+    // Project-level: ./.yoyo.toml
+    let project = std::path::PathBuf::from(".yoyo.toml");
+    if project.exists() {
+        return Some(project);
+    }
+    // Home shorthand: ~/.yoyo.toml
+    if let Some(path) = crate::cli::home_config_path() {
+        if path.exists() {
+            return Some(path);
+        }
+    }
+    // XDG user-level: ~/.config/yoyo/config.toml
+    if let Some(path) = crate::cli::user_config_path() {
+        if path.exists() {
+            return Some(path);
+        }
+    }
+    None
+}
+
+/// Return `true` if a config key looks like a secret and its value
+/// should be masked in any user-visible output. Matches are
+/// case-insensitive substring checks against `key`, `token`, `secret`,
+/// and `password`. Keep this list in sync with anything that gets
+/// stored in `.yoyo.toml` as a sensitive value (e.g. API keys).
+fn is_secret_key(key: &str) -> bool {
+    let lower = key.to_ascii_lowercase();
+    lower.contains("key")
+        || lower.contains("token")
+        || lower.contains("secret")
+        || lower.contains("password")
+}
+
+/// Pure, testable formatter for `/config show` output. Takes the
+/// already-loaded config HashMap and an optional path to the file
+/// it came from, and returns a stable, human-readable block.
+///
+/// Secrets (keys matching `is_secret_key`) are always masked with
+/// `***` — the raw value must never appear in the output, even in
+/// debug builds. This is the whole point of the test below.
+///
+/// Keys are emitted in sorted order so the output is deterministic
+/// and easy to diff across sessions. An empty HashMap with no path
+/// is the "no config loaded, running on defaults" case and produces
+/// a friendly one-liner rather than an empty block.
+pub fn format_config_output(
+    config: &std::collections::HashMap<String, String>,
+    path: Option<&std::path::Path>,
+) -> String {
+    let mut out = String::new();
+    match path {
+        Some(p) => {
+            out.push_str(&format!("Loaded config: {}\n", p.display()));
+        }
+        None => {
+            out.push_str("No config file loaded — using defaults.\n");
+            // Still dump whatever was passed in (for completeness),
+            // but if the map is also empty we're done.
+            if config.is_empty() {
+                return out;
+            }
+        }
+    }
+
+    if config.is_empty() {
+        // A path was given but the map is empty — file parsed to
+        // nothing (all comments / whitespace). Note it explicitly so
+        // the user knows the file was read but contributed nothing.
+        out.push_str("\n  (no keys parsed from this file)\n");
+        return out;
+    }
+
+    // Determine column width for pretty alignment. Cap it so a single
+    // pathological key doesn't throw off everything else.
+    let max_key_len = config.keys().map(|k| k.len()).max().unwrap_or(0).min(24);
+
+    let mut keys: Vec<&String> = config.keys().collect();
+    keys.sort();
+
+    out.push('\n');
+    for key in keys {
+        let value = config.get(key).map(String::as_str).unwrap_or("");
+        let display_value = if is_secret_key(key) {
+            "***".to_string()
+        } else {
+            value.to_string()
+        };
+        out.push_str(&format!(
+            "  {:<width$}  = {}\n",
+            key,
+            display_value,
+            width = max_key_len
+        ));
+    }
+    out
+}
+
+/// Handler for `/config show`: prints which config file was loaded
+/// (if any) and the merged key-value pairs it contributed.
+///
+/// This is the user-facing surface; all formatting logic lives in
+/// `format_config_output` so it can be unit-tested without touching
+/// the filesystem. This handler's only jobs are (1) detect the path,
+/// (2) read+parse the file via the existing `cli::parse_config_file`
+/// helper, and (3) println the result inside the dim block the rest
+/// of the `/config` family uses.
+pub fn handle_config_show() {
+    let path = detect_loaded_config_path();
+    let config = match path.as_ref() {
+        Some(p) => match std::fs::read_to_string(p) {
+            Ok(content) => crate::cli::parse_config_file(&content),
+            Err(e) => {
+                println!(
+                    "{RED}  Failed to read config file {}: {e}{RESET}",
+                    p.display()
+                );
+                return;
+            }
+        },
+        None => std::collections::HashMap::new(),
+    };
+    let output = format_config_output(&config, path.as_deref());
+    print!("{DIM}{output}{RESET}");
+}
+
 // ── /hooks ───────────────────────────────────────────────────────────────
 
 pub fn handle_hooks(hooks: &[crate::hooks::ShellHook]) {
@@ -687,7 +846,100 @@ mod tests {
         add_memory, format_memories_for_prompt, load_memories_from, remove_memory, MemoryEntry,
         ProjectMemory,
     };
+    use std::collections::HashMap;
+    use std::path::PathBuf;
     use yoagent::ThinkingLevel;
+
+    // ── /config show tests ────────────────────────────────────────────
+    // Runtime config introspection — see `format_config_output` and
+    // `is_secret_key` above. These tests pin the two most important
+    // invariants: (1) secrets are NEVER printed raw, and (2) the
+    // no-config-loaded path produces a clear message instead of
+    // crashing or printing an empty block.
+
+    #[test]
+    fn test_format_config_masks_secret_values() {
+        let mut config = HashMap::new();
+        let raw_key = "sk-ant-super-secret-do-not-leak-12345";
+        config.insert("anthropic_api_key".to_string(), raw_key.to_string());
+        config.insert("model".to_string(), "claude-sonnet-4-6".to_string());
+
+        let path = PathBuf::from("/fake/path/.yoyo.toml");
+        let out = format_config_output(&config, Some(&path));
+
+        // The raw secret value must never appear in the output.
+        assert!(
+            !out.contains(raw_key),
+            "raw secret leaked into /config show output:\n{out}"
+        );
+        // The mask must appear so the user can see the key exists.
+        assert!(
+            out.contains("***"),
+            "expected masked placeholder in output:\n{out}"
+        );
+        // Non-secret keys should be visible as-is.
+        assert!(
+            out.contains("claude-sonnet-4-6"),
+            "non-secret value should be visible:\n{out}"
+        );
+        // The loaded path should be named.
+        assert!(
+            out.contains("/fake/path/.yoyo.toml"),
+            "loaded config path should be shown:\n{out}"
+        );
+    }
+
+    #[test]
+    fn test_format_config_no_file_loaded() {
+        let config: HashMap<String, String> = HashMap::new();
+        let out = format_config_output(&config, None);
+
+        // Must say something clear about the no-config case.
+        assert!(
+            out.to_lowercase().contains("no config file loaded"),
+            "expected 'no config file loaded' message, got:\n{out}"
+        );
+        // Must not crash and must not print stale path markers.
+        assert!(
+            !out.contains("Loaded config:"),
+            "should not claim a config was loaded:\n{out}"
+        );
+    }
+
+    #[test]
+    fn test_is_secret_key_matches_common_patterns() {
+        // Positive — all of these should be masked.
+        assert!(is_secret_key("anthropic_api_key"));
+        assert!(is_secret_key("API_KEY"));
+        assert!(is_secret_key("openai_token"));
+        assert!(is_secret_key("client_secret"));
+        assert!(is_secret_key("db_password"));
+        assert!(is_secret_key("AccessToken"));
+
+        // Negative — ordinary config keys should pass through.
+        assert!(!is_secret_key("model"));
+        assert!(!is_secret_key("provider"));
+        assert!(!is_secret_key("thinking"));
+        assert!(!is_secret_key("temperature"));
+    }
+
+    #[test]
+    fn test_format_config_sorts_keys_deterministically() {
+        let mut config = HashMap::new();
+        config.insert("zebra".to_string(), "z".to_string());
+        config.insert("alpha".to_string(), "a".to_string());
+        config.insert("mike".to_string(), "m".to_string());
+        let path = PathBuf::from(".yoyo.toml");
+        let out = format_config_output(&config, Some(&path));
+
+        let alpha_pos = out.find("alpha").expect("alpha should appear");
+        let mike_pos = out.find("mike").expect("mike should appear");
+        let zebra_pos = out.find("zebra").expect("zebra should appear");
+        assert!(
+            alpha_pos < mike_pos && mike_pos < zebra_pos,
+            "keys should be sorted alphabetically:\n{out}"
+        );
+    }
 
     #[test]
     fn test_command_parsing_quit() {

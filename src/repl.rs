@@ -636,6 +636,10 @@ pub async fn run_repl(
                 );
                 continue;
             }
+            s if s == "/config show" || s.starts_with("/config show ") => {
+                commands::handle_config_show();
+                continue;
+            }
             "/hooks" => {
                 commands::handle_hooks(&agent_config.shell_hooks);
                 continue;

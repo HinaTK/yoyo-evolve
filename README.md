@@ -330,6 +330,7 @@ Create a `YOYO.md` (or `CLAUDE.md`) in your project root with build commands, ar
 | `/compact` | Compact conversation to save context |
 | `/commit [msg]` | Commit staged changes (AI-generates message if omitted) |
 | `/config` | Show all current settings |
+| `/config show` | Show loaded config file path and merged key-value pairs (secrets masked) |
 | `/context [system]` | Show loaded project context files or system prompt sections |
 | `/cost` | Show session cost breakdown |
 | `/diff` | Git diff summary of uncommitted changes |
