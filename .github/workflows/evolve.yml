@@ -31,6 +31,7 @@ jobs:
         with:
           token: ${{ steps.bot-token.outputs.token }}
           fetch-depth: 50
+          persist-credentials: false
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
