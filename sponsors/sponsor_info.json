@@ -12,5 +12,19 @@
     "benefit_expires": "2026-06-06",
     "run_used": false,
     "shouted_out": true
+  },
+  "zhenfund": {
+    "type": "onetime",
+    "total_cents": 100000,
+    "benefits": [
+      "priority",
+      "shoutout",
+      "sponsors_md",
+      "readme"
+    ],
+    "first_seen": "2026-04-09",
+    "benefit_expires": "2026-06-08",
+    "run_used": false,
+    "shouted_out": true
   }
 }
