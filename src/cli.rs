@@ -771,6 +771,50 @@ pub(crate) fn flag_value(args: &[String], flag_names: &[&str]) -> Option<String>
         .cloned()
 }
 
+/// Outcome of checking whether a flag is followed by a real value.
+///
+/// Pure classifier for `--flag <value>` style arguments. Caller decides how
+/// to present the result (warn vs. hard-exit) — this keeps the helper
+/// free of I/O so it can be unit-tested in isolation.
+#[derive(Debug, PartialEq, Eq)]
+pub(crate) enum FlagValueCheck<'a> {
+    /// Next token is a usable value.
+    Ok(&'a str),
+    /// Next token exists but looks like another flag (e.g. `--model --provider ...`).
+    /// The caller should surface a warning; not fatal because a leading `-` may
+    /// also be a negative number (e.g. `--temperature -0.1`).
+    FlagLike(&'a str),
+    /// There is no next token at all (`--model` at end of args).
+    Missing,
+}
+
+/// Classify the token that follows a flag expecting a value.
+///
+/// This is the pure validation kernel for the `flags_needing_values` loop in
+/// [`parse_args`]. The loop body used to inline this logic, which made it
+/// impossible to unit-test directly and left subtle behaviour (negative
+/// numbers being valid values, end-of-args being fatal) undocumented.
+///
+/// Behaviour:
+/// - `None` → [`FlagValueCheck::Missing`]
+/// - `Some("-")` or `Some("--anything")` → [`FlagValueCheck::FlagLike`]
+///   (warning territory, not a hard error — the old code only warned here)
+/// - `Some("-5")`, `Some("-0.1")` etc. → [`FlagValueCheck::Ok`]
+///   (leading dash followed by a digit is a negative number, not a flag)
+/// - anything else → [`FlagValueCheck::Ok`]
+pub(crate) fn require_flag_value<'a>(next: Option<&'a String>) -> FlagValueCheck<'a> {
+    match next {
+        None => FlagValueCheck::Missing,
+        Some(v) => {
+            if v.starts_with('-') && !v.chars().nth(1).is_some_and(|c| c.is_ascii_digit()) {
+                FlagValueCheck::FlagLike(v.as_str())
+            } else {
+                FlagValueCheck::Ok(v.as_str())
+            }
+        }
+    }
+}
+
 pub fn parse_args(args: &[String]) -> Option<Config> {
     // Handle early-exit subcommands (--help, --version) before anything else.
     if let Some(result) = try_dispatch_subcommand(args) {
@@ -811,21 +855,18 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     ];
     for flag in &flags_needing_values {
         if let Some(pos) = args.iter().position(|a| a == flag) {
-            match args.get(pos + 1) {
-                None => {
-                    eprintln!("{RED}error:{RESET} {flag} requires a value");
-                    eprintln!("Run with --help for usage information.");
-                    std::process::exit(1);
-                }
-                Some(next)
-                    if next.starts_with('-')
-                        && !next.chars().nth(1).is_some_and(|c| c.is_ascii_digit()) =>
-                {
+            match require_flag_value(args.get(pos + 1)) {
+                FlagValueCheck::Ok(_) => {}
+                FlagValueCheck::FlagLike(next) => {
                     eprintln!(
                         "{YELLOW}warning:{RESET} {flag} value looks like another flag: '{next}'"
                     );
                 }
-                _ => {}
+                FlagValueCheck::Missing => {
+                    eprintln!("{RED}error:{RESET} {flag} requires a value");
+                    eprintln!("Run with --help for usage information.");
+                    std::process::exit(1);
+                }
             }
         }
     }
@@ -1350,6 +1391,70 @@ mod tests {
             flag_value(&args, &["--model"]),
             Some("first".into()),
             "expected the first --model value (matches prior position-based behavior)"
+        );
+    }
+
+    #[test]
+    fn test_require_flag_value_ok_on_plain_value() {
+        let next = "claude-opus-4".to_string();
+        assert_eq!(
+            require_flag_value(Some(&next)),
+            FlagValueCheck::Ok("claude-opus-4"),
+            "a plain token should be accepted as the flag's value"
+        );
+    }
+
+    #[test]
+    fn test_require_flag_value_missing_on_end_of_args() {
+        assert_eq!(
+            require_flag_value(None),
+            FlagValueCheck::Missing,
+            "None should classify as Missing so the caller can hard-exit"
+        );
+    }
+
+    #[test]
+    fn test_require_flag_value_flag_like_on_double_dash() {
+        // The classic bug: `yoyo --model --provider anthropic` — the value slot
+        // is occupied by another flag. Should be flagged (warning territory).
+        let next = "--provider".to_string();
+        assert_eq!(
+            require_flag_value(Some(&next)),
+            FlagValueCheck::FlagLike("--provider"),
+            "a --flag next-token should classify as FlagLike, not Ok"
+        );
+    }
+
+    #[test]
+    fn test_require_flag_value_flag_like_on_bare_dash() {
+        // Bare `-` is not a value anywhere in yoyo (no stdin marker). Treat it
+        // the same way the old inline code did: warn but don't hard-exit.
+        let next = "-".to_string();
+        assert_eq!(
+            require_flag_value(Some(&next)),
+            FlagValueCheck::FlagLike("-"),
+            "bare '-' is not a yoyo value and should be flagged"
+        );
+    }
+
+    #[test]
+    fn test_require_flag_value_accepts_negative_numbers() {
+        // `--temperature -0.1` is a real use case — leading `-` followed by a
+        // digit is a negative number, not a flag. This is the exact invariant
+        // the old inline regex-free check was protecting; pinning it in a test
+        // so a future refactor can't quietly break temperature/top-p flags.
+        let negative = "-0.1".to_string();
+        assert_eq!(
+            require_flag_value(Some(&negative)),
+            FlagValueCheck::Ok("-0.1"),
+            "negative numbers must survive as plain values"
+        );
+
+        let neg_int = "-5".to_string();
+        assert_eq!(
+            require_flag_value(Some(&neg_int)),
+            FlagValueCheck::Ok("-5"),
+            "negative integers must survive as plain values"
         );
     }
 
