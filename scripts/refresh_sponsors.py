@@ -437,11 +437,10 @@ def render_readme_block(sponsor_info):
         if genesis:
             lines.append("**💎 Genesis Sponsors:**")
             lines.append("")
-            for login, amount in sorted(genesis):
-                lines.append(
-                    f'{avatar_tag(login, amount, 80)} **[@{login}](https://github.com/{login})** — {amount}'
-                )
-                lines.append("")
+            lines.append(
+                " ".join(avatar_tag(login, amount, 80) for login, amount in sorted(genesis))
+            )
+            lines.append("")
         if patrons:
             lines.append("**🚀 Patron Sponsors ($50+):**")
             lines.append("")
