@@ -543,6 +543,68 @@ pub fn handle_teach(input: &str) {
     }
 }
 
+/// Build the `/mcp help` text. Extracted as a pure function so tests can
+/// assert on its contents (e.g. to guard against the stale "coming soon"
+/// string returning, or server-filesystem sneaking back in as the primary
+/// example — it collides with yoyo's read_file/write_file builtins and is
+/// skipped at startup).
+pub(crate) fn mcp_help_text() -> String {
+    // server-fetch is the primary example because it exposes a single `fetch`
+    // tool that does NOT collide with any name in BUILTIN_TOOL_NAMES. Do not
+    // replace with server-filesystem — see the Day 39 collision guard.
+    let mut s = String::new();
+    s.push_str("  MCP (Model Context Protocol) Server Configuration\n");
+    s.push('\n');
+    s.push_str("  Add MCP servers to .yoyo.toml or ~/.config/yoyo/config.toml:\n");
+    s.push('\n');
+    s.push_str("  # Structured format (recommended):\n");
+    s.push_str("  [mcp_servers.fetch]\n");
+    s.push_str("  command = \"npx\"\n");
+    s.push_str("  args = [\"-y\", \"@modelcontextprotocol/server-fetch\"]\n");
+    s.push('\n');
+    s.push_str("  [mcp_servers.postgres]\n");
+    s.push_str("  command = \"npx\"\n");
+    s.push_str("  args = [\"-y\", \"@modelcontextprotocol/server-postgres\"]\n");
+    s.push_str("  env = { DATABASE_URL = \"postgresql://localhost/mydb\" }\n");
+    s.push('\n');
+    s.push_str("  # Simple format (legacy):\n");
+    s.push_str("  mcp = [\"npx -y @modelcontextprotocol/server-fetch\"]\n");
+    s.push('\n');
+    s.push_str("  Or pass via CLI:\n");
+    s.push_str("  yoyo --mcp \"npx -y @modelcontextprotocol/server-fetch\"\n");
+    s.push('\n');
+    s.push_str("  Note: @modelcontextprotocol/server-filesystem exposes read_file and\n");
+    s.push_str("  write_file tools which collide with yoyo's builtins — yoyo skips any\n");
+    s.push_str("  server whose tool names collide (see CLAUDE.md → \"MCP gotchas\").\n");
+    s.push_str("  Prefer server-fetch, server-memory, or server-sequential-thinking.\n");
+    s.push('\n');
+    s.push_str("  Subcommands:\n");
+    s.push_str("    /mcp         List configured MCP servers\n");
+    s.push_str("    /mcp list    List configured MCP servers\n");
+    s.push_str("    /mcp help    Show this help\n");
+    s
+}
+
+/// Build the "configured but not connected" status message shown by
+/// `/mcp list` when servers are configured but zero managed to connect.
+/// Pure function so tests can assert it never contains "coming soon" again.
+pub(crate) fn mcp_not_connected_message(total: usize) -> String {
+    let mut s = String::new();
+    s.push_str(&format!(
+        "  {total} server(s) configured but none connected.\n"
+    ));
+    s.push('\n');
+    s.push_str("  Common causes:\n");
+    s.push_str("    • Tool name collision with a yoyo builtin. For example,\n");
+    s.push_str("      @modelcontextprotocol/server-filesystem exposes read_file and\n");
+    s.push_str("      write_file which collide — such servers are skipped at startup.\n");
+    s.push_str("      Check stderr for a \"skipping MCP server\" warning.\n");
+    s.push_str("    • Server failed to spawn (bad command path or args in your config).\n");
+    s.push('\n');
+    s.push_str("  See CLAUDE.md → \"MCP gotchas\" for the full list of reserved tool names.\n");
+    s
+}
+
 /// Handle the `/mcp` command: list configured MCP servers and show help.
 pub fn handle_mcp(
     input: &str,
@@ -554,30 +616,7 @@ pub fn handle_mcp(
 
     match arg {
         "help" => {
-            println!("{DIM}  MCP (Model Context Protocol) Server Configuration");
-            println!();
-            println!("  Add MCP servers to .yoyo.toml or ~/.config/yoyo/config.toml:");
-            println!();
-            println!("  # Structured format (recommended):");
-            println!("  [mcp_servers.filesystem]");
-            println!("  command = \"npx\"");
-            println!("  args = [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/path\"]");
-            println!();
-            println!("  [mcp_servers.postgres]");
-            println!("  command = \"npx\"");
-            println!("  args = [\"-y\", \"@modelcontextprotocol/server-postgres\"]");
-            println!("  env = {{ DATABASE_URL = \"postgresql://localhost/mydb\" }}");
-            println!();
-            println!("  # Simple format (legacy):");
-            println!("  mcp = [\"npx -y @modelcontextprotocol/server-filesystem /path\"]");
-            println!();
-            println!("  Or pass via CLI:");
-            println!("  yoyo --mcp \"npx -y @modelcontextprotocol/server-filesystem /path\"");
-            println!();
-            println!("  Subcommands:");
-            println!("    /mcp         List configured MCP servers");
-            println!("    /mcp list    List configured MCP servers");
-            println!("    /mcp help    Show this help{RESET}\n");
+            println!("{DIM}{}{RESET}", mcp_help_text());
         }
         "" | "list" => {
             let has_cli = !cli_servers.is_empty();
@@ -589,7 +628,7 @@ pub fn handle_mcp(
                 println!("  Add servers to .yoyo.toml:");
                 println!("    [mcp_servers.myserver]");
                 println!("    command = \"npx\"");
-                println!("    args = [\"-y\", \"@modelcontextprotocol/server-example\"]");
+                println!("    args = [\"-y\", \"@modelcontextprotocol/server-fetch\"]");
                 println!();
                 println!("  See /mcp help for more details.{RESET}\n");
                 return;
@@ -622,7 +661,7 @@ pub fn handle_mcp(
                     total, mcp_count
                 );
             } else {
-                println!("  {} server(s) configured (not connected — MCP protocol support coming soon){RESET}\n", total);
+                println!("{}{RESET}", mcp_not_connected_message(total));
             }
         }
         _ => {
@@ -2399,6 +2438,72 @@ mod tests {
     fn test_handle_mcp_unknown_subcommand() {
         // Should not panic on unknown subcommand
         handle_mcp("/mcp foobar", &[], &[], 0);
+    }
+
+    // --- Regression: stale "coming soon" string and server-filesystem as
+    // --- primary example (Day 40). MCP protocol support shipped on Day 39;
+    // --- anything in /mcp help or /mcp list that still says "coming soon"
+    // --- is an outright lie to the user, and recommending server-filesystem
+    // --- as the first example sends them straight into the collision guard.
+
+    #[test]
+    fn test_mcp_help_text_no_coming_soon() {
+        let help = mcp_help_text();
+        assert!(
+            !help.contains("coming soon"),
+            "/mcp help must not claim MCP support is 'coming soon' — it shipped Day 39.\nGot:\n{help}"
+        );
+    }
+
+    #[test]
+    fn test_mcp_not_connected_message_no_coming_soon() {
+        let msg = mcp_not_connected_message(2);
+        assert!(
+            !msg.contains("coming soon"),
+            "/mcp list 'not connected' message must not say 'coming soon'.\nGot:\n{msg}"
+        );
+        // Positive assertion: the replacement must actually explain WHY.
+        assert!(
+            msg.contains("collision") || msg.contains("collide"),
+            "not-connected message should mention the collision guard as a likely cause.\nGot:\n{msg}"
+        );
+    }
+
+    #[test]
+    fn test_mcp_help_primary_example_is_not_filesystem() {
+        // The help text may still MENTION server-filesystem (annotated with
+        // the collision warning), but the primary example — the first
+        // [mcp_servers.X] block — must not be filesystem, because the
+        // Day 39 collision guard refuses to connect to it.
+        let help = mcp_help_text();
+        let first_block_start = help
+            .find("[mcp_servers.")
+            .expect("help text should contain at least one [mcp_servers.X] example");
+        // The first example block should not contain "server-filesystem"
+        // before the next blank line. Slice from first block to end and
+        // look only at the first ~5 lines.
+        let tail = &help[first_block_start..];
+        let first_block: String = tail.lines().take(5).collect::<Vec<_>>().join("\n");
+        assert!(
+            !first_block.contains("server-filesystem"),
+            "primary /mcp help example must not be server-filesystem \
+             (it collides with read_file/write_file and is skipped at startup).\nFirst block:\n{first_block}"
+        );
+    }
+
+    #[test]
+    fn test_mcp_help_mentions_collision_warning() {
+        // If we leave server-filesystem in the help text at all, it must
+        // be annotated with the collision warning so users know why it
+        // won't work.
+        let help = mcp_help_text();
+        if help.contains("server-filesystem") {
+            assert!(
+                help.contains("collide") || help.contains("skipped"),
+                "if server-filesystem is mentioned in /mcp help it must be \
+                 annotated with the collision warning.\nGot:\n{help}"
+            );
+        }
     }
 
     #[test]

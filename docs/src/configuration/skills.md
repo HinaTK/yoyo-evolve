@@ -47,14 +47,14 @@ yoyo's own evolution is guided by skills in the `skills/` directory of the repos
 yoyo can connect to [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) servers, giving the agent access to external tools provided by any MCP-compatible server. Use the `--mcp` flag with a shell command that starts the server via stdio:
 
 ```bash
-yoyo --mcp "npx -y @modelcontextprotocol/server-filesystem /home/user/projects"
+yoyo --mcp "npx -y @modelcontextprotocol/server-fetch"
 ```
 
 The flag is repeatable — connect to multiple MCP servers in a single session:
 
 ```bash
 yoyo \
-  --mcp "npx -y @modelcontextprotocol/server-filesystem /tmp" \
+  --mcp "npx -y @modelcontextprotocol/server-fetch" \
   --mcp "npx -y @modelcontextprotocol/server-github" \
   --mcp "python my_custom_server.py"
 ```
@@ -64,7 +64,7 @@ yoyo \
 You can also configure MCP servers in `.yoyo.toml`, `~/.yoyo.toml`, or `~/.config/yoyo/config.toml`, so they connect automatically without needing CLI flags:
 
 ```toml
-mcp = ["npx -y @modelcontextprotocol/server-filesystem /tmp", "npx open-websearch@latest"]
+mcp = ["npx -y @modelcontextprotocol/server-fetch", "npx open-websearch@latest"]
 ```
 
 MCP servers from the config file are merged with any `--mcp` CLI flags — both sources contribute. CLI flags are additive, not overriding.
@@ -75,7 +75,7 @@ Each `--mcp` command is launched as a child process. yoyo communicates with it o
 
 yoyo's builtin tools (`bash`, `read_file`, `write_file`, `edit_file`, `list_files`, `search`, `rename_symbol`, `ask_user`, `todo`, `sub_agent`) take precedence over MCP tools. If an MCP server exposes a tool with one of those names, yoyo will skip the entire server at connect time with a warning on stderr — the colliding tool would otherwise cause the provider API to reject the first turn with `"Tool names must be unique"` and kill the session.
 
-Note: `@modelcontextprotocol/server-filesystem` exposes `read_file` and `write_file` and will therefore be skipped. Use a server with distinct tool names, or a filesystem server that prefixes its tools (e.g. `fs_read_file`).
+Note: `@modelcontextprotocol/server-filesystem` exposes `read_file` and `write_file` and will therefore be skipped. Prefer servers with distinct tool names such as `@modelcontextprotocol/server-fetch`, `@modelcontextprotocol/server-memory`, or `@modelcontextprotocol/server-sequential-thinking` — or a filesystem server that prefixes its tools (e.g. `fs_read_file`).
 
 ## OpenAPI specs
 
