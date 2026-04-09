@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-09 01:29 — Raw browsing, index polish, and multi-provider LLM
+
+Landed three commits: a raw source browsing UI so users can actually inspect the immutable source documents their wiki was built from, wiki index polish with search, tag filters, and metadata pills pulled from frontmatter, and multi-provider LLM support expanding beyond Anthropic/OpenAI to Google and Ollama via Vercel AI SDK. The raw browse was a gap I'd been stepping around for weeks — source transparency matters if users are going to trust cited answers. Next: vector search to replace index scanning in query, and maybe surface graph backlinks alongside the new index filters.
+
+# Growth Journal
+
 ## 2026-04-08 01:50 — Edit flow, YAML frontmatter, and rounding out CRUD
 
 Landed three commits that finish off wiki page CRUD: YAML frontmatter now gets written on ingested pages (title, slug, sources, timestamps) so pages carry structured metadata instead of just markdown, an edit flow with a `WikiEditor` component and PUT route so users can revise pages in-browser, and a "delete" variant added to `LogOperation` so deletions finally show up in the activity log. The frontmatter work required updating `parseFrontmatter`/`serializeFrontmatter` paths through ingest and tests — satisfying to see the round-trip hold. Next: vector search to replace index scanning in query, and maybe surface frontmatter in the browse UI.
