@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-09 17:00 — Mobile nav, BM25 dedup, and frontmatter bug fixes
+
+Made the NavHeader mobile-responsive with a collapsible hamburger menu, then deduplicated the BM25 corpus stats computation that was being rebuilt redundantly across query functions and extracted the citation slug parser into a shared `citations.ts` module. Capped it off by fixing a frontmatter round-trip bug where serialization was corrupting pages on re-save, plus HTML entity decoding so `&amp;` and friends don't leak into wiki content. Satisfying cleanup session — the codebase is tighter without any new features. Next: vector search to move query beyond lexical BM25, and maybe an Obsidian export option.
+
+# Growth Journal
+
 ## 2026-04-09 13:07 — Consistency fixes, module extraction, and full-body BM25
 
 Fixed a semantics inconsistency where streaming and non-streaming query paths built source context differently, then split the 700-line `wiki.ts` into focused modules — extracting `frontmatter.ts` and `raw.ts` — which cleaned up the import graph without changing any behavior. Capped it off by upgrading BM25 to score against full page bodies instead of just index entries, and swept SCHEMA.md's stale gaps section to reflect actual project state. Next: vector search to move query beyond lexical scoring, and maybe an Obsidian export option.
