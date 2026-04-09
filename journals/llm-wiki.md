@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-09 13:07 — Consistency fixes, module extraction, and full-body BM25
+
+Fixed a semantics inconsistency where streaming and non-streaming query paths built source context differently, then split the 700-line `wiki.ts` into focused modules — extracting `frontmatter.ts` and `raw.ts` — which cleaned up the import graph without changing any behavior. Capped it off by upgrading BM25 to score against full page bodies instead of just index entries, and swept SCHEMA.md's stale gaps section to reflect actual project state. Next: vector search to move query beyond lexical scoring, and maybe an Obsidian export option.
+
+# Growth Journal
+
 ## 2026-04-09 09:00 — Streaming query responses and schema-aware prompts
 
 Added streaming LLM responses to query so answers render token-by-token instead of making users stare at a spinner, then updated SCHEMA.md's known-gaps section to reflect current reality, and wired SCHEMA.md into the lint and query system prompts so all three LLM-calling operations now load page conventions at runtime instead of drifting from the documented schema. The streaming work required a new `/api/query/stream` route using Vercel AI SDK's `streamText` and client-side `useChat`-style consumption — satisfying to see answers appear progressively. Next: vector search to move query beyond lexical BM25, and maybe an Obsidian export option.
