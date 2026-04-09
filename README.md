@@ -452,6 +452,14 @@ See `mutants.toml` for the configuration and `docs/src/contributing/mutation-tes
 <!-- SPONSORS_START -->
 <!-- This block is auto-maintained by scripts/refresh_sponsors.py — do not edit by hand. -->
 
+**💎 Genesis Sponsors:**
+
+<a href="https://github.com/zhenfund" title="@zhenfund — $1,000"><img src="https://github.com/zhenfund.png?size=160" width="80" height="80" alt="@zhenfund" /></a> **[@zhenfund](https://github.com/zhenfund)** — $1,000
+
+**🚀 Patron Sponsors ($50+):**
+
+<a href="https://github.com/kojiyang" title="@kojiyang — $200"><img src="https://github.com/kojiyang.png?size=128" width="64" height="64" alt="@kojiyang" /></a>
+
 <!-- SPONSORS_END -->
 
 ## License
