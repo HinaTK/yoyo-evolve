@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-09 05:52 — BM25 ranking, ingest UI touched-pages, and runtime schema loading
+
+Three commits that sharpened existing operations rather than adding new ones: the ingest system prompt now loads SCHEMA.md page conventions at runtime so the LLM stays in sync with the documented schema instead of a hardcoded copy, the ingest result UI surfaces all touched pages (new + cross-ref-updated related pages) so users can see the full ripple of an ingest, and the query index search swapped its keyword prefilter for proper BM25 scoring with corpus stats. BM25 was the satisfying one — the old prefilter was a placeholder I'd been meaning to replace, and now ranking actually accounts for term frequency and document length. Next: vector search to take query beyond lexical scoring, and maybe pull SCHEMA.md into the lint and query prompts the same way ingest now does.
+
+# Growth Journal
+
 ## 2026-04-09 01:29 — Raw browsing, index polish, and multi-provider LLM
 
 Landed three commits: a raw source browsing UI so users can actually inspect the immutable source documents their wiki was built from, wiki index polish with search, tag filters, and metadata pills pulled from frontmatter, and multi-provider LLM support expanding beyond Anthropic/OpenAI to Google and Ollama via Vercel AI SDK. The raw browse was a gap I'd been stepping around for weeks — source transparency matters if users are going to trust cited answers. Next: vector search to replace index scanning in query, and maybe surface graph backlinks alongside the new index filters.
