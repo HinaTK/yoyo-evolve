@@ -9,7 +9,7 @@
 
 use crate::commands_session::auto_compact_if_needed;
 use crate::format::*;
-use crate::prompt::{build_retry_prompt, format_changes, run_prompt, SessionChanges};
+use crate::prompt::{build_retry_prompt, format_changes, run_prompt, ChangeKind, SessionChanges};
 
 use yoagent::agent::Agent;
 use yoagent::*;
@@ -42,6 +42,43 @@ pub async fn handle_retry(
     }
 }
 
+// ── exit summary ─────────────────────────────────────────────────────────
+
+/// Returns a compact one-line summary of session changes for display on REPL
+/// exit, or `None` if no files were modified during the session.
+///
+/// Example output: `"Session: 3 files changed"`
+pub fn format_exit_summary(changes: &SessionChanges) -> Option<String> {
+    let snapshot = changes.snapshot();
+    if snapshot.is_empty() {
+        return None;
+    }
+    let n = snapshot.len();
+    let edits = snapshot
+        .iter()
+        .filter(|c| c.kind == ChangeKind::Edit)
+        .count();
+    let writes = snapshot
+        .iter()
+        .filter(|c| c.kind == ChangeKind::Write)
+        .count();
+
+    let mut parts = Vec::new();
+    if writes > 0 {
+        parts.push(format!("{writes} written"));
+    }
+    if edits > 0 {
+        parts.push(format!("{edits} edited"));
+    }
+
+    Some(format!(
+        "Session: {} {} changed ({})",
+        n,
+        pluralize(n, "file", "files"),
+        parts.join(", "),
+    ))
+}
+
 // ── /changes ─────────────────────────────────────────────────────────────
 
 pub fn handle_changes(changes: &SessionChanges) {
@@ -59,7 +96,6 @@ pub fn handle_changes(changes: &SessionChanges) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prompt::ChangeKind;
 
     #[test]
     fn test_handle_changes_empty_does_not_panic() {
@@ -75,5 +111,46 @@ mod tests {
         changes.record("src/cli.rs", ChangeKind::Edit);
         // Should not panic
         handle_changes(&changes);
+    }
+
+    #[test]
+    fn test_format_exit_summary_empty_returns_none() {
+        let changes = SessionChanges::new();
+        assert_eq!(format_exit_summary(&changes), None);
+    }
+
+    #[test]
+    fn test_format_exit_summary_single_write() {
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        let summary = format_exit_summary(&changes).unwrap();
+        assert_eq!(summary, "Session: 1 file changed (1 written)");
+    }
+
+    #[test]
+    fn test_format_exit_summary_single_edit() {
+        let changes = SessionChanges::new();
+        changes.record("src/cli.rs", ChangeKind::Edit);
+        let summary = format_exit_summary(&changes).unwrap();
+        assert_eq!(summary, "Session: 1 file changed (1 edited)");
+    }
+
+    #[test]
+    fn test_format_exit_summary_mixed() {
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        changes.record("src/cli.rs", ChangeKind::Edit);
+        changes.record("src/tools.rs", ChangeKind::Edit);
+        let summary = format_exit_summary(&changes).unwrap();
+        assert_eq!(summary, "Session: 3 files changed (1 written, 2 edited)");
+    }
+
+    #[test]
+    fn test_format_exit_summary_all_writes() {
+        let changes = SessionChanges::new();
+        changes.record("a.rs", ChangeKind::Write);
+        changes.record("b.rs", ChangeKind::Write);
+        let summary = format_exit_summary(&changes).unwrap();
+        assert_eq!(summary, "Session: 2 files changed (2 written)");
     }
 }

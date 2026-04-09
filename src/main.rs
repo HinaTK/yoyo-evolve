@@ -37,6 +37,7 @@
 
 mod cli;
 mod commands;
+mod commands_config;
 mod commands_dev;
 mod commands_file;
 mod commands_git;

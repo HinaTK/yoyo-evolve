@@ -1101,7 +1101,13 @@ pub async fn run_repl(
     // Auto-save session on exit (always — crash recovery for everyone)
     commands::auto_save_on_exit(agent);
 
-    println!("\n{DIM}  bye 👋{RESET}\n");
+    // Show session changes summary if any files were modified
+    if let Some(summary) = commands::format_exit_summary(&session_changes) {
+        println!("\n{DIM}  {summary}{RESET}");
+        println!("{DIM}  bye 👋{RESET}\n");
+    } else {
+        println!("\n{DIM}  bye 👋{RESET}\n");
+    }
 }
 
 /// Build content blocks from `/add` results, ensuring images always have
