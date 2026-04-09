@@ -20,7 +20,7 @@ One-time (cumulative — each tier includes all benefits below it):
 - $10: Above + shoutout issue (30 days)
 - $20: Above + SPONSORS.md eligible (30 days)
 - $50: Above + priority for 60 days + SPONSORS.md + README eligible
-- $1,200 💎 Genesis: All above + permanent priority + SPONSORS.md + README + journal acknowledgment (never expires)
+- $1,000 💎 Genesis: All above + permanent priority + SPONSORS.md + README + journal acknowledgment (never expires)
 
 ## Build & Test Commands
 

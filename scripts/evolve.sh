@@ -57,7 +57,7 @@ echo ""
 #   Monthly: $5→priority, $10→+shoutout, $25→+SPONSORS.md, $50→+README
 #   One-time: $2→1 accelerated run, $5→priority, $10→+shoutout (30d),
 #             $20→+SPONSORS.md (30d), $50→priority 60d+SPONSORS.md+README,
-#             $1200→💎 Genesis (permanent priority, SPONSORS.md, README, journal ack)
+#             $1000→💎 Genesis (permanent priority, SPONSORS.md, README, journal ack)
 SPONSOR_INFO_FILE="sponsors/sponsor_info.json"
 ACTIVE_FILE="sponsors/active.json"
 

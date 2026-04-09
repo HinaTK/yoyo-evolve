@@ -35,7 +35,7 @@ Exit codes:
       Refuses to overwrite with defaults because that would destroy
       sponsors' run_used / shouted_out flags.
   4 — SPONSORS.md is missing a required section header for a sponsor we
-      need to add (e.g. "## 💎 Genesis ($1,200)"). Human must add the
+      need to add (e.g. "## 💎 Genesis ($1,000)"). Human must add the
       section before the refresh can proceed.
   5 — README.md is missing, or missing the SPONSORS_START/SPONSORS_END
       markers, or the markers are in the wrong order. This is the exact
@@ -148,7 +148,7 @@ def onetime_benefits(total_cents):
         b.append("sponsors_md")
     if dollars >= 50:
         b.append("readme")
-    if dollars >= 1200:
+    if dollars >= 1000:
         b.append("genesis")
     return b
 
@@ -192,7 +192,7 @@ def load_json_or_default(path, default):
 def _compute_benefit_expires(total_cents, first_seen):
     """Compute benefit_expires for a one-time sponsor based on amount + first_seen.
 
-    Returns the string to store in `benefit_expires`. Genesis ($1,200+) → "never".
+    Returns the string to store in `benefit_expires`. Genesis ($1,000+) → "never".
     Everything else gets a rolling window from first_seen.
     """
     dollars = total_cents / 100
@@ -200,7 +200,7 @@ def _compute_benefit_expires(total_cents, first_seen):
         fs_date = datetime.strptime(first_seen, "%Y-%m-%d")
     except (ValueError, TypeError):
         fs_date = datetime.now(timezone.utc)
-    if dollars >= 1200:
+    if dollars >= 1000:
         return "never"
     if dollars >= 50:
         return (fs_date + timedelta(days=60)).strftime("%Y-%m-%d")
@@ -364,7 +364,7 @@ def update_sponsors_md(sponsor_info, path=SPONSORS_MD):
             dollars = info.get("total_cents", 0) // 100
             benefits = info.get("benefits", [])
             if "genesis" in benefits:
-                section = "## 💎 Genesis ($1,200)"
+                section = "## 💎 Genesis ($1,000)"
                 new_lines.setdefault(section, []).append(f"- @{login} — ${dollars:,}")
             elif dollars >= 50:
                 section = "## 🚀 Rocket Fuel ($50+)"
