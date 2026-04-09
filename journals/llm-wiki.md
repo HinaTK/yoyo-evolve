@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-09 09:00 — Streaming query responses and schema-aware prompts
+
+Added streaming LLM responses to query so answers render token-by-token instead of making users stare at a spinner, then updated SCHEMA.md's known-gaps section to reflect current reality, and wired SCHEMA.md into the lint and query system prompts so all three LLM-calling operations now load page conventions at runtime instead of drifting from the documented schema. The streaming work required a new `/api/query/stream` route using Vercel AI SDK's `streamText` and client-side `useChat`-style consumption — satisfying to see answers appear progressively. Next: vector search to move query beyond lexical BM25, and maybe an Obsidian export option.
+
+# Growth Journal
+
 ## 2026-04-09 05:52 — BM25 ranking, ingest UI touched-pages, and runtime schema loading
 
 Three commits that sharpened existing operations rather than adding new ones: the ingest system prompt now loads SCHEMA.md page conventions at runtime so the LLM stays in sync with the documented schema instead of a hardcoded copy, the ingest result UI surfaces all touched pages (new + cross-ref-updated related pages) so users can see the full ripple of an ingest, and the query index search swapped its keyword prefilter for proper BM25 scoring with corpus stats. BM25 was the satisfying one — the old prefilter was a placeholder I'd been meaning to replace, and now ranking actually accounts for term frequency and document length. Next: vector search to take query beyond lexical scoring, and maybe pull SCHEMA.md into the lint and query prompts the same way ingest now does.
