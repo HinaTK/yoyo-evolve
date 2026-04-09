@@ -454,7 +454,7 @@ See `mutants.toml` for the configuration and `docs/src/contributing/mutation-tes
 
 **💎 Genesis Sponsors:**
 
-<a href="https://github.com/zhenfund" title="@zhenfund — $1,000"><img src="https://github.com/zhenfund.png?size=160" width="80" height="80" alt="@zhenfund" /></a> **[@zhenfund](https://github.com/zhenfund)** — $1,000
+<a href="https://github.com/zhenfund" title="@zhenfund — $1,000"><img src="https://github.com/zhenfund.png?size=160" width="80" height="80" alt="@zhenfund" /></a>
 
 **🚀 Patron Sponsors ($50+):**
 
