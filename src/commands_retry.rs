@@ -153,4 +153,24 @@ mod tests {
         let summary = format_exit_summary(&changes).unwrap();
         assert_eq!(summary, "Session: 2 files changed (2 written)");
     }
+
+    // ── Tests moved from commands.rs — /changes command tests ────────
+
+    #[test]
+    fn test_changes_command_recognized() {
+        use crate::commands::{is_unknown_command, KNOWN_COMMANDS};
+        assert!(!is_unknown_command("/changes"));
+        assert!(
+            KNOWN_COMMANDS.contains(&"/changes"),
+            "/changes should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_changes_command_not_confused_with_other_commands() {
+        use crate::commands::is_unknown_command;
+        // /changes should match exactly, /changelog etc. should be unknown
+        assert!(is_unknown_command("/changelog"));
+        assert!(is_unknown_command("/changed"));
+    }
 }

@@ -1651,4 +1651,103 @@ mod tests {
 
         std::env::set_current_dir(old_dir).unwrap();
     }
+
+    // ── Tests moved from commands.rs — /add command tests ────────────
+
+    #[test]
+    fn test_add_command_recognized() {
+        use crate::commands::{is_unknown_command, KNOWN_COMMANDS};
+        assert!(!is_unknown_command("/add"));
+        assert!(!is_unknown_command("/add src/main.rs"));
+        assert!(
+            KNOWN_COMMANDS.contains(&"/add"),
+            "/add should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_add_in_help_text() {
+        use crate::help::help_text;
+        let text = help_text();
+        assert!(
+            text.contains("/add"),
+            "Help text should mention /add command"
+        );
+    }
+
+    #[test]
+    fn test_handle_add_no_args_returns_empty() {
+        let results = handle_add("/add");
+        assert!(results.is_empty(), "No args should return empty results");
+    }
+
+    #[test]
+    fn test_handle_add_with_space_no_args_returns_empty() {
+        let results = handle_add("/add   ");
+        assert!(
+            results.is_empty(),
+            "Whitespace-only args should return empty"
+        );
+    }
+
+    #[test]
+    fn test_handle_add_real_file() {
+        let root = env!("CARGO_MANIFEST_DIR");
+        let cargo_path = format!("{}/Cargo.toml", root);
+        let results = handle_add(&format!("/add {}", cargo_path));
+        assert_eq!(results.len(), 1, "Should return one result for Cargo.toml");
+        match &results[0] {
+            AddResult::Text { summary, content } => {
+                assert!(
+                    summary.contains("Cargo.toml"),
+                    "Summary should mention the file"
+                );
+                assert!(
+                    content.contains("[package]"),
+                    "Content should contain file text"
+                );
+            }
+            _ => panic!("Expected AddResult::Text for Cargo.toml"),
+        }
+    }
+
+    #[test]
+    fn test_handle_add_with_line_range() {
+        let root = env!("CARGO_MANIFEST_DIR");
+        let results = handle_add(&format!("/add {}/Cargo.toml:1-3", root));
+        assert_eq!(results.len(), 1);
+        match &results[0] {
+            AddResult::Text { summary, content } => {
+                assert!(
+                    summary.contains("lines 1-3"),
+                    "Summary should mention line range"
+                );
+                assert!(
+                    content.contains("```"),
+                    "Content should be wrapped in code fence"
+                );
+            }
+            _ => panic!("Expected AddResult::Text for line range"),
+        }
+    }
+
+    #[test]
+    fn test_handle_add_glob_pattern() {
+        let root = env!("CARGO_MANIFEST_DIR");
+        let results = handle_add(&format!("/add {}/src/*.rs", root));
+        assert!(results.len() > 1, "Should match multiple .rs files in src/");
+    }
+
+    #[test]
+    fn test_handle_add_nonexistent_file() {
+        let results = handle_add("/add nonexistent_xyz_file.rs");
+        assert!(results.is_empty(), "Nonexistent file should return empty");
+    }
+
+    #[test]
+    fn test_handle_add_multiple_files() {
+        let root = env!("CARGO_MANIFEST_DIR");
+        let results = handle_add(&format!("/add {}/Cargo.toml {}/LICENSE", root, root));
+        assert_eq!(results.len(), 2, "Should return results for both files");
+    }
 }

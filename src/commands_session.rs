@@ -1075,6 +1075,7 @@ pub fn clear_confirmation_message(message_count: usize, token_count: u64) -> Opt
 mod tests {
     use super::*;
     use crate::cli::AUTO_SAVE_SESSION_PATH;
+    use crate::commands::{is_unknown_command, KNOWN_COMMANDS};
 
     // ── compact thrash detection tests ────────────────────────────────────
 
@@ -1421,7 +1422,6 @@ mod tests {
 
     #[test]
     fn test_clear_force_in_known_commands() {
-        use crate::commands::KNOWN_COMMANDS;
         assert!(
             KNOWN_COMMANDS.contains(&"/clear!"),
             "/clear! should be in KNOWN_COMMANDS"
@@ -1775,5 +1775,229 @@ mod tests {
     fn test_stash_drop_invalid_index() {
         let result = handle_stash_drop("abc");
         assert!(result.contains("invalid"), "Should report invalid index");
+    }
+
+    // ── Tests moved from commands.rs — session command tests ──────────
+
+    #[test]
+    fn test_save_load_command_matching() {
+        // /save and /load should only match exact word or with space separator
+        // This tests the fix for /savefile being treated as /save
+        let save_matches = |s: &str| s == "/save" || s.starts_with("/save ");
+        let load_matches = |s: &str| s == "/load" || s.starts_with("/load ");
+
+        assert!(save_matches("/save"));
+        assert!(save_matches("/save myfile.json"));
+        assert!(!save_matches("/savefile"));
+        assert!(!save_matches("/saveXYZ"));
+
+        assert!(load_matches("/load"));
+        assert!(load_matches("/load myfile.json"));
+        assert!(!load_matches("/loadfile"));
+        assert!(!load_matches("/loadXYZ"));
+    }
+
+    #[test]
+    fn test_spawn_command_recognized() {
+        assert!(!is_unknown_command("/spawn"));
+        assert!(!is_unknown_command("/spawn read src/main.rs and summarize"));
+        assert!(
+            KNOWN_COMMANDS.contains(&"/spawn"),
+            "/spawn should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_spawn_command_matching() {
+        // /spawn should match exact or with space separator, not /spawning
+        let spawn_matches = |s: &str| s == "/spawn" || s.starts_with("/spawn ");
+        assert!(spawn_matches("/spawn"));
+        assert!(spawn_matches("/spawn read file"));
+        assert!(spawn_matches("/spawn analyze the codebase"));
+        assert!(!spawn_matches("/spawning"));
+        assert!(!spawn_matches("/spawnpoint"));
+    }
+
+    #[test]
+    fn test_parse_spawn_task_with_task() {
+        let task = parse_spawn_task("/spawn read src/main.rs and summarize");
+        assert_eq!(task, Some("read src/main.rs and summarize".to_string()));
+    }
+
+    #[test]
+    fn test_parse_spawn_task_empty() {
+        let task = parse_spawn_task("/spawn");
+        assert_eq!(task, None);
+    }
+
+    #[test]
+    fn test_parse_spawn_task_whitespace_only() {
+        let task = parse_spawn_task("/spawn   ");
+        assert_eq!(task, None);
+    }
+
+    #[test]
+    fn test_parse_spawn_task_preserves_full_task() {
+        let task = parse_spawn_task("/spawn analyze src/ and list all public functions");
+        assert_eq!(
+            task,
+            Some("analyze src/ and list all public functions".to_string())
+        );
+    }
+
+    #[test]
+    fn test_parse_spawn_args_basic() {
+        let args = parse_spawn_args("/spawn do something");
+        assert!(args.is_some());
+        let args = args.unwrap();
+        assert_eq!(args.task, "do something");
+        assert!(args.output_path.is_none());
+    }
+
+    #[test]
+    fn test_parse_spawn_args_with_output() {
+        let args = parse_spawn_args("/spawn -o out.md write a summary");
+        assert!(args.is_some());
+        let args = args.unwrap();
+        assert_eq!(args.task, "write a summary");
+        assert_eq!(args.output_path, Some("out.md".to_string()));
+    }
+
+    #[test]
+    fn test_parse_spawn_args_status() {
+        assert!(parse_spawn_args("/spawn status").is_none());
+    }
+
+    #[test]
+    fn test_mark_command_recognized() {
+        assert!(!is_unknown_command("/mark"));
+        assert!(!is_unknown_command("/mark checkpoint"));
+        assert!(
+            KNOWN_COMMANDS.contains(&"/mark"),
+            "/mark should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_jump_command_recognized() {
+        assert!(!is_unknown_command("/jump"));
+        assert!(!is_unknown_command("/jump checkpoint"));
+        assert!(
+            KNOWN_COMMANDS.contains(&"/jump"),
+            "/jump should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_marks_command_recognized() {
+        assert!(!is_unknown_command("/marks"));
+        assert!(
+            KNOWN_COMMANDS.contains(&"/marks"),
+            "/marks should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_parse_bookmark_name_with_name() {
+        let name = parse_bookmark_name("/mark checkpoint", "/mark");
+        assert_eq!(name, Some("checkpoint".to_string()));
+    }
+
+    #[test]
+    fn test_parse_bookmark_name_with_spaces() {
+        let name = parse_bookmark_name("/mark  my bookmark  ", "/mark");
+        assert_eq!(name, Some("my bookmark".to_string()));
+    }
+
+    #[test]
+    fn test_parse_bookmark_name_empty() {
+        let name = parse_bookmark_name("/mark", "/mark");
+        assert_eq!(name, None);
+    }
+
+    #[test]
+    fn test_parse_bookmark_name_whitespace_only() {
+        let name = parse_bookmark_name("/mark   ", "/mark");
+        assert_eq!(name, None);
+    }
+
+    #[test]
+    fn test_parse_bookmark_name_for_jump() {
+        let name = parse_bookmark_name("/jump start", "/jump");
+        assert_eq!(name, Some("start".to_string()));
+    }
+
+    #[test]
+    fn test_bookmarks_create_and_list() {
+        let mut bookmarks = Bookmarks::new();
+        assert!(bookmarks.is_empty());
+
+        bookmarks.insert("start".to_string(), "[]".to_string());
+        assert_eq!(bookmarks.len(), 1);
+        assert!(bookmarks.contains_key("start"));
+    }
+
+    #[test]
+    fn test_bookmarks_overwrite_same_name() {
+        let mut bookmarks = Bookmarks::new();
+        bookmarks.insert("checkpoint".to_string(), "[1]".to_string());
+        bookmarks.insert("checkpoint".to_string(), "[1,2]".to_string());
+        // Should still have just one entry
+        assert_eq!(bookmarks.len(), 1);
+        assert_eq!(bookmarks.get("checkpoint").unwrap(), "[1,2]");
+    }
+
+    #[test]
+    fn test_bookmarks_nonexistent_returns_none() {
+        let bookmarks = Bookmarks::new();
+        assert!(!bookmarks.contains_key("nonexistent"));
+    }
+
+    #[test]
+    fn test_bookmarks_multiple_entries() {
+        let mut bookmarks = Bookmarks::new();
+        bookmarks.insert("start".to_string(), "[]".to_string());
+        bookmarks.insert("middle".to_string(), "[1]".to_string());
+        bookmarks.insert("end".to_string(), "[1,2,3]".to_string());
+        assert_eq!(bookmarks.len(), 3);
+        assert!(bookmarks.contains_key("start"));
+        assert!(bookmarks.contains_key("middle"));
+        assert!(bookmarks.contains_key("end"));
+    }
+
+    #[test]
+    fn test_handle_marks_empty_does_not_panic() {
+        let bookmarks = Bookmarks::new();
+        // Should not panic — just prints a message
+        handle_marks(&bookmarks);
+    }
+
+    #[test]
+    fn test_handle_marks_with_entries_does_not_panic() {
+        let mut bookmarks = Bookmarks::new();
+        bookmarks.insert("alpha".to_string(), "[]".to_string());
+        bookmarks.insert("beta".to_string(), "[]".to_string());
+        // Should not panic
+        handle_marks(&bookmarks);
+    }
+
+    #[test]
+    fn test_mark_command_matching() {
+        // /mark should match exact or with space, not /marker
+        let mark_matches = |s: &str| s == "/mark" || s.starts_with("/mark ");
+        assert!(mark_matches("/mark"));
+        assert!(mark_matches("/mark checkpoint"));
+        assert!(!mark_matches("/marker"));
+        assert!(!mark_matches("/marking"));
+    }
+
+    #[test]
+    fn test_jump_command_matching() {
+        // /jump should match exact or with space
+        let jump_matches = |s: &str| s == "/jump" || s.starts_with("/jump ");
+        assert!(jump_matches("/jump"));
+        assert!(jump_matches("/jump checkpoint"));
+        assert!(!jump_matches("/jumping"));
+        assert!(!jump_matches("/jumped"));
     }
 }

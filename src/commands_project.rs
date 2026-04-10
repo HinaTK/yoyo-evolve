@@ -1786,4 +1786,65 @@ mod tests {
         assert!(prompt.contains("Files to examine"));
         assert!(prompt.contains("Step-by-step"));
     }
+
+    // ── Tests moved from commands.rs — /docs and /plan command tests ─
+
+    #[test]
+    fn test_docs_command_recognized() {
+        use crate::commands::{is_unknown_command, KNOWN_COMMANDS};
+        assert!(!is_unknown_command("/docs"));
+        assert!(!is_unknown_command("/docs serde"));
+        assert!(!is_unknown_command("/docs tokio"));
+        assert!(
+            KNOWN_COMMANDS.contains(&"/docs"),
+            "/docs should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_docs_command_matching() {
+        // /docs should match exact or with space, not /docstring etc.
+        let docs_matches = |s: &str| s == "/docs" || s.starts_with("/docs ");
+        assert!(docs_matches("/docs"));
+        assert!(docs_matches("/docs serde"));
+        assert!(docs_matches("/docs tokio-runtime"));
+        assert!(!docs_matches("/docstring"));
+        assert!(!docs_matches("/docsify"));
+    }
+
+    #[test]
+    fn test_docs_crate_arg_extraction() {
+        let input = "/docs serde";
+        let crate_name = input.trim_start_matches("/docs ").trim();
+        assert_eq!(crate_name, "serde");
+
+        let input2 = "/docs tokio-runtime";
+        let crate_name2 = input2.trim_start_matches("/docs ").trim();
+        assert_eq!(crate_name2, "tokio-runtime");
+
+        // Bare /docs has empty after stripping
+        let input_bare = "/docs";
+        assert_eq!(input_bare, "/docs");
+        assert!(!input_bare.starts_with("/docs "));
+    }
+
+    #[test]
+    fn test_plan_in_known_commands() {
+        use crate::commands::KNOWN_COMMANDS;
+        assert!(
+            KNOWN_COMMANDS.contains(&"/plan"),
+            "/plan should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_plan_in_help_text() {
+        use crate::help::help_text;
+        let help = help_text();
+        assert!(help.contains("/plan"), "/plan should appear in help text");
+        assert!(
+            help.contains("architect"),
+            "Help text should mention architect mode"
+        );
+    }
 }

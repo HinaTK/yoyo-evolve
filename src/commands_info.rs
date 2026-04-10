@@ -142,3 +142,69 @@ pub fn handle_think_show(thinking: ThinkingLevel) {
     println!("{DIM}  thinking: {level_str}");
     println!("  usage: /think <off|minimal|low|medium|high>{RESET}\n");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use yoagent::provider::AnthropicProvider;
+    use yoagent::{Agent, Usage};
+
+    #[test]
+    fn test_tokens_display_labels() {
+        // Verify no panic with zero usage and empty conversation
+        let agent = Agent::new(AnthropicProvider)
+            .with_system_prompt("test")
+            .with_model("test-model")
+            .with_api_key("test-key");
+
+        let usage = Usage {
+            input: 0,
+            output: 0,
+            cache_read: 0,
+            cache_write: 0,
+            total_tokens: 0,
+        };
+
+        // Should not panic with zero usage and empty conversation
+        handle_tokens(&agent, &usage, "test-model");
+    }
+
+    #[test]
+    fn test_tokens_display_with_large_values() {
+        // Verify no panic with very large token counts
+        let agent = Agent::new(AnthropicProvider)
+            .with_system_prompt("test")
+            .with_model("test-model")
+            .with_api_key("test-key");
+
+        let usage = Usage {
+            input: 10_000_000,
+            output: 5_000_000,
+            cache_read: 3_000_000,
+            cache_write: 1_000_000,
+            total_tokens: 19_000_000,
+        };
+
+        // Should not panic with very large values
+        handle_tokens(&agent, &usage, "test-model");
+    }
+
+    #[test]
+    fn test_tokens_labels_are_clarified() {
+        // Source-level check: the function body should use the clarified labels
+        // from Issue #189, not the old confusing ones
+        let source = include_str!("commands_info.rs");
+        assert!(
+            source.contains("Active context:"),
+            "/tokens should use 'Active context:' header"
+        );
+        assert!(
+            source.contains("Session totals (all API calls):"),
+            "/tokens should use 'Session totals (all API calls):' header"
+        );
+        assert!(
+            source.contains("session totals below show full usage"),
+            "Compaction note should reference session totals"
+        );
+    }
+}
