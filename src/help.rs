@@ -604,7 +604,12 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
             "/changes — Show files modified during this session\n\n\
              Lists all files that were written or edited by the AI during\n\
              the current session. Useful for reviewing what the AI touched\n\
-             before committing.",
+             before committing.\n\n\
+             Flags:\n\
+             \x20 --diff    Show colorized git diff for each modified file\n\n\
+             Examples:\n\
+             \x20 /changes          List modified files\n\
+             \x20 /changes --diff   List files and show diffs",
         ),
         "web" => Some(
             "/web <url> — Fetch and display web page content\n\n\
@@ -743,7 +748,7 @@ pub fn help_text() -> String {
         "  /jump <name>       Restore conversation to a bookmark (discards messages after it)\n",
     );
     out.push_str("  /marks             List all saved bookmarks\n");
-    out.push_str("  /changes           Show files modified (written/edited) during this session\n");
+    out.push_str("  /changes [--diff]  Show files modified (written/edited) during this session\n");
     out.push_str(
         "  /export [path]     Export conversation as readable markdown (default: conversation.md)\n",
     );

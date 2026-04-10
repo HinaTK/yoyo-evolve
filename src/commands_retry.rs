@@ -9,6 +9,7 @@
 
 use crate::commands_session::auto_compact_if_needed;
 use crate::format::*;
+use crate::git::{colorize_diff, run_git};
 use crate::prompt::{build_retry_prompt, format_changes, run_prompt, ChangeKind, SessionChanges};
 
 use yoagent::agent::Agent;
@@ -81,15 +82,61 @@ pub fn format_exit_summary(changes: &SessionChanges) -> Option<String> {
 
 // ── /changes ─────────────────────────────────────────────────────────────
 
-pub fn handle_changes(changes: &SessionChanges) {
+/// Returns `true` if the raw `/changes` input contains the `--diff` flag.
+fn wants_diff(input: &str) -> bool {
+    input
+        .split_whitespace()
+        .skip(1) // skip "/changes" itself
+        .any(|arg| arg == "--diff")
+}
+
+/// Collect colorized git diffs for the given file paths.
+///
+/// For each file we try both unstaged (`git diff`) and staged
+/// (`git diff --cached`) so we catch changes regardless of staging state.
+fn collect_diffs(paths: &[String]) -> String {
+    let mut out = String::new();
+    for path in paths {
+        // Try unstaged diff first, then staged
+        let unstaged = run_git(&["diff", "--", path]).unwrap_or_default();
+        let staged = run_git(&["diff", "--cached", "--", path]).unwrap_or_default();
+
+        let combined = match (unstaged.is_empty(), staged.is_empty()) {
+            (false, false) => format!("{unstaged}\n{staged}"),
+            (false, true) => unstaged,
+            (true, false) => staged,
+            (true, true) => String::new(),
+        };
+
+        if combined.is_empty() {
+            out.push_str(&format!("    {DIM}({path}: no diff available){RESET}\n"));
+        } else {
+            out.push_str(&colorize_diff(&combined));
+            out.push('\n');
+        }
+    }
+    out
+}
+
+pub fn handle_changes(changes: &SessionChanges, input: &str) {
     let output = format_changes(changes);
     if output.is_empty() {
         println!("{DIM}  No files modified yet this session.");
         println!(
             "  Files touched by write_file or edit_file tool calls will appear here.{RESET}\n"
         );
-    } else {
-        println!("{DIM}{output}{RESET}");
+        return;
+    }
+
+    println!("{DIM}{output}{RESET}");
+
+    if wants_diff(input) {
+        let snapshot = changes.snapshot();
+        let paths: Vec<String> = snapshot.iter().map(|c| c.path.clone()).collect();
+        let diffs = collect_diffs(&paths);
+        if !diffs.is_empty() {
+            println!("{diffs}");
+        }
     }
 }
 
@@ -101,7 +148,7 @@ mod tests {
     fn test_handle_changes_empty_does_not_panic() {
         let changes = SessionChanges::new();
         // Should not panic — just prints a message
-        handle_changes(&changes);
+        handle_changes(&changes, "/changes");
     }
 
     #[test]
@@ -110,7 +157,31 @@ mod tests {
         changes.record("src/main.rs", ChangeKind::Write);
         changes.record("src/cli.rs", ChangeKind::Edit);
         // Should not panic
-        handle_changes(&changes);
+        handle_changes(&changes, "/changes");
+    }
+
+    #[test]
+    fn test_handle_changes_diff_flag_does_not_panic() {
+        let changes = SessionChanges::new();
+        // Empty session with --diff should not panic
+        handle_changes(&changes, "/changes --diff");
+    }
+
+    #[test]
+    fn test_handle_changes_diff_flag_with_entries_does_not_panic() {
+        let changes = SessionChanges::new();
+        changes.record("src/main.rs", ChangeKind::Write);
+        // With files and --diff — may not produce real diffs in test env, but shouldn't panic
+        handle_changes(&changes, "/changes --diff");
+    }
+
+    #[test]
+    fn test_wants_diff_flag_parsing() {
+        assert!(!wants_diff("/changes"));
+        assert!(wants_diff("/changes --diff"));
+        assert!(wants_diff("/changes   --diff"));
+        assert!(!wants_diff("/changes --dif"));
+        assert!(!wants_diff("/changes --verbose"));
     }
 
     #[test]

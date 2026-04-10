@@ -604,8 +604,8 @@ pub async fn run_repl(
                 commands::handle_marks(&bookmarks);
                 continue;
             }
-            "/changes" => {
-                commands::handle_changes(&session_changes);
+            s if s == "/changes" || s.starts_with("/changes ") => {
+                commands::handle_changes(&session_changes, input);
                 continue;
             }
             s if s == "/export" || s.starts_with("/export ") => {
