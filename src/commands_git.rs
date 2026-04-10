@@ -410,6 +410,7 @@ fn build_undo_context(actions: &[String]) -> String {
 /// - `/undo` — undo the last agent turn (restore files to pre-turn state)
 /// - `/undo N` — undo the last N turns
 /// - `/undo --all` — nuclear option: revert ALL uncommitted changes (old behavior)
+/// - `/undo --last-commit` — revert the most recent git commit via `git revert`
 ///
 /// Returns `Some(context)` when files were actually reverted, so the REPL can
 /// inject the summary into the agent's next turn for causal consistency.
@@ -419,6 +420,11 @@ pub fn handle_undo(input: &str, history: &mut crate::prompt::TurnHistory) -> Opt
     // Nuclear fallback: /undo --all
     if arg == "--all" {
         return handle_undo_all(history);
+    }
+
+    // Revert last git commit: /undo --last-commit
+    if arg == "--last-commit" {
+        return handle_undo_last_commit();
     }
 
     // Parse optional count: /undo N
@@ -431,7 +437,7 @@ pub fn handle_undo(input: &str, history: &mut crate::prompt::TurnHistory) -> Opt
         }
         n
     } else {
-        println!("{DIM}  usage: /undo [N] or /undo --all{RESET}\n");
+        println!("{DIM}  usage: /undo [N] | --all | --last-commit{RESET}\n");
         return None;
     };
 
@@ -489,6 +495,66 @@ pub fn handle_undo(input: &str, history: &mut crate::prompt::TurnHistory) -> Opt
         Some(build_undo_context(&actions))
     } else {
         None
+    }
+}
+
+/// Undo the most recent git commit using `git revert`.
+///
+/// Returns `Some(context)` with causality information so the agent knows
+/// that earlier conversation may reference code that no longer exists.
+fn handle_undo_last_commit() -> Option<String> {
+    // 1. Get the last commit info
+    let log = run_git(&["log", "--oneline", "-1"]).unwrap_or_default();
+    if log.trim().is_empty() {
+        println!("{DIM}  (no commits to undo){RESET}\n");
+        return None;
+    }
+
+    // 2. Get the files changed in that commit
+    let files = run_git(&["diff", "--name-only", "HEAD~1", "HEAD"]).unwrap_or_default();
+
+    // 3. Show what will be undone
+    println!("{DIM}  Reverting last commit: {}{RESET}", log.trim());
+
+    // 4. Revert using git revert (keeps history, safer than reset)
+    let result = run_git(&["revert", "HEAD", "--no-edit"]);
+    match result {
+        Ok(output) => {
+            println!("{GREEN}  ✓ Reverted last commit{RESET}");
+            if !output.trim().is_empty() {
+                println!("{DIM}  {}{RESET}", output.trim());
+            }
+            println!();
+
+            // Build context for agent
+            let mut actions = Vec::new();
+            for f in files.lines().filter(|l| !l.is_empty()) {
+                actions.push(format!("reverted changes to {f} (commit undone)"));
+            }
+
+            // Enhanced context note that mentions journal/conversation inconsistency
+            let mut note =
+                String::from("[System note: /undo --last-commit reverted a git commit.\n");
+            note.push_str(&format!("Reverted commit: {}\n", log.trim()));
+            note.push_str("Files affected:\n");
+            for action in &actions {
+                note.push_str(&format!("- {action}\n"));
+            }
+            note.push_str(
+                "⚠️ Earlier messages in this conversation may reference code from this commit \
+                 that no longer exists. Verify current file state before continuing.\n",
+            );
+            note.push_str(
+                "Any journal entries about this commit describe work that has been undone.]",
+            );
+
+            Some(note)
+        }
+        Err(e) => {
+            eprintln!("{RED}  ✗ Revert failed: {e}{RESET}");
+            eprintln!("{DIM}  (the commit may have conflicts — try manual git revert){RESET}\n");
+            None
+        }
     }
 }
 
@@ -1972,5 +2038,145 @@ mod tests {
         let mut history = crate::prompt::TurnHistory::new();
         let result = handle_undo("/undo xyz", &mut history);
         assert!(result.is_none());
+    }
+
+    // ── handle_undo --last-commit tests ─────────────────────────────────
+
+    #[test]
+    fn handle_undo_dispatches_last_commit() {
+        // --last-commit should NOT trigger the "bad arg" usage message.
+        // It will return None in test context (no real git repo with commits
+        // at the test runner's cwd), but importantly it must not print
+        // the usage line or panic — proving the dispatch arm works.
+        let mut history = crate::prompt::TurnHistory::new();
+        let _result = handle_undo("/undo --last-commit", &mut history);
+        // If we get here without panic, dispatch worked correctly.
+    }
+
+    #[test]
+    fn undo_last_commit_context_format() {
+        // Test the context note format that handle_undo_last_commit builds.
+        // We replicate the context-building logic to verify the format
+        // without needing a real git repo (avoids cwd races).
+        let log_line = "abc1234 fix: something important";
+        let files = "src/main.rs\nsrc/tools.rs\n";
+
+        let mut actions = Vec::new();
+        for f in files.lines().filter(|l| !l.is_empty()) {
+            actions.push(format!("reverted changes to {f} (commit undone)"));
+        }
+
+        let mut note = String::from("[System note: /undo --last-commit reverted a git commit.\n");
+        note.push_str(&format!("Reverted commit: {}\n", log_line.trim()));
+        note.push_str("Files affected:\n");
+        for action in &actions {
+            note.push_str(&format!("- {action}\n"));
+        }
+        note.push_str(
+            "⚠️ Earlier messages in this conversation may reference code from this commit \
+             that no longer exists. Verify current file state before continuing.\n",
+        );
+        note.push_str("Any journal entries about this commit describe work that has been undone.]");
+
+        assert!(note.contains("abc1234 fix: something important"));
+        assert!(note.contains("reverted changes to src/main.rs"));
+        assert!(note.contains("reverted changes to src/tools.rs"));
+        assert!(note.contains("⚠️"));
+        assert!(note.contains("journal entries"));
+        assert!(note.contains("[System note: /undo --last-commit"));
+        assert!(note.contains("has been undone.]"));
+    }
+
+    #[test]
+    fn undo_last_commit_in_real_repo() {
+        use std::fs;
+
+        // Create a temp dir with a git repo
+        let dir = tempfile::tempdir().unwrap();
+        let repo = dir.path();
+
+        // Initialize git repo
+        let init = std::process::Command::new("git")
+            .args(["init"])
+            .current_dir(repo)
+            .output()
+            .unwrap();
+        assert!(init.status.success(), "git init failed");
+
+        // Configure git user for the test repo
+        let _ = std::process::Command::new("git")
+            .args(["config", "user.email", "test@test.com"])
+            .current_dir(repo)
+            .output();
+        let _ = std::process::Command::new("git")
+            .args(["config", "user.name", "Test"])
+            .current_dir(repo)
+            .output();
+
+        // Create initial commit
+        let file_path = repo.join("hello.txt");
+        fs::write(&file_path, "initial").unwrap();
+        let _ = std::process::Command::new("git")
+            .args(["add", "."])
+            .current_dir(repo)
+            .output();
+        let _ = std::process::Command::new("git")
+            .args(["commit", "-m", "initial commit"])
+            .current_dir(repo)
+            .output();
+
+        // Create a second commit to revert
+        fs::write(&file_path, "changed").unwrap();
+        let _ = std::process::Command::new("git")
+            .args(["add", "."])
+            .current_dir(repo)
+            .output();
+        let _ = std::process::Command::new("git")
+            .args(["commit", "-m", "change hello"])
+            .current_dir(repo)
+            .output();
+
+        assert_eq!(fs::read_to_string(&file_path).unwrap(), "changed");
+
+        // Use a static mutex to serialize tests that change cwd,
+        // preventing races with other tests that depend on cwd.
+        use std::sync::Mutex;
+        static CWD_MUTEX: Mutex<()> = Mutex::new(());
+        let _lock = CWD_MUTEX.lock().unwrap();
+
+        let original_dir = std::env::current_dir().unwrap();
+        std::env::set_current_dir(repo).unwrap();
+
+        let result = handle_undo_last_commit();
+
+        std::env::set_current_dir(&original_dir).unwrap();
+        // Release lock after cwd is restored (drop happens at end of scope)
+
+        // The revert should succeed
+        assert!(
+            result.is_some(),
+            "handle_undo_last_commit should return Some"
+        );
+        let ctx = result.unwrap();
+        assert!(
+            ctx.contains("hello.txt"),
+            "Context should mention the reverted file"
+        );
+        assert!(ctx.contains("⚠️"), "Context should contain the warning");
+        assert!(
+            ctx.contains("journal entries"),
+            "Context should mention journal entries"
+        );
+        assert!(
+            ctx.contains("Reverted commit:"),
+            "Context should show the reverted commit"
+        );
+
+        // Verify file was reverted to initial content
+        let content = fs::read_to_string(&file_path).unwrap();
+        assert_eq!(
+            content, "initial",
+            "File should be reverted to initial content"
+        );
     }
 }

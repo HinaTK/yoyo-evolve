@@ -301,14 +301,19 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              Usage:\n\
              \x20 /undo              Undo the last turn (restore modified files)\n\
              \x20 /undo N            Undo the last N turns\n\
-             \x20 /undo --all        Revert ALL uncommitted changes (nuclear option)\n\n\
+             \x20 /undo --all        Revert ALL uncommitted changes (nuclear option)\n\
+             \x20 /undo --last-commit  Revert the most recent git commit (git revert)\n\n\
              Per-turn undo restores files to their state before the agent modified\n\
              them and deletes any files the agent created. Each agent turn is tracked\n\
              as a separate snapshot so you can undo precisely.\n\n\
+             --last-commit uses `git revert` to safely undo a committed change while\n\
+             preserving history. It also injects context so the agent knows earlier\n\
+             conversation may reference code that no longer exists.\n\n\
              Examples:\n\
              \x20 /undo              Undo just the last thing the agent did\n\
              \x20 /undo 3            Undo the last 3 agent turns\n\
-             \x20 /undo --all        Git checkout everything (old behavior)",
+             \x20 /undo --all        Git checkout everything (old behavior)\n\
+             \x20 /undo --last-commit  Revert the last git commit",
         ),
         "health" => Some(
             "/health — Run project health checks\n\n\
@@ -764,7 +769,7 @@ pub fn help_text() -> String {
     out.push_str("  ── Git ──\n");
     out.push_str("  /git <subcmd>      Quick git: status, log, add, diff, branch, stash\n");
     out.push_str("  /diff [opts] [file] Show git changes (--staged, --name-only, file filter)\n");
-    out.push_str("  /undo [N|--all]    Undo last turn's changes (or all uncommitted)\n");
+    out.push_str("  /undo [N|--all|--last-commit] Undo changes (turn, all, or last commit)\n");
     out.push_str("  /commit [msg]      Commit staged changes (AI-generates message if no msg)\n");
     out.push_str("  /pr [number]       List open PRs, view, diff, comment, or checkout a PR\n");
     out.push_str(
@@ -939,7 +944,7 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "todo" => Some("Track tasks (add, done, remove, clear)"),
         "tokens" => Some("Show token usage and context window"),
         "tree" => Some("Show project directory tree"),
-        "undo" => Some("Undo last turn's changes"),
+        "undo" => Some("Undo last turn's changes, all uncommitted, or last commit"),
         "update" => Some("Check for and install the latest version"),
         "version" => Some("Show yoyo version"),
         "watch" => Some("Auto-run command after file changes"),

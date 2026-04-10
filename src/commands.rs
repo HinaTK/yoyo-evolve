@@ -134,7 +134,7 @@ pub const GIT_SUBCOMMANDS: &[&str] = &["status", "log", "add", "diff", "branch",
 pub const PR_SUBCOMMANDS: &[&str] = &["list", "view", "diff", "comment", "create", "checkout"];
 
 /// Undo option names for `/undo <Tab>` completion.
-pub const UNDO_OPTIONS: &[&str] = &["--all"];
+pub const UNDO_OPTIONS: &[&str] = &["--all", "--last-commit"];
 
 /// Refactor subcommand names for `/refactor <Tab>` completion.
 pub const REFACTOR_SUBCOMMANDS: &[&str] = &["rename", "extract", "move"];
