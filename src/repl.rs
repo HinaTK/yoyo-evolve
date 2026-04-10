@@ -1100,6 +1100,22 @@ pub async fn run_repl(
             }
         }
 
+        // ── Auto-commit: stage and commit if flag is on and files changed ─────
+        if agent_config.auto_commit && files_modified {
+            let _ = run_git(&["add", "-A"]);
+            if let Some(diff) = get_staged_diff() {
+                if !diff.trim().is_empty() {
+                    let msg = generate_commit_message(&diff);
+                    let (ok, output) = run_git_commit(&msg);
+                    if ok {
+                        eprintln!("{GREEN}  ✓ Auto-committed: {}{RESET}", output.trim());
+                    } else {
+                        eprintln!("{DIM}  (auto-commit failed: {}){RESET}", output.trim());
+                    }
+                }
+            }
+        }
+
         // Auto-compact when context window is getting full
         auto_compact_if_needed(agent);
     }

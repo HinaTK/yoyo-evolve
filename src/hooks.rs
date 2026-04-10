@@ -408,6 +408,8 @@ pub fn maybe_hook(tool: Box<dyn AgentTool>, hooks: &Arc<HookRegistry>) -> Box<dy
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::format::TOOL_OUTPUT_MAX_CHARS;
+    use crate::tools::build_tools;
     use std::sync::atomic::Ordering;
 
     #[test]
@@ -827,5 +829,48 @@ mod tests {
         let params = serde_json::json!({"command": "ls -la"});
         let result = hook.pre_execute("bash", &params);
         assert_eq!(result, Ok(None), "Env vars should be set and non-empty");
+    }
+
+    // ── Tests relocated from main.rs ──────────────────────────────────
+
+    #[test]
+    fn test_maybe_hook_skips_wrap_when_empty() {
+        // With an empty registry, maybe_hook should return the tool as-is (no HookedTool wrapper)
+        let perms = crate::config::PermissionConfig::default();
+        let dirs = crate::config::DirectoryRestrictions::default();
+        // Build with audit=false => hooks is empty => tools are NOT wrapped
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        assert_eq!(tools.len(), 8, "Tool count should be 8 without audit hooks");
+    }
+
+    #[test]
+    fn test_build_tools_with_audit_preserves_tool_count() {
+        // With audit=true, tool count stays the same (tools are wrapped, not added)
+        let perms = crate::config::PermissionConfig::default();
+        let dirs = crate::config::DirectoryRestrictions::default();
+        let tools_no_audit = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        let tools_with_audit =
+            build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, true, vec![]);
+        assert_eq!(
+            tools_no_audit.len(),
+            tools_with_audit.len(),
+            "Audit hooks should wrap tools, not add new ones"
+        );
+    }
+
+    #[test]
+    fn test_build_tools_with_audit_preserves_tool_names() {
+        // Tool names should be identical with or without audit
+        let perms = crate::config::PermissionConfig::default();
+        let dirs = crate::config::DirectoryRestrictions::default();
+        let tools_no_audit = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        let tools_with_audit =
+            build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, true, vec![]);
+        let names_no: Vec<&str> = tools_no_audit.iter().map(|t| t.name()).collect();
+        let names_yes: Vec<&str> = tools_with_audit.iter().map(|t| t.name()).collect();
+        assert_eq!(
+            names_no, names_yes,
+            "Tool names should be identical with/without audit"
+        );
     }
 }

@@ -767,6 +767,7 @@ fn clone_agent_config(config: &crate::AgentConfig) -> crate::AgentConfig {
         temperature: config.temperature,
         max_turns: config.max_turns,
         auto_approve: config.auto_approve,
+        auto_commit: false,
         permissions: config.permissions.clone(),
         dir_restrictions: config.dir_restrictions.clone(),
         context_strategy: config.context_strategy,

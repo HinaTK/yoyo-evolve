@@ -80,6 +80,7 @@ pub struct Config {
     pub mcp_server_configs: Vec<McpServerConfig>,
     pub openapi_specs: Vec<String>,
     pub auto_approve: bool,
+    pub auto_commit: bool,
     pub permissions: PermissionConfig,
     pub dir_restrictions: DirectoryRestrictions,
     pub context_strategy: ContextStrategy,
@@ -206,6 +207,10 @@ pub fn help_text() -> String {
     let _ = writeln!(
         s,
         "  --yes, -y         Auto-approve all tool executions (skip confirmation prompts)"
+    );
+    let _ = writeln!(
+        s,
+        "  --auto-commit     Auto-commit file changes after each agent turn"
     );
     let _ = writeln!(
         s,
@@ -542,6 +547,7 @@ const KNOWN_FLAGS: &[&str] = &[
     "-c",
     "--fallback",
     "--audit",
+    "--auto-commit",
     "--print-system-prompt",
     "--help",
     "-h",
@@ -1081,6 +1087,8 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
 
     let auto_approve = args.iter().any(|a| a == "--yes" || a == "-y");
 
+    let auto_commit = args.iter().any(|a| a == "--auto-commit");
+
     let no_update_check = args.iter().any(|a| a == "--no-update-check")
         || std::env::var("YOYO_NO_UPDATE_CHECK")
             .map(|v| v == "1")
@@ -1235,6 +1243,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         mcp_server_configs,
         openapi_specs,
         auto_approve,
+        auto_commit,
         permissions,
         dir_restrictions,
         context_strategy,
@@ -3238,5 +3247,31 @@ command = "server-two"
         let empty = std::collections::HashMap::new();
         let result = parse_numeric_flag::<usize>(&args, "--max-turns", &empty, "max_turns");
         assert_eq!(result, Some(25));
+    }
+
+    #[test]
+    fn test_auto_commit_flag_default_false() {
+        // When --auto-commit is not passed, auto_commit should default to false
+        let args = vec!["yoyo".to_string(), "-p".to_string(), "hello".to_string()];
+        std::env::set_var("ANTHROPIC_API_KEY", "test-key");
+        let config = parse_args(&args).unwrap();
+        assert!(!config.auto_commit, "auto_commit should default to false");
+    }
+
+    #[test]
+    fn test_auto_commit_flag_parsed() {
+        // When --auto-commit is passed, auto_commit should be true
+        let args = vec![
+            "yoyo".to_string(),
+            "--auto-commit".to_string(),
+            "-p".to_string(),
+            "hello".to_string(),
+        ];
+        std::env::set_var("ANTHROPIC_API_KEY", "test-key");
+        let config = parse_args(&args).unwrap();
+        assert!(
+            config.auto_commit,
+            "auto_commit should be true when --auto-commit is passed"
+        );
     }
 }

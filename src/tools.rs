@@ -1526,6 +1526,10 @@ pub(crate) fn build_sub_agent_tool(config: &AgentConfig) -> SubAgentTool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::commands_refactor;
+    use serial_test::serial;
+    use std::time::Duration;
+    use yoagent::ThinkingLevel;
 
     #[test]
     fn test_analyze_rm_rf_root() {
@@ -1677,5 +1681,827 @@ mod tests {
 
         let reason = analyze_bash_command("DROP TABLE users").unwrap();
         assert!(reason.contains("DROP TABLE") || reason.contains("Database"));
+    }
+
+    // ── Tests relocated from main.rs ──────────────────────────────────
+
+    /// Helper to create a default AgentConfig for tests, varying only the provider.
+    fn test_agent_config(provider: &str, model: &str) -> AgentConfig {
+        AgentConfig {
+            model: model.to_string(),
+            api_key: "test-key".to_string(),
+            provider: provider.to_string(),
+            base_url: None,
+            skills: yoagent::skills::SkillSet::empty(),
+            system_prompt: "Test prompt.".to_string(),
+            thinking: ThinkingLevel::Off,
+            max_tokens: None,
+            temperature: None,
+            max_turns: None,
+            auto_approve: true,
+            auto_commit: false,
+            permissions: cli::PermissionConfig::default(),
+            dir_restrictions: cli::DirectoryRestrictions::default(),
+            context_strategy: cli::ContextStrategy::default(),
+            context_window: None,
+            shell_hooks: vec![],
+            fallback_provider: None,
+            fallback_model: None,
+        }
+    }
+
+    #[test]
+    fn test_build_tools_returns_eight_tools() {
+        // build_tools should return 8 tools regardless of auto_approve (in non-terminal: no ask_user)
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools_approved = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        let tools_confirm = build_tools(false, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        assert_eq!(tools_approved.len(), 8);
+        assert_eq!(tools_confirm.len(), 8);
+    }
+
+    #[test]
+    fn test_build_sub_agent_tool_returns_correct_name() {
+        let config = test_agent_config("anthropic", "claude-sonnet-4-20250514");
+        let tool = build_sub_agent_tool(&config);
+        assert_eq!(tool.name(), "sub_agent");
+    }
+
+    #[test]
+    fn test_build_sub_agent_tool_has_task_parameter() {
+        let config = test_agent_config("anthropic", "claude-sonnet-4-20250514");
+        let tool = build_sub_agent_tool(&config);
+        let schema = tool.parameters_schema();
+        assert!(
+            schema["properties"]["task"].is_object(),
+            "Should have 'task' parameter"
+        );
+        assert!(schema["required"]
+            .as_array()
+            .unwrap()
+            .contains(&serde_json::json!("task")));
+    }
+
+    #[test]
+    fn test_build_sub_agent_tool_all_providers() {
+        // All provider paths should build without panic
+        let _tool_anthropic =
+            build_sub_agent_tool(&test_agent_config("anthropic", "claude-sonnet-4-20250514"));
+        let _tool_google = build_sub_agent_tool(&test_agent_config("google", "gemini-2.0-flash"));
+        let _tool_openai = build_sub_agent_tool(&test_agent_config("openai", "gpt-4o"));
+        let _tool_bedrock = build_sub_agent_tool(&test_agent_config(
+            "bedrock",
+            "anthropic.claude-sonnet-4-20250514-v1:0",
+        ));
+    }
+
+    #[test]
+    fn test_build_sub_agent_tool_inherits_dir_restrictions() {
+        // Sub-agent should inherit directory restrictions from parent config
+        let mut config = test_agent_config("anthropic", "claude-sonnet-4-20250514");
+        config.dir_restrictions = cli::DirectoryRestrictions {
+            allow: vec!["./src".to_string()],
+            deny: vec!["/etc".to_string()],
+        };
+        // Should build without panic — restrictions are applied to file tools
+        let tool = build_sub_agent_tool(&config);
+        assert_eq!(tool.name(), "sub_agent");
+    }
+
+    #[test]
+    fn test_build_sub_agent_tool_no_restrictions_still_works() {
+        // Empty restrictions shouldn't break sub-agent building
+        let config = test_agent_config("anthropic", "claude-sonnet-4-20250514");
+        assert!(config.dir_restrictions.is_empty());
+        let tool = build_sub_agent_tool(&config);
+        assert_eq!(tool.name(), "sub_agent");
+    }
+
+    #[test]
+    fn test_build_tools_count_unchanged_with_sub_agent() {
+        // Verify build_tools still returns exactly 8 — SubAgentTool is added via with_sub_agent
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        assert_eq!(
+            tools.len(),
+            8,
+            "build_tools must stay at 8 — SubAgentTool is added via with_sub_agent"
+        );
+    }
+
+    // === File operation confirmation tests ===
+
+    #[test]
+    fn test_describe_write_file_operation() {
+        let params = serde_json::json!({
+            "path": "src/main.rs",
+            "content": "line1\nline2\nline3\n"
+        });
+        let desc = describe_file_operation("write_file", &params);
+        assert!(desc.contains("write:"));
+        assert!(desc.contains("src/main.rs"));
+        assert!(desc.contains("3 lines")); // Rust's .lines() strips trailing newline
+    }
+
+    #[test]
+    fn test_describe_write_file_empty_content() {
+        let params = serde_json::json!({
+            "path": "empty.txt",
+            "content": ""
+        });
+        let desc = describe_file_operation("write_file", &params);
+        assert!(desc.contains("write:"));
+        assert!(desc.contains("empty.txt"));
+        assert!(
+            desc.contains("EMPTY content"),
+            "Empty content should show warning, got: {desc}"
+        );
+    }
+
+    #[test]
+    fn test_describe_write_file_missing_content() {
+        // When the content key is entirely absent (model bug), treat as empty
+        let params = serde_json::json!({
+            "path": "missing.txt"
+        });
+        let desc = describe_file_operation("write_file", &params);
+        assert!(desc.contains("write:"));
+        assert!(desc.contains("missing.txt"));
+        assert!(
+            desc.contains("EMPTY content"),
+            "Missing content should show warning, got: {desc}"
+        );
+    }
+
+    #[test]
+    fn test_describe_write_file_normal_content() {
+        // Normal write_file should NOT show the empty warning
+        let params = serde_json::json!({
+            "path": "hello.txt",
+            "content": "hello world\n"
+        });
+        let desc = describe_file_operation("write_file", &params);
+        assert!(desc.contains("write:"));
+        assert!(desc.contains("hello.txt"));
+        assert!(desc.contains("1 line"));
+        assert!(
+            !desc.contains("EMPTY"),
+            "Non-empty content should not show warning, got: {desc}"
+        );
+    }
+
+    #[test]
+    fn test_describe_edit_file_operation() {
+        let params = serde_json::json!({
+            "path": "src/cli.rs",
+            "old_text": "old line 1\nold line 2",
+            "new_text": "new line 1\nnew line 2\nnew line 3"
+        });
+        let desc = describe_file_operation("edit_file", &params);
+        assert!(desc.contains("edit:"));
+        assert!(desc.contains("src/cli.rs"));
+        assert!(desc.contains("2 → 3 lines"));
+    }
+
+    #[test]
+    fn test_describe_edit_file_missing_params() {
+        let params = serde_json::json!({
+            "path": "test.rs"
+        });
+        let desc = describe_file_operation("edit_file", &params);
+        assert!(desc.contains("edit:"));
+        assert!(desc.contains("test.rs"));
+        assert!(desc.contains("0 → 0 lines"));
+    }
+
+    #[test]
+    fn test_describe_unknown_tool() {
+        let params = serde_json::json!({});
+        let desc = describe_file_operation("unknown_tool", &params);
+        assert!(desc.contains("unknown_tool"));
+    }
+
+    #[test]
+    fn test_confirm_file_operation_auto_approved_flag() {
+        // When always_approved is true, confirm should return true immediately
+        let flag = Arc::new(AtomicBool::new(true));
+        let perms = cli::PermissionConfig::default();
+        let result = confirm_file_operation("write: test.rs (5 lines)", "test.rs", &flag, &perms);
+        assert!(
+            result,
+            "Should auto-approve when always_approved flag is set"
+        );
+    }
+
+    #[test]
+    fn test_confirm_file_operation_with_allow_pattern() {
+        // Permission patterns should match file paths
+        let flag = Arc::new(AtomicBool::new(false));
+        let perms = cli::PermissionConfig {
+            allow: vec!["*.md".to_string()],
+            deny: vec![],
+        };
+        let result =
+            confirm_file_operation("write: README.md (10 lines)", "README.md", &flag, &perms);
+        assert!(result, "Should auto-approve paths matching allow pattern");
+    }
+
+    #[test]
+    fn test_confirm_file_operation_with_deny_pattern() {
+        // Denied patterns should block the operation
+        let flag = Arc::new(AtomicBool::new(false));
+        let perms = cli::PermissionConfig {
+            allow: vec![],
+            deny: vec!["*.key".to_string()],
+        };
+        let result =
+            confirm_file_operation("write: secrets.key (1 line)", "secrets.key", &flag, &perms);
+        assert!(!result, "Should deny paths matching deny pattern");
+    }
+
+    #[test]
+    fn test_confirm_file_operation_deny_overrides_allow() {
+        // Deny takes priority over allow
+        let flag = Arc::new(AtomicBool::new(false));
+        let perms = cli::PermissionConfig {
+            allow: vec!["*".to_string()],
+            deny: vec!["*.key".to_string()],
+        };
+        let result =
+            confirm_file_operation("write: secrets.key (1 line)", "secrets.key", &flag, &perms);
+        assert!(!result, "Deny should override allow");
+    }
+
+    #[test]
+    fn test_confirm_file_operation_allow_src_pattern() {
+        // Realistic pattern: allow all files under src/
+        let flag = Arc::new(AtomicBool::new(false));
+        let perms = cli::PermissionConfig {
+            allow: vec!["src/*".to_string()],
+            deny: vec![],
+        };
+        let result = confirm_file_operation(
+            "edit: src/main.rs (2 → 3 lines)",
+            "src/main.rs",
+            &flag,
+            &perms,
+        );
+        assert!(
+            result,
+            "Should auto-approve src/ files with 'src/*' pattern"
+        );
+    }
+
+    #[test]
+    fn test_build_tools_auto_approve_skips_confirmation() {
+        // When auto_approve is true, tools should not have ConfirmTool wrappers
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        assert_eq!(tools.len(), 8);
+        let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
+        assert!(names.contains(&"write_file"));
+        assert!(names.contains(&"edit_file"));
+        assert!(names.contains(&"bash"));
+    }
+
+    #[test]
+    fn test_build_tools_no_approve_includes_confirmation() {
+        // When auto_approve is false, write_file and edit_file should still have correct names
+        // (ConfirmTool delegates name() to inner tool)
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(false, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        assert_eq!(tools.len(), 8);
+        let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
+        assert!(names.contains(&"write_file"));
+        assert!(names.contains(&"edit_file"));
+        assert!(names.contains(&"bash"));
+        assert!(names.contains(&"read_file"));
+        assert!(names.contains(&"list_files"));
+        assert!(names.contains(&"search"));
+        assert!(names.contains(&"todo"));
+    }
+
+    #[test]
+    fn test_always_approved_shared_between_bash_and_file_tools() {
+        // Simulates: user says "always" on a bash prompt,
+        // subsequent file operations should auto-approve too.
+        // This test verifies the shared flag concept.
+        let always_approved = Arc::new(AtomicBool::new(false));
+        let bash_flag = Arc::clone(&always_approved);
+        let file_flag = Arc::clone(&always_approved);
+
+        // Initially, nothing is auto-approved
+        assert!(!bash_flag.load(Ordering::Relaxed));
+        assert!(!file_flag.load(Ordering::Relaxed));
+
+        // User says "always" on a bash command
+        bash_flag.store(true, Ordering::Relaxed);
+
+        // File tool should now see the flag as true
+        assert!(
+            file_flag.load(Ordering::Relaxed),
+            "File tool should see always_approved after bash 'always'"
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // StreamingBashTool tests
+    // -----------------------------------------------------------------------
+
+    /// Create a ToolContext for testing, with an optional on_update callback
+    /// that collects partial results.
+    fn test_tool_context(
+        updates: Option<Arc<tokio::sync::Mutex<Vec<yoagent::types::ToolResult>>>>,
+    ) -> yoagent::types::ToolContext {
+        let on_update: Option<yoagent::types::ToolUpdateFn> = updates.map(|u| {
+            Arc::new(move |result: yoagent::types::ToolResult| {
+                // Use try_lock to avoid blocking in sync callback
+                if let Ok(mut guard) = u.try_lock() {
+                    guard.push(result);
+                }
+            }) as yoagent::types::ToolUpdateFn
+        });
+        yoagent::types::ToolContext {
+            tool_call_id: "test-id".to_string(),
+            tool_name: "bash".to_string(),
+            cancel: tokio_util::sync::CancellationToken::new(),
+            on_update,
+            on_progress: None,
+        }
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_deny_patterns() {
+        let tool = StreamingBashTool::default();
+        let ctx = test_tool_context(None);
+        let params = serde_json::json!({"command": "rm -rf /"});
+        let result = tool.execute(params, ctx).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(
+            err.to_string().contains("blocked by safety policy"),
+            "Expected deny pattern error, got: {err}"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_deny_pattern_fork_bomb() {
+        let tool = StreamingBashTool::default();
+        let ctx = test_tool_context(None);
+        let params = serde_json::json!({"command": ":(){:|:&};:"});
+        let result = tool.execute(params, ctx).await;
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("blocked by safety policy"));
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_confirm_rejection() {
+        let tool = StreamingBashTool::default().with_confirm(|_cmd: &str| false);
+        let ctx = test_tool_context(None);
+        let params = serde_json::json!({"command": "echo hello"});
+        let result = tool.execute(params, ctx).await;
+        assert!(result.is_err());
+        assert!(
+            result.unwrap_err().to_string().contains("not confirmed"),
+            "Expected confirmation rejection"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_confirm_approval() {
+        let tool = StreamingBashTool::default().with_confirm(|_cmd: &str| true);
+        let ctx = test_tool_context(None);
+        let params = serde_json::json!({"command": "echo approved"});
+        let result = tool.execute(params, ctx).await;
+        assert!(result.is_ok());
+        let text = &result.unwrap().content[0];
+        match text {
+            yoagent::types::Content::Text { text } => {
+                assert!(text.contains("approved"));
+                assert!(text.contains("Exit code: 0"));
+            }
+            _ => panic!("Expected text content"),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_basic_execution() {
+        let tool = StreamingBashTool::default();
+        let ctx = test_tool_context(None);
+        let params = serde_json::json!({"command": "echo hello world"});
+        let result = tool.execute(params, ctx).await.unwrap();
+        match &result.content[0] {
+            yoagent::types::Content::Text { text } => {
+                assert!(text.contains("hello world"));
+                assert!(text.contains("Exit code: 0"));
+            }
+            _ => panic!("Expected text content"),
+        }
+        assert_eq!(result.details["exit_code"], 0);
+        assert_eq!(result.details["success"], true);
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_captures_exit_code() {
+        let tool = StreamingBashTool::default();
+        let ctx = test_tool_context(None);
+        let params = serde_json::json!({"command": "exit 42"});
+        let result = tool.execute(params, ctx).await.unwrap();
+        assert_eq!(result.details["exit_code"], 42);
+        assert_eq!(result.details["success"], false);
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_timeout() {
+        let tool = StreamingBashTool {
+            timeout: Duration::from_millis(200),
+            ..Default::default()
+        };
+        let ctx = test_tool_context(None);
+        let params = serde_json::json!({"command": "sleep 30"});
+        let result = tool.execute(params, ctx).await;
+        assert!(result.is_err());
+        assert!(
+            result.unwrap_err().to_string().contains("timed out"),
+            "Expected timeout error"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_output_truncation() {
+        let tool = StreamingBashTool {
+            max_output_bytes: 100,
+            ..Default::default()
+        };
+        let ctx = test_tool_context(None);
+        // Generate output longer than 100 bytes
+        let params = serde_json::json!({"command": "for i in $(seq 1 100); do echo \"line number $i of the output\"; done"});
+        let result = tool.execute(params, ctx).await.unwrap();
+        match &result.content[0] {
+            yoagent::types::Content::Text { text } => {
+                // The accumulated output should have been truncated
+                // Total text = "Exit code: 0\n" + accumulated (which was truncated to ~100 bytes)
+                assert!(
+                    text.contains("truncated") || text.len() < 500,
+                    "Output should be truncated or short, got {} bytes",
+                    text.len()
+                );
+            }
+            _ => panic!("Expected text content"),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_emits_updates() {
+        let updates = Arc::new(tokio::sync::Mutex::new(Vec::new()));
+        let tool = StreamingBashTool {
+            lines_per_update: 1,
+            update_interval: Duration::from_millis(10),
+            ..Default::default()
+        };
+        let ctx = test_tool_context(Some(Arc::clone(&updates)));
+        // Generate multi-line output with small delays to allow update emission
+        let params = serde_json::json!({
+            "command": "for i in 1 2 3 4 5; do echo line$i; sleep 0.02; done"
+        });
+        let result = tool.execute(params, ctx).await.unwrap();
+        assert!(result.details["success"] == true);
+
+        let collected = updates.lock().await;
+        // Should have emitted at least one streaming update
+        assert!(
+            !collected.is_empty(),
+            "Expected at least one streaming update, got none"
+        );
+        // The final update (or a late one) should contain multiple lines
+        let last = &collected[collected.len() - 1];
+        match &last.content[0] {
+            yoagent::types::Content::Text { text } => {
+                assert!(
+                    text.contains("line"),
+                    "Update should contain partial output"
+                );
+            }
+            _ => panic!("Expected text content in update"),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_missing_command_param() {
+        let tool = StreamingBashTool::default();
+        let ctx = test_tool_context(None);
+        let params = serde_json::json!({});
+        let result = tool.execute(params, ctx).await;
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("missing"));
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_captures_stderr() {
+        let tool = StreamingBashTool::default();
+        let ctx = test_tool_context(None);
+        let params = serde_json::json!({"command": "echo err_output >&2"});
+        let result = tool.execute(params, ctx).await.unwrap();
+        match &result.content[0] {
+            yoagent::types::Content::Text { text } => {
+                assert!(text.contains("err_output"), "Should capture stderr: {text}");
+            }
+            _ => panic!("Expected text content"),
+        }
+    }
+
+    // ── rename_symbol tool tests ─────────────────────────────────────
+
+    #[test]
+    fn test_rename_symbol_tool_name() {
+        let tool = RenameSymbolTool;
+        assert_eq!(tool.name(), "rename_symbol");
+    }
+
+    #[test]
+    fn test_rename_symbol_tool_label() {
+        let tool = RenameSymbolTool;
+        assert_eq!(tool.label(), "Rename");
+    }
+
+    #[test]
+    fn test_rename_symbol_tool_schema() {
+        let tool = RenameSymbolTool;
+        let schema = tool.parameters_schema();
+        // Must have old_name, new_name, and path properties
+        let props = schema["properties"].as_object().unwrap();
+        assert!(
+            props.contains_key("old_name"),
+            "schema should have old_name"
+        );
+        assert!(
+            props.contains_key("new_name"),
+            "schema should have new_name"
+        );
+        assert!(props.contains_key("path"), "schema should have path");
+        // old_name and new_name are required
+        let required = schema["required"].as_array().unwrap();
+        let required_strs: Vec<&str> = required.iter().map(|v| v.as_str().unwrap()).collect();
+        assert!(required_strs.contains(&"old_name"));
+        assert!(required_strs.contains(&"new_name"));
+        // path is NOT required
+        assert!(!required_strs.contains(&"path"));
+    }
+
+    #[test]
+    fn test_rename_result_struct() {
+        let result = commands_refactor::RenameResult {
+            files_changed: vec!["src/main.rs".to_string(), "src/lib.rs".to_string()],
+            total_replacements: 5,
+            preview: "preview text".to_string(),
+        };
+        assert_eq!(result.files_changed.len(), 2);
+        assert_eq!(result.total_replacements, 5);
+        assert_eq!(result.preview, "preview text");
+    }
+
+    #[test]
+    fn test_rename_symbol_tool_in_build_tools() {
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
+        assert!(
+            names.contains(&"rename_symbol"),
+            "build_tools should include rename_symbol, got: {names:?}"
+        );
+    }
+
+    #[test]
+    fn test_describe_rename_symbol_operation() {
+        let params = serde_json::json!({
+            "old_name": "FooBar",
+            "new_name": "BazQux",
+            "path": "src/"
+        });
+        let desc = describe_file_operation("rename_symbol", &params);
+        assert!(desc.contains("FooBar"), "Should contain old_name: {desc}");
+        assert!(desc.contains("BazQux"), "Should contain new_name: {desc}");
+        assert!(desc.contains("src/"), "Should contain scope: {desc}");
+    }
+
+    #[test]
+    fn test_describe_rename_symbol_no_path() {
+        let params = serde_json::json!({
+            "old_name": "Foo",
+            "new_name": "Bar"
+        });
+        let desc = describe_file_operation("rename_symbol", &params);
+        assert!(
+            desc.contains("project"),
+            "Should default to 'project': {desc}"
+        );
+    }
+
+    #[test]
+    fn test_truncate_result_with_custom_limit() {
+        use yoagent::types::{Content, ToolResult};
+        // Create a ToolResult with text longer than 100 chars and enough lines.
+        // Each line starts with a unique first word to avoid compression collapsing.
+        let long_text = (0..200)
+            .map(|i| format!("T{i} data"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        let result = ToolResult {
+            content: vec![Content::Text {
+                text: long_text.clone(),
+            }],
+            details: serde_json::Value::Null,
+        };
+        let truncated = truncate_result(result, 100);
+        let text = match &truncated.content[0] {
+            Content::Text { text } => text.clone(),
+            _ => panic!("Expected text content"),
+        };
+        assert!(
+            text.contains("[... truncated"),
+            "Result should be truncated with 100-char limit"
+        );
+    }
+
+    #[test]
+    fn test_truncate_result_preserves_under_limit() {
+        use yoagent::types::{Content, ToolResult};
+        let short_text = "hello world".to_string();
+        let result = ToolResult {
+            content: vec![Content::Text {
+                text: short_text.clone(),
+            }],
+            details: serde_json::Value::Null,
+        };
+        let truncated = truncate_result(result, TOOL_OUTPUT_MAX_CHARS);
+        let text = match &truncated.content[0] {
+            Content::Text { text } => text.clone(),
+            _ => panic!("Expected text content"),
+        };
+        assert_eq!(text, short_text, "Short text should be unchanged");
+    }
+
+    #[test]
+    fn test_build_tools_with_piped_limit() {
+        // build_tools should work with the piped limit too
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(
+            true,
+            &perms,
+            &dirs,
+            TOOL_OUTPUT_MAX_CHARS_PIPED,
+            false,
+            vec![],
+        );
+        assert_eq!(tools.len(), 8, "Should still have 8 tools with piped limit");
+    }
+
+    #[test]
+    fn test_ask_user_tool_schema() {
+        let tool = AskUserTool;
+        assert_eq!(tool.name(), "ask_user");
+        assert_eq!(tool.label(), "ask_user");
+        let schema = tool.parameters_schema();
+        assert!(schema["properties"]["question"].is_object());
+        assert!(schema["required"]
+            .as_array()
+            .unwrap()
+            .contains(&serde_json::json!("question")));
+    }
+
+    #[test]
+    fn test_ask_user_tool_not_in_non_terminal_mode() {
+        // In test environment (no terminal), ask_user should NOT be included
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
+        assert!(
+            !names.contains(&"ask_user"),
+            "ask_user should not be in non-terminal mode"
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // TodoTool tests
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_todo_tool_schema() {
+        let tool = TodoTool;
+        assert_eq!(tool.name(), "todo");
+        assert_eq!(tool.label(), "todo");
+        let schema = tool.parameters_schema();
+        assert!(schema["properties"]["action"].is_object());
+        assert!(schema["properties"]["description"].is_object());
+        assert!(schema["properties"]["id"].is_object());
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_todo_tool_list_empty() {
+        commands_project::todo_clear();
+        let tool = TodoTool;
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(serde_json::json!({"action": "list"}), ctx)
+            .await;
+        assert!(result.is_ok());
+        let text = match &result.unwrap().content[0] {
+            yoagent::types::Content::Text { text } => text.clone(),
+            _ => panic!("Expected text content"),
+        };
+        assert!(text.contains("No tasks"));
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_todo_tool_add_and_list() {
+        commands_project::todo_clear();
+        let tool = TodoTool;
+
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(
+                serde_json::json!({"action": "add", "description": "Write tests"}),
+                ctx,
+            )
+            .await;
+        assert!(result.is_ok());
+
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(serde_json::json!({"action": "list"}), ctx)
+            .await;
+        let text = match &result.unwrap().content[0] {
+            yoagent::types::Content::Text { text } => text.clone(),
+            _ => panic!("Expected text content"),
+        };
+        assert!(text.contains("Write tests"));
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_todo_tool_done() {
+        commands_project::todo_clear();
+        let tool = TodoTool;
+        let ctx = test_tool_context(None);
+        tool.execute(
+            serde_json::json!({"action": "add", "description": "Task A"}),
+            ctx,
+        )
+        .await
+        .unwrap();
+
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(serde_json::json!({"action": "done", "id": 1}), ctx)
+            .await;
+        let text = match &result.unwrap().content[0] {
+            yoagent::types::Content::Text { text } => text.clone(),
+            _ => panic!("Expected text content"),
+        };
+        assert!(text.contains("done ✓"));
+    }
+
+    #[tokio::test]
+    async fn test_todo_tool_invalid_action() {
+        let tool = TodoTool;
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(serde_json::json!({"action": "explode"}), ctx)
+            .await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_todo_tool_missing_description() {
+        let tool = TodoTool;
+        let ctx = test_tool_context(None);
+        let result = tool
+            .execute(serde_json::json!({"action": "add"}), ctx)
+            .await;
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_todo_tool_in_build_tools() {
+        let perms = cli::PermissionConfig::default();
+        let dirs = cli::DirectoryRestrictions::default();
+        let tools = build_tools(true, &perms, &dirs, TOOL_OUTPUT_MAX_CHARS, false, vec![]);
+        let names: Vec<&str> = tools.iter().map(|t| t.name()).collect();
+        assert!(
+            names.contains(&"todo"),
+            "build_tools should include todo, got: {names:?}"
+        );
     }
 }
