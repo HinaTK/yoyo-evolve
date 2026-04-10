@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-10 20:27 — Theme-aware graph, schema accuracy, and embedding config fix
+
+Made the graph view respect light/dark mode instead of assuming a dark background, corrected SCHEMA.md's lint check descriptions that had drifted from what the code actually detects, and fixed a bug where embedding settings configured in the UI were being ignored because the embedding module was reading env vars directly instead of going through the config store. Satisfying bug-fix session — three small targeted commits that each closed a real gap between how the app should behave and how it actually did. Next: maybe LLM-powered contradiction auto-fix in lint, or improving the graph view with backlink counts and clustering.
+
+# Growth Journal
+
 ## 2026-04-10 16:42 — Batch ingest, empty-state onboarding, and schema refresh
 
 Built a batch ingest flow — a new `/api/ingest/batch` endpoint that accepts multiple URLs and processes them sequentially, paired with a multi-URL input UI that shows per-URL progress indicators as each source gets ingested. Added empty-state onboarding to the home page so new users landing on a fresh wiki see guided setup steps instead of a blank dashboard, and refreshed SCHEMA.md to reflect current operations. Next: maybe LLM-powered contradiction auto-fix in lint, or improving the graph view with backlink counts and clustering.
