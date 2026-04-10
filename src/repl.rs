@@ -365,6 +365,7 @@ pub async fn run_repl(
     let session_changes = SessionChanges::new();
     let mut turn_history = TurnHistory::new();
     let spawn_tracker = commands::SpawnTracker::new();
+    let mut undo_context: Option<String> = None;
 
     loop {
         let prompt = if let Some(branch) = git_branch() {
@@ -558,7 +559,9 @@ pub async fn run_repl(
                 continue;
             }
             s if s == "/undo" || s.starts_with("/undo ") => {
-                commands::handle_undo(s, &mut turn_history);
+                if let Some(ctx) = commands::handle_undo(s, &mut turn_history) {
+                    undo_context = Some(ctx);
+                }
                 continue;
             }
             "/health" => {
@@ -904,6 +907,14 @@ pub async fn run_repl(
             format!("{}\n\n{}", commands::TEACH_MODE_PROMPT, cleaned_text)
         } else {
             cleaned_text.clone()
+        };
+
+        // If /undo was run since the last turn, prepend context so the agent
+        // knows files were reverted and its previous references may be stale.
+        let effective_input = if let Some(ctx) = undo_context.take() {
+            format!("{ctx}\n\n{effective_input}")
+        } else {
+            effective_input
         };
 
         let prompt_start = Instant::now();

@@ -390,18 +390,35 @@ fn combine_stats(a: &str, b: &str) -> String {
 
 // ── /undo ────────────────────────────────────────────────────────────────
 
+/// Build a context note describing what `/undo` reverted, for injection into
+/// the agent's next turn so it knows files have changed under it.
+fn build_undo_context(actions: &[String]) -> String {
+    let mut note =
+        String::from("[System note: /undo reverted the following changes from a previous turn:\n");
+    for action in actions {
+        note.push_str(&format!("- {action}\n"));
+    }
+    note.push_str(
+        "The code referenced in my previous response may no longer exist. \
+         Please verify current file state before continuing.]",
+    );
+    note
+}
+
 /// Handle `/undo` with per-turn granularity.
 ///
 /// - `/undo` — undo the last agent turn (restore files to pre-turn state)
 /// - `/undo N` — undo the last N turns
 /// - `/undo --all` — nuclear option: revert ALL uncommitted changes (old behavior)
-pub fn handle_undo(input: &str, history: &mut crate::prompt::TurnHistory) {
+///
+/// Returns `Some(context)` when files were actually reverted, so the REPL can
+/// inject the summary into the agent's next turn for causal consistency.
+pub fn handle_undo(input: &str, history: &mut crate::prompt::TurnHistory) -> Option<String> {
     let arg = input.strip_prefix("/undo").unwrap_or("").trim();
 
     // Nuclear fallback: /undo --all
     if arg == "--all" {
-        handle_undo_all(history);
-        return;
+        return handle_undo_all(history);
     }
 
     // Parse optional count: /undo N
@@ -410,12 +427,12 @@ pub fn handle_undo(input: &str, history: &mut crate::prompt::TurnHistory) {
     } else if let Ok(n) = arg.parse::<usize>() {
         if n == 0 {
             println!("{DIM}  (nothing to undo — count is 0){RESET}\n");
-            return;
+            return None;
         }
         n
     } else {
         println!("{DIM}  usage: /undo [N] or /undo --all{RESET}\n");
-        return;
+        return None;
     };
 
     if history.is_empty() {
@@ -435,7 +452,7 @@ pub fn handle_undo(input: &str, history: &mut crate::prompt::TurnHistory) {
         } else {
             println!("{DIM}  (nothing to undo — no turn history){RESET}\n");
         }
-        return;
+        return None;
     }
 
     let available = history.len();
@@ -466,11 +483,20 @@ pub fn handle_undo(input: &str, history: &mut crate::prompt::TurnHistory) {
             crate::format::pluralize(available, "turn was", "turns were")
         );
     }
+
+    // Return context for agent injection if any files were actually affected
+    if !actions.is_empty() {
+        Some(build_undo_context(&actions))
+    } else {
+        None
+    }
 }
 
 /// Nuclear undo: revert ALL uncommitted changes (old behavior).
 /// Clears turn history as well.
-fn handle_undo_all(history: &mut crate::prompt::TurnHistory) {
+///
+/// Returns `Some(context)` when changes were actually reverted.
+fn handle_undo_all(history: &mut crate::prompt::TurnHistory) -> Option<String> {
     let diff_stat = run_git(&["diff", "--stat"]).unwrap_or_default();
     let untracked_text =
         run_git(&["ls-files", "--others", "--exclude-standard"]).unwrap_or_default();
@@ -485,29 +511,46 @@ fn handle_undo_all(history: &mut crate::prompt::TurnHistory) {
 
     if !has_diff && !has_untracked {
         println!("{DIM}  (nothing to undo — no uncommitted changes){RESET}\n");
-    } else {
-        if has_diff {
-            println!("{DIM}{diff_stat}{RESET}");
-        }
-        if has_untracked {
-            println!("{DIM}  untracked files:");
-            for f in &untracked_files {
-                println!("    {f}");
-            }
-            println!("{RESET}");
-        }
-
-        if has_diff {
-            let _ = run_git(&["checkout", "--", "."]);
-        }
-        if has_untracked {
-            let _ = run_git(&["clean", "-fd"]);
-        }
-        println!("{GREEN}  ✓ reverted all uncommitted changes{RESET}\n");
+        history.clear();
+        return None;
     }
+
+    // Collect action descriptions for the context note
+    let mut actions = Vec::new();
+
+    if has_diff {
+        println!("{DIM}{diff_stat}{RESET}");
+        // Parse which files were modified from the diff stat
+        let stat = parse_diff_stat(&diff_stat);
+        for entry in &stat.entries {
+            actions.push(format!("restored {} (to last committed state)", entry.file));
+        }
+    }
+    if has_untracked {
+        println!("{DIM}  untracked files:");
+        for f in &untracked_files {
+            println!("    {f}");
+            actions.push(format!("deleted {f} (was untracked)"));
+        }
+        println!("{RESET}");
+    }
+
+    if has_diff {
+        let _ = run_git(&["checkout", "--", "."]);
+    }
+    if has_untracked {
+        let _ = run_git(&["clean", "-fd"]);
+    }
+    println!("{GREEN}  ✓ reverted all uncommitted changes{RESET}\n");
 
     // Clear turn history since everything is now reverted
     history.clear();
+
+    if !actions.is_empty() {
+        Some(build_undo_context(&actions))
+    } else {
+        None
+    }
 }
 
 // ── /commit ──────────────────────────────────────────────────────────────
@@ -1843,5 +1886,91 @@ mod tests {
         assert!(formatted.contains("+10"), "Should show insertions");
         // "-0" should not appear
         assert!(!formatted.contains("-0"), "Should not show zero deletions");
+    }
+
+    // ── build_undo_context tests ────────────────────────────────────────
+
+    #[test]
+    fn build_undo_context_includes_all_actions() {
+        let actions = vec![
+            "restored src/main.rs".to_string(),
+            "deleted src/new_file.rs".to_string(),
+        ];
+        let ctx = build_undo_context(&actions);
+        assert!(ctx.contains("restored src/main.rs"));
+        assert!(ctx.contains("deleted src/new_file.rs"));
+        assert!(ctx.contains("[System note:"));
+        assert!(ctx.contains("may no longer exist"));
+    }
+
+    #[test]
+    fn build_undo_context_single_action() {
+        let actions = vec!["restored src/foo.rs".to_string()];
+        let ctx = build_undo_context(&actions);
+        assert!(ctx.contains("- restored src/foo.rs"));
+        assert!(ctx.contains("verify current file state"));
+    }
+
+    // ── handle_undo return value tests ──────────────────────────────────
+
+    #[test]
+    fn handle_undo_returns_none_on_empty_history() {
+        let mut history = crate::prompt::TurnHistory::new();
+        let result = handle_undo("/undo", &mut history);
+        assert!(result.is_none(), "Should return None when history is empty");
+    }
+
+    #[test]
+    fn handle_undo_returns_some_when_files_reverted() {
+        use crate::prompt::{TurnHistory, TurnSnapshot};
+        use std::fs;
+
+        // Create a temp file to snapshot
+        let dir = tempfile::tempdir().unwrap();
+        let file_path = dir.path().join("test_undo.txt");
+        fs::write(&file_path, "original content").unwrap();
+        let path_str = file_path.to_str().unwrap();
+
+        // Build a snapshot with the original file
+        let mut snap = TurnSnapshot::new();
+        snap.snapshot_file(path_str);
+
+        // Modify the file (simulating agent changes)
+        fs::write(&file_path, "modified content").unwrap();
+
+        // Push the snapshot into history
+        let mut history = TurnHistory::new();
+        history.push(snap);
+
+        let result = handle_undo("/undo", &mut history);
+        assert!(
+            result.is_some(),
+            "Should return Some when files were reverted"
+        );
+
+        let ctx = result.unwrap();
+        assert!(
+            ctx.contains(path_str),
+            "Context should mention the reverted file path"
+        );
+        assert!(ctx.contains("[System note:"));
+
+        // Verify the file was actually restored
+        let restored = fs::read_to_string(&file_path).unwrap();
+        assert_eq!(restored, "original content");
+    }
+
+    #[test]
+    fn handle_undo_returns_none_on_zero_count() {
+        let mut history = crate::prompt::TurnHistory::new();
+        let result = handle_undo("/undo 0", &mut history);
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn handle_undo_returns_none_on_bad_arg() {
+        let mut history = crate::prompt::TurnHistory::new();
+        let result = handle_undo("/undo xyz", &mut history);
+        assert!(result.is_none());
     }
 }
