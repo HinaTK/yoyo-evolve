@@ -815,6 +815,33 @@ pub(crate) fn require_flag_value<'a>(next: Option<&'a String>) -> FlagValueCheck
     }
 }
 
+/// Parse a numeric CLI flag with config file fallback.
+///
+/// Checks `args` for `flag_name`, parses the following value as `T`.
+/// Falls back to `file_config[config_key]` when the CLI flag is absent.
+/// Prints a warning on parse failure.
+fn parse_numeric_flag<T: std::str::FromStr + std::fmt::Display>(
+    args: &[String],
+    flag_name: &str,
+    file_config: &std::collections::HashMap<String, String>,
+    config_key: &str,
+) -> Option<T> {
+    args.iter()
+        .position(|a| a == flag_name)
+        .and_then(|i| args.get(i + 1))
+        .and_then(|s| {
+            s.parse::<T>().ok().or_else(|| {
+                eprintln!("{YELLOW}warning:{RESET} Invalid {flag_name} value '{s}', using default");
+                None
+            })
+        })
+        .or_else(|| {
+            file_config
+                .get(config_key)
+                .and_then(|s| s.parse::<T>().ok())
+        })
+}
+
 pub fn parse_args(args: &[String]) -> Option<Config> {
     // Handle early-exit subcommands (--help, --version) before anything else.
     if let Some(result) = try_dispatch_subcommand(args) {
@@ -1041,58 +1068,12 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
 
     let continue_session = args.iter().any(|a| a == "--continue" || a == "-c");
 
-    let max_tokens = args
-        .iter()
-        .position(|a| a == "--max-tokens")
-        .and_then(|i| args.get(i + 1))
-        .and_then(|s| {
-            s.parse::<u32>().ok().or_else(|| {
-                eprintln!(
-                    "{YELLOW}warning:{RESET} Invalid --max-tokens value '{s}', using default"
-                );
-                None
-            })
-        })
-        .or_else(|| {
-            file_config
-                .get("max_tokens")
-                .and_then(|s| s.parse::<u32>().ok())
-        });
+    let max_tokens = parse_numeric_flag::<u32>(args, "--max-tokens", &file_config, "max_tokens");
 
-    let temperature = args
-        .iter()
-        .position(|a| a == "--temperature")
-        .and_then(|i| args.get(i + 1))
-        .and_then(|s| {
-            s.parse::<f32>().ok().or_else(|| {
-                eprintln!(
-                    "{YELLOW}warning:{RESET} Invalid --temperature value '{s}', using default"
-                );
-                None
-            })
-        })
-        .or_else(|| {
-            file_config
-                .get("temperature")
-                .and_then(|s| s.parse::<f32>().ok())
-        })
+    let temperature = parse_numeric_flag::<f32>(args, "--temperature", &file_config, "temperature")
         .map(clamp_temperature);
 
-    let max_turns = args
-        .iter()
-        .position(|a| a == "--max-turns")
-        .and_then(|i| args.get(i + 1))
-        .and_then(|s| {
-            s.parse::<usize>().ok().or_else(|| {
-                eprintln!("{YELLOW}warning:{RESET} Invalid --max-turns value '{s}', using default");
-                None
-            })
-        })
-        .or_else(|| {
-            file_config
-                .get("max_turns")
-                .and_then(|s| s.parse::<usize>().ok())
-        });
+    let max_turns = parse_numeric_flag::<usize>(args, "--max-turns", &file_config, "max_turns");
 
     let output_path = flag_value(args, &["--output", "-o"]);
 
@@ -1189,23 +1170,8 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         .unwrap_or_default();
 
     // --context-window <N> (CLI > config file > None = auto-detect from model)
-    let context_window = args
-        .iter()
-        .position(|a| a == "--context-window")
-        .and_then(|i| args.get(i + 1))
-        .and_then(|s| {
-            s.parse::<u32>().ok().or_else(|| {
-                eprintln!(
-                    "{YELLOW}warning:{RESET} Invalid --context-window value '{s}', using model default"
-                );
-                None
-            })
-        })
-        .or_else(|| {
-            file_config
-                .get("context_window")
-                .and_then(|s| s.parse::<u32>().ok())
-        });
+    let context_window =
+        parse_numeric_flag::<u32>(args, "--context-window", &file_config, "context_window");
 
     // --mcp <command> flags: collect all MCP server commands (repeatable)
     let mut mcp_servers: Vec<String> = args
@@ -1711,22 +1677,16 @@ mod tests {
             "--max-tokens".to_string(),
             "4096".to_string(),
         ];
-        let max_tokens = args
-            .iter()
-            .position(|a| a == "--max-tokens")
-            .and_then(|i| args.get(i + 1))
-            .and_then(|s| s.parse::<u32>().ok());
+        let empty = std::collections::HashMap::new();
+        let max_tokens = parse_numeric_flag::<u32>(&args, "--max-tokens", &empty, "max_tokens");
         assert_eq!(max_tokens, Some(4096));
     }
 
     #[test]
     fn test_max_tokens_flag_missing() {
         let args = ["yoyo".to_string()];
-        let max_tokens = args
-            .iter()
-            .position(|a| a == "--max-tokens")
-            .and_then(|i| args.get(i + 1))
-            .and_then(|s| s.parse::<u32>().ok());
+        let empty = std::collections::HashMap::new();
+        let max_tokens = parse_numeric_flag::<u32>(&args, "--max-tokens", &empty, "max_tokens");
         assert_eq!(max_tokens, None);
     }
 
@@ -1737,11 +1697,8 @@ mod tests {
             "--max-tokens".to_string(),
             "not_a_number".to_string(),
         ];
-        let max_tokens = args
-            .iter()
-            .position(|a| a == "--max-tokens")
-            .and_then(|i| args.get(i + 1))
-            .and_then(|s| s.parse::<u32>().ok());
+        let empty = std::collections::HashMap::new();
+        let max_tokens = parse_numeric_flag::<u32>(&args, "--max-tokens", &empty, "max_tokens");
         assert_eq!(max_tokens, None);
     }
 
@@ -1854,22 +1811,16 @@ mcp = ["npx open-websearch@latest", "npx @mcp/server-filesystem /tmp"]
             "--temperature".to_string(),
             "0.7".to_string(),
         ];
-        let temp = args
-            .iter()
-            .position(|a| a == "--temperature")
-            .and_then(|i| args.get(i + 1))
-            .and_then(|s| s.parse::<f32>().ok());
+        let empty = std::collections::HashMap::new();
+        let temp = parse_numeric_flag::<f32>(&args, "--temperature", &empty, "temperature");
         assert_eq!(temp, Some(0.7));
     }
 
     #[test]
     fn test_temperature_flag_missing() {
         let args = ["yoyo".to_string()];
-        let temp = args
-            .iter()
-            .position(|a| a == "--temperature")
-            .and_then(|i| args.get(i + 1))
-            .and_then(|s| s.parse::<f32>().ok());
+        let empty = std::collections::HashMap::new();
+        let temp = parse_numeric_flag::<f32>(&args, "--temperature", &empty, "temperature");
         assert_eq!(temp, None);
     }
 
@@ -1880,11 +1831,8 @@ mcp = ["npx open-websearch@latest", "npx @mcp/server-filesystem /tmp"]
             "--temperature".to_string(),
             "not_a_number".to_string(),
         ];
-        let temp = args
-            .iter()
-            .position(|a| a == "--temperature")
-            .and_then(|i| args.get(i + 1))
-            .and_then(|s| s.parse::<f32>().ok());
+        let empty = std::collections::HashMap::new();
+        let temp = parse_numeric_flag::<f32>(&args, "--temperature", &empty, "temperature");
         assert_eq!(temp, None);
     }
 
@@ -3233,5 +3181,62 @@ command = "server-two"
         assert_eq!(servers.len(), 2);
         assert_eq!(servers[0].name, "first");
         assert_eq!(servers[1].name, "second");
+    }
+
+    #[test]
+    fn test_parse_numeric_flag_config_fallback() {
+        let args = ["yoyo".to_string()];
+        let mut config = std::collections::HashMap::new();
+        config.insert("max_tokens".to_string(), "2048".to_string());
+        let result = parse_numeric_flag::<u32>(&args, "--max-tokens", &config, "max_tokens");
+        assert_eq!(result, Some(2048));
+    }
+
+    #[test]
+    fn test_parse_numeric_flag_cli_overrides_config() {
+        let args = [
+            "yoyo".to_string(),
+            "--max-tokens".to_string(),
+            "4096".to_string(),
+        ];
+        let mut config = std::collections::HashMap::new();
+        config.insert("max_tokens".to_string(), "2048".to_string());
+        let result = parse_numeric_flag::<u32>(&args, "--max-tokens", &config, "max_tokens");
+        assert_eq!(result, Some(4096));
+    }
+
+    #[test]
+    fn test_parse_numeric_flag_invalid_cli_falls_to_config() {
+        let args = [
+            "yoyo".to_string(),
+            "--max-tokens".to_string(),
+            "bad".to_string(),
+        ];
+        let mut config = std::collections::HashMap::new();
+        config.insert("max_tokens".to_string(), "2048".to_string());
+        let result = parse_numeric_flag::<u32>(&args, "--max-tokens", &config, "max_tokens");
+        // Invalid CLI value warns and falls through to config
+        assert_eq!(result, Some(2048));
+    }
+
+    #[test]
+    fn test_parse_numeric_flag_invalid_config_returns_none() {
+        let args = ["yoyo".to_string()];
+        let mut config = std::collections::HashMap::new();
+        config.insert("max_tokens".to_string(), "not_a_number".to_string());
+        let result = parse_numeric_flag::<u32>(&args, "--max-tokens", &config, "max_tokens");
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_parse_numeric_flag_usize() {
+        let args = [
+            "yoyo".to_string(),
+            "--max-turns".to_string(),
+            "25".to_string(),
+        ];
+        let empty = std::collections::HashMap::new();
+        let result = parse_numeric_flag::<usize>(&args, "--max-turns", &empty, "max_turns");
+        assert_eq!(result, Some(25));
     }
 }
