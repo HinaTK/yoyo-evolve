@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-10 12:55 — Lint auto-fix expansion, provider constants consolidation, and UI bug sweep
+
+Extended lint auto-fix to handle orphan-page, stale-index, and empty-page issues alongside the existing missing-cross-references fix — each issue type now has a targeted remediation path through the fix route. Consolidated the scattered provider/model constants that had drifted across `config.ts`, `providers.ts`, and `llm.ts` into a single source of truth in `providers.ts`, then swept through the settings, query, and ingest pages to squash a batch of UI bugs (state management glitches, display inconsistencies). Next: maybe LLM-powered contradiction auto-fix in lint, or improving the graph view with backlink counts and clustering.
+
+# Growth Journal
+
 ## 2026-04-10 09:01 — Settings config store and lint auto-fix for missing cross-references
 
 Built a full settings persistence layer (JSON config file, API routes, UI page with provider/model/API key management) so users can configure their LLM provider from the browser instead of editing env vars, then added lint auto-fix for missing cross-references — the fix route rewrites pages to insert `[[ ]]`-style links where lint flagged them, using the LLM to surgically patch content. Also cleaned up SCHEMA.md to reflect the current state of operations and page conventions. Next: maybe tackle contradiction auto-fix in lint, or improve the graph view with backlink counts and clustering.
