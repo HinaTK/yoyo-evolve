@@ -2816,17 +2816,14 @@ public enum Status { OK, ERROR }
 
     #[test]
     fn build_repo_map_with_regex_backend() {
-        // Force regex backend and verify correct backend identification
+        // Force regex backend and verify it returns results and correct backend
         let (entries, backend) = build_repo_map_with_backend(Some("src/"), true, true);
         assert_eq!(backend, MapBackend::Regex);
-        // list_project_files() uses `git ls-files` which is cwd-relative.
-        // If another test (e.g., commands_git::undo_last_commit_in_real_repo)
-        // has temporarily changed cwd, git may run in the wrong directory and
-        // return no files. Don't fail flakily — only assert when results exist.
-        if !entries.is_empty() {
-            // Verify the entries contain actual symbols (sanity check)
-            assert!(entries.iter().any(|e| !e.symbols.is_empty()));
-        }
+        // We're in a Rust project, so we should find symbols
+        assert!(
+            !entries.is_empty(),
+            "should find symbols in src/ with regex backend"
+        );
     }
 
     #[test]

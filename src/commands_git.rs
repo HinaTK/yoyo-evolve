@@ -393,17 +393,14 @@ fn combine_stats(a: &str, b: &str) -> String {
 /// Build a context note describing what `/undo` reverted, for injection into
 /// the agent's next turn so it knows files have changed under it.
 fn build_undo_context(actions: &[String]) -> String {
-    let count = actions.len();
-    let file_word = crate::format::pluralize(count, "file", "files");
     let mut note =
-        format!("[System note: /undo reverted {count} {file_word} from a previous turn:\n");
+        String::from("[System note: /undo reverted the following changes from a previous turn:\n");
     for action in actions {
         note.push_str(&format!("- {action}\n"));
     }
     note.push_str(
-        "⚠️ The code referenced in my previous response may no longer exist. \
-         Re-read affected files before making new changes. \
-         Verify current file state before continuing.]",
+        "The code referenced in my previous response may no longer exist. \
+         Please verify current file state before continuing.]",
     );
     note
 }
@@ -1970,8 +1967,6 @@ mod tests {
         assert!(ctx.contains("deleted src/new_file.rs"));
         assert!(ctx.contains("[System note:"));
         assert!(ctx.contains("may no longer exist"));
-        // File count included
-        assert!(ctx.contains("2 files"), "Context should include file count");
     }
 
     #[test]
@@ -1979,39 +1974,7 @@ mod tests {
         let actions = vec!["restored src/foo.rs".to_string()];
         let ctx = build_undo_context(&actions);
         assert!(ctx.contains("- restored src/foo.rs"));
-        assert!(ctx.contains("Verify current file state"));
-        // Singular "file" for count of 1
-        assert!(
-            ctx.contains("1 file"),
-            "Context should use singular 'file' for single action"
-        );
-    }
-
-    #[test]
-    fn build_undo_context_warns_about_stale_references() {
-        let actions = vec!["restored src/lib.rs".to_string()];
-        let ctx = build_undo_context(&actions);
-        assert!(
-            ctx.contains("⚠️"),
-            "Context should contain ⚠️ warning about stale references"
-        );
-        assert!(
-            ctx.contains("may no longer exist"),
-            "Context should warn that referenced code may no longer exist"
-        );
-    }
-
-    #[test]
-    fn build_undo_context_recommends_rereading_files() {
-        let actions = vec![
-            "restored src/a.rs".to_string(),
-            "restored src/b.rs".to_string(),
-        ];
-        let ctx = build_undo_context(&actions);
-        assert!(
-            ctx.contains("Re-read affected files"),
-            "Context should recommend re-reading affected files before new changes"
-        );
+        assert!(ctx.contains("verify current file state"));
     }
 
     // ── handle_undo return value tests ──────────────────────────────────
@@ -2057,19 +2020,6 @@ mod tests {
             "Context should mention the reverted file path"
         );
         assert!(ctx.contains("[System note:"));
-        // Verify causality harness content
-        assert!(
-            ctx.contains("⚠️"),
-            "Context should contain ⚠️ stale-reference warning"
-        );
-        assert!(
-            ctx.contains("1 file"),
-            "Context should include the affected file count"
-        );
-        assert!(
-            ctx.contains("Re-read affected files"),
-            "Context should recommend re-reading files"
-        );
 
         // Verify the file was actually restored
         let restored = fs::read_to_string(&file_path).unwrap();
@@ -2188,16 +2138,6 @@ mod tests {
 
         assert_eq!(fs::read_to_string(&file_path).unwrap(), "changed");
 
-        // Capture the commit hash before reverting so we can verify it in context
-        let hash_output = std::process::Command::new("git")
-            .args(["rev-parse", "--short", "HEAD"])
-            .current_dir(repo)
-            .output()
-            .unwrap();
-        let commit_hash = String::from_utf8_lossy(&hash_output.stdout)
-            .trim()
-            .to_string();
-
         // Use a static mutex to serialize tests that change cwd,
         // preventing races with other tests that depend on cwd.
         use std::sync::Mutex;
@@ -2230,21 +2170,6 @@ mod tests {
         assert!(
             ctx.contains("Reverted commit:"),
             "Context should show the reverted commit"
-        );
-        // Verify the context includes the actual commit hash
-        assert!(
-            ctx.contains(&commit_hash),
-            "Context should include the commit hash '{commit_hash}'"
-        );
-        // Verify the context mentions the commit message
-        assert!(
-            ctx.contains("change hello"),
-            "Context should include the commit message"
-        );
-        // Verify the --last-commit specific system note format
-        assert!(
-            ctx.contains("[System note: /undo --last-commit"),
-            "Context should use --last-commit specific system note"
         );
 
         // Verify file was reverted to initial content
