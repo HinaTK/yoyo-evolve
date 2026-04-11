@@ -1459,8 +1459,8 @@ mod tests {
 
     #[test]
     fn test_detect_project_type_rust() {
-        // Current directory has Cargo.toml, so should detect Rust
-        let cwd = std::env::current_dir().unwrap();
+        // Use CARGO_MANIFEST_DIR to avoid race with set_current_dir in other tests
+        let cwd = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         assert_eq!(detect_project_type(&cwd), ProjectType::Rust);
     }
 
@@ -1541,7 +1541,7 @@ mod tests {
 
     #[test]
     fn test_scan_important_files_in_current_project() {
-        let cwd = std::env::current_dir().unwrap();
+        let cwd = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         let files = scan_important_files(&cwd);
         // This is a Rust project, so Cargo.toml should be found
         assert!(
@@ -1579,7 +1579,7 @@ mod tests {
 
     #[test]
     fn test_scan_important_dirs_in_current_project() {
-        let cwd = std::env::current_dir().unwrap();
+        let cwd = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         let dirs = scan_important_dirs(&cwd);
         // This project has src/
         assert!(
@@ -1639,8 +1639,8 @@ mod tests {
 
     #[test]
     fn test_detect_project_name_rust() {
-        // Current project has Cargo.toml with name = "yoyo-agent"
-        let cwd = std::env::current_dir().unwrap();
+        // Use CARGO_MANIFEST_DIR to avoid race with set_current_dir in other tests
+        let cwd = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         let name = detect_project_name(&cwd);
         assert_eq!(
             name, "yoyo-agent",
@@ -1689,7 +1689,7 @@ mod tests {
 
     #[test]
     fn test_generate_init_content_rust_project() {
-        let cwd = std::env::current_dir().unwrap();
+        let cwd = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         let content = generate_init_content(&cwd);
         // Should contain project name
         assert!(
