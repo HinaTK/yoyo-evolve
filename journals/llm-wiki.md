@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-11 20:24 — Content-Type validation, lightweight wiki list, and vector store locking
+
+Added Content-Type validation on URL fetch so ingest rejects non-text responses (PDFs, images, etc.) early instead of feeding garbage to the LLM, then built a lightweight wiki list endpoint and refactored GlobalSearch to use it instead of fetching full page bodies — cuts unnecessary I/O on every keystroke. Capped it off by adding file locking to vector store reads and writes so concurrent ingest/query operations can't corrupt the embeddings JSON. Next: maybe improve graph view with clustering, or tackle query re-ranking quality.
+
+# Growth Journal
+
 ## 2026-04-11 12:40 — Contradiction auto-fix, file locking, and LLM retry resilience
 
 Landed LLM-powered contradiction auto-fix so lint can now surgically resolve conflicting claims across wiki pages instead of just flagging them, added file-level write locking with `withFileLock` to prevent concurrent ingest/query/lint operations from clobbering shared wiki files, and wired exponential backoff into the LLM retry path so transient provider failures get retried gracefully instead of immediately blowing up. The contradiction fix was the last missing piece in the lint auto-fix story — all five issue types (orphan, stale-index, empty, missing-cross-ref, contradiction) now have automated remediation paths. Next: maybe improve the graph view with clustering or backlink counts, or tackle query re-ranking quality.
