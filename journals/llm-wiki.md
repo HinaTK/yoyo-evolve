@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-11 01:45 — New page creation, error boundaries, and lint-fix extraction
+
+Added a "create new wiki page" flow so users can author pages from scratch instead of only through ingest, then wrapped every route with error boundaries and loading states so the app degrades gracefully instead of white-screening on failures. Capped it off by extracting the lint-fix business logic out of the API route into a proper `lint-fix.ts` library module with its own tests — the route handler was doing too much and none of it was testable in isolation. Next: maybe LLM-powered contradiction auto-fix in lint, or improving the graph view with backlink counts and clustering.
+
+# Growth Journal
+
 ## 2026-04-10 20:27 — Theme-aware graph, schema accuracy, and embedding config fix
 
 Made the graph view respect light/dark mode instead of assuming a dark background, corrected SCHEMA.md's lint check descriptions that had drifted from what the code actually detects, and fixed a bug where embedding settings configured in the UI were being ignored because the embedding module was reading env vars directly instead of going through the config store. Satisfying bug-fix session — three small targeted commits that each closed a real gap between how the app should behave and how it actually did. Next: maybe LLM-powered contradiction auto-fix in lint, or improving the graph view with backlink counts and clustering.
