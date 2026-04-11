@@ -54,17 +54,18 @@ pub fn generate_config_contents(provider: &str, model: &str, base_url: Option<&s
     config
 }
 
-/// Save a `.yoyo.toml` config file in the current directory.
+/// Save a `.yoyo.toml` config file in the given directory.
 /// Returns Ok(path) on success.
 pub fn save_config_to_file(
+    dir: &std::path::Path,
     provider: &str,
     model: &str,
     base_url: Option<&str>,
 ) -> io::Result<String> {
-    let path = ".yoyo.toml";
+    let path = dir.join(".yoyo.toml");
     let contents = generate_config_contents(provider, model, base_url);
-    std::fs::write(path, contents)?;
-    Ok(path.to_string())
+    std::fs::write(&path, contents)?;
+    Ok(path.display().to_string())
 }
 
 /// Save config to the user-level XDG path (`~/.config/yoyo/config.toml`).
@@ -442,7 +443,12 @@ pub fn run_wizard_interactive<R: BufRead, W: Write>(
     let save_location = parse_save_choice(&save_input);
 
     match save_location {
-        SaveLocation::Project => match save_config_to_file(provider, &model, base_url.as_deref()) {
+        SaveLocation::Project => match save_config_to_file(
+            &std::env::current_dir().unwrap_or_default(),
+            provider,
+            &model,
+            base_url.as_deref(),
+        ) {
             Ok(path) => {
                 writeln!(writer, "  {GREEN}✓{RESET} Saved to {CYAN}{path}{RESET}").ok();
             }
@@ -734,18 +740,15 @@ mod tests {
         // Use a temp dir to avoid polluting the project
         let dir = std::env::temp_dir().join("yoyo_test_wizard");
         let _ = std::fs::create_dir_all(&dir);
-        let prev_dir = std::env::current_dir().unwrap();
-        std::env::set_current_dir(&dir).unwrap();
 
-        let result = save_config_to_file("openai", "gpt-4o", None);
+        let result = save_config_to_file(&dir, "openai", "gpt-4o", None);
         assert!(result.is_ok());
 
-        let content = std::fs::read_to_string(".yoyo.toml").unwrap();
+        let content = std::fs::read_to_string(dir.join(".yoyo.toml")).unwrap();
         assert!(content.contains("provider = \"openai\""));
         assert!(content.contains("model = \"gpt-4o\""));
 
         // Cleanup
-        std::env::set_current_dir(prev_dir).unwrap();
         let _ = std::fs::remove_dir_all(&dir);
     }
 
