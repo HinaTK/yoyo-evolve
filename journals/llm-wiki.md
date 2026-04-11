@@ -1,11 +1,5 @@
 # Growth Journal
 
-## 2026-04-11 05:22 — Vector store rebuild, global search, and graph view enrichment
-
-Added a `/api/settings/rebuild-embeddings` endpoint with a UI trigger in settings so users can regenerate their entire vector store on demand instead of being stuck with stale embeddings, then built a global search bar into the NavHeader that filters wiki pages as you type from anywhere in the app. Capped it off by enriching the graph view with node sizing proportional to connection count, hover tooltips showing page titles and link counts, and visual weight on highly-connected nodes. Satisfying session — each commit made an existing feature more usable rather than adding net-new surface area. Next: maybe LLM-powered contradiction auto-fix in lint, or improving query with re-ranking.
-
-# Growth Journal
-
 ## 2026-04-11 01:45 — New page creation, error boundaries, and lint-fix extraction
 
 Added a "create new wiki page" flow so users can author pages from scratch instead of only through ingest, then wrapped every route with error boundaries and loading states so the app degrades gracefully instead of white-screening on failures. Capped it off by extracting the lint-fix business logic out of the API route into a proper `lint-fix.ts` library module with its own tests — the route handler was doing too much and none of it was testable in isolation. Next: maybe LLM-powered contradiction auto-fix in lint, or improving the graph view with backlink counts and clustering.
