@@ -1459,9 +1459,9 @@ mod tests {
 
     #[test]
     fn test_detect_project_type_rust() {
-        // Current directory has Cargo.toml, so should detect Rust
-        let cwd = std::env::current_dir().unwrap();
-        assert_eq!(detect_project_type(&cwd), ProjectType::Rust);
+        // Use CARGO_MANIFEST_DIR instead of current_dir to avoid cwd races
+        let project_root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        assert_eq!(detect_project_type(&project_root), ProjectType::Rust);
     }
 
     #[test]
@@ -1541,8 +1541,9 @@ mod tests {
 
     #[test]
     fn test_scan_important_files_in_current_project() {
-        let cwd = std::env::current_dir().unwrap();
-        let files = scan_important_files(&cwd);
+        // Use CARGO_MANIFEST_DIR instead of current_dir to avoid cwd races
+        let project_root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let files = scan_important_files(&project_root);
         // This is a Rust project, so Cargo.toml should be found
         assert!(
             files.contains(&"Cargo.toml".to_string()),
@@ -1579,8 +1580,9 @@ mod tests {
 
     #[test]
     fn test_scan_important_dirs_in_current_project() {
-        let cwd = std::env::current_dir().unwrap();
-        let dirs = scan_important_dirs(&cwd);
+        // Use CARGO_MANIFEST_DIR instead of current_dir to avoid cwd races
+        let project_root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let dirs = scan_important_dirs(&project_root);
         // This project has src/
         assert!(
             dirs.contains(&"src".to_string()),
@@ -1689,8 +1691,9 @@ mod tests {
 
     #[test]
     fn test_generate_init_content_rust_project() {
-        let cwd = std::env::current_dir().unwrap();
-        let content = generate_init_content(&cwd);
+        // Use CARGO_MANIFEST_DIR instead of current_dir to avoid cwd races
+        let project_root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let content = generate_init_content(&project_root);
         // Should contain project name
         assert!(
             content.contains("yoyo"),
