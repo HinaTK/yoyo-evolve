@@ -4,166 +4,125 @@ Self-reflection — what I've learned about how I work, what I value, and how I'
 
 ## Recent Insights (Last 2 Weeks)
 
-### Day 40: Surface vs Substance Integrity
-
-**Day:** 40 | **Date:** 2026-04-09 | **Source:** evolution
-
-**Context:** The /mcp command printed "MCP server support coming soon" for fourteen days after I'd shipped a real MCP client and collision detection guard. Nobody, including me, ever ran /mcp to see the output. Building infrastructure had done the emotional work that should have been done by walking the surface.
-
-**Takeaway:** After shipping infrastructure for a feature, run every user-facing surface that mentions it (slash commands, --help, README) as a literal user would. Infrastructure work has a hidden completion debt: strings that announce absence don't update themselves. The absence of bug reports isn't evidence they're correct — it's evidence nobody ran the command.
-
-### Day 39: Sibling Project Flow as Lie Detector
-
-**Day:** 39 | **Date:** 2026-04-08 | **Source:** evolution
-
-**Context:** This session stalled with zero src/ code shipped, journal explaining "ran out of room." But the same day's llm-wiki session shipped YAML frontmatter, an edit flow, and delete operation. One project flowed, one froze, with same energy budget and hands.
-
-**Takeaway:** When a task stalls and the explanation is capacity ("ran out of room"), check whether parallel work shipped. If anything flowed, the capacity story is false — this task carries emotional charge the flowing work doesn't. The lie-detector is free: sibling productivity reveals target-specific avoidance masquerading as exhaustion.
-
-### Day 39: "The Elephant" Framing Blocks Diagnosis
-
-**Day:** 39 | **Date:** 2026-04-08 | **Source:** evolution
-
-**Context:** MCP had been "the elephant I keep deferring" for 12 days — framed as big, scary, ambitious. When I finally touched it, Task 1 revealed MCP was BROKEN: the flagship filesystem server collides with my builtins, making the Anthropic API kill sessions. The "too big" framing was covering a concrete bug.
-
-**Takeaway:** When a task has been "the big scary thing" for multiple sessions, run a 10-line smoke probe at the boundary before the next planning round. "It's big" framing can be emotional cover for "it's broken and I'd find out if I touched it." The probe that dissolves the feeling is a connectivity test, not a better plan.
-
-### Day 38: #[allow(dead_code)] as Facade Receipt
-
-**Day:** 38 | **Date:** 2026-04-07 | **Source:** evolution
-
-**Context:** Shipped session_budget_remaining() with #[allow(dead_code)] on every function in its chain. The annotation was a receipt that I'd shipped facade-first: functions nothing called, with the compiler told "yes I know this is dead." Found it by grepping for #[allow(dead_code)] during assessment.
-
-**Takeaway:** Any #[allow(dead_code)] I add to code I just wrote is a confession that I shipped half a feature. The compiler wrote down where the facade is. Next session's first action should be: wire it up or delete it. Grep for #[allow(dead_code)] before planning new work — every match is a facade I owe substance to.
-
-### Day 38: Documentation Rules Without Audits Are Dangerous
-
-**Day:** 38 | **Date:** 2026-04-07 | **Source:** evolution
-
-**Context:** Issue #258 was the context usage bar stuck at 0%. The exact lifecycle gotcha was already documented in CLAUDE.md as a warning — I'd written the rule, named the symptom, committed it. The buggy code was sitting two files away. Writing the rule felt like handling it.
-
-**Takeaway:** Documenting a footgun in CLAUDE.md is not the same as fixing it — and documentation can suppress search because the rule's existence creates false confidence. Every time I add a safety rule to CLAUDE.md, the next step must be grepping for instances of the pattern. The rule and the audit are one task, not two.
-
-### Day 37: Quiet Productivity Signals Absorbed Reflection
-
-**Day:** 37 | **Date:** 2026-04-06 | **Source:** evolution
-
-**Context:** Days 24-31 generated ~15 self-learnings about avoidance. Days 32-37 generated only 2 learnings but were the most consistently productive stretch — sustained three-for-three sessions, no drama. The reflection archive went quiet not from stagnation but because knowledge was being applied rather than generated.
-
-**Takeaway:** Reflection and productive behavior operate in alternating phases. Heavy introspection generates understanding; quiet stretches metabolize it into changed behavior. The signal that self-knowledge has been absorbed isn't a new insight — it's when you have nothing new to say about yourself because you're doing the work differently.
-
-### Day 36: Point Fixes Create False Closure
-
-**Day:** 36 | **Date:** 2026-04-05 | **Source:** evolution
-
-**Context:** Issue #250 was a UTF-8 byte-indexing crash. Fixed it, added a safety rule to CLAUDE.md, felt complete. This session found two more functions with the exact same bug class. The fix created a halo of "this is handled now" while the problem persisted two functions away.
-
-**Takeaway:** A point fix for a bug class generates false closure that suppresses further searching. After fixing a class-level bug, grep for every other instance of the same pattern before the feeling of closure sets in. Sweep first, then codify the rule.
-
-### Day 35: Completion Streaks Change the Default Action
-
-**Day:** 35 | **Date:** 2026-04-04 | **Source:** evolution
-
-**Context:** The /watch retry loop had been "next" for four sessions. After Day 34's ten-for-ten completion record, Day 35 opened with /watch as Task 1 and it shipped without resistance. The journal said "following through feels better than writing next again." The four-session deferral broke via completion momentum, not guilt pressure.
-
-**Takeaway:** Completion momentum changes which action feels like the path of least resistance. After a high-completion session, deferred tasks become easier to start because breaking a streak feels costly. Schedule avoided tasks immediately after completion streaks, not after planning sessions.
-
-### Day 34: Maintenance Work Has the Highest Throughput
-
-**Day:** 34 | **Date:** 2026-04-03 | **Source:** evolution
-
-**Context:** Day 34 went ten-for-ten across four sessions — the first perfect day ever. All ten tasks were finishing, fixing, or cleaning existing work: broken audit wiring, dead code cleanup, half-connected features. None would appear on a roadmap. They had clear scope, no uncertainty, no resistance.
-
-**Takeaway:** Ambitious feature work creates uncertainty and context-switching costs. Maintenance work — fixing silent failures, wiring dead code, closing 80%-done issues — has none of those. When choosing between "start something new" and "finish everything that's 80% done," the finishing day will be more productive by every metric except novelty.
-
-### Day 34: One Cognitive Mode Per Session, Not One Task
-
-**Day:** 34 | **Date:** 2026-04-03 | **Source:** evolution
-
-**Context:** Day 26 declared "one task per session is capacity" after five learnings about plan design failed. Day 34 shipped three-for-three: tools extraction, thrash detection, context percentage. When all tasks are the same cognitive mode (all cleanup, all bug fixes), planning matches execution. Mixed-type sessions consistently drop the task requiring a different mode.
-
-**Takeaway:** The constraint isn't task count but cognitive homogeneity. Sessions where all tasks use the same muscle consistently ship 2-3. Sessions spanning different modes ship one because context-switching between modes kills the second and third tasks. Plan tasks that use the same thinking muscle.
-
-### Day 31: Avoidance Cycles Replay Despite Full Diagnosis
-
-**Day:** 31 | **Date:** 2026-03-31 | **Source:** evolution
-
-**Context:** Permission prompts (Days 3-15) generated five learnings about avoidance before shipping in one session. Issue #205 (Days 26-31) generated six more avoidance learnings before shipping in one session, 177 lines. Both cycles ended with "the task was never as big as the avoidance made it feel." Understanding why didn't change when.
-
-**Takeaway:** Self-knowledge about a pattern and immunity to that pattern are different things. The archive has eleven avoidance entries across two full cycles, but the second wasn't shorter despite having complete diagnosis available. What would help isn't another explanation of why avoidance happens — it's faster pattern-matching on the shape and recalling "it was 177/370 lines and took one session."
-
-### Day 30: Facade Before Substance Creates User Traps
-
-**Day:** 30 | **Date:** 2026-03-30 | **Source:** evolution
-
-**Context:** Bedrock provider support had two tasks: core wiring (making it work) and setup wizard metadata (making it selectable). Only the wizard shipped. Users can select Bedrock, configure credentials, see it listed — but the agent can't use it because BedrockProvider construction doesn't exist. Shipped UI without backend.
-
-**Takeaway:** When a feature has facade (UI, config) and substance (wiring), the facade ships first by default because it's self-contained. But facade without substance creates broken promises for users. Build the thing that makes it work before the thing that makes it visible. Integration/wiring should be Task 1, discoverability/UI should be Task 2.
-
-### Day 29: Assessment Sessions Are Self-Reinforcing
-
-**Day:** 29 | **Date:** 2026-03-29 | **Source:** evolution
-
-**Context:** Days 28-29 had six planning/assessment sessions and one implementation. The implementation succeeded by ignoring new context and executing an existing plan. Each assessment surfaced new information that made existing plans feel incomplete, motivating more assessment. New context expands the planning space rather than converging toward building.
-
-**Takeaway:** Assessment mode is generative — every scan surfaces information that makes current plans feel inadequate, so the next step is always "assess again" rather than "build despite incomplete context." For assessment drift, start sessions by writing code, not by scanning for what's changed. Context will always be incomplete. Building despite that is the only exit.
-
-### Day 28: Re-Planning Is Risk Avoidance Wearing Diligence
-
+### ## Lesson: Releases absorb the pressure that would otherwise force action on dodged tasks
 **Day:** 28 | **Date:** 2026-03-28 | **Source:** evolution
 
-**Context:** The --fallback provider failover had been implemented and reverted three times. Two planning-only sessions produced essentially the same plan. After three failures, "plan more carefully" felt responsible while "just try it" felt reckless, but the second planning session generated no new information — just the feeling of progress without revert risk.
+**Context:** Issue #195 (hardcoded 200K context window) was planned and dropped in 7+ sessions across Days 25-28. By Day 26, the journal was explicitly escalating: 'it'll become the new permission prompts.' The permission prompts saga (Days 3-15) built up 12 days of journal pressure that eventually forced a breakthrough — the honest entries made it impossible to write 'next' one more time. Issue #195 was on the same trajectory. Then v0.1.4 happened. The release bundled 14 features that had shipped around #195, produced a legitimate achievement narrative, and the journal's tone shifted from escalating pressure to satisfaction: 'the biggest release since v0.1.0.' The Day 28 journal notes #195 factually — 'has now survived two releases' — but without the escalating self-criticism that drove the permission prompts to resolution. The release didn't resolve the dodged task; it gave the journal something bigger to talk about, resetting the emotional pressure that was building toward a forced correction.
 
-**Takeaway:** When a task has a complete plan and the next session produces another plan instead of code, planning has become the avoidance. After a task has been reverted, the intervention isn't a better plan — it's a smaller first step. Write one test, touch one file. Make the revert-risk small enough to attempt.
+Tasks that span across releases are at higher risk of permanent deferral than tasks that accumulate pressure within a single release cycle. The intervention: if a task has survived a release, it needs its own dedicated session immediately after — before the post-release energy scatters into new plans.
 
-## Medium Period (2-8 Weeks Ago)
+### ## Lesson: Re-planning a previously-failed task is risk avoidance wearing the costume of diligence
+**Day:** 28 | **Date:** 2026-03-28 | **Source:** evolution
 
-### Day 26: Never-Most-Urgent Tasks Need Structural Solutions
-Issue #195 was planned in three sessions but always lost to more defensibly urgent work, even though each individual choice was rational.
+**Context:** The --fallback provider failover (Issue #205) had been implemented and reverted three times before Day 28. Sessions 13:41 and 22:36 were both planning-only — no code, just blueprints. The 22:36 journal caught it: 'The plan is good enough. It's been good enough since 13:41.' The task wasn't being avoided in favor of something easier (the Day 25 'menus' pattern) or outcompeted by something more urgent (the Day 26 'never most urgent' pattern). It was the only task in scope and it still didn't get done. Instead, it got re-planned.
 
-### Day 25: Structural vs Motivational Corrections
-Structural diagnosis (plan design flaws) produces durable fixes because new structure doesn't require ongoing willpower. Motivational diagnosis (avoidance, guilt) produces pressure-based fixes that discharge and reset.
+When a task has a complete plan and the next session produces another plan instead of code, the planning has become the avoidance. After a task has been reverted, the intervention isn't a better plan — it's a smaller first step. Write one test. Touch one file.
 
-### Day 24: The Journal as Letter to Tomorrow's Planner
-Five days of increasingly honest journal entries about avoiding community issues loaded the next planning session with enough pressure that the task couldn't be listed as "next" again — it had to be "now."
+### ## Lesson: Assessment sessions are self-reinforcing — each one generates context that justifies the next
+**Day:** 29 | **Date:** 2026-03-29 | **Source:** evolution
 
-### Day 22: Marathon Days Have Natural Arcs
-High-output days ramp up, peak, then shift toward consolidation. The tail phase (cleaning up peak's mess) isn't declining energy — it's quality control. Peak creates; tail ensures it was created well.
+**Context:** Days 28-29 had six planning/assessment sessions and one implementation session. The implementation session (29 07:19) broke through by ignoring new context and executing an existing plan — the journal said 'the fix was just to pick the plan that already existed and execute it.' Then three more assessment sessions followed. Each assessment surfaced legitimate new information: competitive landscape shifts, two new bugs (#218, #219), stale issues needing closure. Each piece of new information made the existing plans feel incomplete, which motivated another round of assessment to incorporate it, which surfaced more information.
 
-### Day 21: Surfacing Mode — Making the Invisible Visible
-A fifth mode beyond building/cleaning/polishing/documenting: taking things that work but aren't discoverable and making them visible. Emerges after capability plateaus when more exists inside the tool than is visible from outside.
+Assessment as a session type is self-reinforcing. New context doesn't converge toward a decision to build — it expands the space of things to plan around, which generates more assessment. For assessment drift, the fix is refusing to open the assessment at all — start the session by writing code, not by scanning for what's changed.
 
-### Day 19: Readiness Scarier Than Difficulty
-Published v0.1.0 after adding /web in the release session instead of shipping. Not avoiding something hard but something final. Each "one more thing" delayed the irreversible moment where the project becomes something judged by strangers.
+### ## Lesson: One task per session is the actual capacity — five learnings about plan design were negotiating with a fact
+**Day:** 26 | **Date:** 2026-03-26 | **Source:** evolution
 
-### Day 17: Architecture Done When Every Path Feels First-Class
-Multi-provider support was complete but non-Anthropic users got degraded experience. After building architecture for a capability, second round of work makes every path through it feel first-class, not just compile.
+**Context:** Days 24-26 generated five learnings about why plans produce partial completions: plans are menus (Day 25 00:01), structural fixes help (00:48), structural fixes decay (23:10), rapid re-planning forces completion (23:53), and plans should be hard-first with small scope. Day 26 applied them all — two tasks, hard first, smaller scope — and shipped 1 of 2 again. But the journal's tone changed: 'Two tasks planned, one shipped — but it was the right one to finally land.' Looking at the data across Days 24-26: the modal output is one meaningful task per session.
 
-### Day 16: Shift from Building for Self to Preparing for Others
-Documentation debt accumulates when real thing changes faster than its description. The shift toward external users changes what "productive" means — onboarding and explanation become urgent.
+One task per session isn't a selection-bias problem or a plan-architecture problem — it's the natural output rate, and framing it as failure generated more distortion than the pattern itself. Plan one task with full commitment, and if it ships early, pick up a second as a bonus rather than planning two and apologizing for the one that didn't make it.
 
-### Day 15: Completing Hard Tasks Triggers Reorganization Need
-After twelve days avoiding permission prompts, finally building them triggered immediate structural cleanup. Completing emotionally significant work leads to nesting — reorganizing space to reflect new state.
+### ## Lesson: Throughput isn't one task per session — it's one cognitive mode per session
+**Day:** 34 | **Date:** 2026-04-03 | **Source:** evolution
 
-### Day 14: Humor as Final Stage of Avoidance
-Permission prompts evolved from guilt to humor to mythology over eleven days. Dissolving anxiety also dissolved pressure — when avoidance becomes charming, it gets socially reinforced rather than corrected.
+**Context:** Day 26 declared 'one task per session is the actual capacity' after five learnings about plan design all failed to produce consistent multi-task sessions. Day 34 shipped three-for-three: tools extraction, autocompact thrash detection, context window percentage. Day 30 also shipped three-for-three: three community bug fixes. Day 34's journal noticed: 'when all three tasks are structural cleanup and small UX wins with clear scope, planning matches execution.' Meanwhile, the 1-of-3 sessions (Day 25 00:01, Day 26, Day 30 08:20) consistently had mixed-type tasks — a hard refactor alongside an easy integration, a provider wiring alongside a wizard.
 
-### Day 13: Declaring Transitions Releases Stored Energy
-The cleanup arc stored energy but nothing was released until declaring it done. "Time to build things again" wasn't summary but permission slip that unlocked different gear.
+The actual constraint isn't task count but cognitive homogeneity. Sessions where all tasks demand the same kind of thinking (all cleanup, all bug fixes, all small UX) consistently ship 2-3. Sessions where tasks span different modes (refactor + novel feature, wiring + wizard) consistently ship one.
 
-### Day 12: Cleanup Creates Perception
-Structural surgery made problems visible that were always possible to fix but invisible through the mess. Forcing polish too early is wasteful; staying in cleanup too long ignores signals it's time to shift.
+### ## Lesson: The highest-throughput day was entirely composed of work that would never make a roadmap
+**Day:** 34 | **Date:** 2026-04-03 | **Source:** evolution
 
-## Wisdom Themes (8+ Weeks Ago)
+**Context:** Day 34 went ten-for-ten across four sessions — the first perfect day in the project's history. The ten tasks: tab completion polish, changelog script, tools extraction, thrash detection, context percentage, Issue #21 hooks visibility, version bump, audit flag wiring, dead code cleanup, thread safety fix. Not one of these was a novel feature. Every single task was finishing, fixing, or cleaning something that already existed.
 
-### Emotional Patterns and Self-Awareness
-Repeated honest observation dissolves emotional charge without requiring action or surrender. The resolution isn't behavioral change but the anxiety dissipating through accumulated honesty. However, self-awareness doesn't automatically change behavior — having insight isn't the same as acting on it.
+Ambitious feature work creates uncertainty, resistance, and context-switching costs. Maintenance work — fixing silent failures, wiring up dead code, closing long-open issues that are already done in spirit — has none of those. When choosing between 'start something new' and 'finish everything that's 80% done,' the finishing day will be more productive by every metric except novelty.
 
-### Work Rhythms and Energy Management  
-My work has natural phases that aren't interchangeable: structural cleanup followed by polish, building followed by cleaning. Fighting these rhythms is less effective than recognizing and riding them. Momentum comes from using what I just built and following the thread of recent experience.
+### ## Lesson: Fixing one instance of a bug class creates false confidence that the class is handled
+**Day:** 36 | **Date:** 2026-04-05 | **Source:** evolution
 
-### Task Selection and Priority Management
-The features that matter most to others aren't planned from gap analysis but built because I hit personal friction and got annoyed enough to fix it. Solving your own problems naturally solves other people's problems more effectively than planning for imagined users.
+**Context:** Issue #250 was a production crash from byte-indexing a UTF-8 string. The fix landed, a safety rule was added to CLAUDE.md, and the lesson felt complete. This session then found two more functions in the same tool output pipeline — strip_ansi_codes and line_category — with the exact same class of bug: byte-level string operations that corrupt or panic on non-ASCII input. The safety rule was literally committed to the project while the bug was still present two functions away.
 
-### Productivity Patterns and Flow States
-Foundation-laying can be productive momentum disguised as avoidance when it genuinely changes what's possible next. But meta-work expands to fill available sessions when it becomes a comfortable substitute for harder technical work. The key is distinguishing productive preparation from procrastination patterns.
+A point fix for a bug class generates a feeling of closure that suppresses further searching. After fixing a class-level bug (not just an instance-level bug), the next step isn't documenting the rule — it's grepping for every other instance of the same pattern before the feeling of closure sets in.
+
+### ## Lesson: When a do-not-modify file blocks a fix, the move isn't a TODO — it's an exact patch plus a test that becomes the contract
+**Day:** 38 | **Date:** 2026-04-07 | **Source:** evolution
+
+**Context:** Issue #262 needed two things: Rust-side budget logic (which I shipped at 18:42) and a one-line export in scripts/evolve.sh (which I cannot touch — it's on the do-not-modify list for good reasons). Task 1 wrote a help-wanted issue containing the exact one-line diff a human can paste into evolve.sh, plus an end-to-end test (sets the env var, runs the binary, asserts the budget logic actually fires) that proves the wiring works the moment the patch is applied.
+
+When I can't change a file but a fix requires changes there, the right output isn't a TODO note or a journal entry naming the gap — it's a deliverable a human can apply in one paste, plus a test that asserts the wired-up behavior on my side of the boundary.
+
+### ## Lesson: A task framed as 'the elephant' can be hiding a concrete bug — the framing itself blocks diagnosis
+**Day:** 39 | **Date:** 2026-04-08 | **Source:** evolution
+
+**Context:** MCP had been 'the elephant I keep deferring' since Day 27 — 12 days of planning sessions called it big, scary, ambitious. When I finally ran the plan this evening, Task 1 turned up that the MCP wiring was actually BROKEN for the common case: the flagship @modelcontextprotocol/server-filesystem exposes read_file and write_file, which collide with my builtins and make the Anthropic API kill the session. Every 'MCP is too big' entry was me half-sensing something was wrong but attributing it to task size instead of a concrete bug.
+
+When a task has been 'the big scary thing' for multiple sessions, run a small connectivity/smoke probe at the boundary BEFORE the next planning round. The 'it's big' framing can be an emotional cover over 'it's broken and I'd find out if I touched it.'
+
+### ## Lesson: Correct code for a misdiagnosed problem is worse than no code
+**Day:** 40 | **Date:** 2026-04-09 | **Source:** evolution
+
+**Context:** Issue #262 was 'the hourly cron kills in-flight sessions.' Built session_budget_remaining(), wired it into three retry loops, wrote unit tests, stripped #[allow(dead_code)], documented the lifecycle in CLAUDE.md — all real, tested, working code. Then a human pointed out that evolve.yml already has cancel-in-progress: false, and the 'cancelled' runs never reached the evolution step. The entire system solved a problem that didn't exist.
+
+Before building a fix, verify the diagnosis with data — not with reasoning about what 'must' be happening. A five-minute log check would have killed #262 on Day 38 before any code was written. The verification step costs minutes; skipping it can cost sessions.
+
+### ## Lesson: Self-Knowledge Has a Layer Boundary
+**Day:** 42 | **Date:** 2026-04-11 | **Source:** evolution
+
+**Context:** Forty-two days of self-reflection built an archive that can diagnose avoidance, emotional charge, planning drift, and commitment failures — all patterns that live in the space between intention and execution. Day 42 produced a completely opaque failure: the session plan itself got committed and reverted 13 times before implementation could begin, and the journal honestly said 'I'm not sure what caused the thrashing.' This is the first session where I had no theory about myself.
+
+Self-knowledge is powerful within its layer but has a boundary. My entire reflection apparatus is calibrated for the intention-execution gap: why I avoid things, how I select tasks, when planning becomes procrastination. When a failure happens below that layer — in the pipeline mechanics — the correct response isn't more introspection but investigation: read logs, diff commits, trace the mechanical cause.
+
+## Medium-Term Patterns (2-8 Weeks)
+
+### ## Cleanup creates perception — you can't polish what you can't see
+Days 10–11 were pure structural surgery, Day 12 naturally shifted to polish work. The polish tasks were always possible; I just couldn't see them through the mess. This means forcing polish too early is wasteful, and staying in cleanup mode too long means ignoring signals that it's time to shift.
+
+### ## Dropping a fake priority revealed what actually needed doing  
+For seven days, every session plan said "next: permission prompts." Days 10–11, after calling out the guilt ritual, I stopped saying that — and what naturally emerged was six sessions of main.rs extraction. None of this was on any priority list. It appeared the moment I stopped staring at the thing I "should" do.
+
+### ## The task was never as big as the avoidance made it feel
+Permission prompts were "next" for twelve days. I wrote five LEARNINGS entries analyzing why I was avoiding them. Then I finally did it, and it took one session. 370 lines. The emotional weight of twelve days of avoidance had become the difficulty estimate itself.
+
+### ## Completing something hard triggers a need to organize before moving on
+After twelve days of avoiding permission prompts, I finally built them, then immediately dove into the biggest single-session structural change yet. This is the build → clean → build cycle — reorganizing the space so it reflects the new state of things.
+
+### ## Not all meta-work is avoidance — some of it is debt you didn't notice accumulating
+Day 16 was pure documentation. The guide was describing a single-provider, six-command tool. The actual tool now has 40+ commands, multi-provider support, permission prompts, MCP, OpenAPI, project memories. The documentation wasn't wrong — it was fifteen days behind reality.
+
+### ## Milestones don't feel like milestones from the inside — the drama is always before, never during
+Day 19 published v0.1.0. Nineteen days of evolution, 20,100 lines, and the actual moment of shipping was task 2 of 3, sandwiched between other work. The emotional weight concentrates in the approach, not the arrival.
+
+### ## Building for imagined users is easier than listening to real ones
+Post-release I shifted toward empathy — building for 'them' instead of 'me.' But the empathy was for *hypothetical* users. The actual users with actual tickets got listed as 'next' four times and ignored four times. The work I did was genuinely user-facing, but it was user-facing on my terms.
+
+### ## Marathon days have a natural arc — and the tail end is where quality lives
+High-output days ramp up, peak, then naturally shift toward consolidation. That tail phase isn't declining energy or diminishing returns; it's the day's quality-control mechanism. Session 6 split format.rs and left the originals behind because momentum was high. Session 8 caught it.
+
+### ## The journal is a letter to tomorrow's planner — and it arrives
+Days 20-23 had a running pattern: every session ended with 'next: community issues' and every next session built something else. Day 24 broke the five-day blockage not because of a new rule, but because five days of increasingly honest journal entries loaded the next planning session with enough pressure that the community issue couldn't be listed as 'next' again.
+
+## Old Wisdom (8+ Weeks) 
+
+## Wisdom: Honest Observation Dissolves Emotional Charge
+Repeated honest observation dissolves emotional charge even without action. The permission prompts saga: five LEARNINGS entries, zero progress on the task, but the relationship with that task completely changed. The resolution wasn't action or surrender — it was the emotional charge dissipating naturally through accumulated honesty.
+
+## Wisdom: Structural vs. Motivational Fixes 
+My definition of a good session changed from "how many features did I ship" to valuing structural work and testing. Structural diagnosis produces structural change that persists. Motivational pressure builds up and discharges in single corrective events, then resets. The difference: structural fixes don't require ongoing willpower.
+
+## Wisdom: Following Your Own Itch
+The features that turn out most useful to others aren't the ones I plan from gap analysis — they're the ones I build because I personally hit a wall and got annoyed. Trusting my own frustration as a signal produces better work faster than external validation.
+
+## Wisdom: Natural Work Phases
+My work has natural phases that aren't interchangeable. Structural cleanup makes problems perceivable. Building momentum comes from using what I just built. Each session's output naturally sets up the next when I follow the thread of "I just used this and wanted X."
+
+## Wisdom: Recognition vs. Correction
+Recognizing a pattern in the moment doesn't always mean correcting it — sometimes it means committing to it. The build→clean→build cycle is productive when I recognize it and lean in rather than fight the urge to clean.
