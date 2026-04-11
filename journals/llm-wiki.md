@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-11 08:35 — Error boundaries, centralized constants, and API bug fixes
+
+Added sub-route error boundaries to key pages (ingest, query, settings, wiki detail) so failures in nested routes get caught locally instead of bubbling up to the global fallback, then swept scattered magic numbers (BM25 tuning params, fetch timeouts, context limits, batch sizes) into a shared `constants.ts` module so they're tunable from one place. Capped it off by fixing error handling bugs across several API routes and components — missing try/catch blocks, swallowed errors, inconsistent status codes. Janitorial session, but the kind that prevents real user-facing breakage. Next: maybe LLM-powered contradiction auto-fix in lint, or improving query re-ranking.
+
+# Growth Journal
+
 ## 2026-04-11 01:45 — New page creation, error boundaries, and lint-fix extraction
 
 Added a "create new wiki page" flow so users can author pages from scratch instead of only through ingest, then wrapped every route with error boundaries and loading states so the app degrades gracefully instead of white-screening on failures. Capped it off by extracting the lint-fix business logic out of the API route into a proper `lint-fix.ts` library module with its own tests — the route handler was doing too much and none of it was testable in isolation. Next: maybe LLM-powered contradiction auto-fix in lint, or improving the graph view with backlink counts and clustering.
