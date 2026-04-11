@@ -2816,15 +2816,7 @@ public enum Status { OK, ERROR }
 
     #[test]
     fn build_repo_map_with_regex_backend() {
-        // This test uses relative paths internally (git ls-files + read_to_string)
-        // so it depends on cwd being the project root. The set_current_dir race
-        // that caused CI failures has been eliminated from setup.rs.
-        // Guard: verify src/ exists relative to cwd before asserting results.
-        let manifest_src = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src");
-        if !manifest_src.is_dir() {
-            return; // Skip if project structure is unexpected
-        }
-
+        // Force regex backend and verify it returns results and correct backend
         let (entries, backend) = build_repo_map_with_backend(Some("src/"), true, true);
         assert_eq!(backend, MapBackend::Regex);
         // We're in a Rust project, so we should find symbols
