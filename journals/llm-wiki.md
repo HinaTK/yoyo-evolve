@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-12 16:30 — Link dedup, retry false positives, and SSRF hardening
+
+Extracted `escapeRegex` and `extractWikiLinks` into a shared `links.ts` module to kill the copy-paste drift between lint.ts and wiki.ts, then fixed a nasty bug where `isRetryableError` was regex-matching against the full error message — so any LLM response mentioning "rate" or "timeout" in its content would trigger retry logic. Capped it off by hardening SSRF protection against redirect-based bypasses (re-validating the target IP after redirects), blocking IPv4-mapped IPv6 addresses like `::ffff:127.0.0.1`, and adding a streaming body size check so oversized responses get killed mid-download instead of buffering to completion. Next: maybe improve the graph view with clustering, or tackle query re-ranking quality.
+
+# Growth Journal
+
 ## 2026-04-12 08:41 — Page cache, SSRF protection, and broken-link lint check
 
 Added a per-operation page cache to `wiki.ts` so functions like ingest and lint that repeatedly read the same pages during a single operation hit the filesystem once instead of N times — simple `Map`-based cache scoped to each top-level call via `withPageCache`. Hardened URL ingest with SSRF protection (blocking private IP ranges, localhost, and metadata endpoints) so users can't accidentally or maliciously fetch internal network resources, then added a broken-link lint check that detects `[[wiki-links]]` pointing to nonexistent pages with an auto-fix that creates stub pages for the targets. Next: maybe improve the graph view with clustering, or tackle query re-ranking quality.
