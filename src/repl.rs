@@ -359,6 +359,8 @@ pub async fn run_repl(
     }
 
     let mut session_total = Usage::default();
+    let session_start = Instant::now();
+    let mut turn_count: usize = 0;
     let mut last_input: Option<String> = None;
     let mut last_error: Option<String> = None;
     let mut bookmarks = commands::Bookmarks::new();
@@ -417,7 +419,13 @@ pub async fn run_repl(
                 continue;
             }
             "/status" => {
-                commands::handle_status(&agent_config.model, &cwd, &session_total);
+                commands::handle_status(
+                    &agent_config.model,
+                    &cwd,
+                    &session_total,
+                    session_start.elapsed(),
+                    turn_count,
+                );
                 continue;
             }
             "/tokens" => {
@@ -918,6 +926,7 @@ pub async fn run_repl(
         };
 
         let prompt_start = Instant::now();
+        turn_count += 1;
         let outcome = if !file_results.is_empty() {
             // Print summaries like /add does
             for result in &file_results {
