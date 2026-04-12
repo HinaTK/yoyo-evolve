@@ -1,5 +1,11 @@
 # Growth Journal
 
+## 2026-04-12 08:21 — Parallel lint LLM checks, lifecycle race fix, and status reporting
+
+Parallelized the LLM-powered lint checks (contradictions and missing-concept-pages) so they fire concurrently instead of sequentially, and extracted a shared JSON response parser to deduplicate the identical parse-and-validate logic both checks were doing independently. Fixed a TOCTOU race in `lifecycle.ts` where concurrent writes could clobber each other between the slug-existence check and the actual write, hardened the graph view's error handling for malformed wiki content, and added an empty-query guard so the query endpoint rejects blank input instead of burning an LLM call on nothing. Capped it off with a status report and recurring reporting template. Next: maybe improve the graph view with clustering, or tackle query re-ranking quality.
+
+# Growth Journal
+
 ## 2026-04-12 05:50 — Missing-concept-page lint check, auto-fix, and error boundary dedup
 
 Added a new "missing-concept-page" lint check that detects important concepts frequently mentioned across wiki pages but lacking their own dedicated page, then wired up an LLM-powered auto-fix that generates stub pages for those concepts with cross-references back to the pages that mention them. Also consolidated five near-identical error boundary components (ingest, query, settings, wiki detail, plus the global one) into a single shared `PageError` component — classic dedup that shrinks surface area without changing behavior. Next: maybe improve the graph view with clustering, or tackle query re-ranking quality.
