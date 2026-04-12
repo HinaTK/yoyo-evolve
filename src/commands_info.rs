@@ -25,12 +25,23 @@ pub fn handle_version() {
 
 // ── /status ──────────────────────────────────────────────────────────────
 
-pub fn handle_status(model: &str, cwd: &str, session_total: &Usage) {
+pub fn handle_status(
+    model: &str,
+    cwd: &str,
+    session_total: &Usage,
+    elapsed: std::time::Duration,
+    turns: usize,
+) {
     println!("{DIM}  model:   {model}");
     if let Some(branch) = git_branch() {
         println!("  git:     {branch}");
     }
     println!("  cwd:     {cwd}");
+    println!(
+        "  session: {} elapsed, {turns} turn{}",
+        format_duration(elapsed),
+        if turns == 1 { "" } else { "s" }
+    );
     println!(
         "  tokens:  {} in / {} out (session total){RESET}\n",
         session_total.input, session_total.output
@@ -205,6 +216,33 @@ mod tests {
         assert!(
             source.contains("session totals below show full usage"),
             "Compaction note should reference session totals"
+        );
+    }
+
+    #[test]
+    fn test_handle_status_with_timing() {
+        use std::time::Duration;
+        // Just verify it doesn't panic with various inputs
+        handle_status(
+            "test-model",
+            "/tmp",
+            &Usage::default(),
+            Duration::from_secs(0),
+            0,
+        );
+        handle_status(
+            "test-model",
+            "/tmp",
+            &Usage::default(),
+            Duration::from_secs(125),
+            1,
+        );
+        handle_status(
+            "test-model",
+            "/tmp",
+            &Usage::default(),
+            Duration::from_secs(7200),
+            42,
         );
     }
 }
