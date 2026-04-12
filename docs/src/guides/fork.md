@@ -43,69 +43,14 @@ Your agent needs a GitHub App to commit code and interact with issues.
 
 In your fork, go to **Settings > Secrets and variables > Actions** and add:
 
-#### GitHub App secrets (always required)
-
 | Secret | Description |
 |--------|-------------|
+| `ANTHROPIC_API_KEY` | Your Anthropic API key |
 | `APP_ID` | GitHub App ID |
 | `APP_PRIVATE_KEY` | GitHub App private key (PEM) |
 | `APP_INSTALLATION_ID` | GitHub App installation ID |
 
-#### AI provider secret (pick one)
-
-yoyo supports 13+ AI providers. Add the secret for whichever provider you want to use:
-
-| Provider | Secret Name | Example Models |
-|----------|-------------|----------------|
-| Anthropic | `ANTHROPIC_API_KEY` | `claude-opus-4-6`, `claude-sonnet-4-20250514` |
-| OpenAI | `OPENAI_API_KEY` | `gpt-4o`, `gpt-4.1`, `o3`, `o4-mini` |
-| Google | `GOOGLE_API_KEY` | `gemini-2.5-pro`, `gemini-2.5-flash` |
-| OpenRouter | `OPENROUTER_API_KEY` | Access many models via one key |
-| xAI | `XAI_API_KEY` | `grok-3`, `grok-3-mini` |
-| DeepSeek | `DEEPSEEK_API_KEY` | `deepseek-chat`, `deepseek-reasoner` |
-| Groq | `GROQ_API_KEY` | `llama-3.3-70b-versatile` (fast inference) |
-| Mistral | `MISTRAL_API_KEY` | `mistral-large-latest`, `codestral-latest` |
-| AWS Bedrock | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` | Claude & Nova on AWS |
-
-The default workflow uses `ANTHROPIC_API_KEY`. If you want a different provider, see [Choose Your Provider](#choose-your-provider) below.
-
-### 5. Choose your provider
-
-The evolution workflow uses Anthropic's Claude by default. To use a different provider:
-
-1. **Add your provider's API key** as a repo secret (see the table above)
-2. **Set environment variables** in `.github/workflows/evolve.yml`:
-
-For **Anthropic** (default — no changes needed):
-```yaml
-env:
-  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-```
-
-For **OpenAI**:
-```yaml
-env:
-  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-  MODEL: gpt-4o
-```
-
-For **Google Gemini**:
-```yaml
-env:
-  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-  MODEL: gemini-2.5-pro
-```
-
-For **OpenRouter** (access many models with one key):
-```yaml
-env:
-  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-  MODEL: anthropic/claude-sonnet-4-20250514
-```
-
-yoyo auto-detects the provider from the model name in most cases. Setting `MODEL` is usually enough — but you can also set `PROVIDER` explicitly if needed (e.g., `PROVIDER: openai`).
-
-### 6. Enable the Evolution workflow
+### 5. Enable the Evolution workflow
 
 Go to **Actions** in your fork and enable the **Evolution** workflow. Your agent will start evolving on its next scheduled run, or trigger it manually with **Run workflow**.
 
@@ -123,34 +68,18 @@ Go to **Actions** in your fork and enable the **Evolution** workflow. Your agent
 
 ## Costs
 
-Costs depend on which provider and model you choose:
+The agent uses the Anthropic API (Claude Opus by default):
+- **~$3-8 per evolution session** depending on task complexity
+- **~3 sessions per day** (8-hour gap between runs)
+- **~$10-25/day** typical cost
 
-- **Anthropic Claude Opus** (default): ~$3–8 per session, ~$10–25/day
-- **Anthropic Claude Sonnet**: Significantly cheaper than Opus
-- **OpenAI GPT-4o**: Comparable to Claude Sonnet
-- **Google Gemini 2.5 Pro/Flash**: Competitive pricing, Flash is very cheap
-- **DeepSeek**: Very affordable
-- **Groq**: Free tier available for smaller models
-- **OpenRouter**: Prices vary by model — lets you comparison-shop
-
-The agent runs ~3 sessions per day (8-hour gap between runs). To reduce costs, switch to a cheaper model by setting the `MODEL` environment variable in `.github/workflows/evolve.yml`.
+To reduce costs, set the `MODEL` environment variable in `.github/workflows/evolve.yml` to a cheaper model (e.g., `claude-sonnet-4-6`).
 
 ## Customization
 
 ### Change the model
 
-Set the `MODEL` environment variable in the workflow. Some examples:
-
-| Model | Provider | Notes |
-|-------|----------|-------|
-| `claude-opus-4-6` | Anthropic | Default, most capable, most expensive |
-| `claude-sonnet-4-20250514` | Anthropic | Good balance of quality and cost |
-| `gpt-4o` | OpenAI | Requires `OPENAI_API_KEY` secret |
-| `gemini-2.5-pro` | Google | Requires `GOOGLE_API_KEY` secret |
-| `anthropic/claude-sonnet-4-20250514` | OpenRouter | Requires `OPENROUTER_API_KEY` secret |
-| `deepseek-chat` | DeepSeek | Requires `DEEPSEEK_API_KEY` secret |
-
-Remember to add the matching API key secret when switching providers.
+Set the `MODEL` environment variable in the workflow, or edit the default in `scripts/evolve.sh`.
 
 ### Change session frequency
 
