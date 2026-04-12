@@ -43,24 +43,6 @@ pub fn run_git_commit(message: &str) -> (bool, String) {
     }
 }
 
-/// The co-authored-by trailer appended to commits made through yoyo.
-const CO_AUTHORED_TRAILER: &str = "Co-authored-by: yoyo <yoyo@users.noreply.github.com>";
-
-/// Append a `Co-authored-by: yoyo` trailer to a commit message.
-/// If the trailer is already present, returns the message unchanged.
-pub fn append_co_authored_trailer(message: &str) -> String {
-    if message.contains(CO_AUTHORED_TRAILER) {
-        return message.to_string();
-    }
-    format!("{message}\n\n{CO_AUTHORED_TRAILER}")
-}
-
-/// Like `run_git_commit`, but appends a co-authored-by trailer first.
-pub fn run_git_commit_with_trailer(message: &str) -> (bool, String) {
-    let with_trailer = append_co_authored_trailer(message);
-    run_git_commit(&with_trailer)
-}
-
 /// Generate a conventional commit message from a diff using simple heuristics.
 /// This is a local, token-free approach — no AI calls needed.
 pub fn generate_commit_message(diff: &str) -> String {
@@ -1094,51 +1076,5 @@ stash@{1}: On feature: def5678 wip stuff";
     fn colorize_diff_empty_input() {
         let result = colorize_diff("");
         assert_eq!(result, "", "Empty input should return empty output");
-    }
-
-    // ── co-authored-by trailer tests ─────────────────────────────────────
-
-    #[test]
-    fn co_authored_trailer_normal_message() {
-        let result = append_co_authored_trailer("fix: typo");
-        assert_eq!(
-            result,
-            "fix: typo\n\nCo-authored-by: yoyo <yoyo@users.noreply.github.com>"
-        );
-    }
-
-    #[test]
-    fn co_authored_trailer_empty_message() {
-        let result = append_co_authored_trailer("");
-        assert!(
-            result.contains("Co-authored-by: yoyo"),
-            "Should still append trailer to empty message"
-        );
-    }
-
-    #[test]
-    fn co_authored_trailer_already_present() {
-        let msg = "fix: typo\n\nCo-authored-by: yoyo <yoyo@users.noreply.github.com>";
-        let result = append_co_authored_trailer(msg);
-        assert_eq!(result, msg, "Should not duplicate existing trailer");
-    }
-
-    #[test]
-    fn co_authored_trailer_multiline_message() {
-        let msg = "feat: add new command\n\nThis adds a cool new feature\nwith multiple lines.";
-        let result = append_co_authored_trailer(msg);
-        assert!(
-            result.starts_with(msg),
-            "Original message should be preserved"
-        );
-        assert!(
-            result.ends_with("Co-authored-by: yoyo <yoyo@users.noreply.github.com>"),
-            "Trailer should be at the end"
-        );
-        // Ensure proper blank line separation
-        assert!(
-            result.contains("\n\nCo-authored-by:"),
-            "Trailer should be separated by a blank line"
-        );
     }
 }
