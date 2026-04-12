@@ -627,7 +627,7 @@ fn handle_undo_all(history: &mut crate::prompt::TurnHistory) -> Option<String> {
 pub fn handle_commit(input: &str) {
     let arg = input.strip_prefix("/commit").unwrap_or("").trim();
     if !arg.is_empty() {
-        let (ok, output) = run_git_commit(arg);
+        let (ok, output) = run_git_commit_with_trailer(arg);
         if ok {
             println!("{GREEN}  ✓ {}{RESET}\n", output.trim());
         } else {
@@ -654,7 +654,7 @@ pub fn handle_commit(input: &str) {
                     let response = response.trim().to_lowercase();
                     match response.as_str() {
                         "y" | "yes" | "" => {
-                            let (ok, output) = run_git_commit(&suggested);
+                            let (ok, output) = run_git_commit_with_trailer(&suggested);
                             if ok {
                                 println!("{GREEN}  ✓ {}{RESET}\n", output.trim());
                             } else {
@@ -671,7 +671,7 @@ pub fn handle_commit(input: &str) {
                                 if custom_msg.is_empty() {
                                     println!("{DIM}  (commit cancelled — empty message){RESET}\n");
                                 } else {
-                                    let (ok, output) = run_git_commit(custom_msg);
+                                    let (ok, output) = run_git_commit_with_trailer(custom_msg);
                                     if ok {
                                         println!("{GREEN}  ✓ {}{RESET}\n", output.trim());
                                     } else {
