@@ -78,7 +78,7 @@ See [Session Persistence](../features/sessions.md) for details.
 
 | Command | Description |
 |---------|-------------|
-| `/status` | Show current model, git branch, working directory, session duration, turn count, and token totals |
+| `/status` | Show current model, git branch, working directory, and session token totals |
 | `/tokens` | Show detailed token usage: context window fill level, session totals, and estimated cost |
 | `/cost` | Show estimated session cost |
 | `/config` | Show all current settings |
