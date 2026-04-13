@@ -80,15 +80,39 @@ pub fn find_files(pattern: &str) -> Vec<FindMatch> {
 
 /// List all project files. Prefers `git ls-files`, falls back to walkdir-style listing.
 fn list_project_files() -> Vec<String> {
+    // Use git toplevel to avoid CWD-dependency (prevents flaky tests when
+    // another test calls set_current_dir during parallel execution).
+    if let Ok(toplevel) = crate::git::run_git(&["rev-parse", "--show-toplevel"]) {
+        if let Ok(output) = std::process::Command::new("git")
+            .args(["-C", &toplevel, "ls-files"])
+            .output()
+        {
+            if output.status.success() {
+                let text = String::from_utf8_lossy(&output.stdout);
+                let files: Vec<String> = text
+                    .lines()
+                    .filter(|l| !l.is_empty())
+                    .map(|l| l.to_string())
+                    .collect();
+                if !files.is_empty() {
+                    return files;
+                }
+            }
+        }
+    }
+    // Fallback: original CWD-based behavior
     if let Ok(text) = crate::git::run_git(&["ls-files"]) {
-        return text
+        let files: Vec<String> = text
             .lines()
             .filter(|l| !l.is_empty())
             .map(|l| l.to_string())
             .collect();
+        if !files.is_empty() {
+            return files;
+        }
     }
 
-    // Fallback: recursive listing of current directory (respecting common ignores)
+    // Last resort: recursive listing of current directory (respecting common ignores)
     walk_directory(".", 8)
 }
 
@@ -2850,6 +2874,22 @@ public enum Status { OK, ERROR }
         assert_eq!(MapBackend::AstGrep, MapBackend::AstGrep);
         assert_eq!(MapBackend::Regex, MapBackend::Regex);
         assert_ne!(MapBackend::AstGrep, MapBackend::Regex);
+    }
+
+    #[test]
+    fn list_project_files_returns_known_file() {
+        // Verify that list_project_files() returns results including Cargo.toml
+        // even if CWD has drifted, thanks to the git-toplevel approach.
+        let files = list_project_files();
+        assert!(
+            !files.is_empty(),
+            "list_project_files should return at least some files"
+        );
+        assert!(
+            files.iter().any(|f| f == "Cargo.toml"),
+            "list_project_files should include Cargo.toml; got {} files",
+            files.len()
+        );
     }
 
     // ── tests moved from commands.rs (Issue #260) ───────────────────
