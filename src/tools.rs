@@ -465,7 +465,7 @@ impl AgentTool for StreamingBashTool {
     }
 
     fn description(&self) -> &str {
-        "Execute a bash command and return stdout/stderr. Use for running scripts, installing packages, checking system state, etc. Supports an optional timeout parameter for long-running commands."
+        "Execute a bash command and return stdout/stderr. Use for running scripts, installing packages, checking system state, etc."
     }
 
     fn parameters_schema(&self) -> serde_json::Value {
@@ -475,10 +475,6 @@ impl AgentTool for StreamingBashTool {
                 "command": {
                     "type": "string",
                     "description": "The bash command to execute"
-                },
-                "timeout": {
-                    "type": "integer",
-                    "description": "Maximum seconds to wait for command completion (default: 120, max: 600). Use for long-running builds, test suites, or installs."
                 }
             },
             "required": ["command"]
@@ -543,11 +539,7 @@ impl AgentTool for StreamingBashTool {
         cmd.stdout(std::process::Stdio::piped());
         cmd.stderr(std::process::Stdio::piped());
 
-        let timeout = if let Some(t) = params.get("timeout").and_then(|v| v.as_u64()) {
-            Duration::from_secs(t.clamp(1, 600))
-        } else {
-            self.timeout
-        };
+        let timeout = self.timeout;
         let max_bytes = self.max_output_bytes;
         let update_interval = self.update_interval;
         let lines_per_update = self.lines_per_update;
@@ -2139,68 +2131,6 @@ mod tests {
         assert!(
             result.unwrap_err().to_string().contains("timed out"),
             "Expected timeout error"
-        );
-    }
-
-    #[tokio::test]
-    async fn test_streaming_bash_custom_timeout() {
-        // Pass timeout: 1 (1 second) with a command that sleeps 5s — should timeout
-        let tool = StreamingBashTool::default();
-        let ctx = test_tool_context(None);
-        let params = serde_json::json!({"command": "sleep 5", "timeout": 1});
-        let result = tool.execute(params, ctx).await;
-        assert!(result.is_err());
-        let err = result.unwrap_err().to_string();
-        assert!(
-            err.contains("timed out") && err.contains("1s"),
-            "Expected timeout after 1s, got: {err}"
-        );
-    }
-
-    #[tokio::test]
-    async fn test_streaming_bash_custom_timeout_default() {
-        // No timeout param — should use the struct's default (120s)
-        let tool = StreamingBashTool::default();
-        let ctx = test_tool_context(None);
-        // A fast command that completes well within 120s
-        let params = serde_json::json!({"command": "echo hello"});
-        let result = tool.execute(params, ctx).await.unwrap();
-        assert_eq!(result.details["success"], true);
-        // Verify the tool's default is 120s
-        assert_eq!(tool.timeout, Duration::from_secs(120));
-    }
-
-    #[tokio::test]
-    async fn test_streaming_bash_custom_timeout_clamped() {
-        // Pass timeout: 9999 — should be clamped to 600
-        // We verify by checking the command succeeds (it would fail if somehow
-        // the timeout were applied as 9999s which is nonsensical)
-        // and by testing the clamping logic path with a short-running command
-        let tool = StreamingBashTool::default();
-        let ctx = test_tool_context(None);
-        let params = serde_json::json!({"command": "echo clamped", "timeout": 9999});
-        let result = tool.execute(params, ctx).await.unwrap();
-        assert_eq!(result.details["success"], true);
-        match &result.content[0] {
-            yoagent::types::Content::Text { text } => {
-                assert!(text.contains("clamped"));
-            }
-            _ => panic!("Expected text content"),
-        }
-    }
-
-    #[tokio::test]
-    async fn test_streaming_bash_custom_timeout_zero_clamped_to_one() {
-        // timeout: 0 should be clamped to 1 second
-        let tool = StreamingBashTool::default();
-        let ctx = test_tool_context(None);
-        let params = serde_json::json!({"command": "sleep 5", "timeout": 0});
-        let result = tool.execute(params, ctx).await;
-        assert!(result.is_err());
-        let err = result.unwrap_err().to_string();
-        assert!(
-            err.contains("timed out") && err.contains("1s"),
-            "Expected timeout after 1s (clamped from 0), got: {err}"
         );
     }
 
