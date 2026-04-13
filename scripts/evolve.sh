@@ -37,7 +37,7 @@ if date -j &>/dev/null; then
 else
     DAY=$(( ($(date +%s) - $(date -d "$BIRTH_DATE" +%s)) / 86400 ))
 fi
-echo "$DAY" > DAY_COUNT
+# DAY_COUNT is written at the end of the session (separate commit, immune to task reverts)
 
 # Pull latest changes (in case a queued run starts with stale checkout)
 git pull --rebase --quiet 2>/dev/null || true
@@ -1792,7 +1792,7 @@ RESPONDEOF
     rm -f "$RESPOND_LOG"
 fi
 
-# Commit any remaining uncommitted changes (journal, day counter, etc.)
+# Commit any remaining uncommitted changes (journal, etc.)
 git add -A
 if ! git diff --cached --quiet; then
     if [ "$IS_ACCELERATED" = "true" ]; then
@@ -1803,6 +1803,13 @@ if ! git diff --cached --quiet; then
     echo "  Committed session wrap-up."
 else
     echo "  No uncommitted changes remaining."
+fi
+
+# Update DAY_COUNT (separate commit — immune to task reverts)
+echo "$DAY" > DAY_COUNT
+git add DAY_COUNT
+if ! git diff --cached --quiet; then
+    git commit -m "Day $DAY: update day counter"
 fi
 
 # ── Step 7b: Tag known-good state ──
