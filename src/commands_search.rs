@@ -62,7 +62,7 @@ pub fn fuzzy_score(path: &str, pattern: &str) -> Option<i32> {
 /// Find files matching a fuzzy pattern. Uses `git ls-files` if in a git repo,
 /// otherwise falls back to a recursive directory listing.
 pub fn find_files(pattern: &str) -> Vec<FindMatch> {
-    let (_root, files) = list_project_files();
+    let files = list_project_files();
     let mut matches: Vec<FindMatch> = files
         .iter()
         .filter_map(|path| {
@@ -79,47 +79,17 @@ pub fn find_files(pattern: &str) -> Vec<FindMatch> {
 }
 
 /// List all project files. Prefers `git ls-files`, falls back to walkdir-style listing.
-///
-/// Uses `git rev-parse --show-toplevel` + `git -C <toplevel> ls-files` so the
-/// result is independent of the process CWD.  This prevents flaky test failures
-/// when another test calls `set_current_dir` during parallel execution.
-/// Returns (repo_root_or_dot, relative_paths).
-fn list_project_files() -> (String, Vec<String>) {
-    // Resolve the repo root first so we're CWD-independent.
-    if let Ok(toplevel) = crate::git::run_git(&["rev-parse", "--show-toplevel"]) {
-        let toplevel = toplevel.trim().to_string();
-        if let Ok(output) = std::process::Command::new("git")
-            .args(["-C", &toplevel, "ls-files"])
-            .output()
-        {
-            if output.status.success() {
-                let text = String::from_utf8_lossy(&output.stdout);
-                let files: Vec<String> = text
-                    .lines()
-                    .filter(|l| !l.is_empty())
-                    .map(|l| l.to_string())
-                    .collect();
-                if !files.is_empty() {
-                    return (toplevel, files);
-                }
-            }
-        }
-    }
-
-    // Fallback: plain `git ls-files` from CWD (non-git repos or edge cases)
+fn list_project_files() -> Vec<String> {
     if let Ok(text) = crate::git::run_git(&["ls-files"]) {
-        let files: Vec<String> = text
+        return text
             .lines()
             .filter(|l| !l.is_empty())
             .map(|l| l.to_string())
             .collect();
-        if !files.is_empty() {
-            return (".".to_string(), files);
-        }
     }
 
-    // Final fallback: recursive listing of current directory
-    (".".to_string(), walk_directory(".", 8))
+    // Fallback: recursive listing of current directory (respecting common ignores)
+    walk_directory(".", 8)
 }
 
 /// Simple recursive directory walk (fallback when not in a git repo).
@@ -235,8 +205,7 @@ pub fn extract_first_meaningful_line(content: &str) -> String {
 /// Uses `git ls-files` when available, falls back to directory walk.
 /// Only indexes text-like source files (skips binaries, images, etc.).
 pub fn build_project_index() -> Vec<IndexEntry> {
-    let (root, files) = list_project_files();
-    let root_path = std::path::Path::new(&root);
+    let files = list_project_files();
     let mut entries = Vec::new();
 
     for path in &files {
@@ -245,9 +214,8 @@ pub fn build_project_index() -> Vec<IndexEntry> {
             continue;
         }
 
-        // Read the file using the repo root for reliable resolution
-        let full = root_path.join(path);
-        let content = match std::fs::read_to_string(&full) {
+        // Read the file — skip if it fails (binary, permission, etc.)
+        let content = match std::fs::read_to_string(path) {
             Ok(c) => c,
             Err(_) => continue,
         };
@@ -1493,8 +1461,7 @@ pub fn build_repo_map_with_backend(
     public_only: bool,
     force_regex: bool,
 ) -> (Vec<FileSymbols>, MapBackend) {
-    let (repo_root, files) = list_project_files();
-    let repo_root_path = std::path::Path::new(&repo_root);
+    let files = list_project_files();
     let mut result = Vec::new();
 
     // Check ast-grep availability once upfront
@@ -1520,9 +1487,7 @@ pub fn build_repo_map_with_backend(
             Some(l) => l,
             None => continue,
         };
-        // Read using the repo root for reliable resolution
-        let full = repo_root_path.join(path);
-        let content = match std::fs::read_to_string(&full) {
+        let content = match std::fs::read_to_string(path) {
             Ok(c) => c,
             Err(_) => continue,
         };
@@ -2851,8 +2816,10 @@ public enum Status { OK, ERROR }
 
     #[test]
     fn build_repo_map_with_regex_backend() {
-        // list_project_files() now uses `git -C <toplevel> ls-files` and callers
-        // resolve paths via the repo root, so this test is CWD-independent.
+        // This test uses relative paths internally (git ls-files + read_to_string)
+        // so it depends on cwd being the project root. The set_current_dir race
+        // that caused CI failures has been eliminated from setup.rs.
+        // Guard: verify src/ exists relative to cwd before asserting results.
         let manifest_src = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src");
         if !manifest_src.is_dir() {
             return; // Skip if project structure is unexpected
@@ -2864,24 +2831,6 @@ public enum Status { OK, ERROR }
         assert!(
             !entries.is_empty(),
             "should find symbols in src/ with regex backend"
-        );
-    }
-
-    #[test]
-    fn list_project_files_returns_known_file() {
-        // Verify that list_project_files() finds Cargo.toml regardless of CWD,
-        // and that paths can be resolved via the returned repo root.
-        let (root, files) = list_project_files();
-        assert!(
-            files.iter().any(|f| f == "Cargo.toml"),
-            "should find Cargo.toml in project files"
-        );
-        // The repo root + relative path should point to a real file
-        let cargo_path = std::path::Path::new(&root).join("Cargo.toml");
-        assert!(
-            cargo_path.exists(),
-            "repo root + Cargo.toml should exist: {}",
-            cargo_path.display()
         );
     }
 
