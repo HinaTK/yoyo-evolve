@@ -1,7 +1,7 @@
 # Gap Analysis: yoyo vs Claude Code
 
-Last verified: Day 38 (2026-04-07)
-Last updated: Day 24 (2026-03-24) — major refresh on Day 38
+Last verified: Day 44 (2026-04-13)
+Last updated: Day 24 (2026-03-24) — major refresh on Day 38, stats refresh on Day 44
 
 This document tracks the feature gap between yoyo and Claude Code, used to inform
 development priorities when there are no community issues to address. It is a
@@ -20,13 +20,13 @@ remaining gaps, but task selection still happens through the normal planning loo
 | Feature | yoyo | Claude Code | Notes |
 |---------|------|-------------|-------|
 | Streaming text output | ✅ | ✅ | True token-by-token streaming — mid-line tokens render immediately, line-start briefly buffers for fence/header detection (Day 17, fixed line-buffering bug); streaming flush improvements (Day 23) |
-| Tool execution | ✅ | ✅ | bash, read_file, write_file, edit_file, search, list_files, rename_symbol, ask_user, todo |
+| Tool execution | ✅ | ✅ | bash (with per-command timeout), read_file, write_file, edit_file, search, list_files, rename_symbol, ask_user, todo |
 | Multi-turn conversation | ✅ | ✅ | Both maintain conversation history |
 | Thinking/reasoning display | ✅ | ✅ | yoyo shows thinking dimmed; --thinking flag controls budget |
 | Error recovery / auto-retry | ✅ | ✅ | yoagent retries 3x with exponential backoff by default |
 | Subagent / task spawning | 🟡 | ✅ | `/spawn` runs tasks in separate context; yoagent's `SubAgentTool` exposes subagents as tools; no named-role persistent orchestration yet |
 | Tool output streaming | 🟡 | ✅ | `ToolExecutionUpdate` events handled and rendered live (line counts, partial tail); full real-time subprocess streaming inside a single tool call still buffered |
-| Background processes / `/bashes` | ❌ | ✅ | Claude Code has long-running background jobs you can poll; yoyo only does synchronous bash via `StreamingBashTool` |
+| Background processes / `/bashes` | ❌ | ✅ | Claude Code has long-running background jobs you can poll; yoyo only does synchronous bash via `StreamingBashTool` (per-command `timeout` param added Day 44 — incremental, not full background jobs) |
 
 ## CLI & UX
 
@@ -38,7 +38,7 @@ remaining gaps, but task selection still happens through the normal planning loo
 | Output to file (-o) | ✅ | ✅ | |
 | Model selection | ✅ | ✅ | --model flag and /model command |
 | Session save/load | ✅ | ✅ | /save, /load, --continue, /history |
-| Git integration | ✅ | ✅ | Branch in prompt, /diff, /undo, /commit, /pr; git-aware system prompt gives agent branch/dirty state automatically |
+| Git integration | ✅ | ✅ | Branch in prompt, /diff, /undo, /commit (with co-authored-by trailer), /pr; git-aware system prompt gives agent branch/dirty state automatically |
 | Readline / line editing | ✅ | ✅ | rustyline: arrow keys, history (~/.local/share/yoyo/history), Ctrl-A/E/K/W |
 | Tab completion | ✅ | ✅ | Slash commands, file paths, and argument-aware completion (--model values, git subcommands, /pr subcommands) (Day 14) |
 | Fuzzy file search | ✅ | ✅ | `/find` with scoring, git-aware file listing, top-10 ranked results (Day 12) |
@@ -142,12 +142,15 @@ After the Day 38 refresh, the gaps that are actually still gaps:
 2. **Background processes / `/bashes`** — Claude Code lets you launch a
    long-running shell job, get a handle, and poll it later. yoyo only does
    synchronous bash via `StreamingBashTool` — every command blocks the agent
-   loop until it returns.
+   loop until it returns. Per-command `timeout` parameter (Day 44) is
+   incremental progress — prevents hung commands — but not full background
+   job lifecycle.
 3. **Real-time subprocess streaming inside tool calls** — Claude Code shows
    compile/test output as it streams from the child process. yoyo's
    `ToolExecutionUpdate` events render line counts and partial tails, but the
    underlying bash tool still buffers stdout/stderr per call rather than
-   pumping it to the renderer character-by-character.
+   pumping it to the renderer character-by-character. Per-command timeout
+   helps with runaway processes but doesn't change the streaming model.
 4. **Persistent named subagents with orchestration** — yoyo has `/spawn` and
    yoagent's `SubAgentTool`, but no named-role persistent subagent system
    (e.g., a long-lived "reviewer" or "tester" subagent the orchestrator can
@@ -182,19 +185,28 @@ These were listed as gaps on Day 24 but have shipped since:
   piped mode improvements, sub-agent directory restriction inheritance,
   audit-log wiring, autocompact thrash detection, live context-window
   percentage, byte-indexing safety pass on tool output pipeline (#250).
+- ✅ Recently completed (Day 38–44): per-command bash timeout (`"timeout": N`
+  parameter, 1–600s, Day 44), co-authored-by trailer on `/commit` (Day 43),
+  `/status` shows session elapsed time and turn count (Day 43), `/changelog`
+  command for recent git evolution history (Day 44), CWD race condition fix
+  in repo map tests (Day 44), multi-provider fork guide (Day 43).
 
-## Stats (Day 38)
+## Stats (Day 44)
 
-- yoyo: ~43,021 lines of Rust across 24 source files (incl. `src/format/`) + integration tests
-- 24 source files (was 14 on Day 24): commands split into 8 `commands_*.rs` files,
+- yoyo: ~45,577 lines of Rust across 32 source files (incl. `src/format/`) + integration tests
+- 32 source files (was 24 on Day 38): commands split into 11 `commands_*.rs` files
+  (`commands.rs`, `commands_config.rs`, `commands_dev.rs`, `commands_file.rs`,
+  `commands_git.rs`, `commands_info.rs`, `commands_memory.rs`, `commands_project.rs`,
+  `commands_refactor.rs`, `commands_retry.rs`, `commands_search.rs`, `commands_session.rs`),
   format split into `format/{mod,markdown,highlight,cost,tools}.rs`, plus
   `hooks.rs`, `memory.rs`, `setup.rs`, `docs.rs`, `repl.rs`, `git.rs`,
-  `providers.rs`, `context.rs`, `config.rs`, `prompt.rs`, `tools.rs`, `help.rs`,
-  `cli.rs`, `main.rs`
-- ~58 REPL commands (including /watch, /ast, /refactor, /apply, /stash, /rename,
+  `providers.rs`, `context.rs`, `config.rs`, `prompt.rs`, `prompt_budget.rs`,
+  `tools.rs`, `help.rs`, `cli.rs`, `main.rs`
+- 1,843 tests (1,760 unit + 83 integration)
+- ~66 REPL commands (including /watch, /ast, /refactor, /apply, /stash, /rename,
   /move, /spawn, /find, /docs, /fix, /lint, /pr, /review, /init, /mark, /jump,
   /marks, /index, /changes, /web, /add, /plan, /run, /tree, /memories, /export,
-  /grep, /map, /help)
+  /grep, /map, /help, /changelog, /todo, /teach, /mcp, /permissions)
 - 12 provider backends (including z.ai, cerebras, bedrock, custom)
 - **Published:** v0.1.4+ on crates.io (`cargo install yoyo-agent`)
 - MCP server support (production)
@@ -226,3 +238,7 @@ These were listed as gaps on Day 24 but have shipped since:
 - Config `system_prompt`/`system_file` keys
 - Proactive context compaction (70% + 80%)
 - Live context-window percentage in prompt
+- Per-command bash timeout (`"timeout"` parameter, 1–600s)
+- Co-authored-by trailer on `/commit`
+- `/status` with session elapsed time and turn count
+- `/changelog` command for recent evolution history
