@@ -1,7 +1,8 @@
 //! Read-only "info" REPL command handlers.
 //!
 //! These handlers print state without mutating anything: `/version`, `/status`,
-//! `/tokens`, `/cost`, `/model` (show), `/provider` (show), `/think` (show).
+//! `/tokens`, `/cost`, `/model` (show), `/provider` (show), `/think` (show),
+//! `/changelog`.
 //!
 //! Extracted from `commands.rs` as the first slice of issue #260, which tracks
 //! splitting the 3,500-line `commands.rs` into focused modules. Read-only
@@ -154,6 +155,49 @@ pub fn handle_think_show(thinking: ThinkingLevel) {
     println!("  usage: /think <off|minimal|low|medium|high>{RESET}\n");
 }
 
+// ── /changelog ──────────────────────────────────────────────────────────
+
+/// Parse the optional count argument from `/changelog [N]` input.
+/// Returns a count clamped to 1..=100, defaulting to 15.
+pub fn parse_changelog_count(input: &str) -> usize {
+    let arg = input.strip_prefix("/changelog").unwrap_or("").trim();
+    if arg.is_empty() {
+        return 15;
+    }
+    arg.parse::<usize>().unwrap_or(15).clamp(1, 100)
+}
+
+pub fn handle_changelog(input: &str) {
+    let count = parse_changelog_count(input);
+
+    let count_arg = format!("-{count}");
+    let output = std::process::Command::new("git")
+        .args(["log", "--oneline", "--format=%h %s (%ar)", &count_arg])
+        .output();
+
+    match output {
+        Ok(result) if result.status.success() => {
+            let text = String::from_utf8_lossy(&result.stdout);
+            let text = text.trim();
+            if text.is_empty() {
+                println!("{DIM}  (no commits found){RESET}\n");
+            } else {
+                println!("{DIM}  Recent commits ({count} max):\n");
+                for line in text.lines() {
+                    println!("    {line}");
+                }
+                println!("{RESET}");
+            }
+        }
+        Ok(_) => {
+            println!("{DIM}  (not in a git repository){RESET}\n");
+        }
+        Err(_) => {
+            println!("{DIM}  (git not available){RESET}\n");
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -244,5 +288,37 @@ mod tests {
             Duration::from_secs(7200),
             42,
         );
+    }
+
+    #[test]
+    fn test_parse_changelog_count_default() {
+        assert_eq!(parse_changelog_count("/changelog"), 15);
+    }
+
+    #[test]
+    fn test_parse_changelog_count_custom() {
+        assert_eq!(parse_changelog_count("/changelog 30"), 30);
+        assert_eq!(parse_changelog_count("/changelog 1"), 1);
+        assert_eq!(parse_changelog_count("/changelog 100"), 100);
+    }
+
+    #[test]
+    fn test_parse_changelog_count_clamped() {
+        assert_eq!(parse_changelog_count("/changelog 0"), 1);
+        assert_eq!(parse_changelog_count("/changelog 999"), 100);
+    }
+
+    #[test]
+    fn test_parse_changelog_count_invalid() {
+        // Non-numeric falls back to default 15
+        assert_eq!(parse_changelog_count("/changelog abc"), 15);
+        assert_eq!(parse_changelog_count("/changelog -5"), 15);
+    }
+
+    #[test]
+    fn test_handle_changelog_no_panic() {
+        // Should not panic regardless of git availability
+        handle_changelog("/changelog");
+        handle_changelog("/changelog 5");
     }
 }

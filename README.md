@@ -333,6 +333,7 @@ Create a `YOYO.md` (or `CLAUDE.md`) in your project root with build commands, ar
 | `/config show` | Show loaded config file path and merged key-value pairs (secrets masked) |
 | `/context [system]` | Show loaded project context files or system prompt sections |
 | `/cost` | Show session cost breakdown |
+| `/changelog [N]` | Show recent git commit history (default: 15) |
 | `/diff` | Git diff summary of uncommitted changes |
 | `/docs <crate>` | Look up docs.rs documentation |
 | `/exit`, `/quit` | Exit |
@@ -392,7 +393,7 @@ src/                    28 modules, ~42,000 lines of Rust
   hooks.rs              Hook trait, registry, AuditHook, tool wrapping
   cli.rs                CLI parsing, config files, permissions
   commands.rs           Slash command dispatch, grouped /help
-  commands_info.rs      /version, /status, /tokens, /cost, /model, /provider, /think (read-only)
+  commands_info.rs      /version, /status, /tokens, /cost, /changelog, /model, /provider, /think (read-only)
   commands_git.rs       /diff, /commit, /pr, /review, /git
   commands_project.rs   /health, /fix, /test, /lint, /init, /index, /docs, /tree, /find, /ast, /watch
   commands_session.rs   /save, /load, /compact, /tokens, /cost

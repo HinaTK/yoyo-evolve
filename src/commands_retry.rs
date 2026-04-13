@@ -240,8 +240,9 @@ mod tests {
     #[test]
     fn test_changes_command_not_confused_with_other_commands() {
         use crate::commands::is_unknown_command;
-        // /changes should match exactly, /changelog etc. should be unknown
-        assert!(is_unknown_command("/changelog"));
+        // /changes should match exactly, unrelated words should be unknown
         assert!(is_unknown_command("/changed"));
+        // /changelog is now a valid command (Issue #226)
+        assert!(!is_unknown_command("/changelog"));
     }
 }

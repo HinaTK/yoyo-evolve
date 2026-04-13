@@ -436,6 +436,10 @@ pub async fn run_repl(
                 commands::handle_cost(&session_total, &agent_config.model);
                 continue;
             }
+            s if s == "/changelog" || s.starts_with("/changelog ") => {
+                commands::handle_changelog(input);
+                continue;
+            }
             "/clear" => {
                 let messages = agent.messages();
                 let msg_count = messages.len();

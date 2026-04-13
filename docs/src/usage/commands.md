@@ -81,6 +81,7 @@ See [Session Persistence](../features/sessions.md) for details.
 | `/status` | Show current model, git branch, working directory, and session token totals |
 | `/tokens` | Show detailed token usage: context window fill level, session totals, and estimated cost |
 | `/cost` | Show estimated session cost |
+| `/changelog [N]` | Show recent git commit history (default: 15, max: 100) |
 | `/config` | Show all current settings |
 | `/hooks` | Show active hooks (pre/post tool execution) |
 | `/permissions` | Show active security and permission configuration |

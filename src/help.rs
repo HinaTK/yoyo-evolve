@@ -616,6 +616,18 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /changes          List modified files\n\
              \x20 /changes --diff   List files and show diffs",
         ),
+        "changelog" => Some(
+            "/changelog [count] — Show recent git commit history\n\n\
+             Usage:\n\
+             \x20 /changelog        Show the last 15 commits\n\
+             \x20 /changelog <N>    Show the last N commits (max 100)\n\n\
+             Displays a compact log of recent commits with hash, message,\n\
+             and relative time. Useful for reviewing evolution history\n\
+             without leaving the REPL.\n\n\
+             Examples:\n\
+             \x20 /changelog\n\
+             \x20 /changelog 30",
+        ),
         "web" => Some(
             "/web <url> — Fetch and display web page content\n\n\
              Usage:\n\
@@ -754,6 +766,7 @@ pub fn help_text() -> String {
     );
     out.push_str("  /marks             List all saved bookmarks\n");
     out.push_str("  /changes [--diff]  Show files modified (written/edited) during this session\n");
+    out.push_str("  /changelog [N]     Show recent git commit history (default: 15, max: 100)\n");
     out.push_str(
         "  /export [path]     Export conversation as readable markdown (default: conversation.md)\n",
     );
@@ -888,6 +901,7 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "apply" => Some("Apply a diff or patch file"),
         "ast" => Some("Structural code search via ast-grep"),
         "changes" => Some("Show files modified during this session"),
+        "changelog" => Some("Show recent git commit history"),
         "clear" => Some("Clear conversation history"),
         "clear!" => Some("Force-clear without confirmation"),
         "commit" => Some("Commit staged changes"),
