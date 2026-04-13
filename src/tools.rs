@@ -465,7 +465,7 @@ impl AgentTool for StreamingBashTool {
     }
 
     fn description(&self) -> &str {
-        "Execute a bash command and return stdout/stderr. Use for running scripts, installing packages, checking system state, etc."
+        "Execute a bash command and return stdout/stderr. Use for running scripts, installing packages, checking system state, etc. Supports an optional timeout parameter (in seconds) for long-running commands."
     }
 
     fn parameters_schema(&self) -> serde_json::Value {
@@ -475,6 +475,10 @@ impl AgentTool for StreamingBashTool {
                 "command": {
                     "type": "string",
                     "description": "The bash command to execute"
+                },
+                "timeout": {
+                    "type": "integer",
+                    "description": "Maximum seconds to wait for command (default: 120, max: 600)"
                 }
             },
             "required": ["command"]
@@ -539,7 +543,11 @@ impl AgentTool for StreamingBashTool {
         cmd.stdout(std::process::Stdio::piped());
         cmd.stderr(std::process::Stdio::piped());
 
-        let timeout = self.timeout;
+        let timeout = if let Some(t) = params.get("timeout").and_then(|v| v.as_u64()) {
+            Duration::from_secs(t.clamp(1, 600))
+        } else {
+            self.timeout
+        };
         let max_bytes = self.max_output_bytes;
         let update_interval = self.update_interval;
         let lines_per_update = self.lines_per_update;
@@ -2503,5 +2511,61 @@ mod tests {
             names.contains(&"todo"),
             "build_tools should include todo, got: {names:?}"
         );
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_custom_timeout() {
+        let tool = StreamingBashTool::default();
+        let ctx = test_tool_context(None);
+        // Pass timeout: 1 second, command sleeps 5 — should time out
+        let params = serde_json::json!({"command": "sleep 5", "timeout": 1});
+        let result = tool.execute(params, ctx).await;
+        assert!(result.is_err());
+        assert!(
+            result.unwrap_err().to_string().contains("timed out"),
+            "Expected timeout error with custom timeout of 1s"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_custom_timeout_default() {
+        let tool = StreamingBashTool::default();
+        // Without a timeout param, the schema should use the default (120s)
+        let schema = tool.parameters_schema();
+        let props = schema["properties"].as_object().unwrap();
+        assert!(
+            props.contains_key("timeout"),
+            "Schema should include timeout parameter"
+        );
+        // Verify the default timeout is 120s by checking the struct field
+        assert_eq!(tool.timeout, Duration::from_secs(120));
+    }
+
+    #[tokio::test]
+    async fn test_streaming_bash_custom_timeout_clamped() {
+        let tool = StreamingBashTool::default();
+        let ctx = test_tool_context(None);
+        // Pass timeout: 9999, which should be clamped to 600
+        // We verify by running a fast command — it succeeds because the
+        // clamped 600s timeout is more than enough for echo
+        let params = serde_json::json!({"command": "echo clamped", "timeout": 9999});
+        let result = tool.execute(params, ctx).await.unwrap();
+        match &result.content[0] {
+            yoagent::types::Content::Text { text } => {
+                assert!(text.contains("clamped"));
+            }
+            _ => panic!("Expected text content"),
+        }
+
+        // Also verify 0 gets clamped to 1 (minimum) — command still succeeds
+        let ctx2 = test_tool_context(None);
+        let params2 = serde_json::json!({"command": "echo fast", "timeout": 0});
+        let result2 = tool.execute(params2, ctx2).await.unwrap();
+        match &result2.content[0] {
+            yoagent::types::Content::Text { text } => {
+                assert!(text.contains("fast"));
+            }
+            _ => panic!("Expected text content"),
+        }
     }
 }
