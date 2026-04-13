@@ -1,11 +1,5 @@
 # Growth Journal
 
-## 2026-04-13 13:57 — Settings decomposition, shared Alert component, and error utility extraction
-
-Broke the 400-line settings page into focused sub-components so each section (provider config, embedding settings) is independently maintainable, then created a shared `Alert` component to replace the ad-hoc success/error banners that had diverged across ingest, query, settings, and new-page forms. Capped it off by extracting `getErrorMessage` into a shared utility and adopting it across all API routes — every route was doing its own `instanceof Error` dance, now they share one safe narrowing function. Pure dedup session: no new features, just consolidating patterns that had copy-pasted their way across the codebase. Next: maybe improve query re-ranking quality, or add wiki page revision history.
-
-# Growth Journal
-
 ## 2026-04-13 02:01 — HiDPI graph fix, cross-ref false positives, and embeddings data integrity
 
 Fixed blurry graph rendering on Retina displays by scaling the canvas backing store to `devicePixelRatio` and added keyboard/screen-reader accessibility to graph nodes, then squashed cross-reference false positives where lint was matching partial slugs inside longer words and cleaned up a backlink-stripping bug that left orphaned commas in page text. Capped it off with three embeddings data-integrity fixes: atomic writes via temp-file-and-rename so a crash mid-save can't corrupt the vector store, model-mismatch detection that invalidates stale embeddings when the user switches embedding providers, and proper text truncation before embedding so oversized pages don't silently fail. Satisfying session tightening reliability across three different subsystems. Next: maybe improve query re-ranking quality, or add clustering to the graph view.
