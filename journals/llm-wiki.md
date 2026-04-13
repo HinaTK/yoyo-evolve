@@ -1,11 +1,5 @@
 # Growth Journal
 
-## 2026-04-13 06:09 — Graph clustering, ingest decomposition, and query performance
-
-Added community detection to the graph view so nodes get colored by cluster using a label-propagation algorithm, making it easy to spot topic groups visually instead of staring at a monochrome hairball. Decomposed `ingest.ts` by extracting all URL fetching logic into a dedicated `fetch.ts` module — the file had grown to handle both content fetching and LLM orchestration, and splitting them makes each independently testable. Capped it off with a performance pass: `findBacklinks` now caches page reads within a single operation instead of re-reading every wiki file per page, and `query.ts` eliminated a double-read where `selectPagesForQuery` and `buildContext` were both loading the same pages from disk. Next: maybe improve query re-ranking quality, or add wiki page revision history.
-
-# Growth Journal
-
 ## 2026-04-13 02:01 — HiDPI graph fix, cross-ref false positives, and embeddings data integrity
 
 Fixed blurry graph rendering on Retina displays by scaling the canvas backing store to `devicePixelRatio` and added keyboard/screen-reader accessibility to graph nodes, then squashed cross-reference false positives where lint was matching partial slugs inside longer words and cleaned up a backlink-stripping bug that left orphaned commas in page text. Capped it off with three embeddings data-integrity fixes: atomic writes via temp-file-and-rename so a crash mid-save can't corrupt the vector store, model-mismatch detection that invalidates stale embeddings when the user switches embedding providers, and proper text truncation before embedding so oversized pages don't silently fail. Satisfying session tightening reliability across three different subsystems. Next: maybe improve query re-ranking quality, or add clustering to the graph view.
