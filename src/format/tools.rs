@@ -88,15 +88,23 @@ impl Drop for Spinner {
 
 // --- Live tool progress display ---
 
+/// Maximum display length for a tool progress label (command preview).
+const TOOL_LABEL_MAX_CHARS: usize = 40;
+
 /// Format a live progress line for a running tool.
 ///
-/// Shows spinner frame, tool name, elapsed time, and optional line count.
-/// Example: `  ⠹ bash ⏱ 12s` or `  ⠹ bash ⏱ 1m 5s (142 lines)`
+/// Shows spinner frame, tool name, optional label (e.g. command), elapsed time,
+/// and optional line count.
+/// Examples:
+/// - Without label: `  ⠹ bash ⏱ 12s`
+/// - With label: `  ⠹ bash: ls -la src/ ⏱ 12s`
+/// - With label + lines: `  ⠹ bash: cargo test ⏱ 1m 5s (142 lines)`
 pub fn format_tool_progress(
     tool_name: &str,
     elapsed: Duration,
     tick: usize,
     line_count: Option<usize>,
+    label: Option<&str>,
 ) -> String {
     let frame = spinner_frame(tick);
     let time_str = format_duration_live(elapsed);
@@ -107,7 +115,14 @@ pub fn format_tool_progress(
         }
         _ => String::new(),
     };
-    format!("{DIM}  {frame} {tool_name} ⏱ {time_str}{lines_str}{RESET}")
+    let label_str = match label {
+        Some(l) if !l.is_empty() => {
+            let truncated = truncate_with_ellipsis(l, TOOL_LABEL_MAX_CHARS);
+            format!(": {truncated}")
+        }
+        _ => String::new(),
+    };
+    format!("{DIM}  {frame} {tool_name}{label_str} ⏱ {time_str}{lines_str}{RESET}")
 }
 
 /// Format elapsed duration for live display (compact, human-friendly).
@@ -196,10 +211,12 @@ pub fn extract_result_text(result: &ToolResult) -> String {
 
 /// A handle to a running tool-progress timer task.
 /// Shows `  ⠹ bash ⏱ 12s` on stderr, updating every second.
+/// Optionally shows a label (e.g. command being run): `  ⠹ bash: ls -la ⏱ 12s`
 /// Dropping or calling `stop()` cancels it and clears the line.
 pub struct ToolProgressTimer {
     cancel: tokio::sync::watch::Sender<bool>,
     line_count: Arc<std::sync::atomic::AtomicUsize>,
+    label: Arc<std::sync::Mutex<Option<String>>>,
     handle: Option<tokio::task::JoinHandle<()>>,
 }
 
@@ -210,6 +227,8 @@ impl ToolProgressTimer {
         let (cancel_tx, mut cancel_rx) = tokio::sync::watch::channel(false);
         let line_count = Arc::new(std::sync::atomic::AtomicUsize::new(0));
         let line_count_clone = Arc::clone(&line_count);
+        let label: Arc<std::sync::Mutex<Option<String>>> = Arc::new(std::sync::Mutex::new(None));
+        let label_clone = Arc::clone(&label);
         let handle = tokio::spawn(async move {
             let start = Instant::now();
             let mut tick: usize = 0;
@@ -230,7 +249,9 @@ impl ToolProgressTimer {
                 let elapsed = start.elapsed();
                 let lc = line_count_clone.load(std::sync::atomic::Ordering::Relaxed);
                 let lc_opt = if lc > 0 { Some(lc) } else { None };
-                let progress = format_tool_progress(&tool_name, elapsed, tick, lc_opt);
+                let lbl = label_clone.lock().ok().and_then(|g| g.clone());
+                let progress =
+                    format_tool_progress(&tool_name, elapsed, tick, lc_opt, lbl.as_deref());
                 eprint!("\r\x1b[K{progress}");
                 let _ = io::stderr().flush();
                 tick = tick.wrapping_add(1);
@@ -248,6 +269,7 @@ impl ToolProgressTimer {
         Self {
             cancel: cancel_tx,
             line_count,
+            label,
             handle: Some(handle),
         }
     }
@@ -256,6 +278,14 @@ impl ToolProgressTimer {
     pub fn set_line_count(&self, count: usize) {
         self.line_count
             .store(count, std::sync::atomic::Ordering::Relaxed);
+    }
+
+    /// Set a label (e.g. command name) to display alongside the tool name.
+    /// The label is truncated to ~40 chars in the display.
+    pub fn set_label(&self, label: String) {
+        if let Ok(mut guard) = self.label.lock() {
+            *guard = Some(label);
+        }
     }
 
     /// Stop the timer and clear its output.
@@ -447,7 +477,7 @@ mod tests {
 
     #[test]
     fn test_format_tool_progress_no_lines() {
-        let output = format_tool_progress("bash", Duration::from_secs(5), 0, None);
+        let output = format_tool_progress("bash", Duration::from_secs(5), 0, None, None);
         assert!(output.contains("bash"), "should contain tool name");
         assert!(output.contains("⏱"), "should contain timer emoji");
         assert!(output.contains("5s"), "should contain elapsed time");
@@ -460,7 +490,7 @@ mod tests {
 
     #[test]
     fn test_format_tool_progress_with_lines() {
-        let output = format_tool_progress("bash", Duration::from_secs(12), 3, Some(142));
+        let output = format_tool_progress("bash", Duration::from_secs(12), 3, Some(142), None);
         assert!(output.contains("bash"), "should contain tool name");
         assert!(output.contains("12s"), "should contain elapsed time");
         assert!(output.contains("142 lines"), "should contain line count");
@@ -468,15 +498,56 @@ mod tests {
 
     #[test]
     fn test_format_tool_progress_single_line() {
-        let output = format_tool_progress("bash", Duration::from_secs(1), 0, Some(1));
+        let output = format_tool_progress("bash", Duration::from_secs(1), 0, Some(1), None);
         assert!(output.contains("1 line"), "should use singular 'line'");
         assert!(!output.contains("1 lines"), "should not use plural for 1");
     }
 
     #[test]
     fn test_format_tool_progress_zero_lines_hidden() {
-        let output = format_tool_progress("bash", Duration::from_secs(3), 0, Some(0));
+        let output = format_tool_progress("bash", Duration::from_secs(3), 0, Some(0), None);
         assert!(!output.contains("line"), "zero lines should be hidden");
+    }
+
+    #[test]
+    fn test_format_tool_progress_with_label() {
+        let output = format_tool_progress(
+            "bash",
+            Duration::from_secs(5),
+            0,
+            Some(42),
+            Some("ls -la src/"),
+        );
+        assert!(output.contains("bash"), "should contain tool name");
+        assert!(
+            output.contains(": ls -la src/"),
+            "should contain label after colon"
+        );
+        assert!(output.contains("5s"), "should contain elapsed time");
+        assert!(output.contains("42 lines"), "should contain line count");
+    }
+
+    #[test]
+    fn test_format_tool_progress_label_truncation() {
+        let long_cmd = "cargo test --release --features all-the-things -- some::very::long::test::path::that::goes::on::forever";
+        let output = format_tool_progress("bash", Duration::from_secs(10), 0, None, Some(long_cmd));
+        // The label should be truncated (40 char limit + ellipsis)
+        assert!(output.contains("bash"), "should contain tool name");
+        assert!(output.contains(": "), "should contain colon separator");
+        // Should NOT contain the full command
+        assert!(!output.contains(long_cmd), "should truncate long labels");
+        // Should contain the ellipsis character from truncation
+        assert!(
+            output.contains('…'),
+            "should contain ellipsis for truncation"
+        );
+    }
+
+    #[test]
+    fn test_format_tool_progress_empty_label_ignored() {
+        let output = format_tool_progress("bash", Duration::from_secs(3), 0, None, Some(""));
+        // Empty label should not produce a colon separator
+        assert!(!output.contains(": "), "empty label should not show colon");
     }
 
     #[test]

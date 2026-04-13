@@ -2,7 +2,7 @@
 
 use crate::cli::is_verbose;
 use crate::format::*;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::io::{self, IsTerminal, Write};
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
@@ -880,7 +880,8 @@ async fn handle_prompt_events(
     // confirmation prompt would be overwritten by the spinner. Instead we
     // defer to the first ToolExecutionUpdate (which only fires once the
     // command is actually running, i.e. after confirmation).
-    let mut deferred_bash_timers: HashSet<String> = HashSet::new();
+    // Maps tool_call_id → optional command string for display label.
+    let mut deferred_bash_timers: HashMap<String, Option<String>> = HashMap::new();
 
     // Tool batch tracking for group summaries
     let mut batch_count: usize = 0;
@@ -968,8 +969,13 @@ async fn handle_prompt_events(
                         // Defer timer start for bash commands — the confirmation
                         // prompt would be overwritten by the spinner. The timer
                         // will start on the first ToolExecutionUpdate instead.
+                        // Store the command string for display as a label.
                         if tool_name == "bash" {
-                            deferred_bash_timers.insert(tool_call_id.clone());
+                            let cmd_label = args
+                                .get("command")
+                                .and_then(|v| v.as_str())
+                                .map(|s| s.to_string());
+                            deferred_bash_timers.insert(tool_call_id.clone(), cmd_label);
                         }
                     }
                     AgentEvent::ToolExecutionEnd { tool_call_id, is_error, result, tool_name, .. } => {
@@ -1036,8 +1042,11 @@ async fn handle_prompt_events(
                         // This means the command is actually running (confirmation
                         // has already been resolved), so the spinner won't
                         // overwrite the permission prompt.
-                        if deferred_bash_timers.remove(&tool_call_id) {
+                        if let Some(cmd_label) = deferred_bash_timers.remove(&tool_call_id) {
                             let timer = ToolProgressTimer::start("bash".to_string());
+                            if let Some(label) = cmd_label {
+                                timer.set_label(label);
+                            }
                             tool_progress_timers.insert(tool_call_id.clone(), timer);
                         }
 
@@ -2709,18 +2718,19 @@ mod tests {
     }
 
     /// Verify the deferred bash timer logic: bash tool_call_ids are tracked
-    /// in the deferred set, removed on first update (timer start), and cleaned
-    /// up on end if no update ever arrived (e.g. denied command).
+    /// in the deferred map with optional command label, removed on first update
+    /// (timer start), and cleaned up on end if no update ever arrived (e.g. denied command).
     #[test]
     fn test_deferred_bash_timer_set_lifecycle() {
-        let mut deferred: HashSet<String> = HashSet::new();
+        let mut deferred: HashMap<String, Option<String>> = HashMap::new();
         let mut timers: HashMap<String, &str> = HashMap::new(); // simplified stand-in
 
         // 1. ToolExecutionStart for bash → add to deferred set, NOT to timers
         let id = "call_abc".to_string();
-        deferred.insert(id.clone());
+        let cmd_label = Some("cargo test".to_string());
+        deferred.insert(id.clone(), cmd_label);
         assert!(
-            deferred.contains(&id),
+            deferred.contains_key(&id),
             "bash tool should be in deferred set"
         );
         assert!(
@@ -2728,12 +2738,17 @@ mod tests {
             "timer should NOT start on ToolExecutionStart"
         );
 
-        // 2. ToolExecutionUpdate → remove from deferred, start timer
-        if deferred.remove(&id) {
+        // 2. ToolExecutionUpdate → remove from deferred, start timer (with label)
+        if let Some(label) = deferred.remove(&id) {
+            assert_eq!(
+                label,
+                Some("cargo test".to_string()),
+                "label should be preserved"
+            );
             timers.insert(id.clone(), "bash");
         }
         assert!(
-            !deferred.contains(&id),
+            !deferred.contains_key(&id),
             "should be removed from deferred after update"
         );
         assert!(
@@ -2745,26 +2760,26 @@ mod tests {
         timers.remove(&id);
         deferred.remove(&id); // no-op, already removed
         assert!(!timers.contains_key(&id));
-        assert!(!deferred.contains(&id));
+        assert!(!deferred.contains_key(&id));
     }
 
     /// Verify that a denied bash command (no ToolExecutionUpdate) gets cleaned
     /// up properly on ToolExecutionEnd.
     #[test]
     fn test_deferred_bash_timer_denied_command_cleanup() {
-        let mut deferred: HashSet<String> = HashSet::new();
+        let mut deferred: HashMap<String, Option<String>> = HashMap::new();
         let timers: HashMap<String, &str> = HashMap::new();
 
         // ToolExecutionStart for bash → deferred
         let id = "call_denied".to_string();
-        deferred.insert(id.clone());
+        deferred.insert(id.clone(), Some("rm -rf /".to_string()));
 
         // No ToolExecutionUpdate (command was denied by user)
 
         // ToolExecutionEnd → clean up deferred entry
         deferred.remove(&id);
         assert!(
-            !deferred.contains(&id),
+            !deferred.contains_key(&id),
             "deferred entry should be cleaned up on end"
         );
         assert!(
@@ -2776,7 +2791,7 @@ mod tests {
     /// Non-bash tools should not be deferred — they don't have confirmation prompts.
     #[test]
     fn test_non_bash_tools_not_deferred() {
-        let deferred: HashSet<String> = HashSet::new();
+        let deferred: HashMap<String, Option<String>> = HashMap::new();
         // For non-bash tools (read_file, write_file, etc.), we never insert into deferred
         assert!(
             deferred.is_empty(),
