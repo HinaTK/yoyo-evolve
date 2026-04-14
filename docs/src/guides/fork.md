@@ -25,7 +25,27 @@ Fork [yologdev/yoyo-evolve](https://github.com/yologdev/yoyo-evolve) on GitHub.
 
 These are the only files you *need* to edit. Everything else auto-detects.
 
-### 3. Create a GitHub App
+### 3. Choose your provider
+
+yoyo supports 13+ providers out of the box. Pick the one that fits your budget and preferences:
+
+| Provider | Env Var | Default Model | Notes |
+|----------|---------|---------------|-------|
+| `anthropic` | `ANTHROPIC_API_KEY` | `claude-opus-4-6` | Default. Best overall quality. |
+| `openai` | `OPENAI_API_KEY` | `gpt-4o` | GPT-4o and o-series models |
+| `google` | `GOOGLE_API_KEY` | `gemini-2.0-flash` | Gemini models |
+| `openrouter` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4-20250514` | Multi-provider gateway |
+| `deepseek` | `DEEPSEEK_API_KEY` | `deepseek-chat` | Very cost-effective |
+| `groq` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` | Fast inference |
+| `mistral` | `MISTRAL_API_KEY` | `mistral-large-latest` | Mistral and Codestral models |
+| `xai` | `XAI_API_KEY` | `grok-3` | Grok models |
+| `ollama` | *(none — local)* | `llama3.2` | Free, runs on your hardware |
+
+For the full list of providers and models, see [Models & Providers](../configuration/models.md).
+
+> **Tip:** Anthropic is the default and what yoyo itself uses to evolve. If you're unsure, start there. If cost is a concern, DeepSeek and Groq offer strong results at a fraction of the price. Ollama is free but requires local hardware.
+
+### 4. Create a GitHub App
 
 Your agent needs a GitHub App to commit code and interact with issues.
 
@@ -39,18 +59,20 @@ Your agent needs a GitHub App to commit code and interact with issues.
 5. Note the **App ID**, **Private Key** (generate one), and **Installation ID**
    - Installation ID: visit `https://github.com/settings/installations` and click your app — the ID is in the URL
 
-### 4. Set repo secrets
+### 5. Set repo secrets
 
 In your fork, go to **Settings > Secrets and variables > Actions** and add:
 
 | Secret | Description |
 |--------|-------------|
-| `ANTHROPIC_API_KEY` | Your Anthropic API key |
+| *Provider API key* | API key for your chosen provider (see table in step 3) |
 | `APP_ID` | GitHub App ID |
 | `APP_PRIVATE_KEY` | GitHub App private key (PEM) |
 | `APP_INSTALLATION_ID` | GitHub App installation ID |
 
-### 5. Enable the Evolution workflow
+Set the API key secret matching your chosen provider. For example, if using Anthropic, add `ANTHROPIC_API_KEY`. If using OpenAI, add `OPENAI_API_KEY`. If using DeepSeek, add `DEEPSEEK_API_KEY`, and so on.
+
+### 6. Enable the Evolution workflow
 
 Go to **Actions** in your fork and enable the **Evolution** workflow. Your agent will start evolving on its next scheduled run, or trigger it manually with **Run workflow**.
 
@@ -68,18 +90,36 @@ Go to **Actions** in your fork and enable the **Evolution** workflow. Your agent
 
 ## Costs
 
-The agent uses the Anthropic API (Claude Opus by default):
-- **~$3-8 per evolution session** depending on task complexity
-- **~3 sessions per day** (8-hour gap between runs)
-- **~$10-25/day** typical cost
+Costs vary by provider and model:
 
-To reduce costs, set the `MODEL` environment variable in `.github/workflows/evolve.yml` to a cheaper model (e.g., `claude-sonnet-4-6`).
+- **Anthropic Claude Opus** — ~$3-8 per session (~$10-25/day at 3 sessions/day)
+- **Anthropic Claude Sonnet** — ~$1-3 per session, good balance of quality and cost
+- **DeepSeek** — significantly cheaper, strong coding performance
+- **Groq** — fast and affordable for smaller models
+- **Ollama** — free (runs locally), but requires capable hardware
+
+The default schedule runs ~3 sessions per day (8-hour gap between runs). To reduce costs, switch to a cheaper provider/model or reduce session frequency.
 
 ## Customization
 
-### Change the model
+### Change the provider and model
 
-Set the `MODEL` environment variable in the workflow, or edit the default in `scripts/evolve.sh`.
+Set `PROVIDER` and `MODEL` environment variables in `.github/workflows/evolve.yml`:
+
+```yaml
+env:
+  PROVIDER: openai
+  MODEL: gpt-4o
+```
+
+Or set just `MODEL` to use a different model within the default provider (Anthropic):
+
+```yaml
+env:
+  MODEL: claude-sonnet-4-6
+```
+
+You can also edit the default directly in `scripts/evolve.sh`.
 
 ### Change session frequency
 
