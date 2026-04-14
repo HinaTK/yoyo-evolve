@@ -149,6 +149,8 @@ pub const REFACTOR_SUBCOMMANDS: &[&str] = &["rename", "extract", "move"];
 /// Diff flag names for `/diff <Tab>` completion.
 pub const DIFF_FLAGS: &[&str] = &["--staged", "--cached", "--name-only"];
 
+pub const BG_SUBCOMMANDS: &[&str] = &["run", "list", "output", "kill"];
+
 /// Return context-aware argument completions for a given command and partial argument.
 ///
 /// `cmd` is the slash command (e.g. "/model"), `partial_arg` is what the user has typed
@@ -162,6 +164,7 @@ pub fn command_arg_completions(cmd: &str, partial_arg: &str) -> Vec<String> {
         "/diff" => filter_candidates(DIFF_FLAGS, &partial_lower),
         "/pr" => filter_candidates(PR_SUBCOMMANDS, &partial_lower),
         "/provider" => filter_candidates(KNOWN_PROVIDERS, &partial_lower),
+        "/bg" => filter_candidates(BG_SUBCOMMANDS, &partial_lower),
         "/save" | "/load" => list_json_files(partial_arg),
         "/help" => help_command_completions(&partial_lower),
         "/undo" => filter_candidates(UNDO_OPTIONS, &partial_lower),
@@ -792,6 +795,34 @@ mod tests {
             3,
             "Should match 'comment', 'create', and 'checkout': {candidates:?}"
         );
+    }
+
+    #[test]
+    fn test_arg_completions_bg_empty() {
+        let candidates = command_arg_completions("/bg", "");
+        assert!(
+            candidates.contains(&"run".to_string()),
+            "Should include 'run': {candidates:?}"
+        );
+        assert!(
+            candidates.contains(&"list".to_string()),
+            "Should include 'list': {candidates:?}"
+        );
+        assert!(
+            candidates.contains(&"output".to_string()),
+            "Should include 'output': {candidates:?}"
+        );
+        assert!(
+            candidates.contains(&"kill".to_string()),
+            "Should include 'kill': {candidates:?}"
+        );
+        assert_eq!(candidates.len(), 4);
+    }
+
+    #[test]
+    fn test_arg_completions_bg_partial() {
+        let candidates = command_arg_completions("/bg", "k");
+        assert_eq!(candidates, vec!["kill"]);
     }
 
     #[test]

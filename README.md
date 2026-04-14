@@ -324,6 +324,7 @@ Create a `YOYO.md` (or `CLAUDE.md`) in your project root with build commands, ar
 | Command | Description |
 |---------|-------------|
 | `/ast <pattern>` | Structural code search using ast-grep (optional) |
+| `/bg [subcmd]` | Manage background shell processes: run, list, output, kill |
 | `/help` | Grouped command reference |
 | `/changes` | Show files modified during this session |
 | `/clear` | Clear conversation history |
@@ -388,11 +389,12 @@ Everything else auto-detects. See the [full guide](https://yologdev.github.io/yo
 ## Architecture
 
 ```
-src/                    28 modules, ~42,000 lines of Rust
+src/                    29 modules, ~43,000 lines of Rust
   main.rs               Entry point, agent config, tool building
   hooks.rs              Hook trait, registry, AuditHook, tool wrapping
   cli.rs                CLI parsing, config files, permissions
   commands.rs           Slash command dispatch, grouped /help
+  commands_bg.rs        /bg — background process management (run, list, output, kill)
   commands_info.rs      /version, /status, /tokens, /cost, /changelog, /model, /provider, /think (read-only)
   commands_git.rs       /diff, /commit, /pr, /review, /git
   commands_project.rs   /health, /fix, /test, /lint, /init, /index, /docs, /tree, /find, /ast, /watch

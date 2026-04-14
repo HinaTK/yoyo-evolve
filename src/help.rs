@@ -831,6 +831,7 @@ pub fn help_text() -> String {
     );
     out.push_str("  /run <cmd>         Run a shell command directly (no AI, no tokens)\n");
     out.push_str("  !<cmd>             Shortcut for /run\n");
+    out.push_str("  /bg <sub>          Manage background shell processes (run/list/output/kill)\n");
     out.push_str("  /docs <crate> [item] Look up docs.rs documentation for a Rust crate\n");
     out.push_str("  /find <pattern>    Fuzzy-search project files by name\n");
     out.push_str("  /grep <pattern> [path] Search file contents directly (no AI, instant)\n");

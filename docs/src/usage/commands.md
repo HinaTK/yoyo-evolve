@@ -129,6 +129,7 @@ Each category is capped at 10 items with a "+N more" suffix for large crates.
 |---------|-------------|
 | `/run <cmd>` | Run a shell command directly — no AI, no tokens used |
 | `!<cmd>` | Shortcut for `/run` |
+| `/bg [subcmd]` | Manage background shell processes |
 | `/web <url>` | Fetch a web page and display clean readable text content |
 
 The `/run` command (or `!` shortcut) lets you execute shell commands without going through the AI model. Useful for quick checks (e.g., `!git log --oneline -5`) without burning API tokens.
@@ -138,6 +139,35 @@ The `/run` command (or `!` shortcut) lets you execute shell commands without goi
 /run cargo test
 /run git status
 ```
+
+### `/bg` — Background process management
+
+The `/bg` command lets you launch shell commands in the background, monitor their output, and kill them when done. Useful for long-running tasks like builds, test suites, or dev servers.
+
+| Subcommand | Description |
+|------------|-------------|
+| `/bg run <cmd>` | Launch a command in the background |
+| `/bg list` | Show all background jobs (default when no subcommand) |
+| `/bg output <id>` | Show last 50 lines of a job's output |
+| `/bg output <id> --all` | Show all captured output |
+| `/bg kill <id>` | Kill a running job |
+
+```
+/bg run cargo build --release
+  ⚡ Background job [1] started: cargo build --release
+
+/bg list
+  Background Jobs
+    [1]  ● running  12s  cargo build --release
+
+/bg output 1
+  ... (last 50 lines of build output)
+
+/bg kill 1
+  Killed job [1]
+```
+
+Output is capped at 256KB per job to prevent memory issues. Jobs display colored status: green for success, red for failure, yellow for running.
 
 ### `/web` — Fetch and read web pages
 

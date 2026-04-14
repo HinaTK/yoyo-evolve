@@ -367,6 +367,7 @@ pub async fn run_repl(
     let session_changes = SessionChanges::new();
     let mut turn_history = TurnHistory::new();
     let spawn_tracker = commands::SpawnTracker::new();
+    let bg_tracker = commands::BackgroundJobTracker::new();
     let mut undo_context: Option<String> = None;
 
     loop {
@@ -813,6 +814,11 @@ pub async fn run_repl(
             }
             s if s == "/apply" || s.starts_with("/apply ") => {
                 commands::handle_apply(input);
+                continue;
+            }
+            s if s == "/bg" || s.starts_with("/bg ") => {
+                let args = input.strip_prefix("/bg").unwrap_or("").trim();
+                commands::handle_bg(args, &bg_tracker).await;
                 continue;
             }
             s if s.starts_with("/run ") || (s.starts_with('!') && s.len() > 1) => {
