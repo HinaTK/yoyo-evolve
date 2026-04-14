@@ -1125,21 +1125,55 @@ pub fn handle_tree(input: &str) {
 
 /// Run a shell command directly and print its output.
 pub fn run_shell_command(cmd: &str) {
-    let start = std::time::Instant::now();
-    let output = std::process::Command::new("sh").args(["-c", cmd]).output();
-    let elapsed = format_duration(start.elapsed());
+    use std::io::{BufRead, BufReader};
+    use std::process::{Command, Stdio};
 
-    match output {
-        Ok(o) => {
-            let stdout = String::from_utf8_lossy(&o.stdout);
-            let stderr = String::from_utf8_lossy(&o.stderr);
-            if !stdout.is_empty() {
-                print!("{stdout}");
+    let start = std::time::Instant::now();
+    let child = Command::new("sh")
+        .args(["-c", cmd])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn();
+
+    let mut child = match child {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("{RED}  error running command: {e}{RESET}\n");
+            return;
+        }
+    };
+
+    // Read stderr in a background thread so we don't block on either pipe
+    let stderr_pipe = child.stderr.take().expect("stderr was piped");
+    let stderr_handle = std::thread::spawn(move || {
+        let reader = BufReader::new(stderr_pipe);
+        for line in reader.lines() {
+            match line {
+                Ok(l) => eprintln!("{RED}{l}{RESET}"),
+                Err(_) => break,
             }
-            if !stderr.is_empty() {
-                eprint!("{RED}{stderr}{RESET}");
+        }
+    });
+
+    // Stream stdout line-by-line on the main thread
+    if let Some(stdout_pipe) = child.stdout.take() {
+        let reader = BufReader::new(stdout_pipe);
+        for line in reader.lines() {
+            match line {
+                Ok(l) => println!("{l}"),
+                Err(_) => break,
             }
-            let code = o.status.code().unwrap_or(-1);
+        }
+    }
+
+    // Wait for stderr thread to finish
+    let _ = stderr_handle.join();
+
+    // Collect exit status
+    let elapsed = format_duration(start.elapsed());
+    match child.wait() {
+        Ok(status) => {
+            let code = status.code().unwrap_or(-1);
             if code == 0 {
                 println!("{DIM}  ✓ exit {code} ({elapsed}){RESET}\n");
             } else {
@@ -1147,7 +1181,7 @@ pub fn run_shell_command(cmd: &str) {
             }
         }
         Err(e) => {
-            eprintln!("{RED}  error running command: {e}{RESET}\n");
+            eprintln!("{RED}  error waiting for command: {e}{RESET}\n");
         }
     }
 }
@@ -1460,7 +1494,7 @@ mod tests {
     #[test]
     fn test_run_shell_command_basic() {
         // Verify run_shell_command doesn't panic on basic commands
-        // (output goes to stdout/stderr, we just check it doesn't crash)
+        // (output streams to stdout/stderr line-by-line)
         run_shell_command("echo hello");
     }
 
@@ -1468,6 +1502,24 @@ mod tests {
     fn test_run_shell_command_failing() {
         // Non-zero exit should not panic
         run_shell_command("false");
+    }
+
+    #[test]
+    fn test_run_shell_command_streams_multiline() {
+        // Multi-line output should stream without panic
+        run_shell_command("echo line1; echo line2; echo line3");
+    }
+
+    #[test]
+    fn test_run_shell_command_mixed_stdout_stderr() {
+        // Both stdout and stderr should be handled without deadlock or panic
+        run_shell_command("echo out; echo err >&2; echo out2");
+    }
+
+    #[test]
+    fn test_run_shell_command_large_output() {
+        // Ensure streaming handles larger output without buffering issues
+        run_shell_command("seq 1 100");
     }
 
     #[test]
