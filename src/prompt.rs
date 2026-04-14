@@ -55,22 +55,87 @@ pub fn build_watch_fix_prompt(watch_cmd: &str, output: &str) -> String {
 }
 
 /// Run a watch command and return (success, output).
+///
+/// Streams output line-by-line in real time: when stderr is a terminal,
+/// prints a compact progress indicator (`⟳ 42 lines...`) so the user
+/// sees something happening during long test/build runs.  The full
+/// combined stdout+stderr is still collected and returned for the agent
+/// to analyse.
 pub fn run_watch_command(cmd: &str) -> (bool, String) {
-    match std::process::Command::new("sh").args(["-c", cmd]).output() {
-        Ok(output) => {
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            let combined = if stderr.is_empty() {
-                stdout.to_string()
-            } else if stdout.is_empty() {
-                stderr.to_string()
-            } else {
-                format!("{stdout}\n{stderr}")
-            };
-            (output.status.success(), combined)
+    use std::io::BufRead;
+    use std::process::{Command, Stdio};
+
+    let is_tty = io::stderr().is_terminal();
+
+    let child = Command::new("sh")
+        .args(["-c", cmd])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn();
+
+    let mut child = match child {
+        Ok(c) => c,
+        Err(e) => return (false, format!("Failed to run watch command: {e}")),
+    };
+
+    // Collect stderr lines in a background thread.
+    let stderr_pipe = child.stderr.take().expect("stderr was piped");
+    let stderr_handle = std::thread::spawn(move || {
+        let reader = io::BufReader::new(stderr_pipe);
+        let mut lines = Vec::new();
+        for line in reader.lines() {
+            match line {
+                Ok(l) => lines.push(l),
+                Err(_) => break,
+            }
         }
-        Err(e) => (false, format!("Failed to run watch command: {e}")),
+        lines
+    });
+
+    // Stream stdout on the main thread, collecting lines.
+    let mut stdout_lines: Vec<String> = Vec::new();
+    if let Some(stdout_pipe) = child.stdout.take() {
+        let reader = io::BufReader::new(stdout_pipe);
+        for line in reader.lines() {
+            match line {
+                Ok(l) => {
+                    stdout_lines.push(l);
+                    if is_tty {
+                        let count = stdout_lines.len();
+                        eprint!("\r{DIM}  ⟳ {count} lines...{RESET}");
+                        let _ = io::stderr().flush();
+                    }
+                }
+                Err(_) => break,
+            }
+        }
     }
+
+    let stderr_lines = stderr_handle.join().unwrap_or_default();
+
+    // Clear the progress indicator if we printed one.
+    if is_tty && !stdout_lines.is_empty() {
+        eprint!("\r{DIM}                          {RESET}\r");
+        let _ = io::stderr().flush();
+    }
+
+    let status = match child.wait() {
+        Ok(s) => s.success(),
+        Err(_) => false,
+    };
+
+    // Combine stdout + stderr the same way the old implementation did.
+    let stdout_text = stdout_lines.join("\n");
+    let stderr_text = stderr_lines.join("\n");
+    let combined = if stderr_text.is_empty() {
+        stdout_text
+    } else if stdout_text.is_empty() {
+        stderr_text
+    } else {
+        format!("{stdout_text}\n{stderr_text}")
+    };
+
+    (status, combined)
 }
 
 // ── Audit log + session budget ──────────────────────────────────────────
@@ -2865,6 +2930,58 @@ mod tests {
         assert!(
             prompt.contains(&"x".repeat(5000)),
             "first 5000 chars should appear"
+        );
+    }
+
+    #[test]
+    fn test_run_watch_command_success() {
+        let (ok, output) = run_watch_command("echo hello");
+        assert!(ok, "echo should succeed");
+        assert_eq!(output.trim(), "hello");
+    }
+
+    #[test]
+    fn test_run_watch_command_failure() {
+        let (ok, _output) = run_watch_command("exit 1");
+        assert!(!ok, "exit 1 should fail");
+    }
+
+    #[test]
+    fn test_run_watch_command_captures_all_output() {
+        let (ok, output) = run_watch_command("for i in 1 2 3 4 5; do echo line$i; done");
+        assert!(ok);
+        assert!(output.contains("line1"));
+        assert!(output.contains("line5"));
+        // Should have all 5 lines
+        let lines: Vec<&str> = output.lines().collect();
+        assert_eq!(lines.len(), 5, "should capture all 5 lines");
+    }
+
+    #[test]
+    fn test_run_watch_command_captures_stderr() {
+        let (ok, output) = run_watch_command("echo err_msg >&2");
+        assert!(ok, "writing to stderr is not a failure");
+        assert!(
+            output.contains("err_msg"),
+            "stderr should be captured: {output}"
+        );
+    }
+
+    #[test]
+    fn test_run_watch_command_combines_stdout_stderr() {
+        let (ok, output) = run_watch_command("echo out_msg; echo err_msg >&2");
+        assert!(ok);
+        assert!(output.contains("out_msg"), "should contain stdout");
+        assert!(output.contains("err_msg"), "should contain stderr");
+    }
+
+    #[test]
+    fn test_run_watch_command_invalid_command() {
+        let (ok, output) = run_watch_command("nonexistent_command_xyz_123");
+        assert!(!ok, "nonexistent command should fail");
+        assert!(
+            !output.is_empty(),
+            "should have some error output: {output}"
         );
     }
 }
