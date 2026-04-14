@@ -2,11 +2,66 @@
 
 use crate::format::*;
 
+/// Git subcommands that modify repo state. Used by the `#[cfg(test)]` guard
+/// in `run_git()` to prevent accidental destructive operations against the
+/// real project repo during `cargo test`.
+#[cfg(test)]
+const DESTRUCTIVE_GIT_COMMANDS: &[&str] = &[
+    "revert",
+    "reset",
+    "push",
+    "commit",
+    "checkout",
+    "clean",
+    "stash",
+    "add",
+    "merge",
+    "rebase",
+    "cherry-pick",
+    "rm",
+    "mv",
+    "tag",
+    "branch",
+];
+
+/// Check whether a git invocation targets a destructive subcommand and is
+/// running from the project root (i.e., the real repo, not a temp dir).
+/// Returns `Some(subcommand)` when the call should be blocked, `None` when safe.
+#[cfg(test)]
+fn destructive_guard<'a>(args: &'a [&'a str]) -> Option<&'a str> {
+    let subcmd = args.first()?;
+    if !DESTRUCTIVE_GIT_COMMANDS.contains(subcmd) {
+        return None;
+    }
+    // Compare the current working dir against the compile-time project root.
+    // If they match, we're in the real repo — block it.
+    let manifest_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let cwd = std::env::current_dir().ok()?;
+    if cwd == manifest_dir {
+        Some(subcmd)
+    } else {
+        None
+    }
+}
+
 /// Run a git command with the given args.
 /// Returns `Ok(stdout_trimmed)` on success, `Err(stderr_trimmed)` on failure.
 /// This is the common path for most git invocations — use raw `Command` only
 /// when you need the full `Output` struct (e.g., for separate stdout+stderr handling).
+///
+/// # Test safety
+/// Under `#[cfg(test)]`, destructive subcommands (commit, reset, revert, push, …)
+/// are blocked with a panic when the working directory is the project root.
+/// Tests that need destructive git operations should use a temp directory.
 pub fn run_git(args: &[&str]) -> Result<String, String> {
+    #[cfg(test)]
+    if let Some(cmd) = destructive_guard(args) {
+        panic!(
+            "SAFETY: run_git() called with destructive command '{}' from project root during \
+             tests. Use a temp directory or mock instead.",
+            cmd
+        );
+    }
     match std::process::Command::new("git").args(args).output() {
         Ok(output) if output.status.success() => {
             Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
@@ -1140,5 +1195,91 @@ stash@{1}: On feature: def5678 wip stuff";
             result.contains("\n\nCo-authored-by:"),
             "Trailer should be separated by a blank line"
         );
+    }
+
+    // --- Destructive guard tests ---
+
+    #[test]
+    fn destructive_guard_allows_safe_commands() {
+        // Read-only commands should never be blocked
+        for safe in &[
+            &["--version"][..],
+            &["rev-parse", "--abbrev-ref", "HEAD"],
+            &["log", "--oneline", "-5"],
+            &["diff", "--cached"],
+            &["status"],
+            &["show", "HEAD"],
+        ] {
+            assert!(
+                destructive_guard(safe).is_none(),
+                "Safe command {:?} should not be blocked",
+                safe
+            );
+        }
+    }
+
+    #[test]
+    fn destructive_guard_blocks_known_bad_commands_in_project_root() {
+        // We're running from the project root during cargo test, so these should trigger
+        for cmd in DESTRUCTIVE_GIT_COMMANDS {
+            let args = &[*cmd, "--help"];
+            let result = destructive_guard(&args[..]);
+            assert!(
+                result.is_some(),
+                "Destructive command '{}' should be blocked from project root",
+                cmd
+            );
+            assert_eq!(result.unwrap(), *cmd);
+        }
+    }
+
+    #[test]
+    fn destructive_guard_allows_destructive_in_temp_dir() {
+        // If we're in a temp directory, destructive commands should be allowed
+        let tmp = std::env::temp_dir();
+        let original = std::env::current_dir().unwrap();
+        std::env::set_current_dir(&tmp).unwrap();
+        let result = destructive_guard(&["commit", "-m", "test"]);
+        std::env::set_current_dir(&original).unwrap();
+        assert!(
+            result.is_none(),
+            "Destructive command in temp dir should NOT be blocked"
+        );
+    }
+
+    #[test]
+    fn destructive_guard_empty_args() {
+        assert!(destructive_guard(&[]).is_none(), "Empty args should pass");
+    }
+
+    #[test]
+    fn destructive_guard_list_covers_original_incident() {
+        // The original incident was `run_git(&["revert", "HEAD", "--no-edit"])`
+        assert!(
+            DESTRUCTIVE_GIT_COMMANDS.contains(&"revert"),
+            "revert must be in destructive list (original incident)"
+        );
+        assert!(
+            DESTRUCTIVE_GIT_COMMANDS.contains(&"reset"),
+            "reset must be in destructive list"
+        );
+        assert!(
+            DESTRUCTIVE_GIT_COMMANDS.contains(&"push"),
+            "push must be in destructive list"
+        );
+    }
+
+    #[test]
+    fn run_git_safe_command_passes_guard() {
+        // Sanity check: run_git with a safe command still works
+        let result = run_git(&["--version"]);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    #[should_panic(expected = "SAFETY: run_git() called with destructive command")]
+    fn run_git_panics_on_destructive_from_project_root() {
+        // This should panic because we're in the project root during cargo test
+        let _ = run_git(&["revert", "HEAD", "--no-edit"]);
     }
 }

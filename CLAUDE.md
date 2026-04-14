@@ -155,3 +155,4 @@ These are enforced by the `evolve` skill and `evolve.sh`:
   acc.truncate(b);
   ```
   This caused planning agent crashes in production (#250).
+- **`run_git()` has a `#[cfg(test)]` destructive-command guard.** During `cargo test`, calling `run_git()` with a destructive subcommand (commit, revert, reset, push, checkout, etc.) from the project root panics. Tests that need destructive git operations must use a temp directory. This prevents tests from accidentally mutating the real repo (which caused a 6-session deadlock across Days 42-44).
