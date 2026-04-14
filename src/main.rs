@@ -37,6 +37,8 @@
 
 mod cli;
 mod commands;
+#[allow(dead_code)] // wired in task 2
+mod commands_bg;
 mod commands_config;
 mod commands_dev;
 mod commands_file;

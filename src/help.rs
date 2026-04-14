@@ -47,6 +47,20 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /apply fix.patch\n\
              \x20 /apply --check changes.diff",
         ),
+        "bg" => Some(
+            "/bg — Manage background shell processes\n\n\
+             Subcommands:\n\
+             \x20 /bg run <command>    Launch a command in the background\n\
+             \x20 /bg list             Show all background jobs (default)\n\
+             \x20 /bg output <id>      Show output of a job (last 50 lines)\n\
+             \x20 /bg output <id> --all Show all output\n\
+             \x20 /bg kill <id>        Kill a running job\n\n\
+             Examples:\n\
+             \x20 /bg run cargo build --release\n\
+             \x20 /bg list\n\
+             \x20 /bg output 1\n\
+             \x20 /bg kill 1",
+        ),
         "help" => Some(
             "/help [command] — Show help information\n\n\
              Usage:\n\
@@ -900,6 +914,7 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "add" => Some("Add file contents to conversation"),
         "apply" => Some("Apply a diff or patch file"),
         "ast" => Some("Structural code search via ast-grep"),
+        "bg" => Some("Manage background shell processes"),
         "changes" => Some("Show files modified during this session"),
         "changelog" => Some("Show recent git commit history"),
         "clear" => Some("Clear conversation history"),
