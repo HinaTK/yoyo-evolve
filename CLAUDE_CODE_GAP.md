@@ -1,7 +1,7 @@
 # Gap Analysis: yoyo vs Claude Code
 
-Last verified: Day 44 (2026-04-13)
-Last updated: Day 24 (2026-03-24) — major refresh on Day 38, stats refresh on Day 44
+Last verified: Day 46 (2026-04-15)
+Last updated: Day 24 (2026-03-24) — major refresh on Day 38, stats refresh on Day 46
 
 This document tracks the feature gap between yoyo and Claude Code, used to inform
 development priorities when there are no community issues to address. It is a
@@ -26,7 +26,7 @@ remaining gaps, but task selection still happens through the normal planning loo
 | Error recovery / auto-retry | ✅ | ✅ | yoagent retries 3x with exponential backoff by default |
 | Subagent / task spawning | 🟡 | ✅ | `/spawn` runs tasks in separate context; yoagent's `SubAgentTool` exposes subagents as tools; no named-role persistent orchestration yet |
 | Tool output streaming | 🟡 | ✅ | `ToolExecutionUpdate` events handled and rendered live (line counts, partial tail); full real-time subprocess streaming inside a single tool call still buffered |
-| Background processes / `/bashes` | ❌ | ✅ | Claude Code has long-running background jobs you can poll; yoyo only does synchronous bash via `StreamingBashTool` (per-command `timeout` param added Day 44 — incremental, not full background jobs) |
+| Background processes | ✅ | ✅ | `/bg` command (Day 45): launch, list, view output, kill background jobs with persistent tracker; Claude Code has similar with `/bashes` |
 
 ## CLI & UX
 
@@ -139,23 +139,17 @@ After the Day 38 refresh, the gaps that are actually still gaps:
    plugin marketplace with discoverability and install commands. yoyo has
    `--skills <dir>` (yoagent's `SkillSet`) but no marketplace, no signed
    bundles, and no `yoyo skill install` flow.
-2. **Background processes / `/bashes`** — Claude Code lets you launch a
-   long-running shell job, get a handle, and poll it later. yoyo only does
-   synchronous bash via `StreamingBashTool` — every command blocks the agent
-   loop until it returns. Per-command `timeout` parameter (Day 44) is
-   incremental progress — prevents hung commands — but not full background
-   job lifecycle.
-3. **Real-time subprocess streaming inside tool calls** — Claude Code shows
+2. **Real-time subprocess streaming inside tool calls** — Claude Code shows
    compile/test output as it streams from the child process. yoyo's
    `ToolExecutionUpdate` events render line counts and partial tails, but the
    underlying bash tool still buffers stdout/stderr per call rather than
    pumping it to the renderer character-by-character. Per-command timeout
    helps with runaway processes but doesn't change the streaming model.
-4. **Persistent named subagents with orchestration** — yoyo has `/spawn` and
+3. **Persistent named subagents with orchestration** — yoyo has `/spawn` and
    yoagent's `SubAgentTool`, but no named-role persistent subagent system
    (e.g., a long-lived "reviewer" or "tester" subagent the orchestrator can
    delegate to repeatedly with shared state).
-5. **Full graceful degradation on partial tool failures** — provider fallback
+4. **Full graceful degradation on partial tool failures** — provider fallback
    covers hard API errors, but there's no story for "this tool call failed,
    try a different tool that achieves the same effect."
 
@@ -177,6 +171,9 @@ These were listed as gaps on Day 24 but have shipped since:
   on hard errors (Issue #205, Day 31, `try_switch_to_fallback` in `src/main.rs`).
 - ✅ **Bedrock provider wiring** — both the wizard and the actual provider
   construction landed (Day 30 trap closed).
+- ✅ **Background process management** — `/bg` command in `src/commands_bg.rs`
+  (Day 45): launch, list, view output, kill background jobs. Persistent
+  `BackgroundJobTracker` with async completion detection.
 - ✅ Recently completed (Day 23–37): `/refactor` umbrella + `rename_symbol`,
   `/watch` auto-test watcher, `/ast` structural search, `/apply` patch
   application, `/stash` conversation stash, terminal bell notifications,
@@ -190,23 +187,30 @@ These were listed as gaps on Day 24 but have shipped since:
   `/status` shows session elapsed time and turn count (Day 43), `/changelog`
   command for recent git evolution history (Day 44), CWD race condition fix
   in repo map tests (Day 44), multi-provider fork guide (Day 43).
+- ✅ Recently completed (Day 45–46): `/bg` background process management
+  (Day 45), multi-provider fork guide (Day 45), destructive-git-command
+  guard in `run_git()` (Day 45), streaming output for `/run` and `/watch`
+  (Day 45), `/lint fix`, `/lint pedantic`, `/lint strict`, `/lint unsafe`
+  (Day 46).
 
-## Stats (Day 44)
+## Stats (Day 46)
 
-- yoyo: ~45,577 lines of Rust across 32 source files (incl. `src/format/`) + integration tests
-- 32 source files (was 24 on Day 38): commands split into 11 `commands_*.rs` files
-  (`commands.rs`, `commands_config.rs`, `commands_dev.rs`, `commands_file.rs`,
-  `commands_git.rs`, `commands_info.rs`, `commands_memory.rs`, `commands_project.rs`,
-  `commands_refactor.rs`, `commands_retry.rs`, `commands_search.rs`, `commands_session.rs`),
+- yoyo: ~47,329 lines of Rust across 33 source files (incl. `src/format/`) + integration tests
+- 33 source files (was 24 on Day 38): commands split into 12 `commands_*.rs` files
+  (`commands.rs`, `commands_bg.rs`, `commands_config.rs`, `commands_dev.rs`,
+  `commands_file.rs`, `commands_git.rs`, `commands_info.rs`, `commands_memory.rs`,
+  `commands_project.rs`, `commands_refactor.rs`, `commands_retry.rs`,
+  `commands_search.rs`, `commands_session.rs`),
   format split into `format/{mod,markdown,highlight,cost,tools}.rs`, plus
   `hooks.rs`, `memory.rs`, `setup.rs`, `docs.rs`, `repl.rs`, `git.rs`,
   `providers.rs`, `context.rs`, `config.rs`, `prompt.rs`, `prompt_budget.rs`,
   `tools.rs`, `help.rs`, `cli.rs`, `main.rs`
-- 1,843 tests (1,760 unit + 83 integration)
-- ~66 REPL commands (including /watch, /ast, /refactor, /apply, /stash, /rename,
-  /move, /spawn, /find, /docs, /fix, /lint, /pr, /review, /init, /mark, /jump,
+- 1,895 tests (1,812 unit + 83 integration)
+- ~70+ REPL commands (including /watch, /ast, /refactor, /apply, /stash, /rename,
+  /move, /spawn, /find, /docs, /fix, /lint, /lint fix, /lint pedantic,
+  /lint strict, /lint unsafe, /pr, /review, /init, /mark, /jump,
   /marks, /index, /changes, /web, /add, /plan, /run, /tree, /memories, /export,
-  /grep, /map, /help, /changelog, /todo, /teach, /mcp, /permissions)
+  /grep, /map, /help, /changelog, /todo, /teach, /mcp, /permissions, /bg)
 - 12 provider backends (including z.ai, cerebras, bedrock, custom)
 - **Published:** v0.1.4+ on crates.io (`cargo install yoyo-agent`)
 - MCP server support (production)

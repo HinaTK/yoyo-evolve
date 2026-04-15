@@ -848,6 +848,247 @@ fn parse_numeric_flag<T: std::str::FromStr + std::fmt::Display>(
         })
 }
 
+/// Collect all values for a repeatable flag (e.g. `--allow pat1 --allow pat2`).
+fn collect_repeatable_flag(args: &[String], flag: &str) -> Vec<String> {
+    args.iter()
+        .enumerate()
+        .filter(|(_, a)| a.as_str() == flag)
+        .filter_map(|(i, _)| args.get(i + 1).cloned())
+        .collect()
+}
+
+/// Parsed model/provider/API-key configuration extracted from CLI flags and config file.
+struct ModelConfig {
+    provider: String,
+    base_url: Option<String>,
+    api_key: String,
+    model: String,
+    fallback_provider: Option<String>,
+    fallback_model: Option<String>,
+}
+
+/// Parse provider, base URL, API key, model, and fallback from CLI args and config.
+fn parse_model_config(
+    args: &[String],
+    file_config: &HashMap<String, String>,
+    prompt_arg: &Option<String>,
+) -> ModelConfig {
+    // Parse --provider flag (CLI > config file > default "anthropic")
+    let provider = flag_value(args, &["--provider"])
+        .or_else(|| file_config.get("provider").cloned())
+        .unwrap_or_else(|| "anthropic".into())
+        .to_lowercase();
+
+    // Validate provider name
+    if !KNOWN_PROVIDERS.contains(&provider.as_str()) {
+        eprintln!(
+            "{YELLOW}warning:{RESET} Unknown provider '{provider}'. Known providers: {}",
+            KNOWN_PROVIDERS.join(", ")
+        );
+    }
+
+    // Parse --base-url flag (CLI > config file)
+    let base_url =
+        flag_value(args, &["--base-url"]).or_else(|| file_config.get("base_url").cloned());
+
+    // API key: --api-key flag > provider-specific env > ANTHROPIC_API_KEY > API_KEY > config file
+    let api_key_from_flag = flag_value(args, &["--api-key"]);
+
+    // Choose provider-specific env var name
+    let provider_env_var = provider_api_key_env(&provider);
+
+    let api_key = match api_key_from_flag {
+        Some(key) if !key.is_empty() => key,
+        _ => {
+            // Try provider-specific env var first
+            let from_provider_env = provider_env_var
+                .and_then(|var| std::env::var(var).ok())
+                .filter(|k| !k.is_empty());
+            match from_provider_env {
+                Some(key) => key,
+                None => {
+                    // Fallback chain: ANTHROPIC_API_KEY > API_KEY > config file
+                    match std::env::var("ANTHROPIC_API_KEY").or_else(|_| std::env::var("API_KEY")) {
+                        Ok(key) if !key.is_empty() => key,
+                        _ => match file_config.get("api_key").cloned() {
+                            Some(key) if !key.is_empty() => key,
+                            _ => {
+                                // For local/ollama providers, API key is optional
+                                if provider == "ollama" || provider == "custom" {
+                                    "not-needed".to_string()
+                                } else if std::io::stdin().is_terminal() && prompt_arg.is_none() {
+                                    // Interactive REPL with no API key: needs_setup() will
+                                    // be checked in main() and the wizard run there
+                                    String::new()
+                                } else {
+                                    // Piped/single-shot mode: terse error for scripts
+                                    let env_hint = provider_env_var.unwrap_or("ANTHROPIC_API_KEY");
+                                    eprintln!("{RED}error:{RESET} No API key found.");
+                                    eprintln!(
+                                        "Set {env_hint} env var, use --api-key <key>, or add api_key to .yoyo.toml."
+                                    );
+                                    std::process::exit(1);
+                                }
+                            }
+                        },
+                    }
+                }
+            }
+        }
+    };
+
+    let model = flag_value(args, &["--model"])
+        .or_else(|| file_config.get("model").cloned())
+        .unwrap_or_else(|| default_model_for_provider(&provider));
+
+    // --fallback <provider>: fallback provider if primary fails
+    let fallback_provider = flag_value(args, &["--fallback"])
+        .or_else(|| file_config.get("fallback").cloned())
+        .map(|s| s.to_lowercase());
+
+    // Derive a default model for the fallback provider
+    let fallback_model = fallback_provider
+        .as_ref()
+        .map(|p| default_model_for_provider(p));
+
+    ModelConfig {
+        provider,
+        base_url,
+        api_key,
+        model,
+        fallback_provider,
+        fallback_model,
+    }
+}
+
+/// Parsed boolean/simple output flags.
+struct OutputFlags {
+    verbose: bool,
+    auto_approve: bool,
+    auto_commit: bool,
+    no_update_check: bool,
+    json_output: bool,
+    audit: bool,
+    print_system_prompt: bool,
+}
+
+/// Parse simple boolean output flags from CLI args and config.
+fn parse_output_flags(args: &[String], file_config: &HashMap<String, String>) -> OutputFlags {
+    let verbose = args.iter().any(|a| a == "--verbose" || a == "-v");
+
+    let auto_approve = args.iter().any(|a| a == "--yes" || a == "-y");
+
+    let auto_commit = args.iter().any(|a| a == "--auto-commit");
+
+    let no_update_check = args.iter().any(|a| a == "--no-update-check")
+        || std::env::var("YOYO_NO_UPDATE_CHECK")
+            .map(|v| v == "1")
+            .unwrap_or(false);
+
+    let json_output = args.iter().any(|a| a == "--json");
+
+    let audit = args.iter().any(|a| a == "--audit")
+        || std::env::var("YOYO_AUDIT")
+            .map(|v| v == "1")
+            .unwrap_or(false)
+        || file_config
+            .get("audit")
+            .map(|v| v == "true")
+            .unwrap_or(false);
+
+    let print_system_prompt = args.iter().any(|a| a == "--print-system-prompt");
+
+    OutputFlags {
+        verbose,
+        auto_approve,
+        auto_commit,
+        no_update_check,
+        json_output,
+        audit,
+        print_system_prompt,
+    }
+}
+
+/// Parse permission and directory restriction config from CLI args and config file content.
+fn parse_permission_and_dir_config(
+    args: &[String],
+    raw_config_content: &str,
+) -> (PermissionConfig, DirectoryRestrictions) {
+    // --allow <pattern> flags: collect all allow patterns (repeatable)
+    let cli_allow = collect_repeatable_flag(args, "--allow");
+
+    // --deny <pattern> flags: collect all deny patterns (repeatable)
+    let cli_deny = collect_repeatable_flag(args, "--deny");
+
+    // Build permission config: CLI flags override config file
+    let permissions = if cli_allow.is_empty() && cli_deny.is_empty() {
+        // No CLI flags — parse from already-loaded config content
+        parse_permissions_from_config(raw_config_content)
+    } else {
+        PermissionConfig {
+            allow: cli_allow,
+            deny: cli_deny,
+        }
+    };
+
+    // --allow-dir <dir> flags: collect all allowed directories (repeatable)
+    let cli_allow_dirs = collect_repeatable_flag(args, "--allow-dir");
+
+    // --deny-dir <dir> flags: collect all denied directories (repeatable)
+    let cli_deny_dirs = collect_repeatable_flag(args, "--deny-dir");
+
+    // Build directory restrictions: CLI flags override config file
+    let dir_restrictions = if cli_allow_dirs.is_empty() && cli_deny_dirs.is_empty() {
+        parse_directories_from_config(raw_config_content)
+    } else {
+        DirectoryRestrictions {
+            allow: cli_allow_dirs,
+            deny: cli_deny_dirs,
+        }
+    };
+
+    (permissions, dir_restrictions)
+}
+
+/// Parsed MCP and OpenAPI configuration.
+struct McpConfig {
+    mcp_servers: Vec<String>,
+    mcp_server_configs: Vec<McpServerConfig>,
+    openapi_specs: Vec<String>,
+}
+
+/// Parse MCP servers and OpenAPI specs from CLI args and config.
+fn parse_mcp_and_openapi_config(
+    args: &[String],
+    file_config: &HashMap<String, String>,
+    raw_config_content: &str,
+) -> McpConfig {
+    // --mcp <command> flags: collect all MCP server commands (repeatable)
+    let mut mcp_servers = collect_repeatable_flag(args, "--mcp");
+
+    // Merge MCP servers from config file (config servers added first, CLI servers override/add)
+    if let Some(mcp_config) = file_config.get("mcp") {
+        let config_mcps = parse_toml_array(mcp_config);
+        for server in config_mcps.into_iter().rev() {
+            if !mcp_servers.contains(&server) {
+                mcp_servers.insert(0, server);
+            }
+        }
+    }
+
+    // Parse structured [mcp_servers.*] sections from config file
+    let mcp_server_configs = parse_mcp_servers_from_config(raw_config_content);
+
+    // --openapi <spec-path> flags: collect all OpenAPI spec paths (repeatable)
+    let openapi_specs = collect_repeatable_flag(args, "--openapi");
+
+    McpConfig {
+        mcp_servers,
+        mcp_server_configs,
+        openapi_specs,
+    }
+}
+
 pub fn parse_args(args: &[String]) -> Option<Config> {
     // Handle early-exit subcommands (--help, --version) before anything else.
     if let Some(result) = try_dispatch_subcommand(args) {
@@ -907,24 +1148,6 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     // Warn about unknown flags
     warn_unknown_flags(args, &flags_needing_values);
 
-    // Parse --provider flag (CLI > config file > default "anthropic")
-    let provider = flag_value(args, &["--provider"])
-        .or_else(|| file_config.get("provider").cloned())
-        .unwrap_or_else(|| "anthropic".into())
-        .to_lowercase();
-
-    // Validate provider name
-    if !KNOWN_PROVIDERS.contains(&provider.as_str()) {
-        eprintln!(
-            "{YELLOW}warning:{RESET} Unknown provider '{provider}'. Known providers: {}",
-            KNOWN_PROVIDERS.join(", ")
-        );
-    }
-
-    // Parse --base-url flag (CLI > config file)
-    let base_url =
-        flag_value(args, &["--base-url"]).or_else(|| file_config.get("base_url").cloned());
-
     // Parse prompt and image flags early so we can validate --image before API key check
     let prompt_arg = flag_value(args, &["--prompt", "-p"]);
 
@@ -960,62 +1183,10 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         None
     };
 
-    // API key: --api-key flag > provider-specific env > ANTHROPIC_API_KEY > API_KEY > config file
-    let api_key_from_flag = flag_value(args, &["--api-key"]);
+    // Parse model/provider/API-key/fallback configuration
+    let mc = parse_model_config(args, &file_config, &prompt_arg);
 
-    // Choose provider-specific env var name
-    let provider_env_var = provider_api_key_env(&provider);
-
-    let api_key = match api_key_from_flag {
-        Some(key) if !key.is_empty() => key,
-        _ => {
-            // Try provider-specific env var first
-            let from_provider_env = provider_env_var
-                .and_then(|var| std::env::var(var).ok())
-                .filter(|k| !k.is_empty());
-            match from_provider_env {
-                Some(key) => key,
-                None => {
-                    // Fallback chain: ANTHROPIC_API_KEY > API_KEY > config file
-                    match std::env::var("ANTHROPIC_API_KEY").or_else(|_| std::env::var("API_KEY")) {
-                        Ok(key) if !key.is_empty() => key,
-                        _ => match file_config.get("api_key").cloned() {
-                            Some(key) if !key.is_empty() => key,
-                            _ => {
-                                // For local/ollama providers, API key is optional
-                                if provider == "ollama" || provider == "custom" {
-                                    "not-needed".to_string()
-                                } else if std::io::stdin().is_terminal() && prompt_arg.is_none() {
-                                    // Interactive REPL with no API key: needs_setup() will
-                                    // be checked in main() and the wizard run there
-                                    String::new()
-                                } else {
-                                    // Piped/single-shot mode: terse error for scripts
-                                    let env_hint = provider_env_var.unwrap_or("ANTHROPIC_API_KEY");
-                                    eprintln!("{RED}error:{RESET} No API key found.");
-                                    eprintln!(
-                                        "Set {env_hint} env var, use --api-key <key>, or add api_key to .yoyo.toml."
-                                    );
-                                    std::process::exit(1);
-                                }
-                            }
-                        },
-                    }
-                }
-            }
-        }
-    };
-
-    let model = flag_value(args, &["--model"])
-        .or_else(|| file_config.get("model").cloned())
-        .unwrap_or_else(|| default_model_for_provider(&provider));
-
-    let skill_dirs: Vec<String> = args
-        .iter()
-        .enumerate()
-        .filter(|(_, a)| a.as_str() == "--skills")
-        .filter_map(|(i, _)| args.get(i + 1).cloned())
-        .collect();
+    let skill_dirs = collect_repeatable_flag(args, "--skills");
 
     let skills = if skill_dirs.is_empty() {
         SkillSet::empty()
@@ -1083,82 +1254,12 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
 
     let output_path = flag_value(args, &["--output", "-o"]);
 
-    let verbose = args.iter().any(|a| a == "--verbose" || a == "-v");
+    // Parse boolean output flags
+    let of = parse_output_flags(args, &file_config);
 
-    let auto_approve = args.iter().any(|a| a == "--yes" || a == "-y");
-
-    let auto_commit = args.iter().any(|a| a == "--auto-commit");
-
-    let no_update_check = args.iter().any(|a| a == "--no-update-check")
-        || std::env::var("YOYO_NO_UPDATE_CHECK")
-            .map(|v| v == "1")
-            .unwrap_or(false);
-
-    let json_output = args.iter().any(|a| a == "--json");
-
-    let audit = args.iter().any(|a| a == "--audit")
-        || std::env::var("YOYO_AUDIT")
-            .map(|v| v == "1")
-            .unwrap_or(false)
-        || file_config
-            .get("audit")
-            .map(|v| v == "true")
-            .unwrap_or(false);
-
-    let print_system_prompt = args.iter().any(|a| a == "--print-system-prompt");
-
-    // --allow <pattern> flags: collect all allow patterns (repeatable)
-    let cli_allow: Vec<String> = args
-        .iter()
-        .enumerate()
-        .filter(|(_, a)| a.as_str() == "--allow")
-        .filter_map(|(i, _)| args.get(i + 1).cloned())
-        .collect();
-
-    // --deny <pattern> flags: collect all deny patterns (repeatable)
-    let cli_deny: Vec<String> = args
-        .iter()
-        .enumerate()
-        .filter(|(_, a)| a.as_str() == "--deny")
-        .filter_map(|(i, _)| args.get(i + 1).cloned())
-        .collect();
-
-    // Build permission config: CLI flags override config file
-    let permissions = if cli_allow.is_empty() && cli_deny.is_empty() {
-        // No CLI flags — parse from already-loaded config content
-        parse_permissions_from_config(&raw_config_content)
-    } else {
-        PermissionConfig {
-            allow: cli_allow,
-            deny: cli_deny,
-        }
-    };
-
-    // --allow-dir <dir> flags: collect all allowed directories (repeatable)
-    let cli_allow_dirs: Vec<String> = args
-        .iter()
-        .enumerate()
-        .filter(|(_, a)| a.as_str() == "--allow-dir")
-        .filter_map(|(i, _)| args.get(i + 1).cloned())
-        .collect();
-
-    // --deny-dir <dir> flags: collect all denied directories (repeatable)
-    let cli_deny_dirs: Vec<String> = args
-        .iter()
-        .enumerate()
-        .filter(|(_, a)| a.as_str() == "--deny-dir")
-        .filter_map(|(i, _)| args.get(i + 1).cloned())
-        .collect();
-
-    // Build directory restrictions: CLI flags override config file
-    let dir_restrictions = if cli_allow_dirs.is_empty() && cli_deny_dirs.is_empty() {
-        parse_directories_from_config(&raw_config_content)
-    } else {
-        DirectoryRestrictions {
-            allow: cli_allow_dirs,
-            deny: cli_deny_dirs,
-        }
-    };
+    // Parse permission and directory restriction config
+    let (permissions, dir_restrictions) =
+        parse_permission_and_dir_config(args, &raw_config_content);
 
     // --context-strategy <compaction|checkpoint> (CLI only, not in config file)
     let context_strategy = args
@@ -1181,53 +1282,17 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     let context_window =
         parse_numeric_flag::<u32>(args, "--context-window", &file_config, "context_window");
 
-    // --mcp <command> flags: collect all MCP server commands (repeatable)
-    let mut mcp_servers: Vec<String> = args
-        .iter()
-        .enumerate()
-        .filter(|(_, a)| a.as_str() == "--mcp")
-        .filter_map(|(i, _)| args.get(i + 1).cloned())
-        .collect();
-
-    // Merge MCP servers from config file (config servers added first, CLI servers override/add)
-    if let Some(mcp_config) = file_config.get("mcp") {
-        let config_mcps = parse_toml_array(mcp_config);
-        for server in config_mcps.into_iter().rev() {
-            if !mcp_servers.contains(&server) {
-                mcp_servers.insert(0, server);
-            }
-        }
-    }
-
-    // Parse structured [mcp_servers.*] sections from config file
-    let mcp_server_configs = parse_mcp_servers_from_config(&raw_config_content);
-
-    // --openapi <spec-path> flags: collect all OpenAPI spec paths (repeatable)
-    let openapi_specs: Vec<String> = args
-        .iter()
-        .enumerate()
-        .filter(|(_, a)| a.as_str() == "--openapi")
-        .filter_map(|(i, _)| args.get(i + 1).cloned())
-        .collect();
+    // Parse MCP servers and OpenAPI specs
+    let mcp = parse_mcp_and_openapi_config(args, &file_config, &raw_config_content);
 
     // Parse shell hooks from config file
     let shell_hooks = crate::hooks::parse_hooks_from_config(&file_config);
 
-    // --fallback <provider>: fallback provider if primary fails
-    let fallback_provider = flag_value(args, &["--fallback"])
-        .or_else(|| file_config.get("fallback").cloned())
-        .map(|s| s.to_lowercase());
-
-    // Derive a default model for the fallback provider
-    let fallback_model = fallback_provider
-        .as_ref()
-        .map(|p| default_model_for_provider(p));
-
     Some(Config {
-        model,
-        api_key,
-        provider,
-        base_url,
+        model: mc.model,
+        api_key: mc.api_key,
+        provider: mc.provider,
+        base_url: mc.base_url,
         skills,
         system_prompt,
         thinking,
@@ -1238,23 +1303,23 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
         output_path,
         prompt_arg,
         image_path,
-        verbose,
-        mcp_servers,
-        mcp_server_configs,
-        openapi_specs,
-        auto_approve,
-        auto_commit,
+        verbose: of.verbose,
+        mcp_servers: mcp.mcp_servers,
+        mcp_server_configs: mcp.mcp_server_configs,
+        openapi_specs: mcp.openapi_specs,
+        auto_approve: of.auto_approve,
+        auto_commit: of.auto_commit,
         permissions,
         dir_restrictions,
         context_strategy,
         context_window,
         shell_hooks,
-        fallback_provider,
-        fallback_model,
-        no_update_check,
-        json_output,
-        audit,
-        print_system_prompt,
+        fallback_provider: mc.fallback_provider,
+        fallback_model: mc.fallback_model,
+        no_update_check: of.no_update_check,
+        json_output: of.json_output,
+        audit: of.audit,
+        print_system_prompt: of.print_system_prompt,
     })
 }
 
