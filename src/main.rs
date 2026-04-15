@@ -37,7 +37,6 @@
 
 mod cli;
 mod commands;
-#[allow(dead_code)] // wired in task 2
 mod commands_bg;
 mod commands_config;
 mod commands_dev;
@@ -556,6 +555,191 @@ fn build_json_output(
     serde_json::to_string(&json_obj).unwrap_or_else(|_| "{}".to_string())
 }
 
+/// Handle `--prompt / -p` single-shot mode: run one prompt (optionally with an
+/// image), print the result (or write to `--output`), and return. Calls
+/// `std::process::exit` on fatal errors (bad image, API failure with no
+/// fallback).
+async fn run_single_prompt(
+    agent_config: &mut AgentConfig,
+    agent: &mut Agent,
+    prompt_text: &str,
+    image_path: &Option<String>,
+    output_path: &Option<String>,
+    json_output: bool,
+) {
+    if agent_config.provider != "anthropic" {
+        eprintln!(
+            "{DIM}  yoyo (prompt mode) — provider: {}, model: {}{RESET}",
+            agent_config.provider, agent_config.model
+        );
+    } else {
+        eprintln!(
+            "{DIM}  yoyo (prompt mode) — model: {}{RESET}",
+            agent_config.model
+        );
+    }
+    let mut session_total = Usage::default();
+    let prompt_start = Instant::now();
+    let response = if let Some(ref img_path) = image_path {
+        // Multi-modal prompt: text + image
+        match commands_file::read_image_for_add(img_path) {
+            Ok((data, mime_type)) => {
+                let content_blocks = vec![
+                    Content::Text {
+                        text: prompt_text.trim().to_string(),
+                    },
+                    Content::Image {
+                        data: data.clone(),
+                        mime_type: mime_type.clone(),
+                    },
+                ];
+                let initial = run_prompt_with_content(
+                    agent,
+                    content_blocks,
+                    &mut session_total,
+                    &agent_config.model,
+                )
+                .await;
+                // Fallback retry for multi-modal prompts
+                let retry_blocks = vec![
+                    Content::Text {
+                        text: prompt_text.trim().to_string(),
+                    },
+                    Content::Image { data, mime_type },
+                ];
+                let (final_response, should_exit_error) = try_fallback_prompt(
+                    agent_config,
+                    agent,
+                    FallbackRetry::Content(retry_blocks),
+                    &mut session_total,
+                    initial,
+                )
+                .await;
+                if should_exit_error {
+                    format::maybe_ring_bell(prompt_start.elapsed());
+                    if json_output {
+                        println!(
+                            "{}",
+                            build_json_output(
+                                &final_response,
+                                &agent_config.model,
+                                &session_total,
+                                true
+                            )
+                        );
+                    } else {
+                        write_output_file(output_path, &final_response.text);
+                    }
+                    std::process::exit(1);
+                }
+                final_response
+            }
+            Err(e) => {
+                eprintln!("{RED}  error: {e}{RESET}");
+                std::process::exit(1);
+            }
+        }
+    } else {
+        // Text-only prompt
+        let initial = run_prompt(
+            agent,
+            prompt_text.trim(),
+            &mut session_total,
+            &agent_config.model,
+        )
+        .await;
+        // Fallback retry for text-only prompts
+        let (final_response, should_exit_error) = try_fallback_prompt(
+            agent_config,
+            agent,
+            FallbackRetry::Text(prompt_text.trim()),
+            &mut session_total,
+            initial,
+        )
+        .await;
+        if should_exit_error {
+            format::maybe_ring_bell(prompt_start.elapsed());
+            if json_output {
+                println!(
+                    "{}",
+                    build_json_output(&final_response, &agent_config.model, &session_total, true)
+                );
+            } else {
+                write_output_file(output_path, &final_response.text);
+            }
+            std::process::exit(1);
+        }
+        final_response
+    };
+    format::maybe_ring_bell(prompt_start.elapsed());
+    if json_output {
+        println!(
+            "{}",
+            build_json_output(&response, &agent_config.model, &session_total, false)
+        );
+    } else {
+        write_output_file(output_path, &response.text);
+    }
+    if CHECKPOINT_TRIGGERED.load(Ordering::SeqCst) {
+        std::process::exit(2);
+    }
+}
+
+/// Handle piped mode: read all of stdin, run a single prompt, print/write the
+/// result, and return. Calls `std::process::exit` on empty input or fatal API
+/// errors.
+async fn run_piped_mode(
+    agent_config: &mut AgentConfig,
+    agent: &mut Agent,
+    output_path: &Option<String>,
+    json_output: bool,
+) {
+    let mut input = String::new();
+    io::stdin().read_to_string(&mut input).ok();
+    let input = input.trim();
+    if input.is_empty() {
+        eprintln!("No input on stdin.");
+        std::process::exit(1);
+    }
+
+    eprintln!(
+        "{DIM}  yoyo (piped mode) — model: {}{RESET}",
+        agent_config.model
+    );
+    let mut session_total = Usage::default();
+    let prompt_start = Instant::now();
+    let initial = run_prompt(agent, input, &mut session_total, &agent_config.model).await;
+    // Fallback retry for piped mode
+    let (response, should_exit_error) = try_fallback_prompt(
+        agent_config,
+        agent,
+        FallbackRetry::Text(input),
+        &mut session_total,
+        initial,
+    )
+    .await;
+    format::maybe_ring_bell(prompt_start.elapsed());
+    if json_output {
+        println!(
+            "{}",
+            build_json_output(
+                &response,
+                &agent_config.model,
+                &session_total,
+                should_exit_error
+            )
+        );
+    } else {
+        write_output_file(output_path, &response.text);
+    }
+    if should_exit_error {
+        std::process::exit(1);
+    }
+    if CHECKPOINT_TRIGGERED.load(Ordering::SeqCst) {
+        std::process::exit(2);
+    }
+}
+
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -820,176 +1004,21 @@ async fn main() {
 
     // --prompt / -p: single-shot mode with a prompt argument
     if let Some(prompt_text) = config.prompt_arg {
-        if agent_config.provider != "anthropic" {
-            eprintln!(
-                "{DIM}  yoyo (prompt mode) — provider: {}, model: {}{RESET}",
-                agent_config.provider, agent_config.model
-            );
-        } else {
-            eprintln!(
-                "{DIM}  yoyo (prompt mode) — model: {}{RESET}",
-                agent_config.model
-            );
-        }
-        let mut session_total = Usage::default();
-        let prompt_start = Instant::now();
-        let response = if let Some(ref img_path) = image_path {
-            // Multi-modal prompt: text + image
-            match commands_file::read_image_for_add(img_path) {
-                Ok((data, mime_type)) => {
-                    let content_blocks = vec![
-                        Content::Text {
-                            text: prompt_text.trim().to_string(),
-                        },
-                        Content::Image {
-                            data: data.clone(),
-                            mime_type: mime_type.clone(),
-                        },
-                    ];
-                    let initial = run_prompt_with_content(
-                        &mut agent,
-                        content_blocks,
-                        &mut session_total,
-                        &agent_config.model,
-                    )
-                    .await;
-                    // Fallback retry for multi-modal prompts
-                    let retry_blocks = vec![
-                        Content::Text {
-                            text: prompt_text.trim().to_string(),
-                        },
-                        Content::Image { data, mime_type },
-                    ];
-                    let (final_response, should_exit_error) = try_fallback_prompt(
-                        &mut agent_config,
-                        &mut agent,
-                        FallbackRetry::Content(retry_blocks),
-                        &mut session_total,
-                        initial,
-                    )
-                    .await;
-                    if should_exit_error {
-                        format::maybe_ring_bell(prompt_start.elapsed());
-                        if json_output {
-                            println!(
-                                "{}",
-                                build_json_output(
-                                    &final_response,
-                                    &agent_config.model,
-                                    &session_total,
-                                    true
-                                )
-                            );
-                        } else {
-                            write_output_file(&output_path, &final_response.text);
-                        }
-                        std::process::exit(1);
-                    }
-                    final_response
-                }
-                Err(e) => {
-                    eprintln!("{RED}  error: {e}{RESET}");
-                    std::process::exit(1);
-                }
-            }
-        } else {
-            // Text-only prompt
-            let initial = run_prompt(
-                &mut agent,
-                prompt_text.trim(),
-                &mut session_total,
-                &agent_config.model,
-            )
-            .await;
-            // Fallback retry for text-only prompts
-            let (final_response, should_exit_error) = try_fallback_prompt(
-                &mut agent_config,
-                &mut agent,
-                FallbackRetry::Text(prompt_text.trim()),
-                &mut session_total,
-                initial,
-            )
-            .await;
-            if should_exit_error {
-                format::maybe_ring_bell(prompt_start.elapsed());
-                if json_output {
-                    println!(
-                        "{}",
-                        build_json_output(
-                            &final_response,
-                            &agent_config.model,
-                            &session_total,
-                            true
-                        )
-                    );
-                } else {
-                    write_output_file(&output_path, &final_response.text);
-                }
-                std::process::exit(1);
-            }
-            final_response
-        };
-        format::maybe_ring_bell(prompt_start.elapsed());
-        if json_output {
-            println!(
-                "{}",
-                build_json_output(&response, &agent_config.model, &session_total, false)
-            );
-        } else {
-            write_output_file(&output_path, &response.text);
-        }
-        if CHECKPOINT_TRIGGERED.load(Ordering::SeqCst) {
-            std::process::exit(2);
-        }
+        run_single_prompt(
+            &mut agent_config,
+            &mut agent,
+            &prompt_text,
+            &image_path,
+            &output_path,
+            json_output,
+        )
+        .await;
         return;
     }
 
     // Piped mode: read all of stdin as a single prompt, run once, exit
     if !io::stdin().is_terminal() {
-        let mut input = String::new();
-        io::stdin().read_to_string(&mut input).ok();
-        let input = input.trim();
-        if input.is_empty() {
-            eprintln!("No input on stdin.");
-            std::process::exit(1);
-        }
-
-        eprintln!(
-            "{DIM}  yoyo (piped mode) — model: {}{RESET}",
-            agent_config.model
-        );
-        let mut session_total = Usage::default();
-        let prompt_start = Instant::now();
-        let initial = run_prompt(&mut agent, input, &mut session_total, &agent_config.model).await;
-        // Fallback retry for piped mode
-        let (response, should_exit_error) = try_fallback_prompt(
-            &mut agent_config,
-            &mut agent,
-            FallbackRetry::Text(input),
-            &mut session_total,
-            initial,
-        )
-        .await;
-        format::maybe_ring_bell(prompt_start.elapsed());
-        if json_output {
-            println!(
-                "{}",
-                build_json_output(
-                    &response,
-                    &agent_config.model,
-                    &session_total,
-                    should_exit_error
-                )
-            );
-        } else {
-            write_output_file(&output_path, &response.text);
-        }
-        if should_exit_error {
-            std::process::exit(1);
-        }
-        if CHECKPOINT_TRIGGERED.load(Ordering::SeqCst) {
-            std::process::exit(2);
-        }
+        run_piped_mode(&mut agent_config, &mut agent, &output_path, json_output).await;
         return;
     }
 
