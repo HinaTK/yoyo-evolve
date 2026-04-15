@@ -293,9 +293,8 @@ pub use crate::commands_project::{
     handle_refactor, handle_rename, handle_todo,
 };
 
-pub use crate::commands_search::{
-    handle_ast_grep, handle_find, handle_grep, handle_index, handle_map,
-};
+pub use crate::commands_map::handle_map;
+pub use crate::commands_search::{handle_ast_grep, handle_find, handle_grep, handle_index};
 
 pub use crate::commands_dev::{
     handle_doctor, handle_fix, handle_health, handle_lint, handle_lint_fix, handle_run,

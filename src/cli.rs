@@ -1229,7 +1229,7 @@ pub fn parse_args(args: &[String]) -> Option<Config> {
     }
 
     // Append repo map for structural codebase awareness
-    if let Some(repo_map) = crate::commands_search::generate_repo_map_for_prompt() {
+    if let Some(repo_map) = crate::commands_map::generate_repo_map_for_prompt() {
         system_prompt.push_str("\n\n# Repository Structure\n\n");
         system_prompt.push_str(&repo_map);
     }
