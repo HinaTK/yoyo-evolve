@@ -287,7 +287,10 @@ The subagent has access to the same tools (bash, file operations, etc.) and uses
 | `/health` | Run project health checks — auto-detects project type, reports pass/fail with timing |
 | `/test` | Auto-detect and run project tests — shows output with timing |
 | `/lint` | Auto-detect and run project linter — shows output with timing, feeds failures to agent context |
+| `/lint pedantic` | Run with pedantic clippy lints (Rust only) |
+| `/lint strict` | Run with pedantic + nursery clippy lints (Rust only) |
 | `/lint fix` | Run linter and auto-send failures to AI for fixing |
+| `/lint unsafe` | Scan for unsafe code blocks and suggest safety attributes (Rust only) |
 | `/fix` | Auto-fix build/lint errors — runs health checks, sends failures to the AI agent for fixing |
 | `/update` | Self-update yoyo to the latest GitHub release — detects platform, downloads, replaces the binary |
 
@@ -341,6 +344,13 @@ The `/lint` command is similar to `/test` but runs only the linter for your proj
 - **Node.js**: `npx eslint .`
 - **Python**: `ruff check .`
 - **Go**: `golangci-lint run`
+
+For Rust projects, you can increase clippy's strictness:
+
+- `/lint pedantic` — adds `-W clippy::pedantic` for stricter style checks
+- `/lint strict` — adds `-W clippy::pedantic -W clippy::nursery` for maximum analysis
+
+Strictness levels only affect Rust projects; other languages use their default linter regardless.
 
 When lint fails, the error output is automatically fed into the agent context so you can ask the AI about the errors in your next message. For fully automated fixing, use `/lint fix` — this runs the linter and, if there are failures, sends them directly to the AI agent for correction (similar to `/fix` but lint-only).
 

@@ -533,7 +533,13 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              When lint fails, the error output is automatically fed into\n\
              the agent context so you can ask the AI to help fix issues.\n\n\
              Subcommands:\n\
-             \x20 /lint fix  — Run linter and auto-send failures to AI for fixing\n\n\
+             \x20 /lint              Run with default strictness (-D warnings)\n\
+             \x20 /lint pedantic     Run with pedantic clippy lints (Rust only)\n\
+             \x20 /lint strict       Run with pedantic + nursery clippy lints (Rust only)\n\
+             \x20 /lint fix          Run linter and auto-send failures to AI for fixing\n\
+             \x20 /lint unsafe       Scan for unsafe code blocks and suggest safety attributes\n\n\
+             Strictness levels only affect Rust projects (clippy). Other languages\n\
+             use their default linter regardless of strictness level.\n\n\
              Output is displayed directly in the terminal.",
         ),
         "spawn" => Some(
@@ -831,7 +837,7 @@ pub fn help_text() -> String {
         "  /test              Auto-detect and run project tests (cargo test, npm test, etc.)\n",
     );
     out.push_str(
-        "  /lint [fix]        Auto-detect and run project linter (clippy, eslint, ruff, etc.)\n",
+        "  /lint [pedantic|strict|fix|unsafe]  Run project linter (clippy, eslint, ruff, etc.)\n",
     );
     out.push_str("  /run <cmd>         Run a shell command directly (no AI, no tokens)\n");
     out.push_str("  !<cmd>             Shortcut for /run\n");
@@ -947,7 +953,7 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "index" => Some("Show project file index"),
         "init" => Some("Generate a YOYO.md context file"),
         "jump" => Some("Restore conversation to a bookmark"),
-        "lint" => Some("Run project linter (use /lint fix to auto-fix)"),
+        "lint" => Some("Run project linter (pedantic/strict/fix subcommands)"),
         "load" => Some("Load session from file"),
         "map" => Some("Show project symbol map"),
         "mcp" => Some("List and manage MCP server connections"),

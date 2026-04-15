@@ -170,7 +170,7 @@ pub fn command_arg_completions(cmd: &str, partial_arg: &str) -> Vec<String> {
         "/undo" => filter_candidates(UNDO_OPTIONS, &partial_lower),
         "/refactor" => filter_candidates(REFACTOR_SUBCOMMANDS, &partial_lower),
         "/watch" => filter_candidates(crate::commands_dev::WATCH_SUBCOMMANDS, &partial_lower),
-        "/lint" => filter_candidates(&["fix"], &partial_lower),
+        "/lint" => filter_candidates(crate::commands_dev::LINT_SUBCOMMANDS, &partial_lower),
         "/ast" => filter_candidates(crate::commands_search::AST_GREP_FLAGS, &partial_lower),
         "/apply" => filter_candidates(crate::commands_file::APPLY_FLAGS, &partial_lower),
         "/context" => filter_candidates(

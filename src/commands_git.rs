@@ -1752,11 +1752,14 @@ mod tests {
 
     #[test]
     fn test_build_review_content_existing_file() {
-        // Cargo.toml exists in the project root
-        let result = build_review_content("Cargo.toml");
+        // Use CARGO_MANIFEST_DIR for an absolute path to avoid CWD races
+        // with other tests that call set_current_dir
+        let manifest_dir = env!("CARGO_MANIFEST_DIR");
+        let cargo_toml = format!("{manifest_dir}/Cargo.toml");
+        let result = build_review_content(&cargo_toml);
         assert!(result.is_some(), "Existing file should return Some");
         let (label, content) = result.unwrap();
-        assert_eq!(label, "Cargo.toml");
+        assert_eq!(label, cargo_toml);
         assert!(!content.is_empty(), "Content should not be empty");
     }
 

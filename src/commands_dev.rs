@@ -901,25 +901,84 @@ pub fn handle_test() -> Option<String> {
 
 // ── /lint ──────────────────────────────────────────────────────────────
 
-/// Return the lint command for a given project type.
+/// Lint strictness level for clippy (Rust only; other languages ignore this).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LintStrictness {
+    /// Default: `-D warnings`
+    Default,
+    /// Pedantic: `-D warnings -W clippy::pedantic`
+    Pedantic,
+    /// Strict: `-D warnings -W clippy::pedantic -W clippy::nursery`
+    Strict,
+}
+
+/// Lint subcommand names for tab completion.
+pub const LINT_SUBCOMMANDS: &[&str] = &["fix", "pedantic", "strict", "unsafe"];
+
+/// Return the lint command for a given project type and strictness level.
 pub fn lint_command_for_project(
     project_type: &ProjectType,
-) -> Option<(&'static str, Vec<&'static str>)> {
+    strictness: LintStrictness,
+) -> Option<(String, Vec<String>)> {
     match project_type {
-        ProjectType::Rust => Some((
-            "cargo clippy --all-targets -- -D warnings",
-            vec!["cargo", "clippy", "--all-targets", "--", "-D", "warnings"],
+        ProjectType::Rust => {
+            let mut label = String::from("cargo clippy --all-targets -- -D warnings");
+            let mut args: Vec<String> =
+                vec!["cargo", "clippy", "--all-targets", "--", "-D", "warnings"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect();
+            match strictness {
+                LintStrictness::Default => {}
+                LintStrictness::Pedantic => {
+                    label.push_str(" -W clippy::pedantic");
+                    args.push("-W".into());
+                    args.push("clippy::pedantic".into());
+                }
+                LintStrictness::Strict => {
+                    label.push_str(" -W clippy::pedantic -W clippy::nursery");
+                    args.push("-W".into());
+                    args.push("clippy::pedantic".into());
+                    args.push("-W".into());
+                    args.push("clippy::nursery".into());
+                }
+            }
+            Some((label, args))
+        }
+        ProjectType::Node => Some((
+            "npx eslint .".into(),
+            vec!["npx".into(), "eslint".into(), ".".into()],
         )),
-        ProjectType::Node => Some(("npx eslint .", vec!["npx", "eslint", "."])),
-        ProjectType::Python => Some(("ruff check .", vec!["ruff", "check", "."])),
-        ProjectType::Go => Some(("golangci-lint run", vec!["golangci-lint", "run"])),
+        ProjectType::Python => Some((
+            "ruff check .".into(),
+            vec!["ruff".into(), "check".into(), ".".into()],
+        )),
+        ProjectType::Go => Some((
+            "golangci-lint run".into(),
+            vec!["golangci-lint".into(), "run".into()],
+        )),
         ProjectType::Make | ProjectType::Unknown => None,
     }
 }
 
 /// Handle the /lint command: auto-detect project type and run linter.
 /// Returns a summary string suitable for AI context.
-pub fn handle_lint() -> Option<String> {
+/// Accepts the full input string (e.g. "/lint", "/lint pedantic", "/lint strict").
+pub fn handle_lint(input: &str) -> Option<String> {
+    // Parse strictness from subcommand
+    let arg = input.strip_prefix("/lint").unwrap_or("").trim();
+
+    // Dispatch to specialized subcommand handlers
+    if arg == "unsafe" {
+        return handle_lint_unsafe();
+    }
+
+    let strictness = match arg {
+        "pedantic" => LintStrictness::Pedantic,
+        "strict" => LintStrictness::Strict,
+        _ => LintStrictness::Default,
+    };
+
     let project_type = detect_project_type(&std::env::current_dir().unwrap_or_default());
     println!("{DIM}  Detected project: {project_type}{RESET}");
     if project_type == ProjectType::Unknown {
@@ -929,7 +988,7 @@ pub fn handle_lint() -> Option<String> {
         return None;
     }
 
-    let (label, args) = match lint_command_for_project(&project_type) {
+    let (label, args) = match lint_command_for_project(&project_type, strictness) {
         Some(cmd) => cmd,
         None => {
             println!("{DIM}  No lint command configured for {project_type}{RESET}\n");
@@ -939,7 +998,7 @@ pub fn handle_lint() -> Option<String> {
 
     println!("{DIM}  Running: {label}...{RESET}");
     let start = std::time::Instant::now();
-    let output = std::process::Command::new(args[0])
+    let output = std::process::Command::new(&args[0])
         .args(&args[1..])
         .output();
     let elapsed = format_duration(start.elapsed());
@@ -1011,7 +1070,7 @@ pub async fn handle_lint_fix(
     session_total: &mut Usage,
     model: &str,
 ) -> Option<String> {
-    let lint_result = handle_lint();
+    let lint_result = handle_lint("/lint");
     match lint_result {
         Some(ref summary)
             if summary.starts_with("Lint FAILED") || summary.starts_with("Failed to run") =>
@@ -1019,10 +1078,10 @@ pub async fn handle_lint_fix(
             println!("{YELLOW}  Sending lint failures to AI for fixing...{RESET}\n");
             // Extract the lint command label for the prompt
             let project_type = detect_project_type(&std::env::current_dir().unwrap_or_default());
-            let lint_label = lint_command_for_project(&project_type)
+            let lint_label = lint_command_for_project(&project_type, LintStrictness::Default)
                 .map(|(label, _)| label)
-                .unwrap_or("lint");
-            let fix_prompt = build_lint_fix_prompt(lint_label, summary);
+                .unwrap_or_else(|| "lint".into());
+            let fix_prompt = build_lint_fix_prompt(&lint_label, summary);
             run_prompt(agent, &fix_prompt, session_total, model).await;
             auto_compact_if_needed(agent);
             Some(fix_prompt)
@@ -1034,6 +1093,243 @@ pub async fn handle_lint_fix(
         }
         None => None,
     }
+}
+
+// ── /lint unsafe ────────────────────────────────────────────────────────
+
+/// A single occurrence of `unsafe` found in a source file.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UnsafeOccurrence {
+    pub file: String,
+    pub line_number: usize,
+    pub line_text: String,
+    pub kind: UnsafeKind,
+}
+
+/// What kind of `unsafe` usage was found.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum UnsafeKind {
+    Block,
+    Function,
+    Impl,
+    Trait,
+}
+
+impl std::fmt::Display for UnsafeKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Block => write!(f, "unsafe block"),
+            Self::Function => write!(f, "unsafe fn"),
+            Self::Impl => write!(f, "unsafe impl"),
+            Self::Trait => write!(f, "unsafe trait"),
+        }
+    }
+}
+
+/// Scan file content for `unsafe` usage. Returns occurrences with line numbers.
+/// This is the pure, testable core — no filesystem access.
+pub fn scan_for_unsafe(file_path: &str, content: &str) -> Vec<UnsafeOccurrence> {
+    let mut results = Vec::new();
+    for (idx, line) in content.lines().enumerate() {
+        let trimmed = line.trim();
+        // Skip comments
+        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
+            continue;
+        }
+        // Skip string literals containing "unsafe" — simple heuristic:
+        // if the line has a quote before `unsafe`, it's likely in a string
+        if let Some(unsafe_pos) = trimmed.find("unsafe") {
+            let before = &trimmed[..unsafe_pos];
+            // Count unescaped quotes — odd count means we're inside a string
+            let quote_count = before.chars().filter(|&c| c == '"').count();
+            if quote_count % 2 == 1 {
+                continue;
+            }
+            // Determine kind
+            let after_unsafe = &trimmed[unsafe_pos + 6..]; // len("unsafe") == 6
+            let kind = if after_unsafe.trim_start().starts_with("fn ") {
+                UnsafeKind::Function
+            } else if after_unsafe.trim_start().starts_with("impl") {
+                UnsafeKind::Impl
+            } else if after_unsafe.trim_start().starts_with("trait") {
+                UnsafeKind::Trait
+            } else if after_unsafe.trim_start().starts_with('{')
+                || after_unsafe.trim_start().is_empty()
+                || before.is_empty()
+                || before.ends_with(' ')
+                || before.ends_with('{')
+            {
+                UnsafeKind::Block
+            } else {
+                continue; // Not a real unsafe keyword usage
+            };
+            results.push(UnsafeOccurrence {
+                file: file_path.to_string(),
+                line_number: idx + 1,
+                line_text: line.to_string(),
+                kind,
+            });
+        }
+    }
+    results
+}
+
+/// Check whether file content contains `#![deny(unsafe_code)]` or `#![forbid(unsafe_code)]`.
+pub fn has_unsafe_code_attribute(content: &str) -> Option<&'static str> {
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("//") {
+            continue;
+        }
+        if trimmed.contains("#![forbid(unsafe_code)]") {
+            return Some("forbid");
+        }
+        if trimmed.contains("#![deny(unsafe_code)]") {
+            return Some("deny");
+        }
+    }
+    None
+}
+
+/// Collect all `.rs` files under a directory (non-recursive into target/).
+fn collect_rs_files(dir: &std::path::Path) -> Vec<std::path::PathBuf> {
+    let mut files = Vec::new();
+    collect_rs_files_recursive(dir, &mut files);
+    files.sort();
+    files
+}
+
+fn collect_rs_files_recursive(dir: &std::path::Path, files: &mut Vec<std::path::PathBuf>) {
+    let entries = match std::fs::read_dir(dir) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            let name = path.file_name().unwrap_or_default().to_string_lossy();
+            // Skip target/, .git/, and hidden directories
+            if name == "target" || name == ".git" || name.starts_with('.') {
+                continue;
+            }
+            collect_rs_files_recursive(&path, files);
+        } else if path.extension().is_some_and(|e| e == "rs") {
+            files.push(path);
+        }
+    }
+}
+
+/// Handle the `/lint unsafe` command: scan for unsafe code and report findings.
+pub fn handle_lint_unsafe() -> Option<String> {
+    let cwd = std::env::current_dir().unwrap_or_default();
+
+    // Check for Cargo.toml — this is Rust-specific
+    if !cwd.join("Cargo.toml").exists() {
+        println!("{DIM}  /lint unsafe is only available for Rust projects (no Cargo.toml found){RESET}\n");
+        return None;
+    }
+
+    println!("{DIM}  Scanning for unsafe code...{RESET}");
+
+    // Find the crate root file to check for deny/forbid attribute
+    let mut crate_root_attr: Option<&str> = None;
+    for root_file in &["src/main.rs", "src/lib.rs"] {
+        let root_path = cwd.join(root_file);
+        if root_path.exists() {
+            if let Ok(content) = std::fs::read_to_string(&root_path) {
+                if let Some(attr) = has_unsafe_code_attribute(&content) {
+                    crate_root_attr = Some(attr);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Collect and scan all .rs files
+    let src_dir = cwd.join("src");
+    let scan_dir = if src_dir.exists() { &src_dir } else { &cwd };
+    let rs_files = collect_rs_files(scan_dir);
+
+    let mut all_occurrences: Vec<UnsafeOccurrence> = Vec::new();
+    for file_path in &rs_files {
+        if let Ok(content) = std::fs::read_to_string(file_path) {
+            let relative = file_path
+                .strip_prefix(&cwd)
+                .unwrap_or(file_path)
+                .to_string_lossy()
+                .to_string();
+            let occurrences = scan_for_unsafe(&relative, &content);
+            all_occurrences.extend(occurrences);
+        }
+    }
+
+    // Build report
+    let mut summary = String::new();
+
+    if all_occurrences.is_empty() {
+        if let Some(attr) = crate_root_attr {
+            let msg = format!("✓ No unsafe code found — #![{attr}(unsafe_code)] is active");
+            println!("\n{GREEN}  {msg}{RESET}\n");
+            summary.push_str(&msg);
+        } else {
+            println!("\n{GREEN}  ✓ No unsafe code found{RESET}");
+            println!(
+                "{YELLOW}  💡 Consider adding #![forbid(unsafe_code)] to your crate root for compile-time enforcement{RESET}\n"
+            );
+            summary.push_str(
+                "No unsafe code found. Suggest adding #![forbid(unsafe_code)] to crate root.",
+            );
+        }
+    } else {
+        println!(
+            "\n{YELLOW}  ⚠ Found {} unsafe occurrence(s):{RESET}\n",
+            all_occurrences.len()
+        );
+        for occ in &all_occurrences {
+            println!(
+                "  {RED}{}:{}{RESET} — {} — {}",
+                occ.file,
+                occ.line_number,
+                occ.kind,
+                occ.line_text.trim()
+            );
+        }
+        summary.push_str(&format!(
+            "Found {} unsafe occurrence(s):\n",
+            all_occurrences.len()
+        ));
+        for occ in &all_occurrences {
+            summary.push_str(&format!(
+                "  {}:{} — {} — {}\n",
+                occ.file,
+                occ.line_number,
+                occ.kind,
+                occ.line_text.trim()
+            ));
+        }
+
+        match crate_root_attr {
+            Some(attr) => {
+                println!(
+                    "\n{DIM}  #![{attr}(unsafe_code)] is set — these unsafe usages require #[allow(unsafe_code)] or will fail to compile{RESET}\n"
+                );
+                summary.push_str(&format!("\n#![{attr}(unsafe_code)] is set in crate root."));
+            }
+            None => {
+                println!(
+                    "\n{YELLOW}  💡 No #![deny(unsafe_code)] or #![forbid(unsafe_code)] found in crate root{RESET}"
+                );
+                println!(
+                    "{YELLOW}  💡 Consider adding #![forbid(unsafe_code)] to prevent future unsafe additions{RESET}\n"
+                );
+                summary.push_str(
+                    "\nNo unsafe_code attribute found. Suggest adding #![forbid(unsafe_code)] to crate root."
+                );
+            }
+        }
+    }
+
+    Some(summary)
 }
 
 // ── /watch ──────────────────────────────────────────────────────────────
@@ -1277,19 +1573,19 @@ mod tests {
 
     #[test]
     fn lint_command_rust() {
-        let cmd = lint_command_for_project(&ProjectType::Rust);
+        let cmd = lint_command_for_project(&ProjectType::Rust, LintStrictness::Default);
         assert!(cmd.is_some());
         assert!(cmd.unwrap().0.contains("clippy"));
     }
 
     #[test]
     fn lint_command_make_none() {
-        assert!(lint_command_for_project(&ProjectType::Make).is_none());
+        assert!(lint_command_for_project(&ProjectType::Make, LintStrictness::Default).is_none());
     }
 
     #[test]
     fn lint_command_unknown_none() {
-        assert!(lint_command_for_project(&ProjectType::Unknown).is_none());
+        assert!(lint_command_for_project(&ProjectType::Unknown, LintStrictness::Default).is_none());
     }
 
     // ── health_checks_for_project ───────────────────────────────────
@@ -1877,7 +2173,7 @@ mod tests {
 
     #[test]
     fn test_lint_command_for_rust_project() {
-        let cmd = lint_command_for_project(&ProjectType::Rust);
+        let cmd = lint_command_for_project(&ProjectType::Rust, LintStrictness::Default);
         assert!(cmd.is_some(), "Rust project should have a lint command");
         let (label, args) = cmd.unwrap();
         assert!(
@@ -1885,12 +2181,12 @@ mod tests {
             "Rust lint label should mention clippy"
         );
         assert_eq!(args[0], "cargo");
-        assert!(args.contains(&"clippy"));
+        assert!(args.iter().any(|a| a == "clippy"));
     }
 
     #[test]
     fn test_lint_command_for_node_project() {
-        let cmd = lint_command_for_project(&ProjectType::Node);
+        let cmd = lint_command_for_project(&ProjectType::Node, LintStrictness::Default);
         assert!(cmd.is_some(), "Node project should have a lint command");
         let (label, args) = cmd.unwrap();
         assert!(
@@ -1898,12 +2194,12 @@ mod tests {
             "Node lint label should mention eslint"
         );
         assert_eq!(args[0], "npx");
-        assert!(args.contains(&"eslint"));
+        assert!(args.iter().any(|a| a == "eslint"));
     }
 
     #[test]
     fn test_lint_command_for_python_project() {
-        let cmd = lint_command_for_project(&ProjectType::Python);
+        let cmd = lint_command_for_project(&ProjectType::Python, LintStrictness::Default);
         assert!(cmd.is_some(), "Python project should have a lint command");
         let (label, _args) = cmd.unwrap();
         assert!(
@@ -1914,7 +2210,7 @@ mod tests {
 
     #[test]
     fn test_lint_command_for_go_project() {
-        let cmd = lint_command_for_project(&ProjectType::Go);
+        let cmd = lint_command_for_project(&ProjectType::Go, LintStrictness::Default);
         assert!(cmd.is_some(), "Go project should have a lint command");
         let (label, args) = cmd.unwrap();
         assert!(
@@ -1926,16 +2222,215 @@ mod tests {
 
     #[test]
     fn test_lint_command_for_make_project() {
-        let cmd = lint_command_for_project(&ProjectType::Make);
+        let cmd = lint_command_for_project(&ProjectType::Make, LintStrictness::Default);
         assert!(cmd.is_none(), "Make project should not have a lint command");
     }
 
     #[test]
     fn test_lint_command_for_unknown_project() {
-        let cmd = lint_command_for_project(&ProjectType::Unknown);
+        let cmd = lint_command_for_project(&ProjectType::Unknown, LintStrictness::Default);
         assert!(
             cmd.is_none(),
             "Unknown project should not have a lint command"
+        );
+    }
+
+    // ── lint strictness levels ──────────────────────────────────────────
+
+    #[test]
+    fn test_lint_pedantic_adds_flag() {
+        let cmd = lint_command_for_project(&ProjectType::Rust, LintStrictness::Pedantic);
+        let (label, args) = cmd.unwrap();
+        assert!(
+            label.contains("-W clippy::pedantic"),
+            "Pedantic label should contain -W clippy::pedantic, got: {label}"
+        );
+        assert!(
+            args.iter().any(|a| a == "clippy::pedantic"),
+            "Pedantic args should contain clippy::pedantic"
+        );
+    }
+
+    #[test]
+    fn test_lint_strict_adds_both_flags() {
+        let cmd = lint_command_for_project(&ProjectType::Rust, LintStrictness::Strict);
+        let (label, args) = cmd.unwrap();
+        assert!(
+            label.contains("-W clippy::pedantic"),
+            "Strict label should contain -W clippy::pedantic, got: {label}"
+        );
+        assert!(
+            label.contains("-W clippy::nursery"),
+            "Strict label should contain -W clippy::nursery, got: {label}"
+        );
+        assert!(
+            args.iter().any(|a| a == "clippy::pedantic"),
+            "Strict args should contain clippy::pedantic"
+        );
+        assert!(
+            args.iter().any(|a| a == "clippy::nursery"),
+            "Strict args should contain clippy::nursery"
+        );
+    }
+
+    #[test]
+    fn test_lint_default_no_extra_flags() {
+        let cmd = lint_command_for_project(&ProjectType::Rust, LintStrictness::Default);
+        let (label, args) = cmd.unwrap();
+        assert!(
+            !label.contains("clippy::pedantic"),
+            "Default should not contain clippy::pedantic"
+        );
+        assert!(
+            !label.contains("clippy::nursery"),
+            "Default should not contain clippy::nursery"
+        );
+        assert!(
+            !args.iter().any(|a| a == "clippy::pedantic"),
+            "Default args should not contain clippy::pedantic"
+        );
+    }
+
+    #[test]
+    fn test_lint_strictness_ignored_for_non_rust() {
+        // Non-Rust projects should return the same command regardless of strictness
+        let default = lint_command_for_project(&ProjectType::Node, LintStrictness::Default);
+        let pedantic = lint_command_for_project(&ProjectType::Node, LintStrictness::Pedantic);
+        let strict = lint_command_for_project(&ProjectType::Node, LintStrictness::Strict);
+        assert_eq!(default, pedantic);
+        assert_eq!(default, strict);
+    }
+
+    // ── scan_for_unsafe ────────────────────────────────────────────────
+
+    #[test]
+    fn scan_for_unsafe_finds_blocks() {
+        let content = r#"
+fn main() {
+    unsafe {
+        std::ptr::null::<u8>();
+    }
+}
+"#;
+        let results = scan_for_unsafe("test.rs", content);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].kind, UnsafeKind::Block);
+        assert_eq!(results[0].line_number, 3);
+        assert_eq!(results[0].file, "test.rs");
+    }
+
+    #[test]
+    fn scan_for_unsafe_finds_functions() {
+        let content = r#"
+unsafe fn dangerous() {
+    // do something dangerous
+}
+"#;
+        let results = scan_for_unsafe("test.rs", content);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].kind, UnsafeKind::Function);
+        assert_eq!(results[0].line_number, 2);
+    }
+
+    #[test]
+    fn scan_for_unsafe_finds_impl() {
+        let content = r#"
+unsafe impl Send for MyType {}
+"#;
+        let results = scan_for_unsafe("test.rs", content);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].kind, UnsafeKind::Impl);
+    }
+
+    #[test]
+    fn scan_for_unsafe_finds_trait() {
+        let content = r#"
+unsafe trait MyTrait {}
+"#;
+        let results = scan_for_unsafe("test.rs", content);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].kind, UnsafeKind::Trait);
+    }
+
+    #[test]
+    fn scan_for_unsafe_ignores_comments() {
+        let content = r#"
+// unsafe { this is a comment }
+fn safe() {}
+"#;
+        let results = scan_for_unsafe("test.rs", content);
+        assert!(results.is_empty());
+    }
+
+    #[test]
+    fn scan_for_unsafe_ignores_strings() {
+        let content = r#"
+let s = "unsafe { not real code }";
+"#;
+        let results = scan_for_unsafe("test.rs", content);
+        assert!(results.is_empty());
+    }
+
+    #[test]
+    fn scan_for_unsafe_no_occurrences() {
+        let content = r#"
+fn main() {
+    println!("hello world");
+}
+"#;
+        let results = scan_for_unsafe("test.rs", content);
+        assert!(results.is_empty());
+    }
+
+    #[test]
+    fn scan_for_unsafe_multiple_occurrences() {
+        let content = r#"
+unsafe fn one() {}
+fn two() {
+    unsafe {
+        // block
+    }
+}
+unsafe impl Send for Foo {}
+"#;
+        let results = scan_for_unsafe("test.rs", content);
+        assert_eq!(results.len(), 3);
+        assert_eq!(results[0].kind, UnsafeKind::Function);
+        assert_eq!(results[1].kind, UnsafeKind::Block);
+        assert_eq!(results[2].kind, UnsafeKind::Impl);
+    }
+
+    // ── has_unsafe_code_attribute ──────────────────────────────────────
+
+    #[test]
+    fn detects_forbid_attribute() {
+        let content = "#![forbid(unsafe_code)]\nfn main() {}";
+        assert_eq!(has_unsafe_code_attribute(content), Some("forbid"));
+    }
+
+    #[test]
+    fn detects_deny_attribute() {
+        let content = "#![deny(unsafe_code)]\nfn main() {}";
+        assert_eq!(has_unsafe_code_attribute(content), Some("deny"));
+    }
+
+    #[test]
+    fn no_attribute_returns_none() {
+        let content = "fn main() {}";
+        assert_eq!(has_unsafe_code_attribute(content), None);
+    }
+
+    #[test]
+    fn ignores_commented_attribute() {
+        let content = "// #![forbid(unsafe_code)]\nfn main() {}";
+        assert_eq!(has_unsafe_code_attribute(content), None);
+    }
+
+    #[test]
+    fn lint_unsafe_in_subcommands() {
+        assert!(
+            LINT_SUBCOMMANDS.contains(&"unsafe"),
+            "LINT_SUBCOMMANDS should contain 'unsafe'"
         );
     }
 }

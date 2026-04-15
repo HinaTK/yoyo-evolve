@@ -597,8 +597,8 @@ pub async fn run_repl(
                 }
                 continue;
             }
-            "/lint" => {
-                if let Some(lint_result) = commands::handle_lint() {
+            s if s == "/lint" || s.starts_with("/lint ") => {
+                if let Some(lint_result) = commands::handle_lint(s) {
                     if lint_result.starts_with("Lint FAILED")
                         || lint_result.starts_with("Failed to run")
                     {
