@@ -434,7 +434,7 @@ pub async fn run_repl(
                 continue;
             }
             "/cost" => {
-                commands::handle_cost(&session_total, &agent_config.model);
+                commands::handle_cost(&session_total, &agent_config.model, agent.messages());
                 continue;
             }
             s if s == "/changelog" || s.starts_with("/changelog ") => {

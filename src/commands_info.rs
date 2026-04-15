@@ -97,7 +97,7 @@ pub fn handle_tokens(agent: &Agent, session_total: &Usage, model: &str) {
 
 // ── /cost ────────────────────────────────────────────────────────────────
 
-pub fn handle_cost(session_total: &Usage, model: &str) {
+pub fn handle_cost(session_total: &Usage, model: &str, messages: &[yoagent::AgentMessage]) {
     if let Some(cost) = estimate_cost(session_total, model) {
         println!("{DIM}  Session cost: {}", format_cost(cost));
         println!(
@@ -126,6 +126,14 @@ pub fn handle_cost(session_total: &Usage, model: &str) {
                 println!("      cache read:  {}", format_cost(cr_cost));
             }
         }
+
+        // Per-turn breakdown
+        let turn_costs = extract_turn_costs(messages, model);
+        if !turn_costs.is_empty() {
+            println!();
+            println!("{}", format_turn_costs(&turn_costs));
+        }
+
         println!("{RESET}");
     } else {
         println!("{DIM}  Cost estimation not available for model '{model}'.{RESET}\n");

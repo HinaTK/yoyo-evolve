@@ -240,6 +240,84 @@ pub fn pluralize<'a>(count: usize, singular: &'a str, plural: &'a str) -> &'a st
     }
 }
 
+// ── Per-turn cost breakdown ─────────────────────────────────────────────
+
+/// Per-turn cost information extracted from conversation messages.
+pub struct TurnCost {
+    pub turn_number: usize,
+    pub usage: yoagent::Usage,
+    pub cost_usd: Option<f64>,
+}
+
+/// Extract per-turn costs from a conversation message list.
+/// Each Assistant message counts as one turn.
+pub fn extract_turn_costs(messages: &[yoagent::AgentMessage], model: &str) -> Vec<TurnCost> {
+    let mut turns = Vec::new();
+    let mut turn_number = 0;
+    for msg in messages {
+        if let yoagent::AgentMessage::Llm(yoagent::Message::Assistant { usage, .. }) = msg {
+            turn_number += 1;
+            turns.push(TurnCost {
+                turn_number,
+                usage: usage.clone(),
+                cost_usd: estimate_cost(usage, model),
+            });
+        }
+    }
+    turns
+}
+
+/// Format per-turn costs as a compact table for display.
+pub fn format_turn_costs(costs: &[TurnCost]) -> String {
+    if costs.is_empty() {
+        return String::new();
+    }
+
+    let mut lines = Vec::new();
+    lines.push("    Per-turn breakdown:".to_string());
+    lines.push("      Turn   Input    Output   Cost".to_string());
+
+    let mut total_input: u64 = 0;
+    let mut total_output: u64 = 0;
+    let mut total_cost: f64 = 0.0;
+    let mut has_cost = false;
+
+    for tc in costs {
+        total_input = total_input.saturating_add(tc.usage.input);
+        total_output = total_output.saturating_add(tc.usage.output);
+        let cost_str = match tc.cost_usd {
+            Some(c) => {
+                has_cost = true;
+                total_cost += c;
+                format_cost(c)
+            }
+            None => "—".to_string(),
+        };
+        lines.push(format!(
+            "      {:>4}   {:>7}  {:>7}  {}",
+            tc.turn_number,
+            format_token_count(tc.usage.input),
+            format_token_count(tc.usage.output),
+            cost_str,
+        ));
+    }
+
+    lines.push("      ─────────────────────────────────".to_string());
+    let total_cost_str = if has_cost {
+        format_cost(total_cost)
+    } else {
+        "—".to_string()
+    };
+    lines.push(format!(
+        "      Total  {:>7}  {:>7}  {}",
+        format_token_count(total_input),
+        format_token_count(total_output),
+        total_cost_str,
+    ));
+
+    lines.join("\n")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -849,4 +927,176 @@ mod tests {
     }
 
     // --- truncate_tool_output tests ---
+
+    // ── Per-turn cost tests ───────────────────────────────────────────
+
+    #[test]
+    fn test_extract_turn_costs_empty() {
+        let messages: Vec<yoagent::AgentMessage> = vec![];
+        let costs = extract_turn_costs(&messages, "claude-sonnet-4-20250514");
+        assert!(costs.is_empty());
+    }
+
+    #[test]
+    fn test_extract_turn_costs_skips_non_assistant() {
+        use yoagent::{AgentMessage, Content, Message};
+
+        let messages = vec![AgentMessage::Llm(Message::User {
+            content: vec![Content::Text {
+                text: "hello".into(),
+            }],
+            timestamp: 0,
+        })];
+        let costs = extract_turn_costs(&messages, "claude-sonnet-4-20250514");
+        assert!(costs.is_empty());
+    }
+
+    #[test]
+    fn test_extract_turn_costs_single_assistant() {
+        use yoagent::{AgentMessage, Content, Message, StopReason, Usage};
+
+        let messages = vec![AgentMessage::Llm(Message::Assistant {
+            content: vec![Content::Text { text: "hi".into() }],
+            stop_reason: StopReason::Stop,
+            model: "claude-sonnet-4-20250514".into(),
+            provider: "anthropic".into(),
+            usage: Usage {
+                input: 1000,
+                output: 500,
+                cache_read: 0,
+                cache_write: 0,
+                total_tokens: 1500,
+            },
+            timestamp: 0,
+            error_message: None,
+        })];
+        let costs = extract_turn_costs(&messages, "claude-sonnet-4-20250514");
+        assert_eq!(costs.len(), 1);
+        assert_eq!(costs[0].turn_number, 1);
+        assert_eq!(costs[0].usage.input, 1000);
+        assert_eq!(costs[0].usage.output, 500);
+        assert!(costs[0].cost_usd.is_some());
+    }
+
+    #[test]
+    fn test_extract_turn_costs_multiple() {
+        use yoagent::{AgentMessage, Content, Message, StopReason, Usage};
+
+        let make_assistant = |input: u64, output: u64| {
+            AgentMessage::Llm(Message::Assistant {
+                content: vec![Content::Text { text: "hi".into() }],
+                stop_reason: StopReason::Stop,
+                model: "claude-sonnet-4-20250514".into(),
+                provider: "anthropic".into(),
+                usage: Usage {
+                    input,
+                    output,
+                    cache_read: 0,
+                    cache_write: 0,
+                    total_tokens: input + output,
+                },
+                timestamp: 0,
+                error_message: None,
+            })
+        };
+        let user_msg = AgentMessage::Llm(Message::User {
+            content: vec![Content::Text { text: "q".into() }],
+            timestamp: 0,
+        });
+
+        let messages = vec![
+            user_msg.clone(),
+            make_assistant(1000, 500),
+            user_msg.clone(),
+            make_assistant(2000, 800),
+            user_msg,
+            make_assistant(3000, 1200),
+        ];
+        let costs = extract_turn_costs(&messages, "claude-sonnet-4-20250514");
+        assert_eq!(costs.len(), 3);
+        assert_eq!(costs[0].turn_number, 1);
+        assert_eq!(costs[1].turn_number, 2);
+        assert_eq!(costs[2].turn_number, 3);
+        assert_eq!(costs[2].usage.input, 3000);
+    }
+
+    #[test]
+    fn test_format_turn_costs_empty() {
+        let result = format_turn_costs(&[]);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_format_turn_costs_single() {
+        let costs = vec![TurnCost {
+            turn_number: 1,
+            usage: yoagent::Usage {
+                input: 1200,
+                output: 500,
+                cache_read: 0,
+                cache_write: 0,
+                total_tokens: 1700,
+            },
+            cost_usd: Some(0.0111),
+        }];
+        let output = format_turn_costs(&costs);
+        assert!(output.contains("Per-turn breakdown:"));
+        assert!(output.contains("Turn"));
+        assert!(output.contains("1.2k"));
+        assert!(output.contains("500"));
+        assert!(output.contains("Total"));
+    }
+
+    #[test]
+    fn test_format_turn_costs_multiple() {
+        let costs = vec![
+            TurnCost {
+                turn_number: 1,
+                usage: yoagent::Usage {
+                    input: 1200,
+                    output: 500,
+                    cache_read: 0,
+                    cache_write: 0,
+                    total_tokens: 1700,
+                },
+                cost_usd: Some(0.003),
+            },
+            TurnCost {
+                turn_number: 2,
+                usage: yoagent::Usage {
+                    input: 1500,
+                    output: 800,
+                    cache_read: 0,
+                    cache_write: 0,
+                    total_tokens: 2300,
+                },
+                cost_usd: Some(0.005),
+            },
+        ];
+        let output = format_turn_costs(&costs);
+        assert!(output.contains("Per-turn breakdown:"));
+        // Both turns should appear
+        assert!(output.contains("1.2k"));
+        assert!(output.contains("1.5k"));
+        // Total line should appear
+        assert!(output.contains("Total"));
+    }
+
+    #[test]
+    fn test_format_turn_costs_unknown_model() {
+        let costs = vec![TurnCost {
+            turn_number: 1,
+            usage: yoagent::Usage {
+                input: 1000,
+                output: 500,
+                cache_read: 0,
+                cache_write: 0,
+                total_tokens: 1500,
+            },
+            cost_usd: None,
+        }];
+        let output = format_turn_costs(&costs);
+        // Should show dash for unknown cost
+        assert!(output.contains("—"));
+    }
 }
