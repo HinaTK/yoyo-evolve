@@ -82,6 +82,22 @@ pub fn remove_memory(memory: &mut ProjectMemory, index: usize) -> Option<MemoryE
     }
 }
 
+/// Search memories by case-insensitive substring match.
+/// Returns a vec of `(index, &MemoryEntry)` for matching entries.
+/// An empty query matches all entries.
+pub fn search_memories<'a>(
+    memory: &'a ProjectMemory,
+    query: &str,
+) -> Vec<(usize, &'a MemoryEntry)> {
+    let query_lower = query.to_lowercase();
+    memory
+        .entries
+        .iter()
+        .enumerate()
+        .filter(|(_, entry)| entry.note.to_lowercase().contains(&query_lower))
+        .collect()
+}
+
 /// Format memories for display in the system prompt.
 /// Returns None if there are no memories.
 pub fn format_memories_for_prompt(memory: &ProjectMemory) -> Option<String> {
@@ -371,5 +387,111 @@ mod tests {
         assert_eq!(final_load.entries[1].note, "third");
 
         cleanup(&path);
+    }
+
+    #[test]
+    fn test_search_memories_basic() {
+        let memory = ProjectMemory {
+            entries: vec![
+                MemoryEntry {
+                    note: "uses sqlx for database".to_string(),
+                    timestamp: "t0".to_string(),
+                },
+                MemoryEntry {
+                    note: "docker needed for tests".to_string(),
+                    timestamp: "t1".to_string(),
+                },
+                MemoryEntry {
+                    note: "always run cargo fmt".to_string(),
+                    timestamp: "t2".to_string(),
+                },
+            ],
+        };
+
+        let results = search_memories(&memory, "docker");
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].0, 1); // index 1
+        assert_eq!(results[0].1.note, "docker needed for tests");
+    }
+
+    #[test]
+    fn test_search_memories_case_insensitive() {
+        let memory = ProjectMemory {
+            entries: vec![
+                MemoryEntry {
+                    note: "Uses SQLx for Database".to_string(),
+                    timestamp: "t0".to_string(),
+                },
+                MemoryEntry {
+                    note: "docker NEEDED".to_string(),
+                    timestamp: "t1".to_string(),
+                },
+            ],
+        };
+
+        let results = search_memories(&memory, "SQLX");
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].1.note, "Uses SQLx for Database");
+
+        let results = search_memories(&memory, "needed");
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].0, 1);
+    }
+
+    #[test]
+    fn test_search_memories_no_match() {
+        let memory = ProjectMemory {
+            entries: vec![MemoryEntry {
+                note: "uses sqlx".to_string(),
+                timestamp: "t0".to_string(),
+            }],
+        };
+
+        let results = search_memories(&memory, "python");
+        assert!(results.is_empty());
+    }
+
+    #[test]
+    fn test_search_memories_empty_query() {
+        let memory = ProjectMemory {
+            entries: vec![
+                MemoryEntry {
+                    note: "first".to_string(),
+                    timestamp: "t0".to_string(),
+                },
+                MemoryEntry {
+                    note: "second".to_string(),
+                    timestamp: "t1".to_string(),
+                },
+            ],
+        };
+
+        let results = search_memories(&memory, "");
+        assert_eq!(results.len(), 2);
+    }
+
+    #[test]
+    fn test_search_memories_multiple_matches() {
+        let memory = ProjectMemory {
+            entries: vec![
+                MemoryEntry {
+                    note: "cargo build first".to_string(),
+                    timestamp: "t0".to_string(),
+                },
+                MemoryEntry {
+                    note: "docker needed".to_string(),
+                    timestamp: "t1".to_string(),
+                },
+                MemoryEntry {
+                    note: "cargo fmt before commit".to_string(),
+                    timestamp: "t2".to_string(),
+                },
+            ],
+        };
+
+        let results = search_memories(&memory, "cargo");
+        assert_eq!(results.len(), 2);
+        assert_eq!(results[0].0, 0);
+        assert_eq!(results[1].0, 2);
     }
 }

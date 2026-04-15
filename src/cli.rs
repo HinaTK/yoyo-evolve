@@ -309,7 +309,7 @@ pub fn help_text() -> String {
     );
     let _ = writeln!(s, "  /lint             Auto-detect and run project linter");
     let _ = writeln!(s, "  /load [path]      Load session from file");
-    let _ = writeln!(s, "  /memories         List project-specific memories");
+    let _ = writeln!(s, "  /memories [query] List or search project memories");
     let _ = writeln!(s, "  /model <name>     Switch model mid-session");
     let _ = writeln!(s, "  /retry            Re-send the last user input");
     let _ = writeln!(

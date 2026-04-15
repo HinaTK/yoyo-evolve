@@ -690,7 +690,7 @@ If `YOYO.md` or `CLAUDE.md` already exists, `/init` won't overwrite it. The gene
 | Command | Description |
 |---------|-------------|
 | `/remember <note>` | Save a project-specific note that persists across sessions |
-| `/memories` | List all saved project memories |
+| `/memories [query]` | List all memories, or search by keyword |
 | `/forget <number>` | Remove a memory by its number |
 
 Project memories let you teach yoyo things about your project that it should always know — build quirks, team conventions, infrastructure requirements. Memories are stored in `.yoyo/memory.json` in your project root and are automatically injected into the system prompt at the start of every session.
@@ -711,7 +711,13 @@ Project memories let you teach yoyo things about your project that it should alw
 
 > /forget 0
   ✓ Forgot: "this project uses sqlx for database access" (1 memories remaining)
+
+> /memories docker
+  Found 1 memory matching 'docker':
+    [1] tests require docker running (2026-03-15 08:33)
 ```
+
+Use `/memories <query>` to filter by keyword when you have many memories. The search is case-insensitive.
 
 Use `/remember` any time you find yourself repeating the same instruction to the agent. The memory will be there next time you start a session in this project directory.
 

@@ -770,8 +770,8 @@ pub async fn run_repl(
                 commands::handle_remember(input);
                 continue;
             }
-            "/memories" => {
-                commands::handle_memories();
+            s if s == "/memories" || s.starts_with("/memories ") => {
+                commands::handle_memories(input);
                 continue;
             }
             s if s == "/forget" || s.starts_with("/forget ") => {

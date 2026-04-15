@@ -613,10 +613,17 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /remember the auth module uses JWT with RS256",
         ),
         "memories" => Some(
-            "/memories — List project-specific memories\n\n\
-             Shows all saved memories for the current project directory.\n\
+            "/memories [query] — List or search project memories\n\n\
+             Usage:\n\
+             \x20 /memories            List all saved memories\n\
+             \x20 /memories <query>    Search memories by keyword (case-insensitive)\n\n\
+             Shows saved memories for the current project directory.\n\
              Each memory is displayed with its index (for use with /forget)\n\
-             and the saved text.",
+             and the saved text.\n\n\
+             Examples:\n\
+             \x20 /memories\n\
+             \x20 /memories docker\n\
+             \x20 /memories sqlx",
         ),
         "provider" => Some(
             "/provider <name> — Switch AI provider\n\n\
@@ -959,7 +966,7 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "mcp" => Some("List and manage MCP server connections"),
         "mark" => Some("Bookmark current conversation state"),
         "marks" => Some("List saved bookmarks"),
-        "memories" => Some("Show saved memories"),
+        "memories" => Some("List or search project memories"),
         "model" => Some("Switch or show current model"),
         "move" => Some("Move a method between files"),
         "plan" => Some("AI-generate a task plan"),

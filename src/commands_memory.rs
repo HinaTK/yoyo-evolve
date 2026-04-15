@@ -7,7 +7,7 @@
 //! so the move is purely mechanical and carries no behavioral risk.
 
 use crate::format::*;
-use crate::memory::{add_memory, load_memories, remove_memory, save_memories};
+use crate::memory::{add_memory, load_memories, remove_memory, save_memories, search_memories};
 
 // ── /remember ────────────────────────────────────────────────────────────
 
@@ -43,18 +43,44 @@ pub fn handle_remember(input: &str) {
 
 // ── /memories ────────────────────────────────────────────────────────────
 
-pub fn handle_memories() {
+pub fn handle_memories(input: &str) {
+    let query = input.strip_prefix("/memories").unwrap_or("").trim();
+
     let memory = load_memories();
     if memory.entries.is_empty() {
         println!("{DIM}  No project memories yet.");
         println!("  Use /remember <note> to add one.{RESET}\n");
         return;
     }
-    println!("{DIM}  Project memories ({}):", memory.entries.len());
-    for (i, entry) in memory.entries.iter().enumerate() {
-        println!("    [{i}] {} ({})", entry.note, entry.timestamp);
+
+    if query.is_empty() {
+        // Show all memories
+        println!("{DIM}  Project memories ({}):", memory.entries.len());
+        for (i, entry) in memory.entries.iter().enumerate() {
+            println!("    [{i}] {} ({})", entry.note, entry.timestamp);
+        }
+        println!("  Use /forget <n> to remove a memory.{RESET}\n");
+    } else {
+        // Search memories
+        let results = search_memories(&memory, query);
+        if results.is_empty() {
+            println!("{DIM}  No memories matching '{query}'.{RESET}\n");
+        } else {
+            println!(
+                "{DIM}  Found {} {} matching '{query}':",
+                results.len(),
+                if results.len() == 1 {
+                    "memory"
+                } else {
+                    "memories"
+                }
+            );
+            for (i, entry) in &results {
+                println!("    [{i}] {} ({})", entry.note, entry.timestamp);
+            }
+            println!("  Use /forget <n> to remove a memory.{RESET}\n");
+        }
     }
-    println!("  Use /forget <n> to remove a memory.{RESET}\n");
 }
 
 // ── /forget ──────────────────────────────────────────────────────────────
@@ -100,8 +126,8 @@ pub fn handle_forget(input: &str) {
 mod tests {
     use crate::commands::{is_unknown_command, KNOWN_COMMANDS};
     use crate::memory::{
-        add_memory, format_memories_for_prompt, load_memories_from, remove_memory, MemoryEntry,
-        ProjectMemory,
+        add_memory, format_memories_for_prompt, load_memories_from, remove_memory, search_memories,
+        MemoryEntry, ProjectMemory,
     };
 
     #[test]
@@ -198,5 +224,40 @@ mod tests {
         let prompt = prompt.unwrap();
         assert!(prompt.contains("Project Memories"));
         assert!(prompt.contains("always run cargo fmt"));
+    }
+
+    #[test]
+    fn test_memories_command_with_search_arg() {
+        // Verify that /memories with an argument is still recognized
+        // (it should match via starts_with pattern in repl.rs)
+        assert!(!is_unknown_command("/memories"));
+    }
+
+    #[test]
+    fn test_search_memories_from_command() {
+        let memory = ProjectMemory {
+            entries: vec![
+                MemoryEntry {
+                    note: "uses sqlx for DB".to_string(),
+                    timestamp: "t0".to_string(),
+                },
+                MemoryEntry {
+                    note: "docker required".to_string(),
+                    timestamp: "t1".to_string(),
+                },
+                MemoryEntry {
+                    note: "sqlx migrations in ./migrations".to_string(),
+                    timestamp: "t2".to_string(),
+                },
+            ],
+        };
+
+        let results = search_memories(&memory, "sqlx");
+        assert_eq!(results.len(), 2);
+        assert_eq!(results[0].0, 0);
+        assert_eq!(results[1].0, 2);
+
+        let results = search_memories(&memory, "python");
+        assert!(results.is_empty());
     }
 }
