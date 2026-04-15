@@ -589,8 +589,22 @@ pub async fn run_repl(
                 commands::handle_test();
                 continue;
             }
+            "/lint fix" => {
+                if let Some(fix_prompt) =
+                    commands::handle_lint_fix(agent, &mut session_total, &agent_config.model).await
+                {
+                    last_input = Some(fix_prompt);
+                }
+                continue;
+            }
             "/lint" => {
-                commands::handle_lint();
+                if let Some(lint_result) = commands::handle_lint() {
+                    if lint_result.starts_with("Lint FAILED")
+                        || lint_result.starts_with("Failed to run")
+                    {
+                        last_input = Some(lint_result);
+                    }
+                }
                 continue;
             }
             "/fix" => {

@@ -530,6 +530,10 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 • Node: npm run lint / eslint\n\
              \x20 • Python: ruff / flake8\n\
              \x20 • Go: golangci-lint\n\n\
+             When lint fails, the error output is automatically fed into\n\
+             the agent context so you can ask the AI to help fix issues.\n\n\
+             Subcommands:\n\
+             \x20 /lint fix  — Run linter and auto-send failures to AI for fixing\n\n\
              Output is displayed directly in the terminal.",
         ),
         "spawn" => Some(
@@ -827,7 +831,7 @@ pub fn help_text() -> String {
         "  /test              Auto-detect and run project tests (cargo test, npm test, etc.)\n",
     );
     out.push_str(
-        "  /lint              Auto-detect and run project linter (clippy, eslint, ruff, etc.)\n",
+        "  /lint [fix]        Auto-detect and run project linter (clippy, eslint, ruff, etc.)\n",
     );
     out.push_str("  /run <cmd>         Run a shell command directly (no AI, no tokens)\n");
     out.push_str("  !<cmd>             Shortcut for /run\n");
@@ -943,7 +947,7 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "index" => Some("Show project file index"),
         "init" => Some("Generate a YOYO.md context file"),
         "jump" => Some("Restore conversation to a bookmark"),
-        "lint" => Some("Run project linter"),
+        "lint" => Some("Run project linter (use /lint fix to auto-fix)"),
         "load" => Some("Load session from file"),
         "map" => Some("Show project symbol map"),
         "mcp" => Some("List and manage MCP server connections"),

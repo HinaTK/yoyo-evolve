@@ -286,7 +286,8 @@ The subagent has access to the same tools (bash, file operations, etc.) and uses
 | `/pr <number> checkout` | Checkout a PR branch locally (`gh pr checkout <number>`) |
 | `/health` | Run project health checks — auto-detects project type, reports pass/fail with timing |
 | `/test` | Auto-detect and run project tests — shows output with timing |
-| `/lint` | Auto-detect and run project linter — shows output with timing |
+| `/lint` | Auto-detect and run project linter — shows output with timing, feeds failures to agent context |
+| `/lint fix` | Run linter and auto-send failures to AI for fixing |
 | `/fix` | Auto-fix build/lint errors — runs health checks, sends failures to the AI agent for fixing |
 | `/update` | Self-update yoyo to the latest GitHub release — detects platform, downloads, replaces the binary |
 
@@ -341,7 +342,7 @@ The `/lint` command is similar to `/test` but runs only the linter for your proj
 - **Python**: `ruff check .`
 - **Go**: `golangci-lint run`
 
-No AI involvement — just runs the linter and shows the output with timing. For auto-fixing lint errors with AI help, use `/fix` instead.
+When lint fails, the error output is automatically fed into the agent context so you can ask the AI about the errors in your next message. For fully automated fixing, use `/lint fix` — this runs the linter and, if there are failures, sends them directly to the AI agent for correction (similar to `/fix` but lint-only).
 
 The `/fix` command goes one step further than `/health` — it runs the same health checks, but when any check fails, it sends the full error output to the AI agent with a prompt to fix the issues. The AI reads the relevant files, understands the errors, and applies fixes using its tools. After fixing, it re-runs the checks to verify. This is particularly useful for quickly resolving lint warnings, format issues, or build errors.
 

@@ -989,6 +989,53 @@ pub fn handle_lint() -> Option<String> {
     }
 }
 
+/// Build a prompt asking the AI to fix lint errors.
+/// Takes the lint command label and the raw lint output.
+pub fn build_lint_fix_prompt(lint_command: &str, lint_output: &str) -> String {
+    let mut prompt = String::from(
+        "Fix the following lint errors in this project. Read the relevant files, \
+         understand the warnings/errors, and apply fixes:\n\n",
+    );
+    prompt.push_str(&format!(
+        "## Lint errors (`{lint_command}`):\n```\n{lint_output}\n```\n\n"
+    ));
+    prompt
+        .push_str("After fixing, run the lint command again to verify. Fix any remaining issues.");
+    prompt
+}
+
+/// Handle the `/lint fix` command: run lint and send failures to AI for auto-fixing.
+/// Returns Some(fix_prompt) if failures were sent to AI, None otherwise.
+pub async fn handle_lint_fix(
+    agent: &mut Agent,
+    session_total: &mut Usage,
+    model: &str,
+) -> Option<String> {
+    let lint_result = handle_lint();
+    match lint_result {
+        Some(ref summary)
+            if summary.starts_with("Lint FAILED") || summary.starts_with("Failed to run") =>
+        {
+            println!("{YELLOW}  Sending lint failures to AI for fixing...{RESET}\n");
+            // Extract the lint command label for the prompt
+            let project_type = detect_project_type(&std::env::current_dir().unwrap_or_default());
+            let lint_label = lint_command_for_project(&project_type)
+                .map(|(label, _)| label)
+                .unwrap_or("lint");
+            let fix_prompt = build_lint_fix_prompt(lint_label, summary);
+            run_prompt(agent, &fix_prompt, session_total, model).await;
+            auto_compact_if_needed(agent);
+            Some(fix_prompt)
+        }
+        Some(_) => {
+            // Lint passed — nothing to fix
+            println!("{GREEN}  No lint errors to fix ✓{RESET}\n");
+            None
+        }
+        None => None,
+    }
+}
+
 // ── /watch ──────────────────────────────────────────────────────────────
 
 /// Auto-detect the test command for the current project.
@@ -1285,6 +1332,37 @@ mod tests {
         let prompt = build_fix_prompt(&failures);
         assert!(prompt.contains("## build errors"));
         assert!(prompt.contains("## clippy errors"));
+    }
+
+    // ── build_lint_fix_prompt ──────────────────────────────────────────
+
+    #[test]
+    fn lint_fix_prompt_contains_command_and_output() {
+        let prompt = build_lint_fix_prompt(
+            "cargo clippy --all-targets -- -D warnings",
+            "warning: unused variable `x`\n  --> src/main.rs:5:9",
+        );
+        assert!(prompt.contains("cargo clippy"));
+        assert!(prompt.contains("unused variable"));
+        assert!(prompt.contains("src/main.rs:5:9"));
+    }
+
+    #[test]
+    fn lint_fix_prompt_asks_to_fix() {
+        let prompt = build_lint_fix_prompt("ruff check .", "E501 line too long");
+        assert!(prompt.contains("Fix the following lint errors"));
+        assert!(prompt.contains("ruff check ."));
+        assert!(prompt.contains("E501 line too long"));
+        assert!(prompt.contains("run the lint command again to verify"));
+    }
+
+    #[test]
+    fn lint_fix_prompt_includes_structured_output() {
+        let lint_output = "Lint FAILED (exit 1, 2.3s): cargo clippy\n\nLast output:\nwarning: field `foo` is never read";
+        let prompt =
+            build_lint_fix_prompt("cargo clippy --all-targets -- -D warnings", lint_output);
+        assert!(prompt.contains("## Lint errors"));
+        assert!(prompt.contains("field `foo` is never read"));
     }
 
     // ── update helpers ────────────────────────────────────────────────

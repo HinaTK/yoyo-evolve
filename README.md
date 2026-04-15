@@ -191,7 +191,7 @@ Anthropic · OpenAI · Google · Ollama · OpenRouter · xAI · Groq · DeepSeek
 - `/health` — run build/test/clippy/fmt diagnostics (auto-detects Rust, Node, Python, Go, Make)
 - `/fix` — run checks and auto-apply fixes for failures
 - `/test` — detect project type and run the right test command
-- `/lint` — detect project type and run the right linter
+- `/lint` — detect project type and run the right linter (`/lint fix` to auto-fix with AI)
 - `/update` — self-update to the latest release from GitHub
 - `/init` — scan project and generate a starter YOYO.md context file
 - `/index` — build a codebase index: file counts, language breakdown, key files
@@ -348,7 +348,7 @@ Create a `YOYO.md` (or `CLAUDE.md`) in your project root with build commands, ar
 | `/index` | Build a lightweight codebase index |
 | `/init` | Generate a starter YOYO.md |
 | `/jump <name>` | Jump to a conversation bookmark |
-| `/lint` | Auto-detect and run project linter |
+| `/lint [fix]` | Auto-detect and run project linter (`fix`: auto-fix with AI) |
 | `/load [path]` | Load session from file |
 | `/mark <name>` | Bookmark current point in conversation |
 | `/marks` | List all conversation bookmarks |
