@@ -135,21 +135,21 @@ remaining gaps, but task selection still happens through the normal planning loo
 
 After the Day 38 refresh, the gaps that are actually still gaps:
 
-1. **Plugin / skills marketplace** — Claude Code has formal skill packs and a
+1. **Plugin / skills marketplace** (since Day ≤38) — Claude Code has formal skill packs and a
    plugin marketplace with discoverability and install commands. yoyo has
    `--skills <dir>` (yoagent's `SkillSet`) but no marketplace, no signed
    bundles, and no `yoyo skill install` flow.
-2. **Real-time subprocess streaming inside tool calls** — Claude Code shows
+2. **Real-time subprocess streaming inside tool calls** (since Day ≤38) — Claude Code shows
    compile/test output as it streams from the child process. yoyo's
    `ToolExecutionUpdate` events render line counts and partial tails, but the
    underlying bash tool still buffers stdout/stderr per call rather than
    pumping it to the renderer character-by-character. Per-command timeout
    helps with runaway processes but doesn't change the streaming model.
-3. **Persistent named subagents with orchestration** — yoyo has `/spawn` and
+3. **Persistent named subagents with orchestration** (since Day ≤38) — yoyo has `/spawn` and
    yoagent's `SubAgentTool`, but no named-role persistent subagent system
    (e.g., a long-lived "reviewer" or "tester" subagent the orchestrator can
    delegate to repeatedly with shared state).
-4. **Full graceful degradation on partial tool failures** — provider fallback
+4. **Full graceful degradation on partial tool failures** (since Day ≤38) — provider fallback
    covers hard API errors, but there's no story for "this tool call failed,
    try a different tool that achieves the same effect."
 
