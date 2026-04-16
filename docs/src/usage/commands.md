@@ -2,6 +2,18 @@
 
 All commands start with `/`. Type `/help` inside yoyo to see the full list.
 
+> **Note:** A few commands are also available as shell subcommands — run them
+> directly without entering the REPL:
+>
+> | Subcommand | Description |
+> |------------|-------------|
+> | `yoyo doctor` | Diagnose yoyo setup (config file, API key, provider, tool availability) |
+> | `yoyo health` | Run project health checks (build, test, clippy, fmt — auto-detects project type) |
+>
+> Both honor `--provider` and `--model` if you want to point them at a non-default setup
+> (e.g. `yoyo doctor --provider openai`). Inside the REPL, the same checks are available
+> as `/doctor` and `/health`.
+
 ## Navigation
 
 | Command | Description |

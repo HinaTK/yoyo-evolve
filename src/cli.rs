@@ -252,6 +252,16 @@ pub fn help_text() -> String {
     let _ = writeln!(s, "  --help, -h        Show this help message");
     let _ = writeln!(s, "  --version, -V     Show version");
     let _ = writeln!(s);
+    let _ = writeln!(s, "Subcommands (run from shell, no REPL):");
+    let _ = writeln!(
+        s,
+        "  doctor            Diagnose yoyo setup (config, API key, provider, tool availability)"
+    );
+    let _ = writeln!(
+        s,
+        "  health            Run project health checks (build, test, clippy, fmt)"
+    );
+    let _ = writeln!(s);
     let _ = writeln!(s, "Commands (in REPL):");
     let _ = writeln!(s, "  /quit, /exit      Exit the agent");
     let _ = writeln!(s, "  /clear            Clear conversation history");
@@ -757,6 +767,40 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
         println!("yoyo v{VERSION}");
         return Some(None);
     }
+
+    // Positional subcommands: `yoyo <subcmd>`.
+    // args[0] is the binary path; args[1] is the subcommand name.
+    // Each arm calls the existing REPL handler from commands_dev and exits cleanly
+    // (handlers return () and print directly to stdout).
+    if let Some(sub) = args.get(1) {
+        match sub.as_str() {
+            "doctor" => {
+                // Respect --provider / --model flags if present, else fall back to
+                // config-file values, else compiled-in defaults. We deliberately
+                // do NOT run the full parse_args pipeline because `yoyo doctor`
+                // should work even when the API key / model setup is incomplete
+                // (that's exactly the failure mode the diagnostic exists to detect).
+                let (file_config, _) = load_config_file();
+                let provider = flag_value(args, &["--provider"])
+                    .or_else(|| file_config.get("provider").cloned())
+                    .unwrap_or_else(|| "anthropic".into())
+                    .to_lowercase();
+                let model = flag_value(args, &["--model"])
+                    .or_else(|| file_config.get("model").cloned())
+                    .unwrap_or_else(|| default_model_for_provider(&provider));
+                crate::commands_dev::handle_doctor(&provider, &model);
+                return Some(None);
+            }
+            "health" => {
+                // handle_health takes no arguments — it auto-detects project type
+                // from the current directory and runs the appropriate checks.
+                crate::commands_dev::handle_health();
+                return Some(None);
+            }
+            _ => {}
+        }
+    }
+
     None
 }
 
@@ -1578,6 +1622,41 @@ mod tests {
         assert!(
             matches!(result, Some(None)),
             "expected --help to dispatch even with other flags"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_falls_through_on_unknown_subcommand() {
+        // Regression guard for the doctor/health wiring (Day 47): unknown
+        // positional subcommands must still fall through to flag parsing.
+        // If we accidentally swallow them in try_dispatch_subcommand, every
+        // positional token (e.g. a stray filename) would silently exit yoyo.
+        let args = vec!["yoyo".into(), "not-a-real-subcommand".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            result.is_none(),
+            "expected None for an unknown positional subcommand"
+        );
+    }
+
+    #[test]
+    fn help_text_documents_doctor_and_health_subcommands() {
+        // Regression guard for the Day 47 wiring: `yoyo doctor` and
+        // `yoyo health` are now real shell subcommands. The only way users
+        // discover them is `yoyo --help`, so the help text must list both
+        // explicitly under a Subcommands section.
+        let help = help_text();
+        assert!(
+            help.contains("Subcommands"),
+            "--help must have a Subcommands section now that yoyo doctor/health exist"
+        );
+        assert!(
+            help.contains("doctor"),
+            "--help must mention the `doctor` subcommand"
+        );
+        assert!(
+            help.contains("health"),
+            "--help must mention the `health` subcommand"
         );
     }
 
