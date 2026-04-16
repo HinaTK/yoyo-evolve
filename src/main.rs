@@ -689,6 +689,13 @@ async fn run_single_prompt(
 /// Handle piped mode: read all of stdin, run a single prompt, print/write the
 /// result, and return. Calls `std::process::exit` on empty input or fatal API
 /// errors.
+/// Returns true if `input` looks like a slash command (its first non-whitespace
+/// character is `/`). Slash commands belong to the REPL; piped mode can't
+/// dispatch them, so we use this to warn the user instead of wasting a turn.
+fn looks_like_slash_command(input: &str) -> bool {
+    matches!(input.trim_start().chars().next(), Some('/'))
+}
+
 async fn run_piped_mode(
     agent_config: &mut AgentConfig,
     agent: &mut Agent,
@@ -701,6 +708,18 @@ async fn run_piped_mode(
     if input.is_empty() {
         eprintln!("No input on stdin.");
         std::process::exit(1);
+    }
+
+    // Piped mode can't dispatch slash commands (they need REPL state). If the
+    // user piped one in, warn them and exit instead of burning tokens letting
+    // the model puzzle over the literal string.
+    if looks_like_slash_command(input) {
+        eprintln!("{YELLOW}yoyo: slash commands aren't available in piped mode.{RESET}");
+        eprintln!("  Try one of:");
+        eprintln!("    yoyo doctor                    # run a subcommand directly");
+        eprintln!("    yoyo --prompt \"{input}\"        # send the literal text to the agent");
+        eprintln!("    yoyo                           # interactive REPL");
+        std::process::exit(2);
     }
 
     eprintln!(
@@ -1050,6 +1069,37 @@ mod tests {
     use serial_test::serial;
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::Arc;
+
+    #[test]
+    fn looks_like_slash_command_detects_leading_slash() {
+        assert!(looks_like_slash_command("/doctor"));
+        assert!(looks_like_slash_command("/help"));
+        assert!(looks_like_slash_command("/"));
+    }
+
+    #[test]
+    fn looks_like_slash_command_handles_leading_whitespace() {
+        // The caller already trims, but we should be robust to \n/doctor\n etc.
+        assert!(looks_like_slash_command("  /doctor"));
+        assert!(looks_like_slash_command("\n/doctor\n"));
+        assert!(looks_like_slash_command("\t/status"));
+    }
+
+    #[test]
+    fn looks_like_slash_command_rejects_mid_string_slash() {
+        // A slash that isn't the first non-whitespace character must NOT trigger.
+        assert!(!looks_like_slash_command("what does /doctor do?"));
+        assert!(!looks_like_slash_command("explain /help to me"));
+        assert!(!looks_like_slash_command("path: a/b/c"));
+    }
+
+    #[test]
+    fn looks_like_slash_command_rejects_non_slash_input() {
+        assert!(!looks_like_slash_command("hello"));
+        assert!(!looks_like_slash_command(""));
+        assert!(!looks_like_slash_command("   "));
+        assert!(!looks_like_slash_command("-flag"));
+    }
 
     #[test]
     fn test_always_approve_flag_starts_false() {

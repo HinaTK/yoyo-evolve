@@ -40,3 +40,16 @@ cargo test 2>&1 | yoyo --system "Explain these test failures and suggest fixes."
 yoyo detects piped mode automatically by checking if stdin is a terminal. If it is not, piped mode activates. If stdin is a terminal, interactive REPL mode starts instead.
 
 If piped input is empty, yoyo exits with an error: `No input on stdin.`
+
+## Slash commands aren't dispatched in piped mode
+
+Slash commands (`/doctor`, `/status`, `/help`, etc.) belong to the interactive REPL — they depend on REPL state that piped mode doesn't have. If you pipe a slash command into yoyo, it won't run it; it would only get sent to the model as a literal string and waste a turn of tokens.
+
+Instead, yoyo detects this case, prints a one-line warning to stderr, and exits with status code `2`. Use one of these alternatives:
+
+```bash
+yoyo doctor                       # run the subcommand directly
+yoyo --prompt "/doctor"           # send the literal text to the agent
+yoyo                              # interactive REPL
+```
+

@@ -134,6 +134,81 @@ fn empty_stdin_piped_mode_prints_error_and_exits_one() {
     );
 }
 
+// ── Slash command piped to stdin (not dispatchable without REPL state) ───
+
+#[test]
+fn piped_slash_command_warns_and_exits_two() {
+    // Piped mode can't dispatch slash commands, and sending them to the agent
+    // as prose wastes tokens. The binary should detect this up front, warn
+    // the user, and exit 2 (misuse) without ever calling the provider.
+    use std::io::Write;
+
+    let mut child = yoyo_cmd()
+        .env("ANTHROPIC_API_KEY", "sk-ant-fake-for-test")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("spawn yoyo");
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(b"/doctor\n")
+        .expect("write stdin");
+    let out = child.wait_with_output().expect("wait");
+
+    assert_eq!(
+        out.status.code(),
+        Some(2),
+        "piped slash command should exit 2 (misuse), got {:?}",
+        out.status.code()
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        stderr.contains("slash"),
+        "stderr should mention slash commands, got: {stderr}"
+    );
+    // Should offer an alternative — the subcommand hint is the main "try this".
+    assert!(
+        stderr.contains("yoyo doctor") || stderr.contains("--prompt"),
+        "stderr should suggest a workaround, got: {stderr}"
+    );
+}
+
+#[test]
+fn piped_slash_command_with_leading_whitespace_still_warns() {
+    // Edge case: "\n/doctor\n" should still trigger (user pasted with a newline).
+    use std::io::Write;
+
+    let mut child = yoyo_cmd()
+        .env("ANTHROPIC_API_KEY", "sk-ant-fake-for-test")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("spawn yoyo");
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(b"\n  /status\n")
+        .expect("write stdin");
+    let out = child.wait_with_output().expect("wait");
+
+    assert_eq!(
+        out.status.code(),
+        Some(2),
+        "whitespace-prefixed slash should still exit 2, got {:?}",
+        out.status.code()
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        stderr.contains("slash"),
+        "stderr should mention slash commands, got: {stderr}"
+    );
+}
+
 // ── Unknown flags ───────────────────────────────────────────────────
 
 #[test]
