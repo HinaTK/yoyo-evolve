@@ -406,8 +406,11 @@ pub fn build_retry_prompt(input: &str, last_error: &Option<String>) -> String {
     }
 }
 
-/// Maximum number of automatic retries for transient API errors.
-const MAX_RETRIES: u32 = 3;
+/// Maximum retries for transient API errors (rate limits, 5xx, overload).
+/// Total wall-clock budget with the capped-exponential-backoff-plus-jitter
+/// policy in `retry_delay`: roughly 5 × ~avg(cap/2) = up to ~150s, which
+/// comfortably covers normal Anthropic overload windows (30s–2min).
+const MAX_RETRIES: u32 = 5;
 
 /// Maximum number of automatic retries when a tool execution fails during a
 /// natural-language prompt. The agent re-runs with error context appended so
@@ -473,10 +476,31 @@ pub fn build_overflow_retry_prompt(original_input: &str) -> String {
     )
 }
 
-/// Calculate exponential backoff delay for a given retry attempt (1-indexed).
-/// Returns 1s, 2s, 4s for attempts 1, 2, 3.
+/// Calculate exponential backoff delay with a 60s cap and ±50% jitter.
+///
+/// Attempt 1 → ~1s, 2 → ~2s, 3 → ~4s, 4 → ~8s, 5 → ~16s, 6 → ~32s, 7+ → ~60s
+/// (each with jitter). Capped to protect against pathologically long waits,
+/// jittered to avoid thundering-herd against Anthropic during overload events.
+/// Floored at 500ms so even attempt 0 / degenerate cases still pause.
+///
+/// Day 47: widened from a pure 2^n (max 4s total) to this policy after an
+/// Anthropic `overloaded_error` cost an entire session — see journal.
 pub fn retry_delay(attempt: u32) -> Duration {
-    Duration::from_secs(1 << (attempt.saturating_sub(1)))
+    const CAP_SECS: u64 = 60;
+    // Clamp the shift so 2^n can't overflow u64 for pathological inputs.
+    let shift = attempt.saturating_sub(1).min(6); // 2^6 = 64 ≥ CAP
+    let base = 1u64 << shift;
+    let capped = base.min(CAP_SECS);
+    // Cheap entropy for ±50% jitter without pulling in `rand` as a direct dep.
+    // Nanoseconds-since-epoch provide enough spread for thundering-herd avoidance.
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.subsec_nanos())
+        .unwrap_or(0);
+    let jitter_bp = (nanos % 1000) as u64; // 0..=999 basis points
+    let factor_bp = 500 + jitter_bp; // 500..=1499 → 0.5x..~1.5x
+    let jittered_ms = capped * factor_bp; // capped(sec) * factor_bp == capped*1000*factor_bp/1000 (ms)
+    Duration::from_millis(jittered_ms.max(500))
 }
 
 /// Classify whether an API error message looks transient (worth retrying).
@@ -1790,11 +1814,36 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_retry_delay_exponential_backoff() {
-        // attempt 1 → 1s, attempt 2 → 2s, attempt 3 → 4s
-        assert_eq!(retry_delay(1), Duration::from_secs(1));
-        assert_eq!(retry_delay(2), Duration::from_secs(2));
-        assert_eq!(retry_delay(3), Duration::from_secs(4));
+    fn test_retry_delay_exponential_backoff_ranges() {
+        // Post-Day-47 policy: cap + ±50% jitter. Assertions are ranges, not
+        // exact values, so the test doesn't flake on the jitter RNG.
+        // Attempt 1 ideal=1s → [0.5s, 1.5s]
+        let d1 = retry_delay(1);
+        assert!(
+            d1 >= Duration::from_millis(500) && d1 <= Duration::from_millis(1500),
+            "attempt 1 out of range: {d1:?}"
+        );
+        // Attempt 2 ideal=2s → [1s, 3s]
+        let d2 = retry_delay(2);
+        assert!(
+            d2 >= Duration::from_secs(1) && d2 <= Duration::from_secs(3),
+            "attempt 2 out of range: {d2:?}"
+        );
+        // Attempt 3 ideal=4s → [2s, 6s]
+        let d3 = retry_delay(3);
+        assert!(
+            d3 >= Duration::from_secs(2) && d3 <= Duration::from_secs(6),
+            "attempt 3 out of range: {d3:?}"
+        );
+    }
+
+    #[test]
+    fn test_retry_delay_capped_at_60s() {
+        // Very high attempt numbers must be capped (jitter can push up to ~90s,
+        // but never the pathological 2^20 seconds the old pure-exponential would).
+        let d = retry_delay(20);
+        assert!(d <= Duration::from_secs(90), "not capped: {d:?}");
+        assert!(d >= Duration::from_secs(30), "cap too aggressive: {d:?}");
     }
 
     // Issue #258 / Day 33 lesson (test from the user's perspective):
@@ -1842,9 +1891,15 @@ mod tests {
     }
 
     #[test]
-    fn test_retry_delay_zero_attempt() {
-        // Edge case: attempt 0 should still return 1s (saturating_sub prevents underflow)
-        assert_eq!(retry_delay(0), Duration::from_secs(1));
+    fn test_retry_delay_zero_attempt_floor() {
+        // Edge case: attempt 0 with saturating_sub should still yield the floor
+        // and land in the attempt-1 jitter window.
+        let d = retry_delay(0);
+        assert!(d >= Duration::from_millis(500), "below floor: {d:?}");
+        assert!(
+            d <= Duration::from_millis(1500),
+            "above attempt-1 range: {d:?}"
+        );
     }
 
     #[test]
