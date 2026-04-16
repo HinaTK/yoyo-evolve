@@ -837,7 +837,7 @@ pub fn build_repo_map_with_backend(
     }
 
     // Sort by line count descending (biggest/most important files first)
-    result.sort_by(|a, b| b.lines.cmp(&a.lines));
+    result.sort_by_key(|b| std::cmp::Reverse(b.lines));
     (result, backend)
 }
 

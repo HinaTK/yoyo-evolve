@@ -1302,17 +1302,17 @@ async fn handle_prompt_events(
                         // so it doesn't overlap with output
                         if let Some(s) = spinner.take() { s.stop(); }
                     }
-                    AgentEvent::MessageEnd { .. } => {
+                    AgentEvent::MessageEnd { .. }
                         // Agent finished a message — flush any pending text
                         // (This is where ExecutionLimits stop messages appear)
-                        if in_text {
-                            let remaining = md_renderer.flush();
-                            if !remaining.is_empty() {
-                                print!("{remaining}");
-                            }
-                            println!();
-                            in_text = false;
+                        if in_text =>
+                    {
+                        let remaining = md_renderer.flush();
+                        if !remaining.is_empty() {
+                            print!("{remaining}");
                         }
+                        println!();
+                        in_text = false;
                     }
                     AgentEvent::TurnStart => {
                         turn_number += 1;
