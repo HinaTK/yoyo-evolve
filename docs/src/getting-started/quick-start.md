@@ -16,8 +16,9 @@ yoyo --api-key sk-ant-...
 > **First time?** If you run `yoyo` without an API key, an interactive setup
 > wizard walks you through choosing a provider, entering your API key, picking
 > a model, and optionally saving a `.yoyo.toml` config file. After setup, you
-> go straight into the REPL — no restart needed. If you prefer to skip the
-> wizard, set your API key environment variable first or press Ctrl+C to cancel.
+> go straight into the REPL — no restart needed. You can also run the wizard
+> anytime with `yoyo setup`. If you prefer to skip it, set your API key
+> environment variable first or press Ctrl+C to cancel.
 
 You'll see a banner like this:
 

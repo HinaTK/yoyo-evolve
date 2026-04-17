@@ -255,6 +255,16 @@ pub fn help_text() -> String {
     let _ = writeln!(s, "Subcommands (run from shell, no REPL):");
     let _ = writeln!(
         s,
+        "  help              Show this help message (same as --help)"
+    );
+    let _ = writeln!(s, "  version           Show version (same as --version)");
+    let _ = writeln!(s, "  setup             Run the interactive setup wizard");
+    let _ = writeln!(
+        s,
+        "  init              Generate a YOYO.md project context file"
+    );
+    let _ = writeln!(
+        s,
         "  doctor            Diagnose yoyo setup (config, API key, provider, tool availability)"
     );
     let _ = writeln!(
@@ -795,6 +805,22 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
                 // handle_health takes no arguments — it auto-detects project type
                 // from the current directory and runs the appropriate checks.
                 crate::commands_dev::handle_health();
+                return Some(None);
+            }
+            "help" => {
+                print_help();
+                return Some(None);
+            }
+            "version" => {
+                println!("yoyo v{VERSION}");
+                return Some(None);
+            }
+            "setup" => {
+                crate::setup::run_setup_wizard();
+                return Some(None);
+            }
+            "init" => {
+                crate::commands_project::handle_init();
                 return Some(None);
             }
             _ => {}
@@ -1640,24 +1666,65 @@ mod tests {
     }
 
     #[test]
-    fn help_text_documents_doctor_and_health_subcommands() {
-        // Regression guard for the Day 47 wiring: `yoyo doctor` and
-        // `yoyo health` are now real shell subcommands. The only way users
-        // discover them is `yoyo --help`, so the help text must list both
-        // explicitly under a Subcommands section.
+    fn test_try_dispatch_subcommand_help_bare() {
+        // `yoyo help` (bare word, no dashes) should dispatch the same as --help.
+        let args = vec!["yoyo".into(), "help".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `help` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_version_bare() {
+        // `yoyo version` (bare word) should dispatch the same as --version.
+        let args = vec!["yoyo".into(), "version".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `version` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_setup_bare() {
+        // `yoyo setup` should dispatch the setup wizard (returns Some(None)).
+        let args = vec!["yoyo".into(), "setup".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `setup` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_init_bare() {
+        // `yoyo init` should dispatch the init handler (returns Some(None)).
+        let args = vec!["yoyo".into(), "init".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `init` subcommand"
+        );
+    }
+
+    #[test]
+    fn help_text_documents_all_subcommands() {
+        // Regression guard: all bare subcommands (doctor, health, help, version,
+        // setup, init) must appear in the --help output under a Subcommands section
+        // so users can discover them.
         let help = help_text();
         assert!(
             help.contains("Subcommands"),
-            "--help must have a Subcommands section now that yoyo doctor/health exist"
+            "--help must have a Subcommands section"
         );
-        assert!(
-            help.contains("doctor"),
-            "--help must mention the `doctor` subcommand"
-        );
-        assert!(
-            help.contains("health"),
-            "--help must mention the `health` subcommand"
-        );
+        for subcmd in &["doctor", "health", "help", "version", "setup", "init"] {
+            assert!(
+                help.contains(subcmd),
+                "--help must mention the `{subcmd}` subcommand"
+            );
+        }
     }
 
     #[test]

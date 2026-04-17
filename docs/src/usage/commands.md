@@ -7,10 +7,14 @@ All commands start with `/`. Type `/help` inside yoyo to see the full list.
 >
 > | Subcommand | Description |
 > |------------|-------------|
+> | `yoyo help` | Show help message (same as `--help`) |
+> | `yoyo version` | Show version (same as `--version`) |
+> | `yoyo setup` | Run the interactive setup wizard |
+> | `yoyo init` | Generate a YOYO.md project context file |
 > | `yoyo doctor` | Diagnose yoyo setup (config file, API key, provider, tool availability) |
 > | `yoyo health` | Run project health checks (build, test, clippy, fmt — auto-detects project type) |
 >
-> Both honor `--provider` and `--model` if you want to point them at a non-default setup
+> `doctor` honors `--provider` and `--model` if you want to point it at a non-default setup
 > (e.g. `yoyo doctor --provider openai`). Inside the REPL, the same checks are available
 > as `/doctor` and `/health`.
 
