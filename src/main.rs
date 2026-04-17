@@ -50,6 +50,7 @@ mod commands_refactor;
 mod commands_retry;
 mod commands_search;
 mod commands_session;
+mod commands_spawn;
 mod config;
 mod context;
 mod docs;
