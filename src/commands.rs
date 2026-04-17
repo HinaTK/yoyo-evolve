@@ -13,7 +13,6 @@ pub use crate::help::*;
 // Re-export read-only "info" handlers extracted to commands_info.rs (issue #260).
 // Re-export /bg command handler and tracker for background process management.
 // Wired into REPL dispatch in task 2.
-#[allow(unused_imports)]
 pub use crate::commands_bg::{handle_bg, BackgroundJobTracker};
 
 // Explicit re-exports keep the public API of `commands` unchanged so REPL

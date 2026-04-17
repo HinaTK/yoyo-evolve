@@ -631,11 +631,16 @@ pub fn health_checks_for_project(
             checks
         }
         ProjectType::Make => {
-            #[allow(unused_mut)]
-            let mut checks: Vec<(&str, Vec<&str>)> = vec![];
+            // In test builds the push is cfg-gated out, leaving `checks`
+            // effectively immutable — but mut is required for production.
             #[cfg(not(test))]
-            checks.push(("test", vec!["make", "test"]));
-            checks
+            {
+                vec![("test", vec!["make", "test"])]
+            }
+            #[cfg(test)]
+            {
+                vec![]
+            }
         }
         ProjectType::Unknown => vec![],
     }

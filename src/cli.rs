@@ -52,11 +52,9 @@ pub enum ContextStrategy {
 }
 
 // Re-exported from config module so existing `use crate::cli::` imports keep working.
-#[allow(unused_imports)]
 pub use crate::config::{
-    glob_match, parse_directories_from_config, parse_mcp_servers_from_config,
-    parse_permissions_from_config, parse_toml_array, DirectoryRestrictions, McpServerConfig,
-    PermissionConfig,
+    parse_directories_from_config, parse_mcp_servers_from_config, parse_permissions_from_config,
+    parse_toml_array, DirectoryRestrictions, McpServerConfig, PermissionConfig,
 };
 
 /// Parsed CLI configuration.
@@ -1434,6 +1432,7 @@ pub fn print_welcome() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::glob_match;
 
     #[test]
     fn test_version_constant_exists() {
