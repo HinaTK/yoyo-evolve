@@ -67,6 +67,22 @@ Create and switch to a new branch:
 /git branch feature/my-new-feature
 ```
 
+### /blame
+
+Show who last modified each line of a file, with colorized output:
+
+```
+/blame src/main.rs
+```
+
+Limit to a specific line range:
+
+```
+/blame src/main.rs:10-20
+```
+
+Output is colorized: commit hashes (dim), author names (cyan), dates (dim), line numbers (yellow).
+
 ### /undo
 
 Revert all uncommitted changes. This is equivalent to `git checkout -- .`:

@@ -181,6 +181,7 @@ Anthropic · OpenAI · Google · Ollama · OpenRouter · xAI · Groq · DeepSeek
 
 ### 📂 Git Integration
 - `/diff` — full status + diff with insertion/deletion summary
+- `/blame` — colorized git blame with optional line ranges
 - `/commit` — AI-generated commit messages from staged changes
 - `/undo` — revert last commit, clean up untracked files
 - `/git` — shortcuts for `status`, `log`, `diff`, `branch`, `stash`
@@ -336,6 +337,7 @@ Create a `YOYO.md` (or `CLAUDE.md`) in your project root with build commands, ar
 | `/cost` | Show session cost breakdown |
 | `/changelog [N]` | Show recent git commit history (default: 15) |
 | `/diff` | Git diff summary of uncommitted changes |
+| `/blame <file>` | Git blame with colored output (`/blame file:10-20` for ranges) |
 | `/docs <crate>` | Look up docs.rs documentation |
 | `/exit`, `/quit` | Exit |
 | `/find <pattern>` | Fuzzy-search project files by name |
@@ -396,7 +398,7 @@ src/                    29 modules, ~43,000 lines of Rust
   commands.rs           Slash command dispatch, grouped /help
   commands_bg.rs        /bg — background process management (run, list, output, kill)
   commands_info.rs      /version, /status, /tokens, /cost, /changelog, /model, /provider, /think (read-only)
-  commands_git.rs       /diff, /commit, /pr, /review, /git
+  commands_git.rs       /diff, /blame, /commit, /pr, /review, /git
   commands_project.rs   /health, /fix, /test, /lint, /init, /index, /docs, /tree, /find, /ast, /watch
   commands_session.rs   /save, /load, /compact, /tokens, /cost
   docs.rs               Crate documentation lookup

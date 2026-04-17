@@ -571,6 +571,10 @@ pub async fn run_repl(
                 commands::handle_diff(s);
                 continue;
             }
+            s if s == "/blame" || s.starts_with("/blame ") => {
+                commands::handle_blame(s);
+                continue;
+            }
             s if s == "/undo" || s.starts_with("/undo ") => {
                 if let Some(ctx) = commands::handle_undo(s, &mut turn_history) {
                     undo_context = Some(ctx);

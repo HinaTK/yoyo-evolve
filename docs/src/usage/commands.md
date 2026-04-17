@@ -290,6 +290,7 @@ The subagent has access to the same tools (bash, file operations, etc.) and uses
 | `/git stash drop [n]` | Drop a stash entry (default: latest) |
 | `/commit [msg]` | Commit staged changes — generates a conventional commit message if no msg provided |
 | `/diff` | Show colored file summary, change stats, and full diff of uncommitted changes |
+| `/blame <file>` | Show colorized git blame output (`/blame file:10-20` for line ranges) |
 | `/undo` | Revert all uncommitted changes (`git checkout -- .` and `git clean -fd`) |
 | `/pr [number]` | List open PRs (`gh pr list`), or view a specific PR (`gh pr view <number>`) |
 | `/pr create [--draft]` | Create a PR with an AI-generated title and description |

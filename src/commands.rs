@@ -67,6 +67,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/save",
     "/load",
     "/diff",
+    "/blame",
     "/undo",
     "/health",
     "/hooks",
@@ -284,7 +285,7 @@ pub fn handle_provider_switch(
 
 // Git-related handlers
 pub use crate::commands_git::{
-    handle_commit, handle_diff, handle_git, handle_pr, handle_review, handle_undo,
+    handle_blame, handle_commit, handle_diff, handle_git, handle_pr, handle_review, handle_undo,
 };
 
 // Project-related handlers
@@ -309,9 +310,11 @@ pub use crate::commands_file::{
 pub use crate::commands_session::{
     auto_compact_if_needed, auto_save_on_exit, clear_confirmation_message, handle_compact,
     handle_export, handle_history, handle_jump, handle_load, handle_mark, handle_marks,
-    handle_save, handle_search, handle_spawn, handle_stash, last_session_exists,
-    reset_compact_thrash, Bookmarks, SpawnTracker,
+    handle_save, handle_search, handle_stash, last_session_exists, reset_compact_thrash, Bookmarks,
 };
+
+// Spawn subsystem
+pub use crate::commands_spawn::{handle_spawn, SpawnTracker};
 
 // Memory-related handlers live in commands_memory.rs (#260 slice).
 // The memory-module helpers they use (add_memory, load_memories,

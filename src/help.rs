@@ -310,6 +310,17 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              Displays file summary, change stats, and colored diff output.\n\
              Works in any git repository.",
         ),
+        "blame" => Some(
+            "/blame <file> [:<start>-<end>] — Show git blame with colored output\n\n\
+             Usage:\n\
+             \x20 /blame src/main.rs          Blame the entire file\n\
+             \x20 /blame src/main.rs:10-20    Blame lines 10 through 20\n\n\
+             Colorizes output: commit hash (dim), author (cyan),\n\
+             date (dim), line number (yellow), code (default).\n\n\
+             Examples:\n\
+             \x20 /blame Cargo.toml\n\
+             \x20 /blame src/cli.rs:100-150",
+        ),
         "undo" => Some(
             "/undo [N] — Undo the last agent turn's file changes\n\n\
              Usage:\n\
@@ -813,6 +824,7 @@ pub fn help_text() -> String {
     out.push_str("  ── Git ──\n");
     out.push_str("  /git <subcmd>      Quick git: status, log, add, diff, branch, stash\n");
     out.push_str("  /diff [opts] [file] Show git changes (--staged, --name-only, file filter)\n");
+    out.push_str("  /blame <file>      Show git blame with colored output (/blame file:10-20)\n");
     out.push_str("  /undo [N|--all|--last-commit] Undo changes (turn, all, or last commit)\n");
     out.push_str("  /commit [msg]      Commit staged changes (AI-generates message if no msg)\n");
     out.push_str("  /pr [number]       List open PRs, view, diff, comment, or checkout a PR\n");
@@ -933,6 +945,7 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "apply" => Some("Apply a diff or patch file"),
         "ast" => Some("Structural code search via ast-grep"),
         "bg" => Some("Manage background shell processes"),
+        "blame" => Some("Show git blame with colored output"),
         "changes" => Some("Show files modified during this session"),
         "changelog" => Some("Show recent git commit history"),
         "clear" => Some("Clear conversation history"),
@@ -1124,7 +1137,9 @@ mod tests {
         let git_start = text.find("── Git ──").expect("Git header missing");
         let project_start = text.find("── Project ──").expect("Project header missing");
         let git_section = &text[git_start..project_start];
-        for cmd in &["/git", "/diff", "/undo", "/commit", "/pr", "/review"] {
+        for cmd in &[
+            "/git", "/diff", "/blame", "/undo", "/commit", "/pr", "/review",
+        ] {
             assert!(
                 git_section.contains(cmd),
                 "{cmd} should be in the Git section"
