@@ -22,6 +22,9 @@ All commands start with `/`. Type `/help` inside yoyo to see the full list.
 > | `yoyo commit` | Commit staged changes (e.g. `yoyo commit "fix typo"`) |
 > | `yoyo review` | Show review prompt for staged changes or a file |
 > | `yoyo blame` | Show git blame (e.g. `yoyo blame src/main.rs:1-20`) |
+> | `yoyo grep` | Search files for a pattern (e.g. `yoyo grep TODO src/`) |
+> | `yoyo find` | Find files by name (e.g. `yoyo find main`) |
+> | `yoyo index` | Build and display project index |
 >
 > `doctor` honors `--provider` and `--model` if you want to point it at a non-default setup
 > (e.g. `yoyo doctor --provider openai`). Inside the REPL, the same checks are available

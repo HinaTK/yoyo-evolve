@@ -299,6 +299,15 @@ pub fn help_text() -> String {
         s,
         "  blame             Show git blame (e.g. yoyo blame src/main.rs 10-20)"
     );
+    let _ = writeln!(
+        s,
+        "  grep              Search files for a pattern (e.g. yoyo grep TODO src/)"
+    );
+    let _ = writeln!(
+        s,
+        "  find              Find files by name (e.g. yoyo find main)"
+    );
+    let _ = writeln!(s, "  index             Build and display project index");
     let _ = writeln!(s);
     let _ = writeln!(s, "Commands (in REPL):");
     let _ = writeln!(s, "  /quit, /exit      Exit the agent");
@@ -905,6 +914,20 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
             "blame" => {
                 let input = format!("/{}", args[1..].join(" "));
                 crate::commands_git::handle_blame(&input);
+                return Some(None);
+            }
+            "grep" => {
+                let input = format!("/{}", args[1..].join(" "));
+                crate::commands_search::handle_grep(&input);
+                return Some(None);
+            }
+            "find" => {
+                let input = format!("/{}", args[1..].join(" "));
+                crate::commands_search::handle_find(&input);
+                return Some(None);
+            }
+            "index" => {
+                crate::commands_search::handle_index();
                 return Some(None);
             }
             _ => {}
@@ -1879,10 +1902,41 @@ mod tests {
     }
 
     #[test]
+    fn test_try_dispatch_subcommand_grep() {
+        let args = vec!["yoyo".into(), "grep".into(), "TODO".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `grep` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_find() {
+        let args = vec!["yoyo".into(), "find".into(), "main".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `find` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_index() {
+        let args = vec!["yoyo".into(), "index".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `index` subcommand"
+        );
+    }
+
+    #[test]
     fn help_text_documents_all_subcommands() {
         // Regression guard: all bare subcommands (doctor, health, help, version,
-        // setup, init, lint, test, tree, map, run) must appear in the --help output
-        // under a Subcommands section so users can discover them.
+        // setup, init, lint, test, tree, map, run, diff, commit, review, blame,
+        // grep, find, index) must appear in the --help output under a Subcommands
+        // section so users can discover them.
         let help = help_text();
         assert!(
             help.contains("Subcommands"),
@@ -1890,7 +1944,7 @@ mod tests {
         );
         for subcmd in &[
             "doctor", "health", "help", "version", "setup", "init", "lint", "test", "tree", "map",
-            "run", "diff", "commit", "review", "blame",
+            "run", "diff", "commit", "review", "blame", "grep", "find", "index",
         ] {
             assert!(
                 help.contains(subcmd),
