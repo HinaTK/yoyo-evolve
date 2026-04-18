@@ -25,6 +25,11 @@ All commands start with `/`. Type `/help` inside yoyo to see the full list.
 > | `yoyo grep` | Search files for a pattern (e.g. `yoyo grep TODO src/`) |
 > | `yoyo find` | Find files by name (e.g. `yoyo find main`) |
 > | `yoyo index` | Build and display project index |
+> | `yoyo update` | Check for and install the latest yoyo release |
+> | `yoyo docs` | Look up docs.rs documentation (e.g. `yoyo docs serde`) |
+> | `yoyo watch` | Toggle watch mode (e.g. `yoyo watch cargo test`) |
+> | `yoyo status` | Show version, git branch, and working directory |
+> | `yoyo undo` | Undo changes (e.g. `yoyo undo --last-commit`) |
 >
 > `doctor` honors `--provider` and `--model` if you want to point it at a non-default setup
 > (e.g. `yoyo doctor --provider openai`). Inside the REPL, the same checks are available

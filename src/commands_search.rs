@@ -2,6 +2,50 @@
 
 use crate::format::*;
 
+// ── shell-like tokenizer ─────────────────────────────────────────────────
+
+/// Split a string into tokens, respecting double-quoted groups.
+///
+/// Unquoted whitespace separates tokens. A double-quoted span is kept as a
+/// single token with the quotes stripped. This is intentionally minimal — no
+/// backslash escaping, no single quotes — just enough to round-trip multi-word
+/// arguments that `try_dispatch_subcommand` wraps in double quotes.
+///
+/// ```text
+/// tokenize_quoted(r#""fn main" src/"#)  →  ["fn main", "src/"]
+/// tokenize_quoted("simple word")        →  ["simple", "word"]
+/// tokenize_quoted(r#"-s "fn main""#)    →  ["-s", "fn main"]
+/// ```
+pub(crate) fn tokenize_quoted(input: &str) -> Vec<String> {
+    let mut tokens = Vec::new();
+    let mut current = String::new();
+    let mut in_quotes = false;
+    for ch in input.chars() {
+        match ch {
+            '"' => {
+                in_quotes = !in_quotes;
+                // If we just closed quotes, the token will be flushed on next
+                // whitespace (or at end). If we just opened quotes on a fresh
+                // token, we simply start accumulating.
+            }
+            c if c.is_whitespace() && !in_quotes => {
+                if !current.is_empty() {
+                    tokens.push(std::mem::take(&mut current));
+                }
+            }
+            other => {
+                current.push(other);
+            }
+        }
+    }
+
+    if !current.is_empty() {
+        tokens.push(current);
+    }
+
+    tokens
+}
+
 // ── /find ────────────────────────────────────────────────────────────────
 
 /// Result of a fuzzy file match: (file_path, score, match_ranges).
@@ -354,6 +398,9 @@ pub struct GrepArgs {
 ///
 /// Syntax: `/grep [-s|--case] <pattern> [path]`
 ///
+/// Supports double-quoted patterns for multi-word searches:
+/// `/grep "fn main" src/` → pattern = "fn main", path = "src/"
+///
 /// Returns `None` if the pattern is empty.
 pub fn parse_grep_args(input: &str) -> Option<GrepArgs> {
     let rest = input.strip_prefix("/grep").unwrap_or(input).trim();
@@ -362,14 +409,16 @@ pub fn parse_grep_args(input: &str) -> Option<GrepArgs> {
         return None;
     }
 
-    let mut case_sensitive = false;
-    let mut remaining_parts: Vec<&str> = Vec::new();
+    let tokens = tokenize_quoted(rest);
 
-    for part in rest.split_whitespace() {
-        if part == "-s" || part == "--case" {
+    let mut case_sensitive = false;
+    let mut remaining_parts: Vec<String> = Vec::new();
+
+    for token in &tokens {
+        if token == "-s" || token == "--case" {
             case_sensitive = true;
         } else {
-            remaining_parts.push(part);
+            remaining_parts.push(token.clone());
         }
     }
 
@@ -377,7 +426,7 @@ pub fn parse_grep_args(input: &str) -> Option<GrepArgs> {
         return None;
     }
 
-    let pattern = remaining_parts[0].to_string();
+    let pattern = remaining_parts[0].clone();
     let path = if remaining_parts.len() > 1 {
         remaining_parts[1..].join(" ")
     } else {
@@ -711,6 +760,59 @@ mod tests {
     use std::fs;
     use tempfile::TempDir;
 
+    // ── tokenize_quoted ────────────────────────────────────────────
+
+    #[test]
+    fn tokenize_quoted_simple_words() {
+        assert_eq!(tokenize_quoted("hello world"), vec!["hello", "world"]);
+    }
+
+    #[test]
+    fn tokenize_quoted_double_quoted_group() {
+        assert_eq!(
+            tokenize_quoted(r#""fn main" src/"#),
+            vec!["fn main", "src/"]
+        );
+    }
+
+    #[test]
+    fn tokenize_quoted_mixed() {
+        assert_eq!(
+            tokenize_quoted(r#"-s "fn main" src/"#),
+            vec!["-s", "fn main", "src/"]
+        );
+    }
+
+    #[test]
+    fn tokenize_quoted_empty() {
+        let empty: Vec<String> = vec![];
+        assert_eq!(tokenize_quoted(""), empty);
+        assert_eq!(tokenize_quoted("   "), empty);
+    }
+
+    #[test]
+    fn tokenize_quoted_no_quotes() {
+        assert_eq!(tokenize_quoted("TODO src/"), vec!["TODO", "src/"]);
+    }
+
+    #[test]
+    fn tokenize_quoted_adjacent_to_text() {
+        // Quote directly adjacent to unquoted text gets merged
+        assert_eq!(tokenize_quoted(r#"pre"quoted"post"#), vec!["prequotedpost"]);
+    }
+
+    #[test]
+    fn tokenize_quoted_empty_quotes() {
+        // Empty quotes produce an empty token only if adjacent to nothing
+        // Actually, "" alone produces nothing since current is empty
+        assert_eq!(tokenize_quoted(r#"a "" b"#), vec!["a", "b"]);
+    }
+
+    #[test]
+    fn tokenize_quoted_multiple_spaces() {
+        assert_eq!(tokenize_quoted("  a   b   c  "), vec!["a", "b", "c"]);
+    }
+
     // ── fuzzy_score ─────────────────────────────────────────────────
 
     #[test]
@@ -1032,6 +1134,38 @@ mod tests {
     fn parse_grep_args_only_flag_returns_none() {
         assert!(parse_grep_args("/grep -s").is_none());
         assert!(parse_grep_args("/grep --case").is_none());
+    }
+
+    #[test]
+    fn parse_grep_args_quoted_pattern() {
+        let args = parse_grep_args(r#"/grep "fn main""#).unwrap();
+        assert_eq!(args.pattern, "fn main");
+        assert_eq!(args.path, ".");
+        assert!(!args.case_sensitive);
+    }
+
+    #[test]
+    fn parse_grep_args_quoted_pattern_with_path() {
+        let args = parse_grep_args(r#"/grep "fn main" src/"#).unwrap();
+        assert_eq!(args.pattern, "fn main");
+        assert_eq!(args.path, "src/");
+        assert!(!args.case_sensitive);
+    }
+
+    #[test]
+    fn parse_grep_args_quoted_pattern_case_sensitive() {
+        let args = parse_grep_args(r#"/grep -s "fn main" src/"#).unwrap();
+        assert_eq!(args.pattern, "fn main");
+        assert_eq!(args.path, "src/");
+        assert!(args.case_sensitive);
+    }
+
+    #[test]
+    fn parse_grep_args_backward_compat_single_word() {
+        // Ensure single-word patterns still work without quotes
+        let args = parse_grep_args("/grep TODO").unwrap();
+        assert_eq!(args.pattern, "TODO");
+        assert_eq!(args.path, ".");
     }
 
     #[test]

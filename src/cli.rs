@@ -308,6 +308,26 @@ pub fn help_text() -> String {
         "  find              Find files by name (e.g. yoyo find main)"
     );
     let _ = writeln!(s, "  index             Build and display project index");
+    let _ = writeln!(
+        s,
+        "  update            Check for and install the latest yoyo release"
+    );
+    let _ = writeln!(
+        s,
+        "  docs              Look up docs.rs documentation (e.g. yoyo docs serde)"
+    );
+    let _ = writeln!(
+        s,
+        "  watch             Toggle watch mode (e.g. yoyo watch cargo test)"
+    );
+    let _ = writeln!(
+        s,
+        "  status            Show version, git branch, and working directory"
+    );
+    let _ = writeln!(
+        s,
+        "  undo              Undo changes (e.g. yoyo undo --last-commit)"
+    );
     let _ = writeln!(s);
     let _ = writeln!(s, "Commands (in REPL):");
     let _ = writeln!(s);
@@ -1029,6 +1049,44 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
             }
             "index" => {
                 crate::commands_search::handle_index();
+                return Some(None);
+            }
+            "update" => {
+                if let Err(e) = crate::commands_dev::handle_update() {
+                    eprintln!("{RED}  {e}{RESET}");
+                }
+                return Some(None);
+            }
+            "docs" => {
+                let input = quote_args_as_command(args);
+                crate::commands_project::handle_docs(&input);
+                return Some(None);
+            }
+            "watch" => {
+                let input = quote_args_as_command(args);
+                crate::commands_dev::handle_watch(&input);
+                return Some(None);
+            }
+            "status" => {
+                // Bare subcommand: no active session, so show what we can
+                // without agent state (version, git branch, cwd).
+                let cwd = std::env::current_dir()
+                    .map_or_else(|_| "?".into(), |p| p.display().to_string());
+                println!("{DIM}  yoyo v{VERSION}");
+                if let Some(branch) = crate::git::git_branch() {
+                    println!("  git:     {branch}");
+                }
+                println!("  cwd:     {cwd}");
+                println!("  (no active session — start yoyo for full status){RESET}\n");
+                return Some(None);
+            }
+            "undo" => {
+                // Bare subcommand: no turn history available (no active session).
+                // Support --last-commit which works standalone; for other args,
+                // explain that turn-based undo requires a session.
+                let input = quote_args_as_command(args);
+                let mut history = crate::prompt::TurnHistory::new();
+                crate::commands_git::handle_undo(&input, &mut history);
                 return Some(None);
             }
             _ => {}
@@ -2033,6 +2091,58 @@ mod tests {
     }
 
     #[test]
+    fn test_try_dispatch_subcommand_update() {
+        let args = vec!["yoyo".into(), "update".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `update` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_docs() {
+        let args = vec!["yoyo".into(), "docs".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `docs` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_watch() {
+        // `yoyo watch status` should dispatch (shows current watch state).
+        let args = vec!["yoyo".into(), "watch".into(), "status".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `watch` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_status() {
+        let args = vec!["yoyo".into(), "status".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `status` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_undo() {
+        // Bare `yoyo undo` with no session — should dispatch (shows fallback message).
+        let args = vec!["yoyo".into(), "undo".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `undo` subcommand"
+        );
+    }
+
+    #[test]
     fn help_text_documents_all_subcommands() {
         // Regression guard: all bare subcommands (doctor, health, help, version,
         // setup, init, lint, test, tree, map, run, diff, commit, review, blame,
@@ -2045,7 +2155,8 @@ mod tests {
         );
         for subcmd in &[
             "doctor", "health", "help", "version", "setup", "init", "lint", "test", "tree", "map",
-            "run", "diff", "commit", "review", "blame", "grep", "find", "index",
+            "run", "diff", "commit", "review", "blame", "grep", "find", "index", "update", "docs",
+            "watch", "status", "undo",
         ] {
             assert!(
                 help.contains(subcmd),
