@@ -1596,12 +1596,12 @@ public enum Status { OK, ERROR }
     #[test]
     fn build_repo_map_with_regex_backend() {
         // This test uses relative paths internally (git ls-files + read_to_string)
-        // so it depends on cwd being the project root. The set_current_dir race
-        // that caused CI failures has been eliminated from setup.rs.
-        // Guard: verify src/ exists relative to cwd before asserting results.
-        let manifest_src = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src");
-        if !manifest_src.is_dir() {
-            return; // Skip if project structure is unexpected
+        // so it depends on cwd being the project root. Another test running in
+        // parallel may call set_current_dir, breaking relative path resolution.
+        // Guard: verify src/ exists relative to cwd (NOT CARGO_MANIFEST_DIR,
+        // which is an absolute path that always passes).
+        if !std::path::Path::new("src").is_dir() {
+            return; // CWD has been changed by a parallel test — skip
         }
 
         let (entries, backend) = build_repo_map_with_backend(Some("src/"), true, true);
