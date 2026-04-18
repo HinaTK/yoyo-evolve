@@ -13,6 +13,15 @@ All commands start with `/`. Type `/help` inside yoyo to see the full list.
 > | `yoyo init` | Generate a YOYO.md project context file |
 > | `yoyo doctor` | Diagnose yoyo setup (config file, API key, provider, tool availability) |
 > | `yoyo health` | Run project health checks (build, test, clippy, fmt — auto-detects project type) |
+> | `yoyo lint` | Run project linter (e.g. `yoyo lint --strict`, `yoyo lint unsafe`) |
+> | `yoyo test` | Run project test suite |
+> | `yoyo tree` | Show project directory tree |
+> | `yoyo map` | Show project symbol map |
+> | `yoyo run` | Run a shell command (e.g. `yoyo run cargo clippy`) |
+> | `yoyo diff` | Show git diff (e.g. `yoyo diff --staged`) |
+> | `yoyo commit` | Commit staged changes (e.g. `yoyo commit "fix typo"`) |
+> | `yoyo review` | Show review prompt for staged changes or a file |
+> | `yoyo blame` | Show git blame (e.g. `yoyo blame src/main.rs:1-20`) |
 >
 > `doctor` honors `--provider` and `--model` if you want to point it at a non-default setup
 > (e.g. `yoyo doctor --provider openai`). Inside the REPL, the same checks are available

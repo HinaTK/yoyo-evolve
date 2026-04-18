@@ -269,6 +269,36 @@ pub fn help_text() -> String {
         s,
         "  health            Run project health checks (build, test, clippy, fmt)"
     );
+    let _ = writeln!(
+        s,
+        "  lint              Run project linter (e.g. yoyo lint --strict, yoyo lint unsafe)"
+    );
+    let _ = writeln!(s, "  test              Run project test suite");
+    let _ = writeln!(
+        s,
+        "  tree              Show project directory tree (e.g. yoyo tree 5)"
+    );
+    let _ = writeln!(s, "  map               Show project symbol map");
+    let _ = writeln!(
+        s,
+        "  run               Run a shell command (e.g. yoyo run cargo clippy)"
+    );
+    let _ = writeln!(
+        s,
+        "  diff              Show git diff (e.g. yoyo diff --staged)"
+    );
+    let _ = writeln!(
+        s,
+        "  commit            Commit staged changes (e.g. yoyo commit \"fix typo\")"
+    );
+    let _ = writeln!(
+        s,
+        "  review            Show review prompt for staged changes or a file"
+    );
+    let _ = writeln!(
+        s,
+        "  blame             Show git blame (e.g. yoyo blame src/main.rs 10-20)"
+    );
     let _ = writeln!(s);
     let _ = writeln!(s, "Commands (in REPL):");
     let _ = writeln!(s, "  /quit, /exit      Exit the agent");
@@ -819,6 +849,62 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
             }
             "init" => {
                 crate::commands_project::handle_init();
+                return Some(None);
+            }
+            "lint" => {
+                let input = format!("/{}", args[1..].join(" "));
+                crate::commands_dev::handle_lint(&input);
+                return Some(None);
+            }
+            "test" => {
+                crate::commands_dev::handle_test();
+                return Some(None);
+            }
+            "tree" => {
+                let input = format!("/{}", args[1..].join(" "));
+                crate::commands_dev::handle_tree(&input);
+                return Some(None);
+            }
+            "map" => {
+                let input = format!("/{}", args[1..].join(" "));
+                crate::commands_map::handle_map(&input);
+                return Some(None);
+            }
+            "run" => {
+                let input = format!("/{}", args[1..].join(" "));
+                crate::commands_dev::handle_run(&input);
+                return Some(None);
+            }
+            "diff" => {
+                let input = format!("/{}", args[1..].join(" "));
+                crate::commands_git::handle_diff(&input);
+                return Some(None);
+            }
+            "commit" => {
+                let input = format!("/{}", args[1..].join(" "));
+                crate::commands_git::handle_commit(&input);
+                return Some(None);
+            }
+            "review" => {
+                // handle_review is async and needs an agent — for bare
+                // subcommand, gather the content and print the review prompt
+                // so the user can see what would be sent to the model.
+                let input = format!("/{}", args[1..].join(" "));
+                let arg = input.strip_prefix("/review").unwrap_or("").trim();
+                match crate::commands_git::build_review_content(arg) {
+                    Some((label, content)) => {
+                        let prompt = crate::commands_git::build_review_prompt(&label, &content);
+                        println!("{prompt}");
+                    }
+                    None => {
+                        // build_review_content already printed the error/status
+                    }
+                }
+                return Some(None);
+            }
+            "blame" => {
+                let input = format!("/{}", args[1..].join(" "));
+                crate::commands_git::handle_blame(&input);
                 return Some(None);
             }
             _ => {}
@@ -1709,16 +1795,103 @@ mod tests {
     }
 
     #[test]
+    fn test_try_dispatch_subcommand_lint() {
+        let args = vec!["yoyo".into(), "lint".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `lint` subcommand"
+        );
+    }
+
+    #[test]
+    #[ignore] // Runs `cargo test` recursively — verified manually, skip in CI
+    fn test_try_dispatch_subcommand_test() {
+        let args = vec!["yoyo".into(), "test".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `test` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_tree() {
+        let args = vec!["yoyo".into(), "tree".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `tree` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_map() {
+        let args = vec!["yoyo".into(), "map".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `map` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_run_no_args() {
+        // `yoyo run` with no command should still dispatch (shows usage).
+        let args = vec!["yoyo".into(), "run".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `run` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_diff() {
+        let args = vec!["yoyo".into(), "diff".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `diff` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_commit() {
+        // `yoyo commit` with no message should still dispatch (shows "nothing staged" or similar).
+        let args = vec!["yoyo".into(), "commit".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `commit` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_blame() {
+        // `yoyo blame` with no file should still dispatch (shows error message).
+        let args = vec!["yoyo".into(), "blame".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `blame` subcommand"
+        );
+    }
+
+    #[test]
     fn help_text_documents_all_subcommands() {
         // Regression guard: all bare subcommands (doctor, health, help, version,
-        // setup, init) must appear in the --help output under a Subcommands section
-        // so users can discover them.
+        // setup, init, lint, test, tree, map, run) must appear in the --help output
+        // under a Subcommands section so users can discover them.
         let help = help_text();
         assert!(
             help.contains("Subcommands"),
             "--help must have a Subcommands section"
         );
-        for subcmd in &["doctor", "health", "help", "version", "setup", "init"] {
+        for subcmd in &[
+            "doctor", "health", "help", "version", "setup", "init", "lint", "test", "tree", "map",
+            "run", "diff", "commit", "review", "blame",
+        ] {
             assert!(
                 help.contains(subcmd),
                 "--help must mention the `{subcmd}` subcommand"
