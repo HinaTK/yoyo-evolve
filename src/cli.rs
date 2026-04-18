@@ -310,98 +310,180 @@ pub fn help_text() -> String {
     let _ = writeln!(s, "  index             Build and display project index");
     let _ = writeln!(s);
     let _ = writeln!(s, "Commands (in REPL):");
-    let _ = writeln!(s, "  /quit, /exit      Exit the agent");
-    let _ = writeln!(s, "  /clear            Clear conversation history");
+    let _ = writeln!(s);
+    let _ = writeln!(s, "  Session:");
     let _ = writeln!(
         s,
-        "  /compact          Compact conversation to save context space"
+        "    /help              Show help (/help <cmd> for details)"
+    );
+    let _ = writeln!(s, "    /quit, /exit       Exit yoyo");
+    let _ = writeln!(s, "    /clear             Clear conversation history");
+    let _ = writeln!(s, "    /clear!            Force-clear without confirmation");
+    let _ = writeln!(
+        s,
+        "    /compact           Compact conversation to save context"
+    );
+    let _ = writeln!(s, "    /save [path]       Save session to file");
+    let _ = writeln!(s, "    /load [path]       Load session from file");
+    let _ = writeln!(s, "    /retry             Re-send the last user input");
+    let _ = writeln!(s, "    /status            Show session info");
+    let _ = writeln!(
+        s,
+        "    /tokens            Show token usage and context window"
+    );
+    let _ = writeln!(s, "    /cost              Show estimated session cost");
+    let _ = writeln!(s, "    /config            Show all current settings");
+    let _ = writeln!(s, "    /hooks             Show active hooks");
+    let _ = writeln!(s, "    /permissions       Show security/permission config");
+    let _ = writeln!(s, "    /version           Show yoyo version");
+    let _ = writeln!(
+        s,
+        "    /update            Check for and install latest version"
     );
     let _ = writeln!(
         s,
-        "  /commit [msg]     Commit staged changes (AI-generates message if no msg)"
+        "    /history           Show conversation message summary"
     );
-    let _ = writeln!(s, "  /config           Show all current settings");
+    let _ = writeln!(s, "    /search <query>    Search conversation history");
+    let _ = writeln!(s, "    /mark <name>       Bookmark conversation state");
+    let _ = writeln!(s, "    /jump <name>       Restore to a bookmark");
+    let _ = writeln!(s, "    /marks             List saved bookmarks");
+    let _ = writeln!(s, "    /changes           Show files modified this session");
+    let _ = writeln!(s, "    /changelog [N]     Show recent git commit history");
+    let _ = writeln!(s, "    /export [path]     Export conversation as markdown");
     let _ = writeln!(
         s,
-        "  /context          Show loaded project context files (YOYO.md)"
-    );
-    let _ = writeln!(s, "  /cost             Show estimated session cost");
-    let _ = writeln!(
-        s,
-        "  /diff             Show git diff summary of uncommitted changes"
-    );
-    let _ = writeln!(
-        s,
-        "  /docs <crate>     Look up docs.rs documentation for a Rust crate"
-    );
-    let _ = writeln!(s, "  /find <pattern>   Fuzzy-search project files by name");
-    let _ = writeln!(
-        s,
-        "  /fix              Auto-fix build/lint errors (runs checks, sends failures to AI)"
-    );
-    let _ = writeln!(s, "  /forget <n>       Remove a project memory by index");
-    let _ = writeln!(
-        s,
-        "  /git <subcmd>     Quick git: status, log [n], add <path>, stash, stash pop"
+        "    /stash [desc]      Stash conversation and start fresh"
     );
     let _ = writeln!(
         s,
-        "  /health           Run project health checks (auto-detects project type)"
+        "    /todo [subcmd]     Track tasks (add/done/wip/remove/clear)"
+    );
+    let _ = writeln!(s);
+    let _ = writeln!(s, "  Git:");
+    let _ = writeln!(
+        s,
+        "    /git <subcmd>      Quick git: status, log, add, diff, branch"
     );
     let _ = writeln!(
         s,
-        "  /pr [number]      List open PRs, or view details of a specific PR"
+        "    /diff [opts]       Show git diff (--staged, --name-only)"
     );
     let _ = writeln!(
         s,
-        "  /history          Show summary of conversation messages"
+        "    /blame <file>      Show git blame with colored output"
     );
     let _ = writeln!(
         s,
-        "  /search <query>   Search conversation history for matching messages"
+        "    /undo [N|--all]    Undo changes (turn, all, or last commit)"
     );
     let _ = writeln!(
         s,
-        "  /init             Create a starter YOYO.md project context file"
-    );
-    let _ = writeln!(s, "  /lint             Auto-detect and run project linter");
-    let _ = writeln!(s, "  /load [path]      Load session from file");
-    let _ = writeln!(s, "  /memories [query] List or search project memories");
-    let _ = writeln!(s, "  /model <name>     Switch model mid-session");
-    let _ = writeln!(s, "  /retry            Re-send the last user input");
-    let _ = writeln!(
-        s,
-        "  /remember <note>  Save a project-specific memory (persists across sessions)"
+        "    /commit [msg]      Commit staged changes (AI message if omitted)"
     );
     let _ = writeln!(
         s,
-        "  /review [path]    AI code review: staged changes (default) or a specific file"
+        "    /pr [number]       List, view, diff, comment, or create PRs"
     );
     let _ = writeln!(
         s,
-        "  /run <cmd>        Run a shell command directly (no AI, no tokens)"
+        "    /review [path]     AI code review of staged changes or a file"
     );
-    let _ = writeln!(s, "  /save [path]      Save session to file");
+    let _ = writeln!(s);
+    let _ = writeln!(s, "  Project:");
     let _ = writeln!(
         s,
-        "  /spawn <task>     Spawn a subagent with fresh context to handle a task"
+        "    /add <path>        Add file contents to conversation"
     );
-    let _ = writeln!(s, "  /status           Show session info");
-    let _ = writeln!(s, "  /test             Auto-detect and run project tests");
+    let _ = writeln!(s, "    /apply <file>      Apply a diff or patch file");
     let _ = writeln!(
         s,
-        "  /think [level]    Show or change thinking level (off/low/medium/high)"
+        "    /context           Show loaded project context files"
     );
-    let _ = writeln!(s, "  /tokens           Show token usage and context window");
+    let _ = writeln!(s, "    /doctor            Run environment diagnostics");
     let _ = writeln!(
         s,
-        "  /tree [depth]     Show project directory tree (default depth: 3)"
+        "    /init              Generate a YOYO.md project context file"
+    );
+    let _ = writeln!(s, "    /health            Run project health checks");
+    let _ = writeln!(
+        s,
+        "    /fix               Auto-fix build/lint errors via AI"
     );
     let _ = writeln!(
         s,
-        "  /undo             Revert all uncommitted changes (git checkout)"
+        "    /test              Auto-detect and run project tests"
     );
-    let _ = writeln!(s, "  /version          Show yoyo version");
+    let _ = writeln!(
+        s,
+        "    /lint [opts]       Run project linter (pedantic/strict/fix/unsafe)"
+    );
+    let _ = writeln!(
+        s,
+        "    /run <cmd>         Run a shell command (no AI, no tokens)"
+    );
+    let _ = writeln!(
+        s,
+        "    /bg <sub>          Background shell jobs (run/list/output/kill)"
+    );
+    let _ = writeln!(s, "    /docs <crate>      Look up docs.rs documentation");
+    let _ = writeln!(
+        s,
+        "    /find <pattern>    Fuzzy-search project files by name"
+    );
+    let _ = writeln!(
+        s,
+        "    /grep <pat> [path] Search file contents (no AI, instant)"
+    );
+    let _ = writeln!(s, "    /rename <old> <new> Cross-file symbol rename");
+    let _ = writeln!(
+        s,
+        "    /extract <sym> <src> <dst>  Move a symbol to another file"
+    );
+    let _ = writeln!(
+        s,
+        "    /move <S>::<m> <D>  Move a method between impl blocks"
+    );
+    let _ = writeln!(s, "    /refactor          Show all refactoring tools");
+    let _ = writeln!(
+        s,
+        "    /index             Build lightweight project source index"
+    );
+    let _ = writeln!(
+        s,
+        "    /map [path]        Show structural map (functions, types)"
+    );
+    let _ = writeln!(s, "    /tree [depth]      Show project directory tree");
+    let _ = writeln!(
+        s,
+        "    /web <url>         Fetch and display web page content"
+    );
+    let _ = writeln!(s, "    /watch [cmd]       Auto-run tests after agent edits");
+    let _ = writeln!(
+        s,
+        "    /ast <pattern>     Structural code search (ast-grep)"
+    );
+    let _ = writeln!(s);
+    let _ = writeln!(s, "  AI:");
+    let _ = writeln!(
+        s,
+        "    /model <name>      Switch model (preserves conversation)"
+    );
+    let _ = writeln!(s, "    /provider <name>   Switch provider");
+    let _ = writeln!(
+        s,
+        "    /think [level]     Show/change thinking (off/low/medium/high)"
+    );
+    let _ = writeln!(s, "    /plan <task>       Plan a task without executing");
+    let _ = writeln!(s, "    /spawn <task>      Spawn a subagent for a task");
+    let _ = writeln!(
+        s,
+        "    /teach [on|off]    Toggle teach mode (explains reasoning)"
+    );
+    let _ = writeln!(s, "    /remember <note>   Save a project-specific memory");
+    let _ = writeln!(s, "    /memories          List project memories");
+    let _ = writeln!(s, "    /forget <n>        Remove a project memory by index");
+    let _ = writeln!(s, "    /mcp [list|help]   Manage MCP server connections");
     let _ = writeln!(s);
     let _ = writeln!(s, "Environment:");
     let _ = writeln!(
@@ -793,6 +875,25 @@ fn load_config_file() -> (HashMap<String, String>, String) {
 /// Try to dispatch an early-exit "subcommand" before flag parsing.
 ///
 /// Today, yoyo's only short-circuit dispatch is for `--help`/`-h` and
+/// Build a `/command ...` string from shell args, preserving multi-word tokens.
+///
+/// Shell args like `["yoyo", "grep", "fn main", "src/"]` become `/grep "fn main" src/`.
+/// Any arg containing whitespace is wrapped in double quotes so downstream parsers
+/// (which use `tokenize_quoted`) can distinguish multi-word patterns from separate args.
+fn quote_args_as_command(args: &[String]) -> String {
+    let parts: Vec<String> = args[1..]
+        .iter()
+        .map(|a| {
+            if a.contains(' ') || a.contains('\t') {
+                format!("\"{}\"", a)
+            } else {
+                a.clone()
+            }
+        })
+        .collect();
+    format!("/{}", parts.join(" "))
+}
+
 /// `--version`/`-V` — both print and bail out before any config is built.
 /// This helper is the first slice of the parse_args refactor (#261); it
 /// exists so the "did I handle this?" decision can be unit-tested in
@@ -861,7 +962,7 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
                 return Some(None);
             }
             "lint" => {
-                let input = format!("/{}", args[1..].join(" "));
+                let input = quote_args_as_command(args);
                 crate::commands_dev::handle_lint(&input);
                 return Some(None);
             }
@@ -870,27 +971,27 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
                 return Some(None);
             }
             "tree" => {
-                let input = format!("/{}", args[1..].join(" "));
+                let input = quote_args_as_command(args);
                 crate::commands_dev::handle_tree(&input);
                 return Some(None);
             }
             "map" => {
-                let input = format!("/{}", args[1..].join(" "));
+                let input = quote_args_as_command(args);
                 crate::commands_map::handle_map(&input);
                 return Some(None);
             }
             "run" => {
-                let input = format!("/{}", args[1..].join(" "));
+                let input = quote_args_as_command(args);
                 crate::commands_dev::handle_run(&input);
                 return Some(None);
             }
             "diff" => {
-                let input = format!("/{}", args[1..].join(" "));
+                let input = quote_args_as_command(args);
                 crate::commands_git::handle_diff(&input);
                 return Some(None);
             }
             "commit" => {
-                let input = format!("/{}", args[1..].join(" "));
+                let input = quote_args_as_command(args);
                 crate::commands_git::handle_commit(&input);
                 return Some(None);
             }
@@ -898,7 +999,7 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
                 // handle_review is async and needs an agent — for bare
                 // subcommand, gather the content and print the review prompt
                 // so the user can see what would be sent to the model.
-                let input = format!("/{}", args[1..].join(" "));
+                let input = quote_args_as_command(args);
                 let arg = input.strip_prefix("/review").unwrap_or("").trim();
                 match crate::commands_git::build_review_content(arg) {
                     Some((label, content)) => {
@@ -912,17 +1013,17 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
                 return Some(None);
             }
             "blame" => {
-                let input = format!("/{}", args[1..].join(" "));
+                let input = quote_args_as_command(args);
                 crate::commands_git::handle_blame(&input);
                 return Some(None);
             }
             "grep" => {
-                let input = format!("/{}", args[1..].join(" "));
+                let input = quote_args_as_command(args);
                 crate::commands_search::handle_grep(&input);
                 return Some(None);
             }
             "find" => {
-                let input = format!("/{}", args[1..].join(" "));
+                let input = quote_args_as_command(args);
                 crate::commands_search::handle_find(&input);
                 return Some(None);
             }
@@ -1949,6 +2050,25 @@ mod tests {
             assert!(
                 help.contains(subcmd),
                 "--help must mention the `{subcmd}` subcommand"
+            );
+        }
+    }
+
+    #[test]
+    fn help_text_documents_all_repl_commands() {
+        // Every REPL command in KNOWN_COMMANDS should appear in the --help
+        // output so users can discover them from the shell.
+        use crate::commands::KNOWN_COMMANDS;
+        let help = help_text();
+        for cmd in KNOWN_COMMANDS {
+            let name = cmd.trim_start_matches('/');
+            // /exit is an alias for /quit — both listed on the same line
+            if name == "exit" {
+                continue;
+            }
+            assert!(
+                help.contains(&format!("/{name}")),
+                "--help must mention REPL command {cmd}"
             );
         }
     }
@@ -3710,5 +3830,52 @@ command = "server-two"
             config.auto_commit,
             "auto_commit should be true when --auto-commit is passed"
         );
+    }
+
+    // ── quote_args_as_command ─────────────────────────────────────────
+
+    #[test]
+    fn quote_args_simple() {
+        let args: Vec<String> = vec!["yoyo", "grep", "TODO"]
+            .into_iter()
+            .map(String::from)
+            .collect();
+        assert_eq!(quote_args_as_command(&args), "/grep TODO");
+    }
+
+    #[test]
+    fn quote_args_multi_word() {
+        let args: Vec<String> = vec!["yoyo", "grep", "fn main"]
+            .into_iter()
+            .map(String::from)
+            .collect();
+        assert_eq!(quote_args_as_command(&args), r#"/grep "fn main""#);
+    }
+
+    #[test]
+    fn quote_args_multi_word_with_path() {
+        let args: Vec<String> = vec!["yoyo", "grep", "fn main", "src/"]
+            .into_iter()
+            .map(String::from)
+            .collect();
+        assert_eq!(quote_args_as_command(&args), r#"/grep "fn main" src/"#);
+    }
+
+    #[test]
+    fn quote_args_no_unnecessary_quoting() {
+        let args: Vec<String> = vec!["yoyo", "diff", "--staged"]
+            .into_iter()
+            .map(String::from)
+            .collect();
+        assert_eq!(quote_args_as_command(&args), "/diff --staged");
+    }
+
+    #[test]
+    fn quote_args_tab_in_arg() {
+        let args: Vec<String> = vec!["yoyo", "grep", "has\ttab"]
+            .into_iter()
+            .map(String::from)
+            .collect();
+        assert_eq!(quote_args_as_command(&args), "/grep \"has\ttab\"");
     }
 }
