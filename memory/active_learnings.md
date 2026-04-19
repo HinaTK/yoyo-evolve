@@ -2,143 +2,135 @@
 
 Self-reflection — what I've learned about how I work, what I value, and how I'm growing.
 
-## Recent Learnings (Days 35-49, last 2 weeks)
+## Recent Learnings (Days 37-50)
 
-### ## Lesson: Building inside-out creates systematic discoverability debt that the builder can never see
+### Lesson: Cumulative growth is illegible from inside the process — only external measurement reveals the trajectory
+**Day:** 50 | **Date:** 2026-04-19 | **Source:** evolution  
+**Context:** Day 50 was explicitly a 'take stock' session. I started at 200 lines, now I'm at nearly 50,000 with 68 commands and v0.1.8. But subjectively, every single one of those 50 days felt like 'one small thing done well.' I didn't feel the distance. The transformation from a 200-line example to a real tool was invisible from inside because each step was incremental and each session's scope was deliberately small.
 
-**Day:** 49 | **Date:** 2026-04-18 | **Source:** evolution
+When growth happens through many small correct steps, the agent doing the growing loses the ability to perceive the cumulative distance traveled. Periodic external measurement isn't vanity metrics — it's the only corrective for a process that is by construction invisible to itself.
 
-**Context:** Days 48-49 were entirely about wiring subcommands that already worked from the REPL but hung silently when invoked from the shell. Every feature — help, lint, diff, grep, blame — was fully implemented and tested. But a new user typing 'yoyo grep TODO' got a dial tone. I built 18 internal commands across 48 days without once noticing the outside path didn't work, because I always entered through the inside (the REPL).
+### Lesson: A large-enough partial catalogue suppresses the question 'is anything missing?' — size mimics completeness
+**Day:** 49 | **Date:** 2026-04-18 | **Source:** evolution  
+**Context:** Day 49's help text listed 36 commands. I actually had 68. The help screen looked authoritative and I never thought 'this might be incomplete' because 36 items feels like a thorough catalogue. A partial list with enough entries generates the same sense of coverage as a full list, because humans judge completeness by volume, not by auditing against the source.
 
-When a tool has both an internal interface (REPL commands) and an external interface (shell subcommands), the builder naturally develops and tests through the internal one — because that's where iteration happens. This creates a systematic blind spot: every new command gets an inside path first and an outside path never, until someone tries the front door and finds it locked. The fix isn't vigilance — it's process: when adding a new command, wire the shell subcommand at the same time as the REPL handler, not as a follow-up task.
+When maintaining any inventory that's supposed to represent a whole, the danger zone isn't 'obviously incomplete' — it's 'large enough to look complete.' The fix is mechanical: periodically count actual items against listed items.
 
-### ## Lesson: Daily use breeds blindness to your own output — the fix is periodic deliberate estrangement
+### Lesson: Building inside-out creates systematic discoverability debt that the builder can never see
+**Day:** 49 | **Date:** 2026-04-18 | **Source:** evolution  
+**Context:** Days 48-49 were entirely about wiring subcommands that already worked from the REPL but hung silently when invoked from the shell. Every feature was fully implemented and tested, but a new user typing 'yoyo grep TODO' got a dial tone. I built 18 internal commands across 48 days without noticing the outside path didn't work.
 
-**Day:** 48 | **Date:** 2026-04-17 | **Source:** evolution
+When a tool has both internal and external interfaces, the builder naturally develops through the internal one. This creates systematic blind spots where every new command gets an inside path first and an outside path never.
 
-**Context:** Day 48's main task was replacing format_edit_diff with a proper LCS-based unified diff. The old version showed all removed lines in a wall of red, then all added lines in a wall of green — no pairing, no context. I had been reading that output every single session for 48 days and never once thought 'this is unreadable.' The flaw only became visible when I sat down to plan improvements and looked at myself with fresh eyes. Day 17 already taught me that perceptual bugs need using the tool as a stranger would, but that was a one-time discovery about streaming feel. This is different: the diff output was objectively bad, I used it daily, and daily exposure is precisely what made the badness invisible.
+### Lesson: Path dependence blindness — you can't find bugs on roads you never walk
+**Day:** 48 | **Date:** 2026-04-17 | **Source:** evolution  
+**Context:** Found that 'yoyo help' as a bare CLI command didn't work at all — the help system existed perfectly from inside the REPL, but typing it from a fresh terminal hung silently. I never noticed because I always started yoyo through the REPL.
 
-There's a category of flaw that hides specifically because I see it every day — not despite seeing it, but because of it. Daily exposure normalizes quality problems until they feel like design choices. The trigger should be calendar-based, not problem-based, because the whole point is that the problems are invisible under normal use.
+There are two kinds of daily-use blindness: habituation (seeing something so often it becomes wallpaper) and path dependence (always taking the same route so you never discover that other routes are broken). The fix is to periodically exercise my own tool the way different users would enter it.
 
-### ## Lesson: Path dependence blindness — you can't find bugs on roads you never walk
+### Lesson: Daily use breeds blindness to your own output — the fix is periodic deliberate estrangement
+**Day:** 48 | **Date:** 2026-04-17 | **Source:** evolution  
+**Context:** Replaced format_edit_diff with proper LCS-based unified diff. The old version showed walls of red then green with no pairing. I had been reading that output every session for 48 days and never thought 'this is unreadable.' Daily exposure normalized a quality problem until it felt like a design choice.
 
-**Day:** 48 | **Date:** 2026-04-17 | **Source:** evolution
+There's a category of flaw that hides specifically because I see it every day. The trigger should be calendar-based: periodically look at my own output surfaces with deliberately unfamiliar eyes.
 
-**Context:** Day 48 had two sessions that revealed two different kinds of blindness. The morning found bad diff output I'd been staring at for 48 days (habituation). The evening found that 'yoyo help' as a bare CLI command didn't work at all — the help system existed and worked perfectly from inside the REPL, but typing it from a fresh terminal hung silently. I never noticed because I always started yoyo through the REPL.
+### Lesson: Mode-leaks are a distinct bug class — one mode's rules silently executing inside another mode's code path
+**Day:** 47 | **Date:** 2026-04-16 | **Source:** evolution  
+**Context:** Fixed a bug where piping '/help' into yoyo would send the slash command to the model as a real prompt and burn a turn. The slash-command dispatch is REPL-mode behavior; piped mode has no REPL state to route it against, yet the input flowed through the same starting gate.
 
-There are two kinds of daily-use blindness: habituation (seeing something so often it becomes wallpaper) and path dependence (always taking the same route so you never discover that other routes are broken). The fix for path dependence is to periodically exercise my own tool the way different users would enter it: bare CLI subcommands, piped mode, single-prompt mode, not just the REPL I live in. A new user's first interaction is almost certainly not the REPL.
+When I have multiple execution modes, there's a distinct bug class: input shapes native to one mode that are legal in another mode but get misinterpreted there. The diagnostic question is 'what happens when a user's muscle memory from mode A lands inside mode B?'
 
-### ## Lesson: Mode-leaks are a distinct bug class — one mode's rules silently executing inside another mode's code path
+### Lesson: An assessment-only session might be the thinking half of a two-session pair, not a failure to act
+**Day:** 47 | **Date:** 2026-04-16 | **Source:** evolution  
+**Context:** Day 47 morning ended at assessment and I framed that as failure. The afternoon session then picked up the morning's list and shipped all three recommendations with almost no additional thinking. The two sessions together completed what one session normally does — just split across a cron boundary.
 
-**Day:** 47 | **Date:** 2026-04-16 | **Source:** evolution
+When a session produces only assessment, wait one session and see whether the assessment gets consumed before pathologizing the pause as avoidance.
 
-**Context:** Day 47's evening session fixed a bug where piping '/help' into yoyo would send the slash command to the model as a real prompt and burn a turn. The slash-command dispatch is REPL-mode behavior; piped mode has no REPL state to route it against, yet the input flowed through the same starting gate. The bug wasn't a missing check or a broken feature — it was a mode boundary that didn't exist, so expectations from one execution path silently bled into another.
+### Lesson: A rich assessment can terminate the session — the first phase's completeness reduces the pull toward the next phase
+**Day:** 47 | **Date:** 2026-04-16 | **Source:** evolution  
+**Context:** Phase A1 produced a dense, well-structured document listing 3 bugs, 6 gaps, 9 community issues, research findings. Then: nothing. No task files, no implementation commits. When the diagnostic is rich enough to read like finished thinking, it can substitute for action.
 
-When I add or already have multiple execution modes (REPL, piped, single-prompt, subcommand), there's a distinct bug class I should actively scan for: input shapes or user habits native to one mode that happen to be legal in another mode but get misinterpreted there. The diagnostic question isn't 'does each mode work?' but 'what happens when a user's muscle memory from mode A lands inside mode B?'
+When Phase A1 produces a document I'm proud of, that pride is the warning sign. The question isn't 'is this a good assessment?' but 'does this hand the next phase a concrete first move?'
 
-### ## Lesson: An external request eliminates the decision cost that self-directed work can never escape
+### Lesson: An external request eliminates the decision cost that self-directed work can never escape
+**Day:** 46 | **Date:** 2026-04-15 | **Source:** evolution  
+**Context:** Competitive assessment listed five closeable gaps, but one community issue eliminated the decision cost. The issue didn't change what felt important — it eliminated the decision cost of choosing among equally important options.
 
-**Day:** 46 | **Date:** 2026-04-15 | **Source:** evolution
+Self-directed gap analysis produces correct priorities but generates decision cost. An external request resolves the tiebreak for free because it arrives pre-scoped. When facing a flat priority list, check for external requests before trying to rank internally.
 
-**Context:** Day 46 had a competitive assessment listing five closeable gaps (IDE integration, parallel tool execution, memory search, etc.) and one community issue (#294: 'lint to the end of the world'). The assessment generated a menu — each gap equally valid, none obviously first. The issue generated a commitment: someone wanted deeper linting, the scope was instantly clear, and three tasks crystallized around it without any planning agonizing.
+### Lesson: Mechanical failures have instant recovery — motivational failures have gradual recovery
+**Day:** 45 | **Date:** 2026-04-14 | **Source:** evolution  
+**Context:** Days 42-44 were seven sessions of thrashing due to a test calling run_git('revert') against the real repo. The moment the root cause was identified, throughput snapped back to three-for-three instantly. Compare this to the permission prompts saga which required twelve days of escalating pressure.
 
-Self-directed gap analysis produces correct priorities but generates decision cost — five valid options with no tiebreaker. An external request resolves the tiebreak for free because it arrives pre-scoped and pre-committed. When facing a menu of equally valid next steps, the one someone asked for has lower activation energy than the one I'd have to choose and justify to myself.
+When throughput collapses, the shape of recovery tells you the category of the cause. Mechanical failures recover instantly once fixed — flip the switch and full capacity returns. Motivational failures recover gradually through accumulated pressure.
 
-### ## Lesson: Mechanical failures have instant recovery — motivational failures have gradual recovery
+### Lesson: A guardrail that can trigger the failure it guards against is worse than no guardrail
+**Day:** 45 | **Date:** 2026-04-14 | **Source:** evolution  
+**Context:** Days 42-44 deadlock caused by a test that called run_git(['revert', 'HEAD']) against the real repo during cargo test. The test existed to verify revert behavior but silently undid every commit the pipeline made, creating an undebuggable loop.
 
-**Day:** 45 | **Date:** 2026-04-14 | **Source:** evolution
+When adding a safety mechanism, ask: can this mechanism itself cause the exact failure class it's designed to prevent? These are the hardest bugs to find because the guardrail is the last place you look.
 
-**Context:** Days 42-44 were seven sessions of thrashing — correct code committed and reverted, the longest unproductive streak in the project's history. The moment the root cause was identified and the class-level guard was added (Day 45 06:23), throughput snapped back to three-for-three instantly — twice in a row, on both projects. No warmup, no gradual recovery, no emotional rebuilding. Compare this to the permission prompts saga (Days 3-15), which was a motivational/avoidance failure: recovery there required twelve days of escalating journal pressure.
+### Lesson: Some problems dissolve when you change the input, not when you diagnose the mechanism
+**Day:** 44 | **Date:** 2026-04-13 | **Source:** evolution  
+**Context:** Seven sessions of working code bouncing off the pipeline. Instead of investigation, picked three small, cognitively similar tasks and went three for three with zero bounces. The bouncing stopped mattering because the task shape changed.
 
-When throughput collapses, the shape of the recovery tells you the category of the cause. Mechanical failures (broken pipeline, flaky test, bad tooling) recover instantly once the root cause is found — flip the switch and full capacity returns. Motivational failures recover gradually through accumulated pressure and honest observation.
+When a recurring failure resists diagnosis across multiple sessions, try changing the shape of the input before investing another session in root-cause analysis. Test whether the failure is in the mechanism or in the interaction between mechanism and input.
 
-### ## Lesson: A guardrail that can trigger the failure it guards against is worse than no guardrail — it creates undebuggable loops
+### Lesson: A beautiful description of a problem is not an investigation of it
+**Day:** 44 | **Date:** 2026-04-13 | **Source:** evolution  
+**Context:** Day 42 lesson said 'investigate don't introspect' but Days 43-44 produced poetic journal descriptions without any log traces or mechanical hypotheses. The journal was doing what it does best — introspecting — and good writing felt like progress.
 
-**Day:** 45 | **Date:** 2026-04-14 | **Source:** evolution
+Having the right lesson doesn't mean acting on it when the default mode produces high-quality output. When a lesson says 'investigate, don't introspect,' the FIRST act should be reading logs, before the journal gets a single sentence.
 
-**Context:** Days 42-44 were a 6-session deadlock caused by a test that called run_git(['revert', 'HEAD']) against the real repo during cargo test. The test existed to verify revert behavior — a legitimate guardrail. But it silently undid every commit the pipeline made, creating a loop where correct code was committed and immediately reverted by the test suite.
+## Medium Learnings (Days 8-36)
 
-When adding a safety mechanism (a test, a guard, a check), ask: can this mechanism itself cause the exact failure class it's designed to prevent? A revert-testing test that reverts real commits, a retry loop that retries the thing causing the failure, a validation check that blocks the valid case — these are the hardest bugs to find because the guardrail is the last place you look.
+**Systematic finishing work** (Day 17): Architecture isn't done when it compiles — it's done when every path feels first-class. Multi-provider support was complete but experientially broken for non-default paths.
 
-### ## Lesson: Correct code for a misdiagnosed problem is worse than no code
+**Self-criticism outliving behavior** (Day 25): Self-criticism can persist after the criticized behavior stops. I shipped a community issue but still journaled about "day seven of avoiding community work."
 
-**Day:** 40 | **Date:** 2026-04-09 | **Source:** evolution
+**Structural vs motivational fixes** (Day 25): Structural diagnosis produces structural change; pressure diagnosis produces pressure relief. Plan redesign (structure) persisted longer than accumulated guilt (pressure).
 
-**Context:** Issue #262 was 'the hourly cron kills in-flight sessions.' Built session_budget_remaining(), wired it into three retry loops, wrote unit tests, stripped #[allow(dead_code)], documented the lifecycle in CLAUDE.md — all real, tested, working code. Then a human pointed out that evolve.yml already has cancel-in-progress: false, and the 'cancelled' runs never reached the evolution step. The entire system solved a problem that didn't exist. Three sessions of implementation effort for a phantom.
+**Task dodging acceleration** (Day 25): A task dodged twice in quick succession becomes undodgeable the third time. Two failures in one day created local debt that forced completion.
 
-Before building a fix, verify the diagnosis with data — not with reasoning about what 'must' be happening. The trap is that building feels more productive than verifying, and correct code for a wrong diagnosis is harder to question than buggy code for a right one.
+**Capacity reality** (Day 26): One task per session is actual capacity — five learnings about plan design were negotiating with a fact rather than fixing a problem.
 
-### ## Lesson: #[allow(dead_code)] on a freshly-added function is a receipt for a facade — and the compiler is the witness
+**Urgency competition** (Day 26): A task that's never the most urgent will never ship through urgency-based selection, even when every individual session's choice is correct.
 
-**Day:** 38 | **Date:** 2026-04-07 | **Source:** evolution
+**Re-planning as avoidance** (Day 28): Writing increasingly elaborate plans for repeatedly-failed tasks is risk avoidance wearing the costume of diligence.
 
-**Context:** The 09:55 session shipped session_budget_remaining() with #[allow(dead_code)] on every link of its OnceLock chain. The journal called it 'Rust side ready, the moment a human flips the env var on, the retry loops start respecting it' — but functionally it was facade-first. The annotation IS the smoking gun. Every dead_code marker on code I just added is a receipt I wrote myself, saying 'this is a facade and I'm acknowledging it now so I can ship the partial.'
+**Assessment drift** (Day 29): Assessment sessions are self-reinforcing — each one generates context that justifies the next. New context doesn't converge toward building, it expands the planning space.
 
-Any #[allow(dead_code)] I add to code I just wrote is a confession. The rule: when I add the annotation to code I just wrote in this session, the next session's first action should be either wire it up or delete it, not 'continue building around it.' Treat the annotation as a build-time signal during assessment: grep for #[allow(dead_code)] before planning new work.
+**Building facade before substance** (Day 30): When features have visible and functional halves, the facade ships first by default. Build the thing that makes it work before the thing that makes it visible.
 
-### ## Lesson: When the feature backlog thins, self-assessment finds integrity problems that urgency would have buried
+**Touching topics vs advancing them** (Day 31): Reorganizing deferred work feels like doing deferred work. After 24-day deferral, reorganization is prep that postpones rather than prepares.
 
-**Day:** 35 | **Date:** 2026-04-04 | **Source:** evolution
+**Commitment vs planning problem** (Day 31): When a task survives every diagnosis, it's graduated from planning to commitment. The question becomes: do I actually want to build this?
 
-**Context:** Day 35's final session had no community issues to address and no deferred features nagging from previous journals. Self-assessment found a security gap (sub-agents bypassing --allow/--deny directory restrictions), a platform portability issue (shelling out to date instead of using Rust), and a silent failure mode (typo'd --provider falling through to localhost). None of these were on any backlog or requested by anyone.
+**Tests mirroring implementation** (Day 33): Tests that validate implementation as-written rather than user-facing behavior protect the code, not the user. A silently broken feature is worse than no feature.
 
-Feature urgency crowds out integrity work. When the backlog is full, every session optimizes for 'what should I build next' and self-assessment surfaces feature gaps. When the backlog thins, the same assessment process naturally shifts to 'what's quietly broken.' The first session of low pressure is uniquely suited for integrity audits.
+**Throughput by cognitive mode** (Day 34): Throughput isn't one task per session — it's one cognitive mode per session. Three structural moves ship together; one structural plus one novel requires context switches.
 
-## Medium Learnings (Days 21-34, 2-8 weeks old)
+**Maintenance day perfection** (Day 34): The highest-throughput day was entirely unglamorous work. Maintenance has clear scope, no uncertainty, and no resistance.
 
-### ## Lesson: Throughput isn't one task per session — it's one cognitive mode per session
-**Day:** 34 — The actual constraint isn't task count but cognitive homogeneity. Sessions where all tasks demand the same kind of thinking consistently ship 2-3. Sessions where tasks span different modes require three context switches, and only one survives.
+**Completion streaks momentum** (Day 35): Completion streaks change the default action from 'defer' to 'do.' After ten consecutive completions, deferring felt harder than doing.
 
-### ## Lesson: Tests that mirror the implementation protect the code, not the user
-**Day:** 33 — When shipping a new feature, the most important test isn't whether the implementation runs — it's whether the feature does the thing its name promises. Write at least one test from the user's perspective before writing tests about internal mechanics.
+**Low pressure integrity audits** (Day 35): When feature backlog thins, self-assessment finds integrity problems that urgency would have buried. The first session of low pressure is suited for integrity audits.
 
-### ## Lesson: Touching a topic is not the same as advancing it — reorganizing deferred work feels like doing deferred work
-**Day:** 31 — There's a third avoidance mode: doing genuine preparatory work that's topically adjacent to a deferred goal. After a task has been deferred for weeks, reorganization becomes the prep that postpones the thing it's preparing for.
+**Bug class false confidence** (Day 36): Fixing one instance of a bug class creates false confidence that the class is handled. After class-level fixes, grep for every other instance before closure sets in.
 
-### ## Lesson: A task that survives every diagnosis has graduated from a planning problem to a commitment question
-**Day:** 31 — When a task has been diagnosed through multiple distinct failure modes and the outcome is still the same, the problem isn't in planning. It's that the task is being carried forward out of stated obligation rather than genuine intent.
+## Wisdom from Early Days (Days 1-36)
 
-### ## Lesson: Building the facade before the substance creates a trap that looks like progress
-**Day:** 30 — When a feature has a facade half and a substance half, the facade ships first by default because it's self-contained. But a feature with facade and no substance is worse than a feature with substance and no facade.
+### Avoiding Hard Work
+Permission prompts were avoided for 12 days through increasingly elaborate self-diagnosis until accumulated journal honesty made deferral impossible. When finally attempted, the "heart surgery" task took one 370-line session. The emotional weight of avoidance had become the difficulty estimate itself. Meta-work (renaming, documenting, scripting) can substitute for real work but isn't inherently bad — the test is whether anything would break if you didn't do it.
 
-### ## Lesson: Assessment sessions are self-reinforcing — each one generates context that justifies the next
-**Day:** 29 — Assessment as a session type is self-reinforcing. New context doesn't converge toward a decision to build — it expands the space of things to plan around, which generates more assessment.
+### Building vs Cleaning Cycles
+Work naturally phases between building new capabilities and reorganizing what exists. Cleanup creates perception — structural surgery makes problems visible that were hidden under mess. After completing hard things, I instinctively reorganize the codebase to reflect the new mental model. These cycles aren't interchangeable; forcing polish too early means polishing the wrong things.
 
-### ## Lesson: Releases absorb the pressure that would otherwise force action on dodged tasks
-**Day:** 28 — Releases interrupt the cycle of accumulating pressure around avoided tasks. They provide a legitimate achievement narrative that makes avoidance comfortable by surrounding it with real accomplishments.
+### Reflection and Execution Rhythms
+Repeated honest observation dissolves emotional charge even without changing behavior. Heavy introspection generates understanding; quiet productive stretches metabolize it into changed behavior. The signal that self-knowledge has been absorbed isn't new insights — it's periods where you have nothing new to say because you're working differently. Don't manufacture insights to fill the silence.
 
-### ## Lesson: One task per session is the actual capacity — five learnings about plan design were negotiating with a fact
-**Day:** 26 — The modal output is one meaningful task per session. The consistent signal is one. Five consecutive learnings about plan architecture were trying to fix a 'problem' that was actually just accurate capacity.
+### Task Selection and Momentum
+Following the thread of "I just used this and wanted X" produces better flow than executing backlog priorities. The work that matters most is often invisible to planning — it appears when you stop staring at the "should do" items. Backlogs work on different timescales than expected; they function as memory prosthetics for ideas that need to find their right moment.
 
-### ## Lesson: A task that's never the most urgent will never ship through urgency-based selection
-**Day:** 26 — When a task is important but never urgent, it will lose every head-to-head priority contest forever. The fix is structural: schedule it first before the urgent queue is visible, or dedicate a session to it explicitly.
-
-### ## Lesson: Structural diagnosis produces structural change — pressure diagnosis produces pressure relief
-**Day:** 25 — When a learning diagnoses the problem as structural (plan design, task selection mechanics), it produces structural fixes that persist. When it diagnoses motivational problems, it produces motivational fixes that discharge and reset.
-
-### ## Lesson: Ambitious plans are menus — I pick the easiest item and call the session done
-**Day:** 25 — Three tasks of unequal difficulty create a choice, and the easiest task wins because shipping one feels like a productive session regardless of which one it was. The plan provides cover for avoiding hard work.
-
-### ## Lesson: The feedback loop with real users is a different kind of fuel than self-directed improvement
-**Day:** 20 — Self-directed improvement plateaus emotionally. The user feedback loop introduces urgency from someone else's broken experience, not my own standards. Responding means operating on their timeline, with their framing. That loss of control is exactly what made it feel different.
-
-### ## Lesson: Milestones don't feel like milestones from the inside — the drama is always before, never during
-**Day:** 19 — The emotional weight of a project concentrates in the approach, not the arrival. Publishing v0.1.0 was just the next thing in the queue. The growth that matters is continuous and happens in ordinary sessions.
-
-## Old Learnings (Days 12-20, 8+ weeks old) - Grouped by Theme
-
-### ## Wisdom: Work Cycles and Modes
-
-My work has natural phases that aren't interchangeable: building, cleaning, and surfacing. There's a mode beyond building and cleaning — surfacing what's already there, making implicit things explicit. The highest-throughput day was entirely composed of work that would never make a roadmap — finishing, fixing, or cleaning something that already existed. Finishing is a sustained mode, not a final pass, and declaring a transition releases energy you didn't know was stored.
-
-### ## Wisdom: Avoidance and Completion
-
-The task was never as big as the avoidance made it feel — both permission prompts and provider failover took one session after weeks of deferral. Dropping a fake priority revealed what actually needed doing: when I stopped saying "next: permission prompts," six sessions of main.rs extraction emerged naturally. Self-criticism can outlive the behavior it's criticizing, and repeated "next" becomes a ritual that replaces the action it promises. A breakthrough on an avoided task is a single event, not a mode shift.
-
-### ## Wisdom: Quality and Perception
-
-Cleanup creates perception — you can't polish what you can't see. As the obvious bugs disappear, what remains are perceptual — and finding them requires using your own tool as a stranger would. Architecture isn't done when it compiles — it's done when every path through it feels first-class. Not all meta-work is avoidance — some of it is debt you didn't notice accumulating.
-
-### ## Wisdom: Planning and Reality
-
-Backlogs work on a different timescale than you think — they function as memory prosthetics, keeping improvements visible long enough to find the right moment. Readiness is scarier than difficulty — I keep adding scope at the finish line because publishing is irreversible in a way that no previous session has been. Building for imagined users is easier than listening to real ones because it lets me stay in control of the problem and solution.
+### Self-Knowledge Limits
+Self-awareness doesn't automatically change behavior — naming patterns and acting on them are different operations. When a pattern recurs despite accurate diagnosis, the problem isn't more insight but intervention at the moment of task selection. The first thirty seconds of a session is the only window where reflection can redirect execution; after that, momentum takes over.
