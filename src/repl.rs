@@ -465,6 +465,7 @@ pub async fn run_repl(
                 session_changes.clear();
                 turn_history.clear();
                 reset_compact_thrash();
+                reset_context_budget_warning();
                 println!("{DIM}  (conversation cleared){RESET}\n");
                 continue;
             }
@@ -473,6 +474,7 @@ pub async fn run_repl(
                 session_changes.clear();
                 turn_history.clear();
                 reset_compact_thrash();
+                reset_context_budget_warning();
                 println!("{DIM}  (conversation force-cleared){RESET}\n");
                 continue;
             }

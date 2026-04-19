@@ -129,6 +129,7 @@ pub fn handle_compact(agent: &mut Agent) {
     let before_tokens = total_tokens(messages) as u64;
     match compact_agent(agent) {
         Some((_, _, after_count, after_tokens)) => {
+            reset_context_budget_warning();
             println!(
                 "{DIM}  compacted: {before_count} → {after_count} messages, ~{} → ~{} tokens{RESET}\n",
                 format_token_count(before_tokens),

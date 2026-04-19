@@ -1562,6 +1562,9 @@ pub async fn run_prompt_with_changes(
     let ctx_used = total_tokens(agent.messages()) as u64;
     let ctx_max = crate::cli::effective_context_tokens();
     print_context_usage(ctx_used, ctx_max);
+    if let Some(warning) = crate::format::context_budget_warning(ctx_used, ctx_max) {
+        eprintln!("{warning}");
+    }
     maybe_ring_bell(prompt_start.elapsed());
     println!();
     PromptOutcome {
@@ -1776,6 +1779,9 @@ pub async fn run_prompt_with_content_and_changes(
     let ctx_used = total_tokens(agent.messages()) as u64;
     let ctx_max = crate::cli::effective_context_tokens();
     print_context_usage(ctx_used, ctx_max);
+    if let Some(warning) = crate::format::context_budget_warning(ctx_used, ctx_max) {
+        eprintln!("{warning}");
+    }
     maybe_ring_bell(prompt_start.elapsed());
     println!();
     PromptOutcome {

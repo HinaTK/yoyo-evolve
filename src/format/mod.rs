@@ -1,6 +1,7 @@
 //! Formatting helpers: ANSI colors, cost, duration, tokens, context bar, truncation.
 
 use std::io::{self, Write};
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::OnceLock;
 use std::time::Duration;
 
@@ -1008,6 +1009,69 @@ pub fn print_context_usage(used_tokens: u64, max_tokens: u64) {
     let color = context_usage_color(pct);
     let label = context_usage_label(used_tokens, max_tokens);
     println!("{DIM}  {color}⬤{RESET}{DIM} {label} of context window used{RESET}");
+}
+
+/// Tracks the last warned context budget threshold (0, 60, 80, 90, 95).
+/// Used to avoid repeating the same warning every turn.
+static LAST_WARNED_THRESHOLD: AtomicU32 = AtomicU32::new(0);
+
+/// Return an escalating context budget warning if the usage crosses a new threshold.
+///
+/// Thresholds:
+/// - Below 60%: `None`
+/// - 60%: dim info suggesting `/compact`
+/// - 80%: yellow warning suggesting `/compact` or `/save` + `/clear`
+/// - 90%: red warning urging `/save` then `/clear`
+/// - 95%+: bold red warning to `/clear` immediately
+///
+/// Only warns once per threshold crossing. Call `reset_context_budget_warning()`
+/// after a `/clear` to re-arm.
+pub fn context_budget_warning(used: u64, max: u64) -> Option<String> {
+    if max == 0 {
+        return None;
+    }
+    let pct = ((used as f64 / max as f64) * 100.0).min(100.0) as u32;
+
+    let threshold = if pct >= 95 {
+        95
+    } else if pct >= 90 {
+        90
+    } else if pct >= 80 {
+        80
+    } else if pct >= 60 {
+        60
+    } else {
+        return None;
+    };
+
+    let prev = LAST_WARNED_THRESHOLD.load(Ordering::Relaxed);
+    if threshold <= prev {
+        return None;
+    }
+    LAST_WARNED_THRESHOLD.store(threshold, Ordering::Relaxed);
+
+    let msg = match threshold {
+        95 => format!(
+            "{BOLD}{RED}  🔴 Context nearly full! /clear now or risk overflow errors{RESET}"
+        ),
+        90 => format!(
+            "{RED}  🔴 Context is 90% full — /save your session, then /clear to avoid overflow{RESET}"
+        ),
+        80 => format!(
+            "{YELLOW}  ⚠ Context is 80% full — /compact or /save + /clear recommended{RESET}"
+        ),
+        60 => format!(
+            "{DIM}  Context is 60% full — consider /compact to free space{RESET}"
+        ),
+        _ => return None,
+    };
+
+    Some(msg)
+}
+
+/// Reset the context budget warning tracker so warnings re-arm after `/clear`.
+pub fn reset_context_budget_warning() {
+    LAST_WARNED_THRESHOLD.store(0, Ordering::Relaxed);
 }
 
 #[cfg(test)]
@@ -2550,5 +2614,98 @@ mod tests {
             result.contains("passing tests omitted"),
             "should filter test output, got: {result}"
         );
+    }
+
+    // ── context_budget_warning tests ───────────────────────────────────
+
+    #[test]
+    fn test_context_budget_warning_below_60_returns_none() {
+        reset_context_budget_warning();
+        assert!(context_budget_warning(0, 100_000).is_none());
+        assert!(context_budget_warning(10_000, 100_000).is_none()); // 10%
+        assert!(context_budget_warning(50_000, 100_000).is_none()); // 50%
+        assert!(context_budget_warning(59_999, 100_000).is_none()); // 59.999%
+    }
+
+    #[test]
+    fn test_context_budget_warning_60_threshold() {
+        reset_context_budget_warning();
+        let warn = context_budget_warning(60_000, 100_000);
+        assert!(warn.is_some(), "should warn at 60%");
+        let msg = warn.unwrap();
+        assert!(msg.contains("60% full"), "got: {msg}");
+        assert!(msg.contains("/compact"), "got: {msg}");
+    }
+
+    #[test]
+    fn test_context_budget_warning_80_threshold() {
+        reset_context_budget_warning();
+        let warn = context_budget_warning(80_000, 100_000);
+        assert!(warn.is_some(), "should warn at 80%");
+        let msg = warn.unwrap();
+        assert!(msg.contains("80% full"), "got: {msg}");
+        assert!(msg.contains("/compact"), "got: {msg}");
+        assert!(msg.contains("/save"), "got: {msg}");
+        assert!(msg.contains("/clear"), "got: {msg}");
+    }
+
+    #[test]
+    fn test_context_budget_warning_90_threshold() {
+        reset_context_budget_warning();
+        let warn = context_budget_warning(90_000, 100_000);
+        assert!(warn.is_some(), "should warn at 90%");
+        let msg = warn.unwrap();
+        assert!(msg.contains("90% full"), "got: {msg}");
+        assert!(msg.contains("/save"), "got: {msg}");
+        assert!(msg.contains("/clear"), "got: {msg}");
+    }
+
+    #[test]
+    fn test_context_budget_warning_95_threshold() {
+        reset_context_budget_warning();
+        let warn = context_budget_warning(95_000, 100_000);
+        assert!(warn.is_some(), "should warn at 95%");
+        let msg = warn.unwrap();
+        assert!(msg.contains("nearly full"), "got: {msg}");
+        assert!(msg.contains("/clear"), "got: {msg}");
+    }
+
+    #[test]
+    fn test_context_budget_warning_same_threshold_no_repeat() {
+        reset_context_budget_warning();
+        // First call at 60% should warn
+        let first = context_budget_warning(60_000, 100_000);
+        assert!(first.is_some(), "first call should warn");
+        // Second call at same threshold should NOT warn
+        let second = context_budget_warning(65_000, 100_000);
+        assert!(second.is_none(), "same threshold should not repeat");
+    }
+
+    #[test]
+    fn test_context_budget_warning_escalates() {
+        reset_context_budget_warning();
+        let w60 = context_budget_warning(60_000, 100_000);
+        assert!(w60.is_some());
+        // Jumping to 80% should warn again (higher threshold)
+        let w80 = context_budget_warning(80_000, 100_000);
+        assert!(w80.is_some(), "should warn at new higher threshold");
+        assert!(w80.unwrap().contains("80% full"));
+    }
+
+    #[test]
+    fn test_context_budget_warning_reset_rearms() {
+        reset_context_budget_warning();
+        let w1 = context_budget_warning(60_000, 100_000);
+        assert!(w1.is_some());
+        // Reset should allow the same threshold to warn again
+        reset_context_budget_warning();
+        let w2 = context_budget_warning(60_000, 100_000);
+        assert!(w2.is_some(), "should warn again after reset");
+    }
+
+    #[test]
+    fn test_context_budget_warning_zero_max_returns_none() {
+        reset_context_budget_warning();
+        assert!(context_budget_warning(100, 0).is_none());
     }
 }
