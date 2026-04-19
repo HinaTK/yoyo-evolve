@@ -195,6 +195,18 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
              \x20 /extract MyResult src/lib.rs src/errors.rs\n\
              \x20 /extract MAX_SIZE src/config.rs src/constants.rs",
         ),
+        "explain" => Some(
+            "/explain <file>[:<start>-<end>] — Ask the agent to explain code\n\n\
+             Usage:\n\
+             \x20 /explain <file>               Explain entire file\n\
+             \x20 /explain <file>:<start>-<end>  Explain specific lines\n\n\
+             Reads the file (or line range), sends it to the agent with a\n\
+             clear explanation prompt. Great for understanding unfamiliar code.\n\n\
+             Examples:\n\
+             \x20 /explain src/main.rs\n\
+             \x20 /explain src/main.rs:50-100\n\
+             \x20 /explain Cargo.toml:1-20",
+        ),
         "move" => Some(
             "/move <SourceType>::<method> [file::]<TargetType> — Relocate a method between impl blocks\n\n\
              Usage:\n\
@@ -268,7 +280,8 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
         "status" => Some(
             "/status — Show session info\n\n\
              Displays current session information including: working directory,\n\
-             active model, message count, and git branch (if in a repo).",
+             active model, message count, git branch (if in a repo), and\n\
+             context window usage percentage.",
         ),
         "tokens" => Some(
             "/tokens — Show token usage and context window\n\n\
@@ -466,7 +479,10 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
                /context system — Show system prompt sections with token estimates\n\
                                  Displays each section of the assembled system prompt\n\
                                  with line counts, approximate token estimates, and a\n\
-                                 preview of each section's content.",
+                                 preview of each section's content.\n\
+               /context tokens — Show context token budget breakdown\n\
+                                 System prompt size, conversation messages, total\n\
+                                 context used vs limit, and remaining capacity.",
         ),
         "init" => Some(
             "/init — Scan project and generate a YOYO.md context file\n\n\
@@ -864,8 +880,10 @@ pub fn help_text() -> String {
     out.push_str(
         "                     /add <path>:<start>-<end> for line ranges, /add src/*.rs for globs\n",
     );
+    out.push_str("  /explain <file>    Ask the agent to explain code from a file\n");
+    out.push_str("                     /explain <path>:<start>-<end> for specific line ranges\n");
     out.push_str("  /apply <file>      Apply a diff or patch file (--check for dry-run)\n");
-    out.push_str("  /context [system]  Show loaded project context files\n");
+    out.push_str("  /context [system|tokens]  Show loaded project context files\n");
     out.push_str("  /doctor            Run environment diagnostics (git, API key, config, etc.)\n");
     out.push_str("  /init              Scan project and generate a YOYO.md context file\n");
     out.push_str("  /health            Run project health checks (auto-detects project type)\n");
@@ -974,13 +992,14 @@ pub fn command_short_description(cmd: &str) -> Option<&'static str> {
         "commit" => Some("Commit staged changes"),
         "compact" => Some("Compact conversation to save context"),
         "config" => Some("Show current settings"),
-        "context" => Some("Show project context or system prompt sections"),
+        "context" => Some("Show project context, system prompt sections, or token budget"),
         "cost" => Some("Show estimated session cost"),
         "diff" => Some("Show git changes"),
         "doctor" => Some("Run environment diagnostics"),
         "docs" => Some("Look up crate documentation"),
         "exit" => Some("Exit yoyo"),
         "export" => Some("Export conversation as markdown"),
+        "explain" => Some("Ask the agent to explain code from a file"),
         "extract" => Some("Extract a function/block to a new file"),
         "find" => Some("Find files by name pattern"),
         "fix" => Some("Auto-fix build/lint errors"),

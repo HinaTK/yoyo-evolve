@@ -32,6 +32,8 @@ pub fn handle_status(
     session_total: &Usage,
     elapsed: std::time::Duration,
     turns: usize,
+    context_used: u64,
+    context_max: u64,
 ) {
     println!("{DIM}  model:   {model}");
     if let Some(branch) = git_branch() {
@@ -44,9 +46,19 @@ pub fn handle_status(
         if turns == 1 { "" } else { "s" }
     );
     println!(
-        "  tokens:  {} in / {} out (session total){RESET}\n",
+        "  tokens:  {} in / {} out (session total)",
         session_total.input, session_total.output
     );
+    if context_max > 0 {
+        let pct = ((context_used as f64 / context_max as f64) * 100.0) as u32;
+        let color = context_usage_color(pct);
+        println!(
+            "  context: {} / {} tokens ({color}{pct}%{DIM})",
+            format_token_count(context_used),
+            format_token_count(context_max),
+        );
+    }
+    println!("{RESET}");
 }
 
 // ── /tokens ──────────────────────────────────────────────────────────────
@@ -281,6 +293,8 @@ mod tests {
             &Usage::default(),
             Duration::from_secs(0),
             0,
+            0,
+            0,
         );
         handle_status(
             "test-model",
@@ -288,6 +302,8 @@ mod tests {
             &Usage::default(),
             Duration::from_secs(125),
             1,
+            5000,
+            200_000,
         );
         handle_status(
             "test-model",
@@ -295,6 +311,38 @@ mod tests {
             &Usage::default(),
             Duration::from_secs(7200),
             42,
+            180_000,
+            200_000,
+        );
+    }
+
+    #[test]
+    fn test_handle_status_context_line() {
+        use std::time::Duration;
+        // When context_max > 0, the context line should appear (no panic)
+        handle_status(
+            "test-model",
+            "/tmp",
+            &Usage::default(),
+            Duration::from_secs(60),
+            3,
+            45_231,
+            200_000,
+        );
+    }
+
+    #[test]
+    fn test_handle_status_skips_context_when_zero() {
+        use std::time::Duration;
+        // When context_max == 0, it should skip the context line (no panic)
+        handle_status(
+            "test-model",
+            "/tmp",
+            &Usage::default(),
+            Duration::from_secs(60),
+            3,
+            0,
+            0,
         );
     }
 

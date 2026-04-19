@@ -57,6 +57,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/doctor",
     "/docs",
     "/export",
+    "/explain",
     "/find",
     "/fix",
     "/forget",
@@ -308,7 +309,7 @@ pub use crate::commands_dev::{
 };
 
 pub use crate::commands_file::{
-    expand_file_mentions, handle_add, handle_apply, handle_web, AddResult,
+    build_explain_prompt, expand_file_mentions, handle_add, handle_apply, handle_web, AddResult,
 };
 
 // Session-related handlers

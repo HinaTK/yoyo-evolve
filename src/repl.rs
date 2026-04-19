@@ -19,6 +19,7 @@ use rustyline::hint::Hinter;
 use rustyline::history::DefaultHistory;
 use rustyline::validate::Validator;
 use rustyline::Editor;
+use yoagent::context::total_tokens;
 use yoagent::*;
 
 /// Rustyline helper that provides tab-completion for `/` slash commands.
@@ -420,12 +421,16 @@ pub async fn run_repl(
                 continue;
             }
             "/status" => {
+                let ctx_used = total_tokens(agent.messages()) as u64;
+                let ctx_max = effective_context_tokens();
                 commands::handle_status(
                     &agent_config.model,
                     &cwd,
                     &session_total,
                     session_start.elapsed(),
                     turn_count,
+                    ctx_used,
+                    ctx_max,
                 );
                 continue;
             }
@@ -701,7 +706,7 @@ pub async fn run_repl(
                 continue;
             }
             s if s == "/context" || s.starts_with("/context ") => {
-                commands::handle_context(input, &agent_config.system_prompt);
+                commands::handle_context(input, &agent_config.system_prompt, agent);
                 continue;
             }
             s if s == "/add" || s.starts_with("/add ") => {
@@ -906,6 +911,24 @@ pub async fn run_repl(
             }
             s if s == "/skill" || s.starts_with("/skill ") => {
                 commands::handle_skill(input, &agent_config.skills);
+                continue;
+            }
+            s if s == "/explain" || s.starts_with("/explain ") => {
+                if let Some(prompt) = commands::build_explain_prompt(input) {
+                    last_input = Some(prompt.clone());
+                    let prompt_start = Instant::now();
+                    let outcome = run_prompt_with_changes(
+                        agent,
+                        &prompt,
+                        &mut session_total,
+                        &agent_config.model,
+                        &session_changes,
+                    )
+                    .await;
+                    crate::format::maybe_ring_bell(prompt_start.elapsed());
+                    last_error = outcome.last_tool_error;
+                    auto_compact_if_needed(agent);
+                }
                 continue;
             }
             s if s == "/plan" || s.starts_with("/plan ") => {

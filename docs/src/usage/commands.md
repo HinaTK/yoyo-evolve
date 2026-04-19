@@ -533,6 +533,7 @@ The question appears with a ❓ prompt, and you type your response directly. If 
 | Command | Description |
 |---------|-------------|
 | `/add <path>` | Add file contents into the conversation — the AI sees them immediately |
+| `/explain <file>` | Read code from a file and ask the agent to explain it |
 | `/context [system]` | Show which project context files are loaded, or use `/context system` to see system prompt sections with token estimates |
 | `/find <pattern>` | Fuzzy-search project files by name — respects `.gitignore`, ranked by relevance |
 | `/grep <pattern> [path]` | Search file contents directly — no AI, no tokens, instant results |

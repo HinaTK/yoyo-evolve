@@ -1,5 +1,6 @@
 //! File operation command handlers: /add, /apply, /web, @file mentions.
 
+use crate::commands_map::detect_language;
 use crate::format::*;
 
 use std::io::IsTerminal;
@@ -865,6 +866,67 @@ pub fn handle_apply(input: &str) {
             }
         }
     }
+}
+
+// ── /explain ─────────────────────────────────────────────────────────────
+
+/// Build a prompt asking the agent to explain code from a file.
+///
+/// Parses the argument as `path[:start-end]`, reads the file content (or a
+/// line range), and wraps it in a clear "explain this code" prompt that gets
+/// sent to the agent. Returns `None` (after printing usage) when the input
+/// is empty or the file cannot be read.
+pub fn build_explain_prompt(input: &str) -> Option<String> {
+    let arg = input.strip_prefix("/explain").unwrap_or(input).trim();
+
+    if arg.is_empty() {
+        println!("{DIM}  usage: /explain <file>[:<start>-<end>]{RESET}");
+        println!("{DIM}  Read code from a file and ask the agent to explain it.{RESET}");
+        println!("{DIM}  Example: /explain src/main.rs:50-100{RESET}\n");
+        return None;
+    }
+
+    let (path, range) = parse_add_arg(arg);
+
+    let (code, line_count) = match read_file_for_add(path, range) {
+        Ok(result) => result,
+        Err(e) => {
+            eprintln!("{RED}  {e}{RESET}\n");
+            return None;
+        }
+    };
+
+    let lang = detect_language(path).unwrap_or_else(|| {
+        std::path::Path::new(path)
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("")
+    });
+
+    let range_desc = match range {
+        Some((start, end)) => format!(" (lines {start}-{end})"),
+        None => {
+            if line_count > 0 {
+                format!(" ({line_count} lines)")
+            } else {
+                String::new()
+            }
+        }
+    };
+
+    println!("{DIM}  🔍 Explaining {path}{range_desc}{RESET}\n");
+
+    let prompt = format!(
+        "Explain the following code from `{path}`{range_desc}:\n\
+         \n\
+         ```{lang}\n\
+         {code}\n\
+         ```\n\
+         \n\
+         Focus on: what it does, how it works, any notable patterns or potential issues."
+    );
+
+    Some(prompt)
 }
 
 #[cfg(test)]
@@ -1749,5 +1811,68 @@ mod tests {
         let root = env!("CARGO_MANIFEST_DIR");
         let results = handle_add(&format!("/add {}/Cargo.toml {}/LICENSE", root, root));
         assert_eq!(results.len(), 2, "Should return results for both files");
+    }
+
+    // ── build_explain_prompt ─────────────────────────────────────────
+
+    #[test]
+    fn explain_prompt_with_real_file() {
+        let root = env!("CARGO_MANIFEST_DIR");
+        let path = format!("{}/Cargo.toml", root);
+        let result = build_explain_prompt(&format!("/explain {path}"));
+        assert!(result.is_some(), "Should return a prompt for a real file");
+        let prompt = result.unwrap();
+        assert!(
+            prompt.contains("Cargo.toml"),
+            "Prompt should mention filename"
+        );
+        assert!(
+            prompt.contains("[package]"),
+            "Prompt should include file content"
+        );
+        assert!(
+            prompt.contains("```toml"),
+            "Prompt should include language fence"
+        );
+        assert!(
+            prompt.contains("Focus on:"),
+            "Prompt should include focus instructions"
+        );
+    }
+
+    #[test]
+    fn explain_prompt_nonexistent_file_returns_none() {
+        let result = build_explain_prompt("/explain nonexistent_xyz_file.rs");
+        assert!(result.is_none(), "Nonexistent file should return None");
+    }
+
+    #[test]
+    fn explain_prompt_with_line_range() {
+        let root = env!("CARGO_MANIFEST_DIR");
+        let path = format!("{}/Cargo.toml", root);
+        let result = build_explain_prompt(&format!("/explain {path}:1-3"));
+        assert!(result.is_some(), "Should return a prompt for a line range");
+        let prompt = result.unwrap();
+        assert!(
+            prompt.contains("lines 1-3"),
+            "Prompt should mention the line range"
+        );
+        // Only 3 lines — shouldn't have the entire file
+        let code_block_start = prompt.find("```toml\n").unwrap();
+        let code_block_end = prompt[code_block_start + 8..].find("\n```").unwrap();
+        let code_content = &prompt[code_block_start + 8..code_block_start + 8 + code_block_end];
+        let line_count = code_content.lines().count();
+        assert_eq!(line_count, 3, "Should include exactly 3 lines");
+    }
+
+    #[test]
+    fn explain_prompt_empty_input_returns_none() {
+        let result = build_explain_prompt("/explain");
+        assert!(result.is_none(), "Empty input should return None");
+        let result2 = build_explain_prompt("/explain   ");
+        assert!(
+            result2.is_none(),
+            "Whitespace-only input should return None"
+        );
     }
 }

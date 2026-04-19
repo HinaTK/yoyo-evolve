@@ -185,20 +185,61 @@ pub fn handle_todo(input: &str) -> String {
 // ── /context ─────────────────────────────────────────────────────────────
 
 /// Subcommands for /context.
-const CONTEXT_SUBCOMMANDS: &[&str] = &["system"];
+const CONTEXT_SUBCOMMANDS: &[&str] = &["system", "tokens"];
 
 pub fn context_subcommands() -> &'static [&'static str] {
     CONTEXT_SUBCOMMANDS
 }
 
-pub fn handle_context(input: &str, system_prompt: &str) {
+pub fn handle_context(input: &str, system_prompt: &str, agent: &Agent) {
     let args = input.strip_prefix("/context").unwrap_or("").trim();
 
     if args.starts_with("system") {
         show_system_prompt_sections(system_prompt);
+    } else if args.starts_with("tokens") {
+        show_context_tokens(system_prompt, agent);
     } else {
         show_project_context_files();
     }
+}
+
+fn show_context_tokens(system_prompt: &str, agent: &Agent) {
+    let messages = agent.messages();
+    let context_used = yoagent::context::total_tokens(messages) as u64;
+    let context_max = cli::effective_context_tokens();
+
+    // System prompt tokens
+    let sys_tokens = estimate_tokens(system_prompt);
+    println!("{DIM}  Context token budget:\n");
+    println!(
+        "    system prompt: ~{} tokens",
+        format_token_count(sys_tokens as u64)
+    );
+
+    // Conversation
+    println!(
+        "    conversation:  {} message{}",
+        messages.len(),
+        if messages.len() == 1 { "" } else { "s" },
+    );
+    println!(
+        "    context used:  {} / {} tokens",
+        format_token_count(context_used),
+        format_token_count(context_max),
+    );
+
+    // Percentage and remaining
+    if context_max > 0 {
+        let pct = ((context_used as f64 / context_max as f64) * 100.0) as u32;
+        let color = context_usage_color(pct);
+        let remaining = context_max.saturating_sub(context_used);
+        println!("    usage:         {color}{pct}%{DIM}");
+        println!(
+            "    remaining:     ~{} tokens",
+            format_token_count(remaining)
+        );
+    }
+    println!("{RESET}");
 }
 
 fn show_project_context_files() {
@@ -1560,19 +1601,38 @@ mod tests {
     fn test_context_default_behavior() {
         // Verify handle_context with empty input doesn't panic
         // (it just calls show_project_context_files which prints)
-        handle_context("/context", "");
+        let agent = yoagent::Agent::new(yoagent::provider::AnthropicProvider)
+            .with_system_prompt("test")
+            .with_model("test-model")
+            .with_api_key("test-key");
+        handle_context("/context", "", &agent);
     }
 
     #[test]
     fn test_context_system_subcommand() {
         // Verify handle_context with "system" doesn't panic
-        handle_context("/context system", "# Test\nHello world.\n");
+        let agent = yoagent::Agent::new(yoagent::provider::AnthropicProvider)
+            .with_system_prompt("test")
+            .with_model("test-model")
+            .with_api_key("test-key");
+        handle_context("/context system", "# Test\nHello world.\n", &agent);
     }
 
     #[test]
     fn test_context_subcommands_list() {
         let subs = context_subcommands();
         assert!(subs.contains(&"system"));
+        assert!(subs.contains(&"tokens"));
+    }
+
+    #[test]
+    fn test_context_tokens_subcommand() {
+        // Verify handle_context with "tokens" doesn't panic
+        let agent = yoagent::Agent::new(yoagent::provider::AnthropicProvider)
+            .with_system_prompt("You are a test assistant.")
+            .with_model("test-model")
+            .with_api_key("test-key");
+        handle_context("/context tokens", "You are a test assistant.", &agent);
     }
 
     // ── tests migrated from commands.rs (Issue #260) ─────────────────

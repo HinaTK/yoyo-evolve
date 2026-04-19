@@ -419,6 +419,7 @@ pub fn help_text() -> String {
         s,
         "    /add <path>        Add file contents to conversation"
     );
+    let _ = writeln!(s, "    /explain <file>    Ask the agent to explain code");
     let _ = writeln!(s, "    /apply <file>      Apply a diff or patch file");
     let _ = writeln!(
         s,
