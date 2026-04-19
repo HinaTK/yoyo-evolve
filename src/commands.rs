@@ -33,8 +33,8 @@ pub use crate::commands_memory::{handle_forget, handle_memories, handle_remember
 // Re-export config, hooks, permissions, teach, and MCP handlers extracted
 // to commands_config.rs (issue #260 slice). Same stability contract as above.
 pub use crate::commands_config::{
-    handle_config, handle_config_show, handle_hooks, handle_mcp, handle_permissions, handle_teach,
-    is_teach_mode, TEACH_MODE_PROMPT,
+    handle_config, handle_config_edit, handle_config_show, handle_hooks, handle_mcp,
+    handle_permissions, handle_teach, is_teach_mode, TEACH_MODE_PROMPT,
 };
 
 use yoagent::agent::Agent;
@@ -152,6 +152,9 @@ pub const DIFF_FLAGS: &[&str] = &["--staged", "--cached", "--name-only"];
 
 pub const BG_SUBCOMMANDS: &[&str] = &["run", "list", "output", "kill"];
 
+/// Config subcommand names for `/config <Tab>` completion.
+pub const CONFIG_SUBCOMMANDS: &[&str] = &["show", "edit"];
+
 /// Return context-aware argument completions for a given command and partial argument.
 ///
 /// `cmd` is the slash command (e.g. "/model"), `partial_arg` is what the user has typed
@@ -166,6 +169,7 @@ pub fn command_arg_completions(cmd: &str, partial_arg: &str) -> Vec<String> {
         "/pr" => filter_candidates(PR_SUBCOMMANDS, &partial_lower),
         "/provider" => filter_candidates(KNOWN_PROVIDERS, &partial_lower),
         "/bg" => filter_candidates(BG_SUBCOMMANDS, &partial_lower),
+        "/config" => filter_candidates(CONFIG_SUBCOMMANDS, &partial_lower),
         "/save" | "/load" => list_json_files(partial_arg),
         "/help" => help_command_completions(&partial_lower),
         "/undo" => filter_candidates(UNDO_OPTIONS, &partial_lower),
@@ -875,5 +879,27 @@ mod tests {
             load_candidates.contains(&test_file.to_string()),
             "/load should complete .json files: {load_candidates:?}"
         );
+    }
+
+    #[test]
+    fn test_arg_completions_config_subcommands() {
+        let candidates = command_arg_completions("/config", "");
+        assert!(
+            candidates.contains(&"show".to_string()),
+            "Should include 'show': {candidates:?}"
+        );
+        assert!(
+            candidates.contains(&"edit".to_string()),
+            "Should include 'edit': {candidates:?}"
+        );
+        assert_eq!(candidates.len(), 2);
+    }
+
+    #[test]
+    fn test_arg_completions_config_partial() {
+        let candidates = command_arg_completions("/config", "e");
+        assert_eq!(candidates, vec!["edit"]);
+        let candidates = command_arg_completions("/config", "s");
+        assert_eq!(candidates, vec!["show"]);
     }
 }

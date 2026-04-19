@@ -674,6 +674,10 @@ pub async fn run_repl(
                 commands::handle_config_show();
                 continue;
             }
+            s if s == "/config edit" || s.starts_with("/config edit ") => {
+                commands::handle_config_edit();
+                continue;
+            }
             "/hooks" => {
                 commands::handle_hooks(&agent_config.shell_hooks);
                 continue;

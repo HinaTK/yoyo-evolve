@@ -116,6 +116,8 @@ See [Session Persistence](../features/sessions.md) for details.
 | `/cost` | Show estimated session cost |
 | `/changelog [N]` | Show recent git commit history (default: 15, max: 100) |
 | `/config` | Show all current settings |
+| `/config show` | Show loaded config file path and merged key-value pairs (secrets masked) |
+| `/config edit` | Open config file in `$EDITOR` |
 | `/hooks` | Show active hooks (pre/post tool execution) |
 | `/permissions` | Show active security and permission configuration |
 | `/version` | Show yoyo version |

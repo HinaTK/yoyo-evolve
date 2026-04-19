@@ -452,7 +452,10 @@ pub fn command_help(cmd: &str) -> Option<&'static str> {
                               key matching /key|token|secret|password/i is\n\
                               masked as *** so secrets never print. Useful for\n\
                               debugging 'why isn't my override being picked up?'\n\
-                              questions at runtime.",
+                              questions at runtime.\n\
+               /config edit — Open the config file in $EDITOR (or $VISUAL, vi).\n\
+                              Opens project-level .yoyo.toml if it exists,\n\
+                              otherwise falls back to ~/.config/yoyo/config.toml.",
         ),
         "context" => Some(
             "/context — Show loaded project context files\n\n\
@@ -812,6 +815,7 @@ pub fn help_text() -> String {
     out.push_str(
         "  /config show       Show loaded config file path and merged key-value pairs (secrets masked)\n",
     );
+    out.push_str("  /config edit       Open config file in $EDITOR\n");
     out.push_str("  /hooks             Show active hooks (pre/post tool execution)\n");
     out.push_str("  /permissions       Show active security and permission configuration\n");
     out.push_str("  /version           Show yoyo version\n");

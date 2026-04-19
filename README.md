@@ -330,6 +330,7 @@ Create a `YOYO.md` (or `CLAUDE.md`) in your project root with build commands, ar
 | `/commit [msg]` | Commit staged changes (AI-generates message if omitted) |
 | `/config` | Show all current settings |
 | `/config show` | Show loaded config file path and merged key-value pairs (secrets masked) |
+| `/config edit` | Open config file in `$EDITOR` |
 | `/context [system]` | Show loaded project context files or system prompt sections |
 | `/cost` | Show session cost breakdown |
 | `/changelog [N]` | Show recent git commit history (default: 15) |

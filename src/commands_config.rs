@@ -285,6 +285,90 @@ pub fn handle_config_show() {
     print!("{DIM}{output}{RESET}");
 }
 
+// ── /config edit ─────────────────────────────────────────────────────────
+
+/// Resolve which config file to open for editing.
+///
+/// Priority:
+/// 1. `.yoyo.toml` in current directory (project-level) — only if it exists
+/// 2. `~/.config/yoyo/config.toml` (XDG user-level) — even if it doesn't exist yet
+///
+/// Returns the path to open. If no user config directory can be determined,
+/// returns `None`.
+///
+/// This is a pure function (no I/O side effects beyond `exists()` checks)
+/// so it can be tested.
+pub fn resolve_config_edit_path() -> Option<std::path::PathBuf> {
+    // Project-level config takes priority if it already exists
+    let project_config = std::path::Path::new(".yoyo.toml");
+    if project_config.exists() {
+        return Some(project_config.to_path_buf());
+    }
+
+    // Fall back to user-level config (create path even if file doesn't exist)
+    if let Some(user_path) = crate::cli::user_config_path() {
+        return Some(user_path);
+    }
+
+    None
+}
+
+/// Open the config file in the user's preferred editor.
+pub fn handle_config_edit() {
+    let config_path = match resolve_config_edit_path() {
+        Some(p) => p,
+        None => {
+            eprintln!("{RED}Could not determine config file path{RESET}");
+            return;
+        }
+    };
+
+    // Ensure parent directory exists for user-level config
+    if let Some(parent) = config_path.parent() {
+        if !parent.exists() {
+            if let Err(e) = std::fs::create_dir_all(parent) {
+                eprintln!(
+                    "{RED}Failed to create config directory {}: {e}{RESET}",
+                    parent.display()
+                );
+                return;
+            }
+        }
+    }
+
+    // Get editor from $EDITOR, $VISUAL, or fall back to common editors
+    let editor = std::env::var("EDITOR")
+        .or_else(|_| std::env::var("VISUAL"))
+        .unwrap_or_else(|_| {
+            if cfg!(target_os = "windows") {
+                "notepad".to_string()
+            } else {
+                "vi".to_string()
+            }
+        });
+
+    println!(
+        "{DIM}  Opening {} in {editor}{RESET}",
+        config_path.display()
+    );
+    let status = std::process::Command::new(&editor)
+        .arg(&config_path)
+        .status();
+
+    match status {
+        Ok(s) if s.success() => {
+            println!("{GREEN}  Config saved.{RESET}");
+        }
+        Ok(_) => {
+            eprintln!("  Editor exited with non-zero status");
+        }
+        Err(e) => {
+            eprintln!("{RED}  Failed to open editor '{editor}': {e}{RESET}");
+            eprintln!("  Set $EDITOR to your preferred editor");
+        }
+    }
+}
+
 // ── /hooks ───────────────────────────────────────────────────────────────
 
 pub fn handle_hooks(hooks: &[crate::hooks::ShellHook]) {
@@ -887,5 +971,58 @@ mod tests {
             deny: vec!["/secret".to_string()],
         };
         handle_permissions(true, &perms, &dirs);
+    }
+
+    #[test]
+    fn test_resolve_config_edit_path_prefers_project_config() {
+        // When .yoyo.toml exists in the current dir, it should be returned
+        let tmp = std::env::temp_dir().join("yoyo_test_config_edit");
+        let _ = std::fs::create_dir_all(&tmp);
+        let project_config = tmp.join(".yoyo.toml");
+        std::fs::write(&project_config, "# test config\n").unwrap();
+
+        // Temporarily change to the temp dir
+        let original_dir = std::env::current_dir().unwrap();
+        std::env::set_current_dir(&tmp).unwrap();
+
+        let result = resolve_config_edit_path();
+        assert!(result.is_some(), "should return a path");
+        let path = result.unwrap();
+        assert_eq!(
+            path,
+            std::path::PathBuf::from(".yoyo.toml"),
+            "should prefer project-level config"
+        );
+
+        // Restore dir and clean up
+        std::env::set_current_dir(original_dir).unwrap();
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
+
+    #[test]
+    fn test_resolve_config_edit_path_falls_back_to_user_config() {
+        // When no .yoyo.toml exists, should fall back to user config path
+        let tmp = std::env::temp_dir().join("yoyo_test_config_edit_fallback");
+        let _ = std::fs::create_dir_all(&tmp);
+        // Make sure there's no .yoyo.toml
+        let _ = std::fs::remove_file(tmp.join(".yoyo.toml"));
+
+        let original_dir = std::env::current_dir().unwrap();
+        std::env::set_current_dir(&tmp).unwrap();
+
+        let result = resolve_config_edit_path();
+        // As long as HOME is set, we should get a path
+        if std::env::var("HOME").is_ok() {
+            assert!(result.is_some(), "should return user config path");
+            let path = result.unwrap();
+            assert!(
+                path.to_string_lossy().contains("config.toml"),
+                "should point to user config.toml, got: {}",
+                path.display()
+            );
+        }
+
+        std::env::set_current_dir(original_dir).unwrap();
+        let _ = std::fs::remove_dir_all(&tmp);
     }
 }
