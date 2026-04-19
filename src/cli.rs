@@ -332,6 +332,23 @@ pub fn help_text() -> String {
         s,
         "  undo              Undo changes (e.g. yoyo undo --last-commit)"
     );
+    let _ = writeln!(
+        s,
+        "  changelog         Show recent commits (e.g. yoyo changelog 20)"
+    );
+    let _ = writeln!(
+        s,
+        "  config            Show configuration (e.g. yoyo config show)"
+    );
+    let _ = writeln!(s, "  permissions       Show security/permission config");
+    let _ = writeln!(
+        s,
+        "  todo              Manage project tasks (e.g. yoyo todo list, yoyo todo add ...)"
+    );
+    let _ = writeln!(
+        s,
+        "  memories          Show project memories (e.g. yoyo memories)"
+    );
     let _ = writeln!(s);
     let _ = writeln!(s, "Commands (in REPL):");
     let _ = writeln!(s);
@@ -1107,6 +1124,54 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
                 let input = quote_args_as_command(args);
                 let mut history = crate::prompt::TurnHistory::new();
                 crate::commands_git::handle_undo(&input, &mut history);
+                return Some(None);
+            }
+            "changelog" => {
+                let input = quote_args_as_command(args);
+                crate::commands_info::handle_changelog(&input);
+                return Some(None);
+            }
+            "config" => {
+                // Only `yoyo config show` (or bare `yoyo config`) works without
+                // an interactive session. Other config subcommands (edit, hooks,
+                // teach) require agent state.
+                let sub2 = args.get(2).map(|s| s.as_str());
+                match sub2 {
+                    None | Some("show") => {
+                        crate::commands_config::handle_config_show();
+                    }
+                    Some(other) => {
+                        eprintln!(
+                            "{YELLOW}  `config {other}` requires an interactive session.{RESET}"
+                        );
+                        eprintln!("{DIM}  Try: yoyo config show (works from the shell){RESET}");
+                    }
+                }
+                return Some(None);
+            }
+            "permissions" => {
+                // Load permission config from config file (same as parse_args does)
+                // so the user can inspect their effective permissions from the shell.
+                let (_, raw_config) = load_config_file();
+                let permissions = crate::config::parse_permissions_from_config(&raw_config);
+                let dir_restrictions = crate::config::parse_directories_from_config(&raw_config);
+                let auto_approve = args.iter().any(|a| a == "--yes" || a == "-y");
+                crate::commands_config::handle_permissions(
+                    auto_approve,
+                    &permissions,
+                    &dir_restrictions,
+                );
+                return Some(None);
+            }
+            "todo" => {
+                let input = quote_args_as_command(args);
+                let output = crate::commands_project::handle_todo(&input);
+                println!("{output}");
+                return Some(None);
+            }
+            "memories" => {
+                let input = quote_args_as_command(args);
+                crate::commands_memory::handle_memories(&input);
                 return Some(None);
             }
             _ => {}
@@ -2163,6 +2228,97 @@ mod tests {
     }
 
     #[test]
+    fn test_try_dispatch_subcommand_changelog() {
+        let args = vec!["yoyo".into(), "changelog".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `changelog` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_changelog_with_count() {
+        let args = vec!["yoyo".into(), "changelog".into(), "20".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `changelog 20` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_config() {
+        let args = vec!["yoyo".into(), "config".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `config` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_config_show() {
+        let args = vec!["yoyo".into(), "config".into(), "show".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `config show` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_config_unknown() {
+        // Unknown config subcommands still dispatch (print a message, don't hang)
+        let args = vec!["yoyo".into(), "config".into(), "edit".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `config edit` (requires session message)"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_permissions() {
+        let args = vec!["yoyo".into(), "permissions".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `permissions` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_todo() {
+        let args = vec!["yoyo".into(), "todo".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for bare `todo` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_todo_list() {
+        let args = vec!["yoyo".into(), "todo".into(), "list".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `todo list` subcommand"
+        );
+    }
+
+    #[test]
+    fn test_try_dispatch_subcommand_memories() {
+        let args = vec!["yoyo".into(), "memories".into()];
+        let result = try_dispatch_subcommand(&args);
+        assert!(
+            matches!(result, Some(None)),
+            "expected Some(None) for `memories` subcommand"
+        );
+    }
+
+    #[test]
     fn help_text_documents_all_subcommands() {
         // Regression guard: all bare subcommands (doctor, health, help, version,
         // setup, init, lint, test, tree, map, run, diff, commit, review, blame,
@@ -2174,9 +2330,35 @@ mod tests {
             "--help must have a Subcommands section"
         );
         for subcmd in &[
-            "doctor", "health", "help", "version", "setup", "init", "lint", "test", "tree", "map",
-            "run", "diff", "commit", "review", "blame", "grep", "find", "index", "update", "docs",
-            "watch", "status", "undo", "skill",
+            "doctor",
+            "health",
+            "help",
+            "version",
+            "setup",
+            "init",
+            "lint",
+            "test",
+            "tree",
+            "map",
+            "run",
+            "diff",
+            "commit",
+            "review",
+            "blame",
+            "grep",
+            "find",
+            "index",
+            "update",
+            "docs",
+            "watch",
+            "status",
+            "undo",
+            "skill",
+            "changelog",
+            "config",
+            "permissions",
+            "todo",
+            "memories",
         ] {
             assert!(
                 help.contains(subcmd),
