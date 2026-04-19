@@ -318,6 +318,10 @@ pub fn help_text() -> String {
     );
     let _ = writeln!(
         s,
+        "  skill             List and inspect loaded skills (e.g. yoyo skill list --skills ./skills)"
+    );
+    let _ = writeln!(
+        s,
         "  watch             Toggle watch mode (e.g. yoyo watch cargo test)"
     );
     let _ = writeln!(
@@ -483,6 +487,7 @@ pub fn help_text() -> String {
         s,
         "    /ast <pattern>     Structural code search (ast-grep)"
     );
+    let _ = writeln!(s, "    /skill [subcmd]    List and inspect loaded skills");
     let _ = writeln!(s);
     let _ = writeln!(s, "  AI:");
     let _ = writeln!(
@@ -1060,6 +1065,20 @@ pub(crate) fn try_dispatch_subcommand(args: &[String]) -> Option<Option<Config>>
             "docs" => {
                 let input = quote_args_as_command(args);
                 crate::commands_project::handle_docs(&input);
+                return Some(None);
+            }
+            "skill" => {
+                let input = quote_args_as_command(args);
+                let skill_dirs = collect_repeatable_flag(args, "--skills");
+                let skills = if skill_dirs.is_empty() {
+                    SkillSet::empty()
+                } else {
+                    SkillSet::load(&skill_dirs).unwrap_or_else(|e| {
+                        eprintln!("{YELLOW}warning:{RESET} Failed to load skills: {e}");
+                        SkillSet::empty()
+                    })
+                };
+                crate::commands_project::handle_skill(&input, &skills);
                 return Some(None);
             }
             "watch" => {
@@ -2156,7 +2175,7 @@ mod tests {
         for subcmd in &[
             "doctor", "health", "help", "version", "setup", "init", "lint", "test", "tree", "map",
             "run", "diff", "commit", "review", "blame", "grep", "find", "index", "update", "docs",
-            "watch", "status", "undo",
+            "watch", "status", "undo", "skill",
         ] {
             assert!(
                 help.contains(subcmd),

@@ -64,6 +64,7 @@ pub const KNOWN_COMMANDS: &[&str] = &[
     "/status",
     "/tokens",
     "/save",
+    "/skill",
     "/load",
     "/diff",
     "/blame",
@@ -177,6 +178,7 @@ pub fn command_arg_completions(cmd: &str, partial_arg: &str) -> Vec<String> {
             crate::commands_project::context_subcommands(),
             &partial_lower,
         ),
+        "/skill" => filter_candidates(crate::commands_project::SKILL_SUBCOMMANDS, &partial_lower),
         _ => Vec::new(),
     }
 }
@@ -290,7 +292,7 @@ pub use crate::commands_git::{
 // Project-related handlers
 pub use crate::commands_project::{
     handle_context, handle_docs, handle_extract, handle_init, handle_move, handle_plan,
-    handle_refactor, handle_rename, handle_todo,
+    handle_refactor, handle_rename, handle_skill, handle_todo,
 };
 
 pub use crate::commands_map::handle_map;

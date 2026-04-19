@@ -1,4 +1,4 @@
-//! Project-related command handlers: /todo, /context, /init, /docs, /plan.
+//! Project-related command handlers: /todo, /context, /init, /docs, /plan, /skill.
 
 use crate::cli;
 use crate::commands::auto_compact_if_needed;
@@ -765,6 +765,126 @@ pub async fn handle_plan(
     );
 
     Some(plan_prompt)
+}
+
+// ── /skill ────────────────────────────────────────────────────────────────
+
+/// Subcommand names for `/skill <Tab>` completion.
+pub const SKILL_SUBCOMMANDS: &[&str] = &["list", "show", "path"];
+
+/// Handle the `/skill` command: list, show, and inspect loaded skills.
+///
+/// Accepts the raw input (with or without the `/skill` prefix) and a reference
+/// to the loaded `SkillSet`. If no skills directory is configured, prints a
+/// helpful message about the `--skills` flag.
+pub fn handle_skill(input: &str, skills: &yoagent::skills::SkillSet) {
+    let sub = input.strip_prefix("/skill").unwrap_or(input).trim();
+
+    if sub.is_empty() || sub == "list" {
+        skill_list(skills);
+    } else if sub == "path" {
+        skill_path(skills);
+    } else if let Some(name) = sub.strip_prefix("show ") {
+        skill_show(name.trim(), skills);
+    } else if sub == "show" {
+        eprintln!("{YELLOW}  usage: /skill show <name>{RESET}");
+        eprintln!("{DIM}  try /skill list to see available skills{RESET}\n");
+    } else {
+        eprintln!("{RED}  unknown subcommand: {sub}{RESET}");
+        eprintln!("{DIM}  try: /skill list, /skill show <name>, /skill path{RESET}\n");
+    }
+}
+
+/// List all loaded skills with name and description.
+fn skill_list(skills: &yoagent::skills::SkillSet) {
+    if skills.is_empty() {
+        println!("{DIM}  no skills loaded{RESET}");
+        println!("{DIM}  use --skills <dir> to load skills from a directory{RESET}\n");
+        return;
+    }
+
+    println!("{BOLD}  Loaded skills ({}):{RESET}\n", skills.len());
+
+    // Find the longest skill name for alignment
+    let max_name_len = skills
+        .skills()
+        .iter()
+        .map(|s| s.name.len())
+        .max()
+        .unwrap_or(0);
+
+    for skill in skills.skills() {
+        let padding = " ".repeat(max_name_len.saturating_sub(skill.name.len()));
+        println!(
+            "    {GREEN}{}{RESET}{}  {DIM}{}{RESET}",
+            skill.name, padding, skill.description
+        );
+    }
+    println!();
+}
+
+/// Show the current skills directory paths (derived from loaded skill base_dirs).
+fn skill_path(skills: &yoagent::skills::SkillSet) {
+    if skills.is_empty() {
+        println!("{DIM}  no skills directory configured{RESET}");
+        println!("{DIM}  use --skills <dir> to load skills from a directory{RESET}\n");
+        return;
+    }
+
+    // Collect unique parent directories from loaded skills
+    let mut dirs: Vec<String> = skills
+        .skills()
+        .iter()
+        .filter_map(|s| s.base_dir.parent().map(|p| p.display().to_string()))
+        .collect();
+    dirs.sort();
+    dirs.dedup();
+
+    if dirs.len() == 1 {
+        println!("{DIM}  skills directory: {}{RESET}\n", dirs[0]);
+    } else {
+        println!("{DIM}  skills directories:{RESET}");
+        for d in &dirs {
+            println!("{DIM}    {d}{RESET}");
+        }
+        println!();
+    }
+}
+
+/// Show the full content of a named skill's SKILL.md file.
+fn skill_show(name: &str, skills: &yoagent::skills::SkillSet) {
+    let skill = skills.skills().iter().find(|s| s.name == name);
+
+    match skill {
+        Some(s) => {
+            match std::fs::read_to_string(&s.file_path) {
+                Ok(content) => {
+                    println!("{BOLD}  Skill: {}{RESET}", s.name);
+                    println!("{DIM}  path: {}{RESET}\n", s.file_path.display());
+                    // Print the skill content with light indentation
+                    for line in content.lines() {
+                        println!("  {line}");
+                    }
+                    println!();
+                }
+                Err(e) => {
+                    eprintln!(
+                        "{RED}  error reading {}: {e}{RESET}\n",
+                        s.file_path.display()
+                    );
+                }
+            }
+        }
+        None => {
+            eprintln!("{RED}  skill not found: {name}{RESET}");
+            if !skills.is_empty() {
+                let names: Vec<&str> = skills.skills().iter().map(|s| s.name.as_str()).collect();
+                eprintln!("{DIM}  available: {}{RESET}\n", names.join(", "));
+            } else {
+                eprintln!("{DIM}  no skills loaded — use --skills <dir>{RESET}\n");
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -1846,5 +1966,117 @@ mod tests {
             help.contains("architect"),
             "Help text should mention architect mode"
         );
+    }
+
+    // ── /skill ──────────────────────────────────────────────────────────
+
+    #[test]
+    fn test_skill_in_known_commands() {
+        assert!(
+            KNOWN_COMMANDS.contains(&"/skill"),
+            "/skill should be in KNOWN_COMMANDS"
+        );
+    }
+
+    #[test]
+    fn test_skill_in_help_text() {
+        let help = help_text();
+        assert!(help.contains("/skill"), "/skill should appear in help text");
+        assert!(help.contains("skills"), "Help text should mention skills");
+    }
+
+    #[test]
+    fn test_skill_list_with_real_skills() {
+        // Load the real ./skills directory used by this project
+        let skills = yoagent::skills::SkillSet::load(&["./skills"]).unwrap();
+        assert!(
+            skills.len() >= 4,
+            "Expected at least 4 core skills, got {}",
+            skills.len()
+        );
+
+        // Verify the evolve skill is present
+        let names: Vec<&str> = skills.skills().iter().map(|s| s.name.as_str()).collect();
+        assert!(names.contains(&"evolve"), "evolve skill should be loaded");
+        assert!(
+            names.contains(&"communicate"),
+            "communicate skill should be loaded"
+        );
+    }
+
+    #[test]
+    fn test_skill_list_empty() {
+        let skills = yoagent::skills::SkillSet::empty();
+        // Should not panic — just print "no skills loaded"
+        handle_skill("/skill list", &skills);
+        handle_skill("/skill", &skills);
+    }
+
+    #[test]
+    fn test_skill_show_existing() {
+        let skills = yoagent::skills::SkillSet::load(&["./skills"]).unwrap();
+        // Should not panic — prints the evolve skill content
+        handle_skill("/skill show evolve", &skills);
+    }
+
+    #[test]
+    fn test_skill_show_nonexistent() {
+        let skills = yoagent::skills::SkillSet::load(&["./skills"]).unwrap();
+        // Should not panic — prints error message
+        handle_skill("/skill show nonexistent-skill", &skills);
+    }
+
+    #[test]
+    fn test_skill_path() {
+        let skills = yoagent::skills::SkillSet::load(&["./skills"]).unwrap();
+        // Should not panic — prints the skills directory
+        handle_skill("/skill path", &skills);
+    }
+
+    #[test]
+    fn test_skill_path_empty() {
+        let skills = yoagent::skills::SkillSet::empty();
+        // Should not panic — prints "no skills directory configured"
+        handle_skill("/skill path", &skills);
+    }
+
+    #[test]
+    fn test_skill_unknown_subcommand() {
+        let skills = yoagent::skills::SkillSet::empty();
+        // Should not panic — prints error about unknown subcommand
+        handle_skill("/skill foobar", &skills);
+    }
+
+    #[test]
+    fn test_skill_show_bare() {
+        let skills = yoagent::skills::SkillSet::empty();
+        // Should not panic — prints usage hint
+        handle_skill("/skill show", &skills);
+    }
+
+    #[test]
+    fn test_skill_with_temp_dir() {
+        let tmp = TempDir::new().unwrap();
+        let skill_dir = tmp.path().join("my-skill");
+        fs::create_dir_all(&skill_dir).unwrap();
+        fs::write(
+            skill_dir.join("SKILL.md"),
+            "---\nname: my-skill\ndescription: A test skill\n---\n\n# My Skill\n\nDoes things.\n",
+        )
+        .unwrap();
+
+        let skills = yoagent::skills::SkillSet::load(&[tmp.path()]).unwrap();
+        assert_eq!(skills.len(), 1);
+        assert_eq!(skills.skills()[0].name, "my-skill");
+        assert_eq!(skills.skills()[0].description, "A test skill");
+
+        // List should work
+        handle_skill("/skill list", &skills);
+
+        // Show should work
+        handle_skill("/skill show my-skill", &skills);
+
+        // Path should work
+        handle_skill("/skill path", &skills);
     }
 }

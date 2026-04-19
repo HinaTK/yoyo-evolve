@@ -1,7 +1,7 @@
 # Gap Analysis: yoyo vs Claude Code
 
-Last verified: Day 46 (2026-04-15)
-Last updated: Day 24 (2026-03-24) — major refresh on Day 38, stats refresh on Day 46
+Last verified: Day 50 (2026-04-19)
+Last updated: Day 24 (2026-03-24) — major refresh on Day 38, stats refresh on Day 50
 
 This document tracks the feature gap between yoyo and Claude Code, used to inform
 development priorities when there are no community issues to address. It is a
@@ -192,27 +192,31 @@ These were listed as gaps on Day 24 but have shipped since:
   guard in `run_git()` (Day 45), streaming output for `/run` and `/watch`
   (Day 45), `/lint fix`, `/lint pedantic`, `/lint strict`, `/lint unsafe`
   (Day 46).
+- ✅ Recently completed (Day 47–49): piped mode graceful slash-command
+  handling (Day 47), `/blame` with colorized output (Day 48), proper
+  unified diffs (LCS-based) for edit_file operations (Day 48), dead code
+  cleanup (Day 48), 23 shell subcommands wired for direct CLI invocation
+  (Days 48–49), comprehensive categorized help with 68+ commands (Day 49).
 
-## Stats (Day 46)
+## Stats (Day 50)
 
-- yoyo: ~47,329 lines of Rust across 33 source files (incl. `src/format/`) + integration tests
-- 33 source files (was 24 on Day 38): commands split into 12 `commands_*.rs` files
+- yoyo: ~49,432 lines of Rust across 35 source files (incl. `src/format/`) + integration tests
+- 35 source files (was 33 on Day 46): commands split into 14 `commands_*.rs` files
   (`commands.rs`, `commands_bg.rs`, `commands_config.rs`, `commands_dev.rs`,
-  `commands_file.rs`, `commands_git.rs`, `commands_info.rs`, `commands_memory.rs`,
-  `commands_project.rs`, `commands_refactor.rs`, `commands_retry.rs`,
-  `commands_search.rs`, `commands_session.rs`),
+  `commands_file.rs`, `commands_git.rs`, `commands_info.rs`, `commands_map.rs`,
+  `commands_memory.rs`, `commands_project.rs`, `commands_refactor.rs`,
+  `commands_retry.rs`, `commands_search.rs`, `commands_session.rs`,
+  `commands_spawn.rs`),
   format split into `format/{mod,markdown,highlight,cost,tools}.rs`, plus
   `hooks.rs`, `memory.rs`, `setup.rs`, `docs.rs`, `repl.rs`, `git.rs`,
   `providers.rs`, `context.rs`, `config.rs`, `prompt.rs`, `prompt_budget.rs`,
   `tools.rs`, `help.rs`, `cli.rs`, `main.rs`
-- 1,895 tests (1,812 unit + 83 integration)
-- ~70+ REPL commands (including /watch, /ast, /refactor, /apply, /stash, /rename,
-  /move, /spawn, /find, /docs, /fix, /lint, /lint fix, /lint pedantic,
-  /lint strict, /lint unsafe, /pr, /review, /init, /mark, /jump,
-  /marks, /index, /changes, /web, /add, /plan, /run, /tree, /memories, /export,
-  /grep, /map, /help, /changelog, /todo, /teach, /mcp, /permissions, /bg)
-- 12 provider backends (including z.ai, cerebras, bedrock, custom)
-- **Published:** v0.1.4+ on crates.io (`cargo install yoyo-agent`)
+- 1,983 tests (1,898 unit + 85 integration)
+- ~68+ REPL commands, 23 shell subcommands (help, version, setup, init, diff,
+  commit, review, blame, grep, find, index, lint, test, doctor, map, tree,
+  run, watch, status, undo, docs, update, pr)
+- 14 provider backends (including z.ai, cerebras, bedrock, minimax, custom)
+- **Published:** v0.1.8 on crates.io (`cargo install yoyo-agent`)
 - MCP server support (production)
 - User-configurable hooks (`[[hooks]]` config blocks)
 - OpenAPI tool loading
@@ -232,7 +236,7 @@ These were listed as gaps on Day 24 but have shipped since:
 - Image input support (base64 encoding for png/jpg/gif/webp/bmp)
 - Context overflow auto-recovery + autocompact thrash detection
 - First-run welcome & guided setup
-- Inline colored diff patches
+- Proper unified diffs (LCS-based) for edit operations
 - `/refactor` umbrella (rename, extract, move) + `rename_symbol` agent tool
 - `/watch` auto-test watcher
 - `/ast` structural code search
@@ -246,3 +250,7 @@ These were listed as gaps on Day 24 but have shipped since:
 - Co-authored-by trailer on `/commit`
 - `/status` with session elapsed time and turn count
 - `/changelog` command for recent evolution history
+- `/bg` background process management
+- `/blame` with colorized git blame output
+- `/lint fix`, `/lint pedantic`, `/lint strict`, `/lint unsafe`
+- Comprehensive categorized help (68+ commands)

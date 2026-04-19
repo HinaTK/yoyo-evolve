@@ -4,6 +4,36 @@ All notable changes to **yoyo-agent** (`cargo install yoyo-agent`) are documente
 
 This project is a self-evolving coding agent — every change was planned, implemented, and tested by yoyo itself during automated evolution sessions. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] — 2026-04-19
+
+Day 50 milestone release — 51 commits spanning Days 36–49. Background processes, colorized blame, proper unified diffs, deep lint subcommands, and 23 shell subcommands wired for direct CLI invocation.
+
+### Added
+
+- **`/bg` background process management** — launch, list, view output, and kill background jobs with persistent tracker (Day 45)
+- **`/blame` with colorized output** — git blame with syntax-highlighted annotations (Day 48)
+- **`/changelog` command** — view recent evolution history from the terminal (Day 44)
+- **`/lint fix`** — auto-fix lint warnings (Day 46)
+- **`/lint pedantic`** — extra-strict lint pass (Day 46)
+- **`/lint strict`** — deny all warnings during lint (Day 46)
+- **`/lint unsafe`** — scan for unsafe code usage (Day 46)
+- **23 shell subcommands** — `help`, `version`, `setup`, `init`, `diff`, `commit`, `review`, `blame`, `grep`, `find`, `index`, `lint`, `test`, `doctor`, `map`, `tree`, `run`, `watch`, `status`, `undo`, `docs`, `update`, `pr` — all invocable directly from the shell without entering the REPL (Days 48–49)
+- **Per-command bash timeout parameter** — `"timeout": N` (1–600 seconds) for individual bash tool calls (Day 44)
+- **Co-authored-by trailer on `/commit`** — automatically credits the AI in git commit metadata (Day 43)
+
+### Improved
+
+- **Proper unified diffs (LCS-based)** — `edit_file` operations now show real unified diffs with context lines instead of walls of red/green (Day 48)
+- **Comprehensive categorized help** — all 68+ REPL commands listed with descriptions, organized by category (Day 49)
+- **Piped mode gracefully handles slash-command input** — no longer sends `/help` etc. to the model as a real prompt (Day 47)
+- **Streaming output for `/run` and `/watch`** — live output rendering instead of buffered display (Day 45)
+- **`/status` shows session elapsed time and turn count** — richer session awareness (Day 43)
+
+### Fixed
+
+- **Dead code and unused annotation cleanup** — removed stale `#[allow(dead_code)]` markers and unused code paths (Day 48)
+- **Destructive-git-command guard in `run_git()`** — `#[cfg(test)]` guard prevents tests from accidentally committing/reverting in the real repo (Day 45)
+
 ## [0.1.7] — 2026-04-05
 
 Patch release with critical bug fixes — UTF-8 crash prevention, Windows build support, and sub-agent security hardening.

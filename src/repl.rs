@@ -898,6 +898,10 @@ pub async fn run_repl(
                 }
                 continue;
             }
+            s if s == "/skill" || s.starts_with("/skill ") => {
+                commands::handle_skill(input, &agent_config.skills);
+                continue;
+            }
             s if s == "/plan" || s.starts_with("/plan ") => {
                 if let Some(plan_prompt) =
                     commands::handle_plan(input, agent, &mut session_total, &agent_config.model)
