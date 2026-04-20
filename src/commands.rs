@@ -225,6 +225,75 @@ pub fn is_unknown_command(input: &str) -> bool {
     !KNOWN_COMMANDS.contains(&cmd)
 }
 
+/// Compute Levenshtein edit distance between two strings.
+fn edit_distance(a: &str, b: &str) -> usize {
+    let a: Vec<char> = a.chars().collect();
+    let b: Vec<char> = b.chars().collect();
+    let mut dp = vec![vec![0usize; b.len() + 1]; a.len() + 1];
+    for (i, row) in dp.iter_mut().enumerate() {
+        row[0] = i;
+    }
+    for (j, val) in dp[0].iter_mut().enumerate() {
+        *val = j;
+    }
+    for i in 1..=a.len() {
+        for j in 1..=b.len() {
+            let cost = if a[i - 1] == b[j - 1] { 0 } else { 1 };
+            dp[i][j] = (dp[i - 1][j] + 1)
+                .min(dp[i][j - 1] + 1)
+                .min(dp[i - 1][j - 1] + cost);
+        }
+    }
+    dp[a.len()][b.len()]
+}
+
+/// Suggest the closest known command for a mistyped slash command.
+///
+/// Returns `Some("/command")` if there's a close match, `None` otherwise.
+/// Uses Levenshtein distance with thresholds based on command length,
+/// and also checks for unique prefix matches.
+pub fn suggest_command(input: &str) -> Option<&'static str> {
+    let cmd = input.split_whitespace().next().unwrap_or(input);
+
+    // Don't suggest for valid commands
+    if KNOWN_COMMANDS.contains(&cmd) {
+        return None;
+    }
+
+    // Check for unique prefix match first
+    let prefix_matches: Vec<&str> = KNOWN_COMMANDS
+        .iter()
+        .filter(|known| known.starts_with(cmd))
+        .copied()
+        .collect();
+    if prefix_matches.len() == 1 {
+        return Some(prefix_matches[0]);
+    }
+
+    // Find closest by edit distance
+    let mut best: Option<(&str, usize)> = None;
+    for &known in KNOWN_COMMANDS {
+        let dist = edit_distance(cmd, known);
+        if let Some((_, best_dist)) = best {
+            if dist < best_dist {
+                best = Some((known, dist));
+            }
+        } else {
+            best = Some((known, dist));
+        }
+    }
+
+    // Threshold: ≤2 for short commands (≤5 chars), ≤3 for longer ones
+    if let Some((suggestion, dist)) = best {
+        let threshold = if cmd.len() <= 5 { 2 } else { 3 };
+        if dist <= threshold {
+            return Some(suggestion);
+        }
+    }
+
+    None
+}
+
 /// Format a ThinkingLevel as a display string.
 pub fn thinking_level_name(level: ThinkingLevel) -> &'static str {
     match level {
@@ -902,5 +971,51 @@ mod tests {
         assert_eq!(candidates, vec!["edit"]);
         let candidates = command_arg_completions("/config", "s");
         assert_eq!(candidates, vec!["show"]);
+    }
+
+    #[test]
+    fn test_edit_distance() {
+        assert_eq!(edit_distance("help", "help"), 0);
+        assert_eq!(edit_distance("help", "hlep"), 2);
+        assert_eq!(edit_distance("", "abc"), 3);
+        assert_eq!(edit_distance("abc", ""), 3);
+        assert_eq!(edit_distance("kitten", "sitting"), 3);
+    }
+
+    #[test]
+    fn test_suggest_command_typos() {
+        // Common typos should suggest the right command
+        assert_eq!(suggest_command("/hlep"), Some("/help"));
+        assert_eq!(suggest_command("/comit"), Some("/commit"));
+        assert_eq!(suggest_command("/savee"), Some("/save"));
+    }
+
+    #[test]
+    fn test_suggest_command_no_match() {
+        // Too far from anything → None
+        assert_eq!(suggest_command("/zzzzz"), None);
+        assert_eq!(suggest_command("/xyzabc"), None);
+    }
+
+    #[test]
+    fn test_suggest_command_prefix_match() {
+        // Unique prefix should suggest the full command
+        assert_eq!(suggest_command("/comp"), Some("/compact"));
+        assert_eq!(suggest_command("/expl"), Some("/explain"));
+    }
+
+    #[test]
+    fn test_suggest_command_valid_command_returns_none() {
+        // Valid commands should not generate suggestions
+        assert_eq!(suggest_command("/model"), None);
+        assert_eq!(suggest_command("/help"), None);
+        assert_eq!(suggest_command("/save"), None);
+    }
+
+    #[test]
+    fn test_suggest_command_with_args() {
+        // Should extract just the command part, ignoring args
+        assert_eq!(suggest_command("/hlep commands"), Some("/help"));
+        assert_eq!(suggest_command("/savee myfile.json"), Some("/save"));
     }
 }

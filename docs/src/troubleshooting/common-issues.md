@@ -80,9 +80,15 @@ The `--skills` directory couldn't be read. yoyo continues without skills.
   type /help for available commands
 ```
 
-You typed a command yoyo doesn't recognize.
+You typed a command yoyo doesn't recognize. If it's a typo, yoyo will suggest the closest match:
 
-**Fix:** Type `/help` to see available commands.
+```
+  unknown command: /hlep
+  did you mean /help?
+  type /help for available commands
+```
+
+**Fix:** Check the suggestion, or type `/help` to see all available commands.
 
 ## "not in a git repository"
 

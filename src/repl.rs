@@ -5,7 +5,7 @@ use std::time::Instant;
 use crate::cli::*;
 use crate::commands::{
     self, auto_compact_if_needed, clear_confirmation_message, command_arg_completions,
-    is_unknown_command, reset_compact_thrash, thinking_level_name, KNOWN_COMMANDS,
+    is_unknown_command, reset_compact_thrash, suggest_command, thinking_level_name, KNOWN_COMMANDS,
 };
 use crate::format::*;
 use crate::git::*;
@@ -943,6 +943,9 @@ pub async fn run_repl(
             s if s.starts_with('/') && is_unknown_command(s) => {
                 let cmd = s.split_whitespace().next().unwrap_or(s);
                 eprintln!("{RED}  unknown command: {cmd}{RESET}");
+                if let Some(suggestion) = suggest_command(s) {
+                    eprintln!("{YELLOW}  did you mean {suggestion}?{RESET}");
+                }
                 eprintln!("{DIM}  type /help for available commands{RESET}\n");
                 continue;
             }
