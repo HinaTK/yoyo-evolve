@@ -788,6 +788,10 @@ pub fn build_repo_map_with_backend(
     let files = list_project_files();
     let mut result = Vec::new();
 
+    // Resolve git toplevel so file reads use absolute paths,
+    // preventing CWD races when parallel tests call set_current_dir.
+    let toplevel = crate::git::run_git(&["rev-parse", "--show-toplevel"]).ok();
+
     // Check ast-grep availability once upfront
     let use_ast_grep = !force_regex && is_ast_grep_available();
     let backend = if use_ast_grep {
@@ -811,7 +815,16 @@ pub fn build_repo_map_with_backend(
             Some(l) => l,
             None => continue,
         };
-        let content = match std::fs::read_to_string(path) {
+        // Use absolute path for file I/O to avoid CWD dependency
+        let abs_path = if let Some(ref tl) = toplevel {
+            std::path::Path::new(tl)
+                .join(path)
+                .to_string_lossy()
+                .to_string()
+        } else {
+            path.clone()
+        };
+        let content = match std::fs::read_to_string(&abs_path) {
             Ok(c) => c,
             Err(_) => continue,
         };
@@ -1595,15 +1608,6 @@ public enum Status { OK, ERROR }
 
     #[test]
     fn build_repo_map_with_regex_backend() {
-        // This test uses relative paths internally (git ls-files + read_to_string)
-        // so it depends on cwd being the project root. Another test running in
-        // parallel may call set_current_dir, breaking relative path resolution.
-        // Guard: verify src/ exists relative to cwd (NOT CARGO_MANIFEST_DIR,
-        // which is an absolute path that always passes).
-        if !std::path::Path::new("src").is_dir() {
-            return; // CWD has been changed by a parallel test — skip
-        }
-
         let (entries, backend) = build_repo_map_with_backend(Some("src/"), true, true);
         assert_eq!(backend, MapBackend::Regex);
         // We're in a Rust project, so we should find symbols
