@@ -299,10 +299,18 @@ pub fn handle_config_show() {
 /// This is a pure function (no I/O side effects beyond `exists()` checks)
 /// so it can be tested.
 pub fn resolve_config_edit_path() -> Option<std::path::PathBuf> {
+    resolve_config_edit_path_in(std::path::Path::new("."))
+}
+
+/// Like [`resolve_config_edit_path`] but searches for `.yoyo.toml` under an
+/// explicit `root` directory instead of the process CWD. This avoids the need
+/// for `set_current_dir` in tests (global mutable state that races across
+/// parallel threads).
+fn resolve_config_edit_path_in(root: &std::path::Path) -> Option<std::path::PathBuf> {
     // Project-level config takes priority if it already exists
-    let project_config = std::path::Path::new(".yoyo.toml");
+    let project_config = root.join(".yoyo.toml");
     if project_config.exists() {
-        return Some(project_config.to_path_buf());
+        return Some(project_config);
     }
 
     // Fall back to user-level config (create path even if file doesn't exist)
@@ -975,27 +983,22 @@ mod tests {
 
     #[test]
     fn test_resolve_config_edit_path_prefers_project_config() {
-        // When .yoyo.toml exists in the current dir, it should be returned
+        // When .yoyo.toml exists in the root dir, it should be returned
         let tmp = std::env::temp_dir().join("yoyo_test_config_edit");
         let _ = std::fs::create_dir_all(&tmp);
         let project_config = tmp.join(".yoyo.toml");
         std::fs::write(&project_config, "# test config\n").unwrap();
 
-        // Temporarily change to the temp dir
-        let original_dir = std::env::current_dir().unwrap();
-        std::env::set_current_dir(&tmp).unwrap();
-
-        let result = resolve_config_edit_path();
+        let result = resolve_config_edit_path_in(&tmp);
         assert!(result.is_some(), "should return a path");
         let path = result.unwrap();
         assert_eq!(
             path,
-            std::path::PathBuf::from(".yoyo.toml"),
+            tmp.join(".yoyo.toml"),
             "should prefer project-level config"
         );
 
-        // Restore dir and clean up
-        std::env::set_current_dir(original_dir).unwrap();
+        // Clean up
         let _ = std::fs::remove_dir_all(&tmp);
     }
 
@@ -1007,10 +1010,7 @@ mod tests {
         // Make sure there's no .yoyo.toml
         let _ = std::fs::remove_file(tmp.join(".yoyo.toml"));
 
-        let original_dir = std::env::current_dir().unwrap();
-        std::env::set_current_dir(&tmp).unwrap();
-
-        let result = resolve_config_edit_path();
+        let result = resolve_config_edit_path_in(&tmp);
         // As long as HOME is set, we should get a path
         if std::env::var("HOME").is_ok() {
             assert!(result.is_some(), "should return user config path");
@@ -1022,7 +1022,6 @@ mod tests {
             );
         }
 
-        std::env::set_current_dir(original_dir).unwrap();
         let _ = std::fs::remove_dir_all(&tmp);
     }
 }

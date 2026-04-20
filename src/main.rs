@@ -776,6 +776,15 @@ async fn main() {
         disable_bell();
     }
 
+    // Check --no-rtk before any tool execution (also respects YOYO_NO_RTK env)
+    if args.iter().any(|a| a == "--no-rtk")
+        || std::env::var("YOYO_NO_RTK")
+            .map(|v| v == "1")
+            .unwrap_or(false)
+    {
+        tools::disable_rtk();
+    }
+
     let Some(config) = parse_args(&args) else {
         return; // --help or --version was handled
     };

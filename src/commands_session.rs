@@ -156,13 +156,21 @@ pub fn last_session_exists() -> bool {
 /// Creates the `.yoyo/` directory if it doesn't exist.
 /// Silently ignores errors (best-effort crash recovery).
 pub fn auto_save_on_exit(agent: &Agent) {
+    auto_save_on_exit_in(agent, std::path::Path::new("."));
+}
+
+/// Like [`auto_save_on_exit`] but writes session files under an explicit `root`
+/// directory instead of the process CWD. This avoids `set_current_dir` in tests.
+fn auto_save_on_exit_in(agent: &Agent, root: &std::path::Path) {
     if agent.messages().is_empty() {
         return;
     }
     if let Ok(json) = agent.save_messages() {
         // Ensure .yoyo/ directory exists
-        let _ = std::fs::create_dir_all(".yoyo");
-        if std::fs::write(AUTO_SAVE_SESSION_PATH, &json).is_ok() {
+        let yoyo_dir = root.join(".yoyo");
+        let _ = std::fs::create_dir_all(&yoyo_dir);
+        let save_path = root.join(AUTO_SAVE_SESSION_PATH);
+        if std::fs::write(&save_path, &json).is_ok() {
             eprintln!(
                 "{DIM}  session auto-saved to {AUTO_SAVE_SESSION_PATH} ({} messages){RESET}",
                 agent.messages().len()
@@ -174,7 +182,13 @@ pub fn auto_save_on_exit(agent: &Agent) {
 /// Return the path to load for `--continue`: use `.yoyo/last-session.json` if it exists,
 /// otherwise fall back to the legacy `yoyo-session.json`.
 pub fn continue_session_path() -> &'static str {
-    if last_session_exists() {
+    continue_session_path_in(std::path::Path::new("."))
+}
+
+/// Like [`continue_session_path`] but checks for the auto-save file under an
+/// explicit `root` directory instead of the process CWD.
+fn continue_session_path_in(root: &std::path::Path) -> &'static str {
+    if root.join(AUTO_SAVE_SESSION_PATH).exists() {
         AUTO_SAVE_SESSION_PATH
     } else {
         DEFAULT_SESSION_PATH
@@ -767,24 +781,17 @@ mod tests {
         let _ = std::fs::remove_dir_all(&tmp_dir);
         std::fs::create_dir_all(&tmp_dir).unwrap();
 
-        let original_dir = std::env::current_dir().unwrap();
-
-        // Change to temp directory
-        std::env::set_current_dir(&tmp_dir).unwrap();
-
         // Create an agent with an empty conversation — should NOT save
         let agent = Agent::new(AnthropicProvider)
             .with_system_prompt("test")
             .with_model("test-model")
             .with_api_key("test-key");
-        auto_save_on_exit(&agent);
+        auto_save_on_exit_in(&agent, &tmp_dir);
         assert!(
-            !std::path::Path::new(AUTO_SAVE_SESSION_PATH).exists(),
+            !tmp_dir.join(AUTO_SAVE_SESSION_PATH).exists(),
             "Should not save empty conversations"
         );
 
-        // Restore directory
-        std::env::set_current_dir(&original_dir).unwrap();
         let _ = std::fs::remove_dir_all(&tmp_dir);
     }
 
@@ -796,16 +803,12 @@ mod tests {
         std::fs::create_dir_all(tmp_dir.join(".yoyo")).unwrap();
         std::fs::write(tmp_dir.join(".yoyo/last-session.json"), "[]").unwrap();
 
-        let original_dir = std::env::current_dir().unwrap();
-        std::env::set_current_dir(&tmp_dir).unwrap();
-
-        let path = continue_session_path();
+        let path = continue_session_path_in(&tmp_dir);
         assert_eq!(
             path, AUTO_SAVE_SESSION_PATH,
             "Should prefer .yoyo/last-session.json when it exists"
         );
 
-        std::env::set_current_dir(&original_dir).unwrap();
         let _ = std::fs::remove_dir_all(&tmp_dir);
     }
 
@@ -816,16 +819,12 @@ mod tests {
         let _ = std::fs::remove_dir_all(&tmp_dir);
         std::fs::create_dir_all(&tmp_dir).unwrap();
 
-        let original_dir = std::env::current_dir().unwrap();
-        std::env::set_current_dir(&tmp_dir).unwrap();
-
-        let path = continue_session_path();
+        let path = continue_session_path_in(&tmp_dir);
         assert_eq!(
             path, DEFAULT_SESSION_PATH,
             "Should fall back to yoyo-session.json when .yoyo/last-session.json doesn't exist"
         );
 
-        std::env::set_current_dir(&original_dir).unwrap();
         let _ = std::fs::remove_dir_all(&tmp_dir);
     }
 

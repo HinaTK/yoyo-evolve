@@ -184,6 +184,10 @@ pub fn help_text() -> String {
     let _ = writeln!(s, "  --no-bell         Disable terminal bell on long completions (also respects YOYO_NO_BELL env)");
     let _ = writeln!(
         s,
+        "  --no-rtk          Disable RTK (Rust Token Killer) proxy even when installed"
+    );
+    let _ = writeln!(
+        s,
         "  --no-update-check Skip startup update check (also respects YOYO_NO_UPDATE_CHECK=1 env)"
     );
     let _ = writeln!(
@@ -719,6 +723,7 @@ const KNOWN_FLAGS: &[&str] = &[
     "--context-window",
     "--no-color",
     "--no-bell",
+    "--no-rtk",
     "--no-update-check",
     "--json",
     "--verbose",

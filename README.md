@@ -162,7 +162,7 @@ Crypto wallets:
 ### 🛠️ Tools
 | Tool | What it does |
 |------|-------------|
-| `bash` | Run shell commands with interactive confirmation |
+| `bash` | Run shell commands with interactive confirmation, optional [RTK](https://github.com/rtk-ai/rtk) token compression |
 | `read_file` | Read files with optional offset/limit |
 | `write_file` | Create or overwrite files with content preview |
 | `edit_file` | Surgical text replacement with colored inline diffs |
@@ -225,6 +225,7 @@ Anthropic · OpenAI · Google · Ollama · OpenRouter · xAI · Groq · DeepSeek
 - **MCP servers** — `--mcp <cmd>` or `mcp = [...]` in `.yoyo.toml` connects to MCP servers via stdio transport
 - **OpenAPI tools** — `--openapi <spec>` registers tools from OpenAPI specifications
 - **Skills system** — `--skills <dir>` loads markdown skill files with YAML frontmatter
+- **RTK integration** — auto-detects [RTK](https://github.com/rtk-ai/rtk) and uses it to compress tool output by 60-90% (`--no-rtk` to disable)
 
 ### ✨ REPL Experience
 - **Rustyline** — arrow keys, Ctrl-A/E/K/W, persistent history
