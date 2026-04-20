@@ -213,8 +213,11 @@ pub fn compress_tool_output(output: &str) -> String {
     // Phase 2: filter test framework output (more specific, runs first)
     let filtered = filter_test_output(&stripped);
 
-    // Phase 3: collapse repetitive line sequences
-    collapse_repetitive_lines(&filtered)
+    // Phase 3: filter noisy CLI patterns (cargo, npm, pip, progress bars, etc.)
+    let denoised = filter_noisy_patterns(&filtered);
+
+    // Phase 4: collapse repetitive line sequences
+    collapse_repetitive_lines(&denoised)
 }
 
 /// Remove ANSI escape sequences from a string.
@@ -256,6 +259,165 @@ fn strip_ansi_codes(s: &str) -> String {
     }
 
     result
+}
+
+/// Returns true if the line looks like a progress bar / spinner
+/// (contains 6+ consecutive block/bar characters).
+fn is_progress_bar_line(line: &str) -> bool {
+    let mut count = 0u32;
+    for c in line.chars() {
+        if matches!(
+            c,
+            '━' | '█' | '▓' | '░' | '─' | '▏' | '▎' | '▍' | '▌' | '▋' | '▊' | '▉'
+        ) {
+            count += 1;
+            if count >= 6 {
+                return true;
+            }
+        } else {
+            count = 0;
+        }
+    }
+    false
+}
+
+/// Returns true if `line` matches `Compiling <something> v<version>`.
+fn is_compiling_line(line: &str) -> bool {
+    let t = line.trim();
+    t.starts_with("Compiling ") && t.contains(" v")
+}
+
+/// Returns true if `line` matches `Downloading <something> v<version>`.
+fn is_downloading_line(line: &str) -> bool {
+    let t = line.trim();
+    t.starts_with("Downloading ") && t.contains(" v")
+}
+
+/// Filter noisy CLI output patterns that waste tokens.
+///
+/// Handles:
+/// - Cargo `Compiling`/`Downloading` sequences (keep first + last, collapse middle)
+/// - Cargo lock-waiting lines (remove entirely)
+/// - Progress bars and spinner lines (remove)
+/// - npm warn lines (keep only if they mention "deprecated" or "vulnerability")
+/// - pip "already satisfied" lines (remove)
+/// - Git commit hash abbreviation (`commit <40-hex>` → `commit <7-hex>...`)
+/// - Git Author/Date whitespace consolidation
+/// - Runs of 3+ consecutive empty lines collapsed to 2
+fn filter_noisy_patterns(s: &str) -> String {
+    let lines: Vec<&str> = s.lines().collect();
+    let mut result: Vec<String> = Vec::with_capacity(lines.len());
+    let mut i = 0;
+
+    while i < lines.len() {
+        let line = lines[i];
+        let trimmed = line.trim();
+
+        // ── Cargo Compiling / Downloading sequences ───────────────
+        if is_compiling_line(line) || is_downloading_line(line) {
+            let is_compiling = is_compiling_line(line);
+            let first = i;
+            let mut run_end = i + 1;
+            while run_end < lines.len() {
+                let matches = if is_compiling {
+                    is_compiling_line(lines[run_end])
+                } else {
+                    is_downloading_line(lines[run_end])
+                };
+                if matches {
+                    run_end += 1;
+                } else {
+                    break;
+                }
+            }
+            let run_len = run_end - first;
+            if run_len >= 3 {
+                // Keep first and last, collapse middle
+                result.push(lines[first].to_string());
+                let collapsed = run_len - 2;
+                result.push(format!("... ({collapsed} more)"));
+                result.push(lines[run_end - 1].to_string());
+            } else {
+                // Short run — keep all
+                for item in lines.iter().take(run_end).skip(first) {
+                    result.push((*item).to_string());
+                }
+            }
+            i = run_end;
+            continue;
+        }
+
+        // ── Cargo lock-waiting lines → remove ────────────────────
+        if trimmed.starts_with("Blocking waiting for file lock on") {
+            i += 1;
+            continue;
+        }
+
+        // ── Progress bars / spinners → remove ────────────────────
+        if is_progress_bar_line(line) {
+            i += 1;
+            continue;
+        }
+
+        // ── npm warn lines → keep only important ones ────────────
+        if trimmed.starts_with("npm warn") || trimmed.starts_with("npm WARN") {
+            let lower = trimmed.to_lowercase();
+            if lower.contains("deprecated") || lower.contains("vulnerability") {
+                result.push(line.to_string());
+            }
+            i += 1;
+            continue;
+        }
+
+        // ── pip "already satisfied" lines → remove ───────────────
+        if trimmed.starts_with("Requirement already satisfied") {
+            i += 1;
+            continue;
+        }
+
+        // ── Git commit hash abbreviation ─────────────────────────
+        if trimmed.starts_with("commit ") && trimmed.len() >= 47 {
+            let hash_part = &trimmed[7..];
+            // Check that we have a 40-char hex hash
+            if hash_part.len() >= 40 && hash_part[..40].chars().all(|c| c.is_ascii_hexdigit()) {
+                result.push(format!("commit {}...", &hash_part[..7]));
+                i += 1;
+                continue;
+            }
+        }
+
+        // ── Git Author/Date whitespace consolidation ─────────────
+        if trimmed.starts_with("Author:") || trimmed.starts_with("Date:") {
+            // Collapse multiple internal spaces to single space
+            let consolidated: String = trimmed.split_whitespace().collect::<Vec<&str>>().join(" ");
+            result.push(consolidated);
+            i += 1;
+            continue;
+        }
+
+        // ── Consecutive empty lines → max 2 ─────────────────────
+        if trimmed.is_empty() {
+            let mut empty_count = 1u32;
+            let mut j = i + 1;
+            while j < lines.len() && lines[j].trim().is_empty() {
+                empty_count += 1;
+                j += 1;
+            }
+            // Keep at most 2
+            let keep = empty_count.min(2);
+            for _ in 0..keep {
+                result.push(String::new());
+            }
+            i = j;
+            continue;
+        }
+
+        // ── Default: pass through ────────────────────────────────
+        result.push(line.to_string());
+        i += 1;
+    }
+
+    result.join("\n")
 }
 
 /// Extract a "category" from a line for grouping similar lines.
@@ -2155,6 +2317,217 @@ mod tests {
         assert_eq!(color.0, RED.0);
     }
 
+    // ── filter_noisy_patterns tests ──────────────────────────────────
+
+    #[test]
+    fn test_noisy_compiling_lines_collapse() {
+        let mut lines = Vec::new();
+        for i in 0..20 {
+            lines.push(format!("   Compiling crate_{i} v0.{i}.0"));
+        }
+        let input = lines.join("\n");
+        let result = filter_noisy_patterns(&input);
+        assert!(
+            result.contains("Compiling crate_0 v0.0.0"),
+            "should keep first: {result}"
+        );
+        assert!(
+            result.contains("... (18 more)"),
+            "should collapse middle: {result}"
+        );
+        assert!(
+            result.contains("Compiling crate_19 v0.19.0"),
+            "should keep last: {result}"
+        );
+        // Should NOT contain middle lines
+        assert!(
+            !result.contains("crate_5"),
+            "should not contain middle lines: {result}"
+        );
+    }
+
+    #[test]
+    fn test_noisy_downloading_lines_collapse() {
+        let mut lines = Vec::new();
+        for i in 0..10 {
+            lines.push(format!("   Downloading dep_{i} v1.{i}.0"));
+        }
+        let input = lines.join("\n");
+        let result = filter_noisy_patterns(&input);
+        assert!(result.contains("... (8 more)"), "got: {result}");
+        assert!(result.contains("dep_0"), "should keep first: {result}");
+        assert!(result.contains("dep_9"), "should keep last: {result}");
+    }
+
+    #[test]
+    fn test_noisy_short_compiling_run_kept() {
+        let input = "   Compiling foo v1.0.0\n   Compiling bar v2.0.0";
+        let result = filter_noisy_patterns(input);
+        assert!(result.contains("foo"), "short run should be kept: {result}");
+        assert!(result.contains("bar"), "short run should be kept: {result}");
+        assert!(
+            !result.contains("more"),
+            "no collapse for short run: {result}"
+        );
+    }
+
+    #[test]
+    fn test_noisy_lock_waiting_removed() {
+        let input = "   Blocking waiting for file lock on package cache\nreal output here";
+        let result = filter_noisy_patterns(input);
+        assert!(!result.contains("Blocking"), "lock line should be removed");
+        assert!(result.contains("real output here"), "real output kept");
+    }
+
+    #[test]
+    fn test_noisy_progress_bar_removed() {
+        let input = "Building [████████████████████] 95%\nDone.";
+        let result = filter_noisy_patterns(input);
+        assert!(!result.contains("████"), "progress bar should be removed");
+        assert!(result.contains("Done."), "non-progress line kept");
+    }
+
+    #[test]
+    fn test_noisy_progress_bar_thin_chars_removed() {
+        let input = "Progress ━━━━━━━━━━ 50%\nFinished.";
+        let result = filter_noisy_patterns(input);
+        assert!(!result.contains("━━━"), "thin bar should be removed");
+        assert!(result.contains("Finished."), "non-progress line kept");
+    }
+
+    #[test]
+    fn test_noisy_npm_warn_filtered() {
+        let input = [
+            "npm warn optional SKIPPING OPTIONAL DEPENDENCY",
+            "npm warn deprecated lodash@3.0.0: use lodash@4",
+            "npm warn peer missing: react@>=16",
+            "npm WARN vulnerability found 2 vulnerabilities",
+        ]
+        .join("\n");
+        let result = filter_noisy_patterns(&input);
+        assert!(
+            result.contains("deprecated"),
+            "should keep deprecated warning: {result}"
+        );
+        assert!(
+            result.contains("vulnerability"),
+            "should keep vulnerability warning: {result}"
+        );
+        assert!(
+            !result.contains("SKIPPING"),
+            "should remove generic npm warn: {result}"
+        );
+        assert!(
+            !result.contains("peer missing"),
+            "should remove peer warn: {result}"
+        );
+    }
+
+    #[test]
+    fn test_noisy_pip_already_satisfied_removed() {
+        let input =
+            "Requirement already satisfied: requests in /usr/lib/python3\nInstalling collected packages: foo";
+        let result = filter_noisy_patterns(input);
+        assert!(
+            !result.contains("already satisfied"),
+            "pip line should be removed"
+        );
+        assert!(result.contains("Installing"), "other pip output kept");
+    }
+
+    #[test]
+    fn test_noisy_git_hash_abbreviated() {
+        let hash = "a".repeat(40);
+        let input = format!("commit {hash}\nAuthor: Test User <test@example.com>");
+        let result = filter_noisy_patterns(&input);
+        assert!(
+            result.contains("commit aaaaaaa..."),
+            "should abbreviate hash: {result}"
+        );
+        assert!(
+            !result.contains(&hash),
+            "should not contain full hash: {result}"
+        );
+    }
+
+    #[test]
+    fn test_noisy_git_author_date_consolidated() {
+        let input = "Author:     Jane   Doe   <jane@example.com>\nDate:       Mon Apr  7 12:00:00 2025 +0000";
+        let result = filter_noisy_patterns(input);
+        assert!(
+            result.contains("Author: Jane Doe <jane@example.com>"),
+            "should consolidate whitespace: {result}"
+        );
+        assert!(
+            result.contains("Date: Mon Apr 7 12:00:00 2025 +0000"),
+            "should consolidate date whitespace: {result}"
+        );
+    }
+
+    #[test]
+    fn test_noisy_empty_lines_collapsed_to_two() {
+        let input = "line1\n\n\n\n\nline2";
+        let result = filter_noisy_patterns(input);
+        // Count empty lines between line1 and line2
+        let parts: Vec<&str> = result.split("line1").collect();
+        assert!(parts.len() >= 2, "should have content around line1");
+        let between = parts[1].split("line2").next().unwrap_or("");
+        let empty_count = between.matches('\n').count();
+        // Should be exactly 2 empty lines = 3 newline chars (line1\n\n\nline2)
+        assert!(
+            empty_count <= 3,
+            "should collapse to max 2 empty lines, got {empty_count} newlines between: '{between}'"
+        );
+        assert!(result.contains("line1"), "should keep line1");
+        assert!(result.contains("line2"), "should keep line2");
+    }
+
+    #[test]
+    fn test_noisy_two_empty_lines_kept() {
+        let input = "a\n\n\nb";
+        let result = filter_noisy_patterns(input);
+        // 2 empty lines should be kept as-is
+        assert_eq!(result, "a\n\n\nb", "2 empty lines should be preserved");
+    }
+
+    #[test]
+    fn test_noisy_passthrough_normal_lines() {
+        let input = "error[E0308]: mismatched types\n  --> src/main.rs:42:5\n   |\n42 |     let x: u32 = \"hello\";\n   |                  ^^^^^^^ expected u32";
+        let result = filter_noisy_patterns(input);
+        assert_eq!(result, input, "normal lines should pass through unchanged");
+    }
+
+    #[test]
+    fn test_noisy_downloaded_summary_kept() {
+        let input = "   Downloading foo v1.0.0\n   Downloading bar v2.0.0\n   Downloading baz v3.0.0\n   Downloading qux v4.0.0\n  Downloaded 4 crates (2.5 MB) in 1.2s";
+        let result = filter_noisy_patterns(input);
+        assert!(
+            result.contains("Downloaded 4 crates"),
+            "should keep download summary: {result}"
+        );
+    }
+
+    #[test]
+    fn test_noisy_integration_with_compress() {
+        // Verify filter_noisy_patterns works inside compress_tool_output
+        let mut lines = Vec::new();
+        for i in 0..15 {
+            lines.push(format!("   Compiling dep_{i} v0.{i}.0"));
+        }
+        lines.push(String::from("   Compiling my_project v0.1.0"));
+        lines.push(String::from("error[E0308]: mismatched types"));
+        let input = lines.join("\n");
+        let result = compress_tool_output(&input);
+        assert!(
+            result.contains("... (14 more)"),
+            "compress_tool_output should include noisy filter: {result}"
+        );
+        assert!(
+            result.contains("error[E0308]"),
+            "should keep error lines: {result}"
+        );
+    }
+
     // ── compress_tool_output tests ────────────────────────────────────
 
     #[test]
@@ -2191,8 +2564,9 @@ mod tests {
             "first: {}",
             result_lines[0]
         );
+        // Now handled by filter_noisy_patterns with "N more" wording
         assert!(
-            result_lines[1].contains("8 more similar"),
+            result_lines[1].contains("8 more"),
             "marker: {}",
             result_lines[1]
         );
@@ -2212,10 +2586,19 @@ mod tests {
 
     #[test]
     fn test_compress_short_output_unchanged() {
-        // Only 3 similar lines — below the threshold of 4
+        // Only 3 similar Compiling lines — filter_noisy_patterns collapses at 3+
         let input = "   Compiling a v1.0\n   Compiling b v1.0\n   Compiling c v1.0";
         let result = compress_tool_output(input);
-        assert_eq!(result, input);
+        // Should collapse: first + "... (1 more)" + last
+        assert!(
+            result.contains("Compiling a"),
+            "should keep first: {result}"
+        );
+        assert!(result.contains("Compiling c"), "should keep last: {result}");
+        assert!(
+            result.contains("1 more"),
+            "should collapse middle: {result}"
+        );
     }
 
     #[test]
@@ -2231,15 +2614,9 @@ mod tests {
         }
         let input = lines.join("\n");
         let result = compress_tool_output(&input);
-        // Both repetitive blocks collapsed
-        assert!(
-            result.contains("3 more similar"),
-            "compiling block: {result}"
-        );
-        assert!(
-            result.contains("4 more similar"),
-            "downloading block: {result}"
-        );
+        // Both repetitive blocks collapsed by filter_noisy_patterns
+        assert!(result.contains("3 more"), "compiling block: {result}");
+        assert!(result.contains("4 more"), "downloading block: {result}");
         // Non-repetitive lines preserved
         assert!(result.contains("warning: unused variable"));
         assert!(result.contains("--> src/main.rs:10:5"));
@@ -2256,12 +2633,16 @@ mod tests {
 
     #[test]
     fn test_compress_exact_threshold_four_lines() {
-        // Exactly 4 similar lines — should collapse
+        // Exactly 4 Compiling lines — filter_noisy_patterns collapses at 3+
         let input = "   Compiling a v1\n   Compiling b v1\n   Compiling c v1\n   Compiling d v1";
         let result = compress_tool_output(input);
         let result_lines: Vec<&str> = result.lines().collect();
         assert_eq!(result_lines.len(), 3, "got: {result}");
-        assert!(result_lines[1].contains("2 more similar"));
+        assert!(
+            result_lines[1].contains("2 more"),
+            "got: {}",
+            result_lines[1]
+        );
     }
 
     #[test]
