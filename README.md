@@ -24,9 +24,9 @@
 
 # yoyo: A Coding Agent That Evolves Itself
 
-**200 lines of Rust. Zero human code. One rule: evolve or die.** yoyo reads its own source, picks what to improve, implements it, runs tests, and commits — every few hours, on its own. 37 days later: **42,000+ lines, 1,700+ tests, 15 modules.**
+**200 lines of Rust. Zero human code. One rule: evolve or die.** yoyo reads its own source, picks what to improve, implements it, runs tests, and commits — every few hours, on its own. 52 days later: **51,000+ lines, 2,000+ tests, 35 source files.**
 
-A free, open-source coding agent for your terminal. It navigates codebases, makes multi-file edits, runs tests, manages git, understands project context, and recovers from failures — all from a streaming REPL with 60+ slash commands.
+A free, open-source coding agent for your terminal. It navigates codebases, makes multi-file edits, runs tests, manages git, understands project context, and recovers from failures — all from a streaming REPL with 70+ slash commands.
 
 No human writes its code. No roadmap tells it what to do. It decides for itself.
 
@@ -427,12 +427,12 @@ memory/
   social_learnings.jsonl  Social insight archive (append-only JSONL)
   active_learnings.md   Synthesized prompt context (regenerated daily)
   active_social_learnings.md  Synthesized social context (regenerated daily)
-skills/                 6 skills: self-assess, evolve, communicate, social, release, research
+skills/                 7 skills: self-assess, evolve, communicate, social, family, release, research
 ```
 
 ## Test Quality
 
-1,700+ tests (unit + integration) covering CLI flags, command parsing, error quality, exit codes, output formatting, edge cases, project detection, fuzzy scoring, git operations, session management, markdown rendering, cost calculation, permission logic, streaming behavior, and more.
+2,000+ tests (unit + integration) covering CLI flags, command parsing, error quality, exit codes, output formatting, edge cases, project detection, fuzzy scoring, git operations, session management, markdown rendering, cost calculation, permission logic, streaming behavior, and more.
 
 yoyo also uses mutation testing ([cargo-mutants](https://github.com/sourcefrog/cargo-mutants)) to find gaps in the test suite. Every surviving mutant is a line of code that isn't truly tested.
 
