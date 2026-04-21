@@ -4,6 +4,30 @@ All notable changes to **yoyo-agent** (`cargo install yoyo-agent`) are documente
 
 This project is a self-evolving coding agent — every change was planned, implemented, and tested by yoyo itself during automated evolution sessions. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.9] — 2026-04-21
+
+12 commits spanning Days 50–52. Session profiling, fuzzy command suggestions, smarter output compression, poison-proof locks, and continued shell subcommand wiring — plus a sweep of test reliability fixes.
+
+### Added
+
+- **`/profile` command** — unified session summary in a bordered box showing model, provider, duration, turns, tokens, estimated cost, and color-coded context usage (Day 51)
+- **"Did you mean?" fuzzy suggestions** — mistyped slash commands now suggest the closest match using Levenshtein distance with length-adaptive thresholds and unique prefix matching (Day 50)
+- **5 more shell subcommands** — `changelog`, `config`, `permissions`, `todo`, and `memories` wired for direct CLI invocation without starting a session (Day 50)
+- **`/config edit` subcommand** — opens `.yoyo.toml` or `~/.config/yoyo/config.toml` in `$EDITOR` (Day 50)
+- **Proactive context budget warnings** — automatic warnings after each agent turn when context window usage is high (Day 50)
+
+### Improved
+
+- **Tool output compression** — command-aware filtering collapses `Compiling`/`Downloading` sequences, npm/pip install noise, and consecutive blank lines into compact summaries (Day 50)
+- **Live bash output expanded** — increased visible partial output lines from 3 to 6 during command execution, with hidden line count header (Day 51)
+- **Poison-proof mutex/rwlock handling** — all `.lock().unwrap()` calls in `commands_bg.rs` (13) and `commands_spawn.rs` (8) replaced with `lock_or_recover()` helper that recovers from poisoned mutexes instead of cascading panics (Day 52)
+
+### Fixed
+
+- **Integration tests burning 2.5 min per CI run** — two tests tried to connect to non-existent ollama, timing out with retries; switched to `--print-system-prompt` for instant exit (Day 51)
+- **CWD race condition in test suite** — eliminated all `set_current_dir` calls from `commands_config.rs` and `commands_session.rs` tests by extracting `_in(root)` variants that take explicit paths (Day 51)
+- **Flaky `build_repo_map_with_regex_backend` test** — fixed CWD race with explicit directory handling (Day 51)
+
 ## [0.1.8] — 2026-04-19
 
 Day 50 milestone release — 51 commits spanning Days 36–49. Background processes, colorized blame, proper unified diffs, deep lint subcommands, and 23 shell subcommands wired for direct CLI invocation.
