@@ -10,6 +10,16 @@ use tokio::sync::Mutex;
 
 use crate::format::{BOLD, CYAN, DIM, GREEN, RED, RESET, YELLOW};
 
+/// Acquire a `std::sync::Mutex` lock, recovering from poison if a thread panicked.
+///
+/// When a thread panics while holding a lock the mutex becomes "poisoned".
+/// Rather than cascading the panic to every subsequent caller we recover the
+/// inner data — the data itself is still valid, only the invariant *might* be
+/// broken, and for our use-cases (counters, output buffers) that is acceptable.
+fn lock_or_recover<T>(mutex: &std::sync::Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    mutex.lock().unwrap_or_else(|e| e.into_inner())
+}
+
 /// Maximum bytes of output to buffer per background job (256KB, same as StreamingBashTool).
 const MAX_OUTPUT_BYTES: usize = 256 * 1024;
 
@@ -70,11 +80,11 @@ impl BackgroundJobTracker {
         });
 
         {
-            let mut jobs = self.jobs.lock().unwrap();
+            let mut jobs = lock_or_recover(&self.jobs);
             jobs.insert(id, job);
         }
         {
-            let mut handles = self.handles.lock().unwrap();
+            let mut handles = lock_or_recover(&self.handles);
             handles.insert(id, handle);
         }
 
@@ -83,14 +93,14 @@ impl BackgroundJobTracker {
 
     /// List all jobs as snapshots (id, command, finished, exit_code, elapsed).
     pub fn list(&self) -> Vec<JobSnapshot> {
-        let jobs = self.jobs.lock().unwrap();
+        let jobs = lock_or_recover(&self.jobs);
         let mut snapshots: Vec<JobSnapshot> = jobs
             .values()
             .map(|j| JobSnapshot {
                 id: j.id,
                 command: j.command.clone(),
                 finished: j.finished.load(Ordering::Relaxed),
-                exit_code: *j.exit_code.lock().unwrap(),
+                exit_code: *lock_or_recover(&j.exit_code),
                 elapsed: j.started_at.elapsed(),
             })
             .collect();
@@ -101,7 +111,7 @@ impl BackgroundJobTracker {
     /// Get the accumulated output for a job.
     pub async fn get_output(&self, id: u32) -> Option<String> {
         let output_arc = {
-            let jobs = self.jobs.lock().unwrap();
+            let jobs = lock_or_recover(&self.jobs);
             jobs.get(&id).map(|j| Arc::clone(&j.output))
         };
         match output_arc {
@@ -117,17 +127,17 @@ impl BackgroundJobTracker {
     pub async fn kill(&self, id: u32) -> bool {
         // Abort the tokio task
         let handle = {
-            let mut handles = self.handles.lock().unwrap();
+            let mut handles = lock_or_recover(&self.handles);
             handles.remove(&id)
         };
 
         if let Some(h) = handle {
             h.abort();
             // Mark the job as finished
-            let jobs = self.jobs.lock().unwrap();
+            let jobs = lock_or_recover(&self.jobs);
             if let Some(j) = jobs.get(&id) {
                 j.finished.store(true, Ordering::Relaxed);
-                let mut code = j.exit_code.lock().unwrap();
+                let mut code = lock_or_recover(&j.exit_code);
                 if code.is_none() {
                     *code = Some(-1); // killed
                 }
@@ -140,13 +150,13 @@ impl BackgroundJobTracker {
 
     /// Check if a job ID exists.
     pub fn exists(&self, id: u32) -> bool {
-        let jobs = self.jobs.lock().unwrap();
+        let jobs = lock_or_recover(&self.jobs);
         jobs.contains_key(&id)
     }
 
     /// Check if a job is finished.
     pub fn is_finished(&self, id: u32) -> bool {
-        let jobs = self.jobs.lock().unwrap();
+        let jobs = lock_or_recover(&self.jobs);
         jobs.get(&id)
             .map(|j| j.finished.load(Ordering::Relaxed))
             .unwrap_or(false)
@@ -185,7 +195,7 @@ async fn run_background_command(
             let mut out = output.lock().await;
             out.push_str(&format!("Failed to spawn: {e}\n"));
             finished.store(true, Ordering::Relaxed);
-            let mut code = exit_code.lock().unwrap();
+            let mut code = lock_or_recover(&exit_code);
             *code = Some(-1);
             return;
         }
@@ -262,11 +272,11 @@ async fn run_background_command(
     // Wait for the process to exit
     match child.wait().await {
         Ok(status) => {
-            let mut code = exit_code.lock().unwrap();
+            let mut code = lock_or_recover(&exit_code);
             *code = Some(status.code().unwrap_or(-1));
         }
         Err(_) => {
-            let mut code = exit_code.lock().unwrap();
+            let mut code = lock_or_recover(&exit_code);
             *code = Some(-1);
         }
     }
@@ -596,5 +606,32 @@ mod tests {
         assert_eq!(jobs.len(), 1);
         assert!(jobs[0].finished);
         assert_eq!(jobs[0].exit_code, Some(42));
+    }
+
+    #[test]
+    fn test_lock_or_recover_normal() {
+        let mutex = std::sync::Mutex::new(42);
+        let guard = lock_or_recover(&mutex);
+        assert_eq!(*guard, 42);
+    }
+
+    #[test]
+    fn test_lock_or_recover_poisoned() {
+        let mutex = std::sync::Arc::new(std::sync::Mutex::new(vec![1, 2, 3]));
+        let m2 = std::sync::Arc::clone(&mutex);
+
+        // Poison the mutex by panicking while holding the lock
+        let _ = std::thread::spawn(move || {
+            let _guard = m2.lock().unwrap();
+            panic!("intentional panic to poison mutex");
+        })
+        .join();
+
+        // The mutex is now poisoned — .lock().unwrap() would panic here
+        assert!(mutex.lock().is_err(), "mutex should be poisoned");
+
+        // lock_or_recover should still give us the data
+        let guard = lock_or_recover(&mutex);
+        assert_eq!(*guard, vec![1, 2, 3]);
     }
 }

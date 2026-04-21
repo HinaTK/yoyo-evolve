@@ -10,6 +10,15 @@ use crate::prompt::*;
 use std::sync::{Arc, Mutex};
 use yoagent::types::{AgentMessage, Usage};
 
+/// Acquire a `std::sync::Mutex` lock, recovering from poison if a thread panicked.
+///
+/// See `commands_bg::lock_or_recover` for rationale — spawn tasks run in
+/// sub-agents that may panic, and we must not cascade a poisoned lock into the
+/// parent REPL.
+fn lock_or_recover<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    mutex.lock().unwrap_or_else(|e| e.into_inner())
+}
+
 // ── /spawn ────────────────────────────────────────────────────────────────
 
 /// Status of a tracked spawn task.
@@ -61,7 +70,7 @@ impl SpawnTracker {
 
     /// Register a new spawn task and return its ID.
     pub fn register(&self, task: &str, output_path: Option<String>) -> usize {
-        let mut tasks = self.inner.lock().unwrap();
+        let mut tasks = lock_or_recover(&self.inner);
         let id = tasks.len() + 1;
         tasks.push(SpawnTask {
             id,
@@ -75,7 +84,7 @@ impl SpawnTracker {
 
     /// Mark a task as completed with its result.
     pub fn complete(&self, id: usize, result: String) {
-        let mut tasks = self.inner.lock().unwrap();
+        let mut tasks = lock_or_recover(&self.inner);
         if let Some(task) = tasks.iter_mut().find(|t| t.id == id) {
             task.status = SpawnStatus::Completed;
             task.result = Some(result);
@@ -84,7 +93,7 @@ impl SpawnTracker {
 
     /// Mark a task as failed.
     pub fn fail(&self, id: usize, error: String) {
-        let mut tasks = self.inner.lock().unwrap();
+        let mut tasks = lock_or_recover(&self.inner);
         if let Some(task) = tasks.iter_mut().find(|t| t.id == id) {
             task.status = SpawnStatus::Failed(error);
             task.result = None;
@@ -93,12 +102,12 @@ impl SpawnTracker {
 
     /// Get a snapshot of all tracked tasks.
     pub fn snapshot(&self) -> Vec<SpawnTask> {
-        self.inner.lock().unwrap().clone()
+        lock_or_recover(&self.inner).clone()
     }
 
     /// Count tasks by status.
     pub fn count_by_status(&self) -> (usize, usize, usize) {
-        let tasks = self.inner.lock().unwrap();
+        let tasks = lock_or_recover(&self.inner);
         let running = tasks
             .iter()
             .filter(|t| t.status == SpawnStatus::Running)
@@ -119,18 +128,18 @@ impl SpawnTracker {
 impl SpawnTracker {
     /// Get a task by ID.
     pub fn get(&self, id: usize) -> Option<SpawnTask> {
-        let tasks = self.inner.lock().unwrap();
+        let tasks = lock_or_recover(&self.inner);
         tasks.iter().find(|t| t.id == id).cloned()
     }
 
     /// Number of tracked tasks.
     pub fn len(&self) -> usize {
-        self.inner.lock().unwrap().len()
+        lock_or_recover(&self.inner).len()
     }
 
     /// Whether the tracker has no tasks.
     pub fn is_empty(&self) -> bool {
-        self.inner.lock().unwrap().is_empty()
+        lock_or_recover(&self.inner).is_empty()
     }
 }
 
