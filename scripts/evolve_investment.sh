@@ -14,7 +14,7 @@ YOYO_BIN="${YOYO_BIN:-$ROOT_DIR/target/debug/yoyo}"
 cd "$ROOT_DIR"
 export DATE
 
-mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses"
+mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations"
 
 if [ -f "$ROOT_DIR/scripts/yoyo_context.sh" ]; then
     # shellcheck disable=SC1091
@@ -77,6 +77,7 @@ PY
 
 RULES=$(cat "$ROOT_DIR/memory/investment_rules.md")
 ERRORS=$(cat "$ROOT_DIR/memory/investment_error_patterns.md")
+ACTIVE_LEARNINGS=$(cat "$ROOT_DIR/memory/active_investment_learnings.md")
 
 run_prompt() {
     local prompt_file="$1"
@@ -91,8 +92,18 @@ run_prompt() {
 ASSESSMENT_FILE="$ROOT_DIR/research/daily/$DATE-market-assessment.md"
 PLAN_FILE="$ROOT_DIR/research/daily/$DATE-plan.md"
 REPORT_FILE="$ROOT_DIR/research/daily/$DATE-report.md"
+CALLS_FILE="$ROOT_DIR/research/calls/$DATE-calls.json"
 REFLECTION_FILE="$ROOT_DIR/research/daily/$DATE-reflection.md"
+EVALUATION_FILE="$ROOT_DIR/research/evaluations/latest.md"
 JOURNAL_FILE="$ROOT_DIR/journals/investment_journal.md"
+
+python3 "$ROOT_DIR/scripts/evaluate_investment_calls.py" \
+    --calls-dir "$ROOT_DIR/research/calls" \
+    --snapshot-dir "$ROOT_DIR/data/snapshots" \
+    --summary-md "$EVALUATION_FILE" \
+    --summary-json "$ROOT_DIR/research/evaluations/latest.json"
+
+EVALUATION_SUMMARY=$(cat "$EVALUATION_FILE")
 
 ASSESS_PROMPT=$(mktemp)
 cat > "$ASSESS_PROMPT" <<EOF
@@ -117,6 +128,10 @@ $SNAPSHOT
 $RULES
 - Error patterns:
 $ERRORS
+- Active learnings:
+$ACTIVE_LEARNINGS
+- Posterior evaluation summary:
+$EVALUATION_SUMMARY
 
 Output requirements:
 - Keep facts separate from interpretations.
@@ -144,6 +159,10 @@ $PROFILE
 $PORTFOLIO
 - Stable rules:
 $RULES
+- Active learnings:
+$ACTIVE_LEARNINGS
+- Posterior evaluation summary:
+$EVALUATION_SUMMARY
 
 Plan requirements:
 - Pick at most 5 candidates from the configured watchlist.
@@ -174,6 +193,10 @@ $SNAPSHOT
 $RULES
 - Error patterns:
 $ERRORS
+- Active learnings:
+$ACTIVE_LEARNINGS
+- Posterior evaluation summary:
+$EVALUATION_SUMMARY
 
 Report requirements:
 - Provide sections for market regime, top candidates, avoids, and portfolio posture.
@@ -181,6 +204,50 @@ Report requirements:
 - If evidence is weak, use watch_only.
 - Do not invent catalysts that are absent from the snapshot.
 - Save only markdown to $REPORT_FILE.
+EOF
+
+CALLS_PROMPT=$(mktemp)
+cat > "$CALLS_PROMPT" <<EOF
+You are yoyo-invest. Today is $DATE $SESSION_TIME.
+
+$YOYO_CONTEXT
+
+Use the investment-loop skill.
+
+Your job: convert today's report into structured machine-readable recommendations and save them to $CALLS_FILE.
+
+Inputs:
+- Daily report:
+$( [ -f "$REPORT_FILE" ] && cat "$REPORT_FILE" )
+- Watchlist:
+$WATCHLIST
+- Market snapshot:
+$SNAPSHOT
+
+Output requirements:
+- Write valid JSON only.
+- Use this exact schema:
+  {
+    "date": "$DATE",
+    "generated_at": "ISO-8601 UTC timestamp",
+    "recommendations": [
+      {
+        "symbol": "0700.HK",
+        "state": "watch_only|buy_candidate|accumulate|hold|trim|sell_candidate|avoid",
+        "theme": "string",
+        "kind": "stock|etf",
+        "horizon_days_min": 14,
+        "horizon_days_max": 90,
+        "confidence": 0.0,
+        "rationale": "short string",
+        "evidence": ["fact 1", "fact 2"],
+        "risks": ["risk 1", "risk 2"],
+        "invalidation": "single string"
+      }
+    ]
+  }
+- Include only symbols that appear in today's report as actionable, watch, or avoid names.
+- Save only JSON to $CALLS_FILE.
 EOF
 
 REFLECT_PROMPT=$(mktemp)
@@ -206,13 +273,21 @@ $( [ -f "$REPORT_FILE" ] && cat "$REPORT_FILE" )
 $RULES
 - Error patterns:
 $ERRORS
+- Active learnings:
+$ACTIVE_LEARNINGS
+- Posterior evaluation summary:
+$EVALUATION_SUMMARY
 
 Reflection requirements:
 - Record where confidence is weakest.
 - State what evidence is still missing.
 - Name 1-3 likely failure modes for today's recommendations.
 - Suggest concrete priority shifts for the next cycle.
-- Do not update rules unless a repeated pattern is already evident.
+- If posterior evaluation shows repeated patterns, update:
+  - $ROOT_DIR/memory/active_investment_learnings.md
+  - $ROOT_DIR/memory/investment_rules.md
+  - $ROOT_DIR/memory/investment_error_patterns.md
+  Keep changes concise and operational.
 EOF
 
 export SNAPSHOT_FILE
@@ -220,12 +295,14 @@ export SNAPSHOT_FILE
 run_prompt "$ASSESS_PROMPT" "$(mktemp)"
 run_prompt "$PLAN_PROMPT" "$(mktemp)"
 run_prompt "$REPORT_PROMPT" "$(mktemp)"
+run_prompt "$CALLS_PROMPT" "$(mktemp)"
 run_prompt "$REFLECT_PROMPT" "$(mktemp)"
 
-rm -f "$ASSESS_PROMPT" "$PLAN_PROMPT" "$REPORT_PROMPT" "$REFLECT_PROMPT"
+rm -f "$ASSESS_PROMPT" "$PLAN_PROMPT" "$REPORT_PROMPT" "$CALLS_PROMPT" "$REFLECT_PROMPT"
 
 echo "=== Investment loop complete ==="
 echo "Assessment: $ASSESSMENT_FILE"
 echo "Plan:       $PLAN_FILE"
 echo "Report:     $REPORT_FILE"
+echo "Calls:      $CALLS_FILE"
 echo "Reflection: $REFLECTION_FILE"

@@ -87,7 +87,7 @@ jobs:
 
       - name: Commit research outputs
         run: |
-          git add research/daily journals/investment_journal.md
+          git add research/daily research/calls research/evaluations journals/investment_journal.md memory/active_investment_learnings.md memory/investment_rules.md memory/investment_error_patterns.md
           if git diff --cached --quiet; then
             echo "No research changes to commit."
             exit 0

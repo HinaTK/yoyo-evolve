@@ -11,6 +11,9 @@ This repository now includes an investment research loop that can run alongside 
   - daily plan
   - recommendation report
   - reflection
+- Stores structured call records for each cycle under `research/calls/`
+- Runs posterior evaluation across historical calls and later snapshots under `research/evaluations/`
+- Feeds evaluation learnings back into investment memory files
 - Writes outputs under `research/daily/`
 - Uses stable memory files under `memory/` to reduce drift
 
@@ -20,6 +23,7 @@ This repository now includes an investment research loop that can run alongside 
 - `config/watchlist.toml`
 - `config/portfolio.toml`
 - `scripts/fetch_investment_data.py`
+- `scripts/evaluate_investment_calls.py`
 - `scripts/evolve_investment.sh`
 - `skills/investment-loop/SKILL.md`
 - `memory/investment_rules.md`
@@ -35,10 +39,11 @@ bash scripts/evolve_investment.sh
 ```
 
 If you already have a snapshot file, the loop reuses it. Otherwise it fetches one for the current date.
+Before each new cycle, it evaluates prior structured calls against later snapshots and injects the summary into the next prompt.
 
 ## Guardrails
 
 - The investment loop uses a fixed analysis order: market, theme, ETF, symbol, risk, action.
 - Recommendations must carry evidence, risks, invalidation, horizon, and confidence.
 - When evidence is weak, the expected fallback is `watch_only`.
-- The loop writes memory and journal artifacts instead of modifying the protected self-evolution pipeline.
+- The loop persists machine-readable calls, posterior evaluations, memory, and journal artifacts instead of modifying the protected self-evolution pipeline.
