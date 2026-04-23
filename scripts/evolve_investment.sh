@@ -4,8 +4,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-DATE=$(date +%Y-%m-%d)
-SESSION_TIME=$(date +%H:%M)
+DATE="${DATE:-$(date +%Y-%m-%d)}"
+SESSION_TIME="${SESSION_TIME:-$(date +%H:%M)}"
 MODEL="${MODEL:-claude-opus-4-6}"
 TIMEOUT="${TIMEOUT:-900}"
 SNAPSHOT_FILE="${SNAPSHOT_FILE:-$ROOT_DIR/data/snapshots/$DATE.json}"
