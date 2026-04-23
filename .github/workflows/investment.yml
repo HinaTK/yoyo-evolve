@@ -1,0 +1,98 @@
+name: Investment Research
+
+on:
+  schedule:
+    - cron: '30 9 * * 1-5' # weekdays 17:30 HKT, after market close
+  workflow_dispatch:
+
+concurrency:
+  group: investment-research
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Generate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.bot-token.outputs.token }}
+          fetch-depth: 20
+          persist-credentials: false
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-invest-${{ hashFiles('Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-invest-
+
+      - name: Detect bot identity
+        id: bot-info
+        run: |
+          SLUG="${{ steps.bot-token.outputs.app-slug }}"
+          if [ -z "$SLUG" ]; then
+            echo "::error::GitHub App slug is empty. Check that your GitHub App is configured correctly."
+            exit 1
+          fi
+          echo "login=${SLUG}[bot]" >> "$GITHUB_OUTPUT"
+          echo "email=${SLUG}[bot]@users.noreply.github.com" >> "$GITHUB_OUTPUT"
+
+      - name: Configure git
+        run: |
+          git config user.name "${{ steps.bot-info.outputs.login }}"
+          git config user.email "${{ steps.bot-info.outputs.email }}"
+
+      - name: Build yoyo
+        run: cargo build --quiet
+
+      - name: Run investment research loop
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          chmod +x scripts/evolve_investment.sh
+          ./scripts/evolve_investment.sh
+
+      - name: Commit research outputs
+        run: |
+          git add research/daily journals/investment_journal.md
+          if git diff --cached --quiet; then
+            echo "No research changes to commit."
+            exit 0
+          fi
+          git commit -m "Daily investment research update"
+
+      - name: Push research outputs
+        run: git push origin main
