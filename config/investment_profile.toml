@@ -1,0 +1,27 @@
+[agent]
+name = "yoyo-invest"
+market_focus = ["hk-stocks", "etfs"]
+time_horizon = "swing"
+time_window_days_min = 14
+time_window_days_max = 90
+
+[risk]
+profile = "balanced"
+max_single_position_pct = 10
+max_theme_exposure_pct = 30
+allow_leverage = false
+allow_inverse_etf = false
+allow_low_liquidity = false
+default_action_when_uncertain = "watch_only"
+
+[process]
+max_daily_candidates = 5
+require_evidence_count = 3
+require_invalidation = true
+require_risk_section = true
+evaluation_windows = [3, 5, 10, 20]
+
+[outputs]
+default_report_dir = "research/daily"
+thesis_dir = "research/theses"
+memory_dir = "memory"

@@ -1,0 +1,9 @@
+[portfolio]
+base_currency = "HKD"
+cash_pct = 100
+
+[[positions]]
+symbol = "2800.HK"
+status = "watch"
+cost_basis = 0
+notes = "Seed example; replace with real holdings before production use."

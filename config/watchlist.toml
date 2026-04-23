@@ -1,0 +1,35 @@
+[[symbols]]
+symbol = "0700.HK"
+name = "Tencent"
+kind = "stock"
+theme = "internet-platform"
+
+[[symbols]]
+symbol = "9988.HK"
+name = "Alibaba"
+kind = "stock"
+theme = "internet-platform"
+
+[[symbols]]
+symbol = "1810.HK"
+name = "Xiaomi"
+kind = "stock"
+theme = "consumer-tech"
+
+[[symbols]]
+symbol = "2800.HK"
+name = "Tracker Fund of Hong Kong"
+kind = "etf"
+theme = "hong-kong-broad-market"
+
+[[symbols]]
+symbol = "3033.HK"
+name = "Hang Seng Tech ETF"
+kind = "etf"
+theme = "hang-seng-tech"
+
+[[symbols]]
+symbol = "3067.HK"
+name = "iShares Hang Seng TECH ETF"
+kind = "etf"
+theme = "hang-seng-tech"
