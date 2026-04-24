@@ -31,6 +31,7 @@ PY
 )
 
 for run_date in "${SNAPSHOT_DATES[@]}"; do
+    run_date="${run_date//$'\r'/}"
     echo "=== Bootstrap replay: $run_date ==="
     DATE="$run_date" \
     MODEL="$MODEL" \
