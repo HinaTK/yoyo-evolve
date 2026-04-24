@@ -7,12 +7,19 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DAYS="${DAYS:-30}"
 MODEL="${MODEL:-claude-opus-4-6}"
 TIMEOUT="${TIMEOUT:-900}"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+    if command -v python >/dev/null 2>&1; then
+        PYTHON_BIN="python"
+    fi
+fi
 
 cd "$ROOT_DIR"
 
-python3 "$ROOT_DIR/scripts/backfill_investment_snapshots.py" --days "$DAYS"
+"$PYTHON_BIN" "$ROOT_DIR/scripts/backfill_investment_snapshots.py" --days "$DAYS"
 
-mapfile -t SNAPSHOT_DATES < <(python3 - <<'PY'
+mapfile -t SNAPSHOT_DATES < <($PYTHON_BIN - <<'PY'
 import os
 import pathlib
 

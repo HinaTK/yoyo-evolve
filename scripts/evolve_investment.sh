@@ -7,12 +7,27 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DATE="${DATE:-$(date +%Y-%m-%d)}"
 SESSION_TIME="${SESSION_TIME:-$(date +%H:%M)}"
 MODEL="${MODEL:-claude-opus-4-6}"
+PROVIDER="${PROVIDER:-anthropic}"
+BASE_URL="${BASE_URL:-}"
 TIMEOUT="${TIMEOUT:-900}"
 SNAPSHOT_FILE="${SNAPSHOT_FILE:-$ROOT_DIR/data/snapshots/$DATE.json}"
 YOYO_BIN="${YOYO_BIN:-$ROOT_DIR/target/debug/yoyo}"
+if [ -z "${YOYO_BIN:-}" ] || [ "$YOYO_BIN" = "$ROOT_DIR/target/debug/yoyo" ]; then
+    if [ -f "$ROOT_DIR/target/debug/yoyo.exe" ]; then
+        YOYO_BIN="$ROOT_DIR/target/debug/yoyo.exe"
+    fi
+fi
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+    if command -v python >/dev/null 2>&1; then
+        PYTHON_BIN="python"
+    fi
+fi
 
 cd "$ROOT_DIR"
 export DATE
+export SNAPSHOT_FILE
 
 mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations"
 
@@ -24,7 +39,7 @@ else
 fi
 
 if [ ! -f "$SNAPSHOT_FILE" ]; then
-    python3 "$ROOT_DIR/scripts/fetch_investment_data.py" --date "$DATE"
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/fetch_investment_data.py" --date "$DATE"
 fi
 
 if [ ! -f "$YOYO_BIN" ]; then
@@ -41,7 +56,7 @@ if ! command -v timeout &>/dev/null; then
     fi
 fi
 
-PROFILE=$(python3 - <<'PY'
+PROFILE=$($PYTHON_BIN - <<'PY'
 import pathlib, tomllib, json
 root = pathlib.Path.cwd()
 with open(root / 'config' / 'investment_profile.toml', 'rb') as f:
@@ -49,7 +64,7 @@ with open(root / 'config' / 'investment_profile.toml', 'rb') as f:
 PY
 )
 
-PORTFOLIO=$(python3 - <<'PY'
+PORTFOLIO=$($PYTHON_BIN - <<'PY'
 import pathlib, tomllib, json
 root = pathlib.Path.cwd()
 with open(root / 'config' / 'portfolio.toml', 'rb') as f:
@@ -57,7 +72,7 @@ with open(root / 'config' / 'portfolio.toml', 'rb') as f:
 PY
 )
 
-WATCHLIST=$(python3 - <<'PY'
+WATCHLIST=$($PYTHON_BIN - <<'PY'
 import pathlib, tomllib, json
 root = pathlib.Path.cwd()
 with open(root / 'config' / 'watchlist.toml', 'rb') as f:
@@ -65,7 +80,7 @@ with open(root / 'config' / 'watchlist.toml', 'rb') as f:
 PY
 )
 
-SNAPSHOT=$(python3 - <<'PY'
+SNAPSHOT=$($PYTHON_BIN - <<'PY'
 import os, pathlib
 path = pathlib.Path(os.environ['SNAPSHOT_FILE'])
 if not path.exists():
@@ -82,10 +97,36 @@ ACTIVE_LEARNINGS=$(cat "$ROOT_DIR/memory/active_investment_learnings.md")
 run_prompt() {
     local prompt_file="$1"
     local log_file="$2"
+    local provider_args=(--provider "$PROVIDER" --model "$MODEL")
+    if [ -n "$BASE_URL" ]; then
+        provider_args+=(--base-url "$BASE_URL")
+    fi
+    local exe_path="$YOYO_BIN"
+    local prompt_path="$prompt_file"
+    if command -v cygpath >/dev/null 2>&1; then
+        exe_path="$(cygpath -w "$YOYO_BIN")"
+        prompt_path="$(cygpath -w "$prompt_file")"
+    fi
+
+    if [[ "$YOYO_BIN" == *.exe ]] && command -v powershell.exe >/dev/null 2>&1; then
+        local ps_cmd
+        ps_cmd="Get-Content -Raw '$prompt_path' | & '$exe_path'"
+        for arg in "${provider_args[@]}"; do
+            ps_cmd+=" '$arg'"
+        done
+        ps_cmd+=" --skills ./skills"
+        if [ -n "$TIMEOUT_CMD" ]; then
+            powershell.exe -NoProfile -Command "$ps_cmd" 2>&1 | tee "$log_file"
+        else
+            powershell.exe -NoProfile -Command "$ps_cmd" 2>&1 | tee "$log_file"
+        fi
+        return
+    fi
+
     if [ -n "$TIMEOUT_CMD" ]; then
-        "$TIMEOUT_CMD" "$TIMEOUT" "$YOYO_BIN" --model "$MODEL" --skills ./skills < "$prompt_file" 2>&1 | tee "$log_file"
+        "$TIMEOUT_CMD" "$TIMEOUT" "$YOYO_BIN" "${provider_args[@]}" --skills ./skills < "$prompt_file" 2>&1 | tee "$log_file"
     else
-        "$YOYO_BIN" --model "$MODEL" --skills ./skills < "$prompt_file" 2>&1 | tee "$log_file"
+        "$YOYO_BIN" "${provider_args[@]}" --skills ./skills < "$prompt_file" 2>&1 | tee "$log_file"
     fi
 }
 
@@ -97,7 +138,7 @@ REFLECTION_FILE="$ROOT_DIR/research/daily/$DATE-reflection.md"
 EVALUATION_FILE="$ROOT_DIR/research/evaluations/latest.md"
 JOURNAL_FILE="$ROOT_DIR/journals/investment_journal.md"
 
-python3 "$ROOT_DIR/scripts/evaluate_investment_calls.py" \
+"$PYTHON_BIN" "$ROOT_DIR/scripts/evaluate_investment_calls.py" \
     --calls-dir "$ROOT_DIR/research/calls" \
     --snapshot-dir "$ROOT_DIR/data/snapshots" \
     --summary-md "$EVALUATION_FILE" \
@@ -289,8 +330,6 @@ Reflection requirements:
   - $ROOT_DIR/memory/investment_error_patterns.md
   Keep changes concise and operational.
 EOF
-
-export SNAPSHOT_FILE
 
 run_prompt "$ASSESS_PROMPT" "$(mktemp)"
 run_prompt "$PLAN_PROMPT" "$(mktemp)"
