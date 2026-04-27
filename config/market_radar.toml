@@ -1,0 +1,93 @@
+# Broad HK market radar used to detect sector/theme strength.
+# This is not the tradeable recommendation list. Actionable recommendations
+# should still come from config/trade_universe.toml unless explicitly promoted later.
+
+[[symbols]]
+symbol = "2800.HK"
+name = "Tracker Fund of Hong Kong / 盈富基金"
+kind = "etf"
+theme = "hong-kong-broad-market"
+
+[[symbols]]
+symbol = "3033.HK"
+name = "CSOP Hang Seng TECH Index ETF / 南方东英恒生科技指数ETF"
+kind = "etf"
+theme = "hang-seng-tech"
+
+[[symbols]]
+symbol = "0005.HK"
+name = "HSBC / 汇丰控股"
+kind = "stock"
+theme = "financials-bank"
+
+[[symbols]]
+symbol = "0388.HK"
+name = "HKEX / 香港交易所"
+kind = "stock"
+theme = "financials-exchange"
+
+[[symbols]]
+symbol = "1299.HK"
+name = "AIA / 友邦保险"
+kind = "stock"
+theme = "financials-insurance"
+
+[[symbols]]
+symbol = "0883.HK"
+name = "CNOOC / 中国海洋石油"
+kind = "stock"
+theme = "energy"
+
+[[symbols]]
+symbol = "0857.HK"
+name = "PetroChina / 中国石油股份"
+kind = "stock"
+theme = "energy"
+
+[[symbols]]
+symbol = "0941.HK"
+name = "China Mobile / 中国移动"
+kind = "stock"
+theme = "telecom-dividend"
+
+[[symbols]]
+symbol = "0728.HK"
+name = "China Telecom / 中国电信"
+kind = "stock"
+theme = "telecom-dividend"
+
+[[symbols]]
+symbol = "0002.HK"
+name = "CLP Holdings / 中电控股"
+kind = "stock"
+theme = "utilities-defensive"
+
+[[symbols]]
+symbol = "0006.HK"
+name = "Power Assets / 电能实业"
+kind = "stock"
+theme = "utilities-defensive"
+
+[[symbols]]
+symbol = "2020.HK"
+name = "ANTA Sports / 安踏体育"
+kind = "stock"
+theme = "consumer-discretionary"
+
+[[symbols]]
+symbol = "9992.HK"
+name = "Pop Mart / 泡泡玛特"
+kind = "stock"
+theme = "consumer-discretionary"
+
+[[symbols]]
+symbol = "2269.HK"
+name = "WuXi Biologics / 药明生物"
+kind = "stock"
+theme = "healthcare-biotech"
+
+[[symbols]]
+symbol = "1177.HK"
+name = "Sino Biopharm / 中国生物制药"
+kind = "stock"
+theme = "healthcare-pharma"

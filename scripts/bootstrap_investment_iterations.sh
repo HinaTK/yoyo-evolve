@@ -59,6 +59,7 @@ for run_date in "${SNAPSHOT_DATES[@]}"; do
         MODEL="$MODEL" \
         TIMEOUT="$TIMEOUT" \
         SNAPSHOT_FILE="$ROOT_DIR/data/snapshots/$run_date.json" \
+        SESSION="historical" \
         PYTHON_BIN="$PYTHON_BIN" \
         PROVIDER="${PROVIDER:-custom}" \
         BASE_URL="${BASE_URL:-http://127.0.0.1:8310/v1}" \
@@ -71,6 +72,7 @@ for run_date in "${SNAPSHOT_DATES[@]}"; do
             MODEL="$FALLBACK_MODEL" \
             TIMEOUT="$TIMEOUT" \
             SNAPSHOT_FILE="$ROOT_DIR/data/snapshots/$run_date.json" \
+            SESSION="historical" \
             PYTHON_BIN="$PYTHON_BIN" \
             PROVIDER="${PROVIDER:-custom}" \
             BASE_URL="${BASE_URL:-http://127.0.0.1:8310/v1}" \

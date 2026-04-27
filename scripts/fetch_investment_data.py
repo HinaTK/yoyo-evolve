@@ -51,6 +51,16 @@ def to_tencent_symbol(symbol: str) -> str:
     return symbol.lower()
 
 
+def parse_trade_date(value: str) -> str | None:
+    digits = "".join(ch for ch in str(value) if ch.isdigit())
+    if len(digits) < 8:
+        return None
+    try:
+        return dt.date(int(digits[:4]), int(digits[4:6]), int(digits[6:8])).isoformat()
+    except ValueError:
+        return None
+
+
 def fetch_tencent_bundle(symbol: str) -> tuple[dict[str, Any], list[list[Any]]]:
     tencent_symbol = to_tencent_symbol(symbol)
     quote_text = fetch_text(f"https://qt.gtimg.cn/q={tencent_symbol}")
@@ -91,11 +101,33 @@ def compute_metrics(symbol: str, name: str, kind: str, theme: str, quote: dict[s
     if len(series) < 20:
         raise ValueError(f"Not enough price history for {symbol}")
 
-    close_values = [row[1] for row in series]
-    volume_values = [row[2] for row in series if row[2] is not None]
-    latest_ts, latest_close, latest_volume, _latest_open, latest_high, latest_low, latest_date = series[-1]
-    prev_close = quote["prev_close"] or series[-2][1]
-    pct_change_1d = ((latest_close / prev_close) - 1.0) * 100.0 if prev_close else 0.0
+    quote_trade_date = parse_trade_date(quote.get("trade_time", ""))
+    completed_series = series
+    if quote_trade_date:
+        prior_completed = [row for row in series if row[6] != quote_trade_date]
+        if len(prior_completed) >= 20:
+            completed_series = prior_completed
+
+    close_values = [row[1] for row in completed_series]
+    volume_values = [row[2] for row in completed_series if row[2] is not None]
+
+    quote_last = float(quote.get("last") or 0)
+    if quote_last > 0:
+        latest_close = quote_last
+        latest_volume = float(quote.get("volume") or 0)
+        latest_open = float(quote.get("open") or latest_close)
+        latest_high = float(quote.get("high") or max(latest_open, latest_close))
+        latest_low = float(quote.get("low") or min(latest_open, latest_close))
+        latest_date = quote_trade_date or completed_series[-1][6]
+        prev_close = float(quote.get("prev_close") or completed_series[-1][1])
+        pct_change_1d = float(quote.get("pct_change") or 0.0)
+        price_source = "quote"
+    else:
+        _latest_ts, latest_close, latest_volume, latest_open, latest_high, latest_low, latest_date = series[-1]
+        prev_close = series[-2][1]
+        pct_change_1d = ((latest_close / prev_close) - 1.0) * 100.0 if prev_close else 0.0
+        price_source = "daily_kline"
+
     ma20 = statistics.fmean(close_values[-20:])
     ma60 = statistics.fmean(close_values[-60:]) if len(close_values) >= 60 else statistics.fmean(close_values)
     high_60 = max(close_values[-60:]) if len(close_values) >= 60 else max(close_values)
@@ -122,6 +154,7 @@ def compute_metrics(symbol: str, name: str, kind: str, theme: str, quote: dict[s
         "currency": quote.get("currency", "HKD"),
         "exchange": "HKEX",
         "latest_close": round(latest_close, 4),
+        "latest_open": round(latest_open, 4),
         "prev_close": round(prev_close, 4),
         "pct_change_1d": round(pct_change_1d, 3),
         "ma20": round(ma20, 4),
@@ -133,6 +166,12 @@ def compute_metrics(symbol: str, name: str, kind: str, theme: str, quote: dict[s
         "latest_low": round(latest_low, 4),
         "turnover": quote.get("turnover"),
         "as_of": latest_date,
+        "quote_trade_time": quote.get("trade_time"),
+        "quote_trade_date": quote_trade_date,
+        "price_source": price_source,
+        "ma_source": "completed_daily_history",
+        "quote_last": round(float(quote.get("last") or 0), 4),
+        "quote_volume": int(float(quote.get("volume") or 0)),
         "regime_flags": regime_flags,
     }
 
@@ -161,12 +200,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Fetch investment snapshot data for configured symbols.")
     parser.add_argument("--watchlist", default=str(ROOT / "config" / "watchlist.toml"))
     parser.add_argument("--output-dir", default=str(ROOT / "data" / "snapshots"))
+    parser.add_argument("--output-file", default=None)
     parser.add_argument("--date", default=dt.date.today().isoformat())
     args = parser.parse_args()
 
     watchlist = read_toml(pathlib.Path(args.watchlist))
     output_dir = pathlib.Path(args.output_dir)
-    ensure_dir(output_dir)
+    output_file = pathlib.Path(args.output_file) if args.output_file else output_dir / f"{args.date}.json"
+    ensure_dir(output_file.parent)
 
     items = []
     failures = []
@@ -187,7 +228,7 @@ def main() -> int:
         "failures": failures,
     }
 
-    out_file = output_dir / f"{args.date}.json"
+    out_file = output_file
     out_file.write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
 
     print(f"Wrote snapshot: {out_file}")

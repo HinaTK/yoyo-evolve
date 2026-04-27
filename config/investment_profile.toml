@@ -14,12 +14,28 @@ allow_inverse_etf = false
 allow_low_liquidity = false
 default_action_when_uncertain = "watch_only"
 
+[costs]
+estimated_round_trip_bps = 35
+minimum_edge_bps = 100
+require_edge_over_cost_multiple = 2.0
+notes = "Only upgrade to actionable states when expected swing edge clearly exceeds estimated round-trip trading cost."
+
+[ranking]
+min_action_score = 65
+min_watch_score = 45
+max_candidates = 8
+prefer_liquid_etfs_for_theme_confirmation = true
+
 [process]
 max_daily_candidates = 5
 require_evidence_count = 3
 require_invalidation = true
 require_risk_section = true
 evaluation_windows = [3, 5, 10, 20]
+primary_use = "recommendation_only"
+recommendation_goal = "Generate ranked swing-trade candidates and conditional triggers without assuming the user's real holdings."
+selection_mode = "dynamic_from_trade_universe"
+selection_goal = "Use the market radar to identify strong themes, then select the best current symbols from the trade universe each session."
 
 [outputs]
 default_report_dir = "research/daily"

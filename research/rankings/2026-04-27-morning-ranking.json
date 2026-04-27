@@ -1,0 +1,227 @@
+{
+  "snapshot": "D:\\Code\\yoyo\\data\\snapshots\\2026-04-27-morning.json",
+  "as_of_date": "2026-04-27",
+  "generated_at": "2026-04-27T06:26:31Z",
+  "cost_gate": {
+    "estimated_round_trip_bps": 35.0,
+    "minimum_edge_bps": 100.0,
+    "action_rule": "Do not upgrade unless expected swing edge exceeds both cost and minimum edge gates."
+  },
+  "thresholds": {
+    "min_watch_score": 45.0,
+    "min_action_score": 65.0
+  },
+  "theme_summary": [
+    {
+      "theme": "hong-kong-broad-market",
+      "avg_score": 51.96,
+      "leader": "2800.HK",
+      "leader_score": 51.96,
+      "members": [
+        "2800.HK"
+      ]
+    },
+    {
+      "theme": "hang-seng-tech",
+      "avg_score": 44.8,
+      "leader": "3033.HK",
+      "leader_score": 45.86,
+      "members": [
+        "3033.HK",
+        "3067.HK"
+      ]
+    },
+    {
+      "theme": "internet-platform",
+      "avg_score": 13.24,
+      "leader": "9988.HK",
+      "leader_score": 26.49,
+      "members": [
+        "9988.HK",
+        "0700.HK"
+      ]
+    },
+    {
+      "theme": "consumer-tech",
+      "avg_score": 0.0,
+      "leader": "1810.HK",
+      "leader_score": 0,
+      "members": [
+        "1810.HK"
+      ]
+    }
+  ],
+  "top_candidates": [
+    {
+      "symbol": "2800.HK",
+      "name": "Tracker Fund of Hong Kong",
+      "kind": "etf",
+      "theme": "hong-kong-broad-market",
+      "score": 51.96,
+      "trend_score": 61.72,
+      "momentum_score": 44.47,
+      "risk_penalty": 0.0,
+      "latest_close": 26.2,
+      "pct_change_1d": -0.228,
+      "ma20": 25.991,
+      "ma60": 26.3593,
+      "range_pos_60": 0.431,
+      "volume_ratio_20": 0.8148,
+      "regime_flags": [
+        "range"
+      ],
+      "price_source": null,
+      "quote_trade_time": null
+    },
+    {
+      "symbol": "3033.HK",
+      "name": "Hang Seng Tech ETF",
+      "kind": "etf",
+      "theme": "hang-seng-tech",
+      "score": 45.86,
+      "trend_score": 50.41,
+      "momentum_score": 52.91,
+      "risk_penalty": 0.0,
+      "latest_close": 4.834,
+      "pct_change_1d": 0.708,
+      "ma20": 4.7684,
+      "ma60": 4.9982,
+      "range_pos_60": 0.2328,
+      "volume_ratio_20": 0.8623,
+      "regime_flags": [
+        "range"
+      ],
+      "price_source": null,
+      "quote_trade_time": null
+    }
+  ],
+  "all_ranked": [
+    {
+      "symbol": "2800.HK",
+      "name": "Tracker Fund of Hong Kong",
+      "kind": "etf",
+      "theme": "hong-kong-broad-market",
+      "score": 51.96,
+      "trend_score": 61.72,
+      "momentum_score": 44.47,
+      "risk_penalty": 0.0,
+      "latest_close": 26.2,
+      "pct_change_1d": -0.228,
+      "ma20": 25.991,
+      "ma60": 26.3593,
+      "range_pos_60": 0.431,
+      "volume_ratio_20": 0.8148,
+      "regime_flags": [
+        "range"
+      ],
+      "price_source": null,
+      "quote_trade_time": null
+    },
+    {
+      "symbol": "3033.HK",
+      "name": "Hang Seng Tech ETF",
+      "kind": "etf",
+      "theme": "hang-seng-tech",
+      "score": 45.86,
+      "trend_score": 50.41,
+      "momentum_score": 52.91,
+      "risk_penalty": 0.0,
+      "latest_close": 4.834,
+      "pct_change_1d": 0.708,
+      "ma20": 4.7684,
+      "ma60": 4.9982,
+      "range_pos_60": 0.2328,
+      "volume_ratio_20": 0.8623,
+      "regime_flags": [
+        "range"
+      ],
+      "price_source": null,
+      "quote_trade_time": null
+    },
+    {
+      "symbol": "3067.HK",
+      "name": "iShares Hang Seng TECH ETF",
+      "kind": "etf",
+      "theme": "hang-seng-tech",
+      "score": 43.75,
+      "trend_score": 50.33,
+      "momentum_score": 47.3,
+      "risk_penalty": 0.0,
+      "latest_close": 10.37,
+      "pct_change_1d": 0.68,
+      "ma20": 10.2365,
+      "ma60": 10.718,
+      "range_pos_60": 0.2275,
+      "volume_ratio_20": 0.593,
+      "regime_flags": [
+        "range"
+      ],
+      "price_source": null,
+      "quote_trade_time": null
+    },
+    {
+      "symbol": "9988.HK",
+      "name": "Alibaba",
+      "kind": "stock",
+      "theme": "internet-platform",
+      "score": 26.49,
+      "trend_score": 43.1,
+      "momentum_score": 30.87,
+      "risk_penalty": 8.0,
+      "latest_close": 130.3,
+      "pct_change_1d": -1.138,
+      "ma20": 127.35,
+      "ma60": 139.61,
+      "range_pos_60": 0.2145,
+      "volume_ratio_20": 0.4987,
+      "regime_flags": [
+        "range"
+      ],
+      "price_source": null,
+      "quote_trade_time": null
+    },
+    {
+      "symbol": "0700.HK",
+      "name": "Tencent",
+      "kind": "stock",
+      "theme": "internet-platform",
+      "score": 0,
+      "trend_score": 20.47,
+      "momentum_score": 36.36,
+      "risk_penalty": 30.0,
+      "latest_close": 478.4,
+      "pct_change_1d": -3.04,
+      "ma20": 499.18,
+      "ma60": 528.9917,
+      "range_pos_60": 0.0,
+      "volume_ratio_20": 1.5339,
+      "regime_flags": [
+        "downtrend",
+        "volume-expansion"
+      ],
+      "price_source": null,
+      "quote_trade_time": null
+    },
+    {
+      "symbol": "1810.HK",
+      "name": "Xiaomi",
+      "kind": "stock",
+      "theme": "consumer-tech",
+      "score": 0,
+      "trend_score": 32.41,
+      "momentum_score": 37.06,
+      "risk_penalty": 38.0,
+      "latest_close": 31.12,
+      "pct_change_1d": -0.256,
+      "ma20": 31.701,
+      "ma60": 33.6713,
+      "range_pos_60": 0.0714,
+      "volume_ratio_20": 0.4554,
+      "regime_flags": [
+        "downtrend"
+      ],
+      "price_source": null,
+      "quote_trade_time": null
+    }
+  ]
+}

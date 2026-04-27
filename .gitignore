@@ -12,3 +12,4 @@ mutants.out.old/
 .yoyo/last-session.json
 /site
 data/snapshots/
+.env

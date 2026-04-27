@@ -2,6 +2,25 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Current Local Working System
+
+This repository is based on yoyo-evolve, a self-evolving coding agent CLI. In this local working tree, it has also been extended into a Hong Kong stock/ETF investment research system.
+
+For investment-related questions, treat the current active purpose as: generate Chinese HK stock/ETF recommendation research, run morning/midday/close analysis, dynamically rank a trade universe, produce structured calls, and improve future recommendations through posterior evaluation.
+
+Read `INVESTMENT_SYSTEM.md` first for the investment workflow. Key investment entry points are:
+- `scripts/investment_morning.sh`
+- `scripts/investment_midday.sh`
+- `scripts/investment_close.sh`
+- `scripts/evolve_investment.sh`
+- `scripts/rank_investment_universe.py`
+- `scripts/evaluate_investment_calls.py`
+- `config/market_radar.toml`
+- `config/trade_universe.toml`
+- `config/investment_profile.toml`
+
+Do not describe the repository as only the original self-evolving coding agent when the user's question is about the current local system. The upstream agent identity still exists, but the active user workflow is the HK investment research and iterative optimization loop.
+
 ## What This Is
 
 A self-evolving coding agent CLI built on [yoagent](https://github.com/yologdev/yoagent). The agent spans multiple Rust source files under `src/`. A GitHub Actions cron job (`scripts/evolve.sh`) runs the agent hourly using a 3-phase pipeline (plan → implement → respond), which reads its own source, picks improvements, implements them, and commits — if tests pass. All runs use a flat 8h gap (~3/day). Sponsors get benefit tiers (issue priority, shoutout issues, listing eligibility) but no run-frequency speedup. One-time sponsors ($2+) get 1 accelerated run that bypasses the gap (only consumed when they have open issues; tracked in `sponsors/credits.json`).

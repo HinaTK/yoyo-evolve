@@ -1,0 +1,159 @@
+# Trade universe: symbols yoyo-invest is allowed to rank and recommend.
+# This should be broader than the focused watchlist, but still limited to names
+# you are willing to consider trading.
+
+[[symbols]]
+symbol = "2800.HK"
+name = "Tracker Fund of Hong Kong / 盈富基金"
+kind = "etf"
+theme = "hong-kong-broad-market"
+
+[[symbols]]
+symbol = "3033.HK"
+name = "CSOP Hang Seng TECH Index ETF / 南方东英恒生科技指数ETF"
+kind = "etf"
+theme = "hang-seng-tech"
+
+[[symbols]]
+symbol = "3067.HK"
+name = "iShares Hang Seng TECH ETF / 安硕恒生科技ETF"
+kind = "etf"
+theme = "hang-seng-tech"
+
+[[symbols]]
+symbol = "0700.HK"
+name = "Tencent / 腾讯控股"
+kind = "stock"
+theme = "internet-platform"
+
+[[symbols]]
+symbol = "9988.HK"
+name = "Alibaba / 阿里巴巴-W"
+kind = "stock"
+theme = "internet-platform"
+
+[[symbols]]
+symbol = "3690.HK"
+name = "Meituan / 美团-W"
+kind = "stock"
+theme = "internet-platform"
+
+[[symbols]]
+symbol = "1024.HK"
+name = "Kuaishou / 快手-W"
+kind = "stock"
+theme = "internet-platform"
+
+[[symbols]]
+symbol = "9618.HK"
+name = "JD.com / 京东集团-SW"
+kind = "stock"
+theme = "internet-platform"
+
+[[symbols]]
+symbol = "1810.HK"
+name = "Xiaomi / 小米集团-W"
+kind = "stock"
+theme = "consumer-tech"
+
+[[symbols]]
+symbol = "0005.HK"
+name = "HSBC / 汇丰控股"
+kind = "stock"
+theme = "financials-bank"
+
+[[symbols]]
+symbol = "0388.HK"
+name = "HKEX / 香港交易所"
+kind = "stock"
+theme = "financials-exchange"
+
+[[symbols]]
+symbol = "1299.HK"
+name = "AIA / 友邦保险"
+kind = "stock"
+theme = "financials-insurance"
+
+[[symbols]]
+symbol = "0883.HK"
+name = "CNOOC / 中国海洋石油"
+kind = "stock"
+theme = "energy"
+
+[[symbols]]
+symbol = "0857.HK"
+name = "PetroChina / 中国石油股份"
+kind = "stock"
+theme = "energy"
+
+[[symbols]]
+symbol = "0386.HK"
+name = "Sinopec / 中国石油化工股份"
+kind = "stock"
+theme = "energy"
+
+[[symbols]]
+symbol = "0941.HK"
+name = "China Mobile / 中国移动"
+kind = "stock"
+theme = "telecom-dividend"
+
+[[symbols]]
+symbol = "0728.HK"
+name = "China Telecom / 中国电信"
+kind = "stock"
+theme = "telecom-dividend"
+
+[[symbols]]
+symbol = "0002.HK"
+name = "CLP Holdings / 中电控股"
+kind = "stock"
+theme = "utilities-defensive"
+
+[[symbols]]
+symbol = "0006.HK"
+name = "Power Assets / 电能实业"
+kind = "stock"
+theme = "utilities-defensive"
+
+[[symbols]]
+symbol = "2020.HK"
+name = "ANTA Sports / 安踏体育"
+kind = "stock"
+theme = "consumer-discretionary"
+
+[[symbols]]
+symbol = "2331.HK"
+name = "Li Ning / 李宁"
+kind = "stock"
+theme = "consumer-discretionary"
+
+[[symbols]]
+symbol = "9992.HK"
+name = "Pop Mart / 泡泡玛特"
+kind = "stock"
+theme = "consumer-discretionary"
+
+[[symbols]]
+symbol = "6862.HK"
+name = "Haidilao / 海底捞"
+kind = "stock"
+theme = "consumer-discretionary"
+
+[[symbols]]
+symbol = "2269.HK"
+name = "WuXi Biologics / 药明生物"
+kind = "stock"
+theme = "healthcare-biotech"
+
+[[symbols]]
+symbol = "1177.HK"
+name = "Sino Biopharm / 中国生物制药"
+kind = "stock"
+theme = "healthcare-pharma"
+
+[[symbols]]
+symbol = "1093.HK"
+name = "CSPC Pharma / 石药集团"
+kind = "stock"
+theme = "healthcare-pharma"

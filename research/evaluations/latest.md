@@ -1,6 +1,6 @@
 # Posterior Evaluation Summary
 
-Generated: `2026-04-27T01:22:21Z`
+Generated: `2026-04-27T11:24:56Z`
 Evaluations: `304`
 
 ## Verdict Counts
@@ -9,11 +9,16 @@ Evaluations: `304`
 - `mixed`: 14
 - `pass`: 49
 
+## Session Counts
+- `historical`: 304
+
 ## Learning Candidates
-- `defensive_misread`: 31
-- `bullish_misread`: 27
-- `overconfidence`: 21
+- `theme_error`: 49
+- `symbol_selection_error`: 27
 - `timing_unclear`: 14
+- `overconfidence`: 9
+- `bullish_misread`: 9
+- `defensive_misread`: 6
 
 ## Symbol Stats
 - `0700.HK`: samples=50, avg_return=-1.745%, pass_rate=0.04
@@ -26,19 +31,22 @@ Evaluations: `304`
 ## Recent Misfires
 - `2026-04-21` `2800.HK` `buy_candidate` over T+3: -1.868%
 
+## Recent Selection Errors
+- No recent same-theme symbol-selection errors detected.
+
 ## Recent Evaluations
-- `2026-04-17` `3033.HK` `watch_only` T+5: -1.58% -> `informational`
-- `2026-04-17` `3067.HK` `watch_only` T+3: 0.378% -> `informational`
-- `2026-04-17` `3067.HK` `watch_only` T+5: -1.322% -> `informational`
-- `2026-04-20` `2800.HK` `hold` T+3: -1.725% -> `fail`
-- `2026-04-20` `0700.HK` `watch_only` T+3: -5.225% -> `informational`
-- `2026-04-20` `9988.HK` `watch_only` T+3: -4.818% -> `informational`
-- `2026-04-20` `1810.HK` `watch_only` T+3: -3.527% -> `informational`
-- `2026-04-20` `3033.HK` `watch_only` T+3: -3.879% -> `informational`
-- `2026-04-20` `3067.HK` `watch_only` T+3: -3.857% -> `informational`
-- `2026-04-21` `0700.HK` `watch_only` T+3: -4.933% -> `informational`
-- `2026-04-21` `9988.HK` `watch_only` T+3: -3.302% -> `informational`
-- `2026-04-21` `1810.HK` `watch_only` T+3: -3.704% -> `informational`
-- `2026-04-21` `2800.HK` `buy_candidate` T+3: -1.868% -> `fail`
-- `2026-04-21` `3033.HK` `watch_only` T+3: -3.148% -> `informational`
-- `2026-04-21` `3067.HK` `watch_only` T+3: -3.104% -> `informational`
+- `2026-04-17` `historical` `3033.HK` `watch_only` T+5: -1.58% -> `informational`
+- `2026-04-17` `historical` `3067.HK` `watch_only` T+3: 0.378% -> `informational`
+- `2026-04-17` `historical` `3067.HK` `watch_only` T+5: -1.322% -> `informational`
+- `2026-04-20` `historical` `2800.HK` `hold` T+3: -1.725% -> `fail`
+- `2026-04-20` `historical` `0700.HK` `watch_only` T+3: -5.225% -> `informational`
+- `2026-04-20` `historical` `9988.HK` `watch_only` T+3: -4.818% -> `informational`
+- `2026-04-20` `historical` `1810.HK` `watch_only` T+3: -3.527% -> `informational`
+- `2026-04-20` `historical` `3033.HK` `watch_only` T+3: -3.879% -> `informational`
+- `2026-04-20` `historical` `3067.HK` `watch_only` T+3: -3.857% -> `informational`
+- `2026-04-21` `historical` `0700.HK` `watch_only` T+3: -4.933% -> `informational`
+- `2026-04-21` `historical` `9988.HK` `watch_only` T+3: -3.302% -> `informational`
+- `2026-04-21` `historical` `1810.HK` `watch_only` T+3: -3.704% -> `informational`
+- `2026-04-21` `historical` `2800.HK` `buy_candidate` T+3: -1.868% -> `fail`
+- `2026-04-21` `historical` `3033.HK` `watch_only` T+3: -3.148% -> `informational`
+- `2026-04-21` `historical` `3067.HK` `watch_only` T+3: -3.104% -> `informational`

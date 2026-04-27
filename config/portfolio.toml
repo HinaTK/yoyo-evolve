@@ -1,9 +1,11 @@
 [portfolio]
 base_currency = "HKD"
+mode = "recommendation_only"
 cash_pct = 100
+notes = "No real holdings are supplied. Treat this as recommendation and candidate-generation mode, not live portfolio management."
 
 [[positions]]
 symbol = "2800.HK"
 status = "watch"
 cost_basis = 0
-notes = "Seed example; replace with real holdings before production use."
+notes = "Watchlist placeholder only; not an actual holding."

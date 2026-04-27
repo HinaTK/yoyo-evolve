@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-27T01:22:21Z",
+  "generated_at": "2026-04-27T11:24:56Z",
   "evaluations": 304,
   "verdict_counts": {
     "informational": 162,
@@ -8,10 +8,15 @@
     "mixed": 14
   },
   "learning_counts": {
-    "defensive_misread": 31,
-    "bullish_misread": 27,
-    "overconfidence": 21,
+    "theme_error": 49,
+    "defensive_misread": 6,
+    "symbol_selection_error": 27,
+    "overconfidence": 9,
+    "bullish_misread": 9,
     "timing_unclear": 14
+  },
+  "session_counts": {
+    "historical": 304
   },
   "symbol_stats": {
     "0700.HK": {
@@ -46,23 +51,29 @@
     }
   },
   "top_learning_candidates": [
-    "defensive_misread",
-    "bullish_misread",
+    "theme_error",
+    "symbol_selection_error",
+    "timing_unclear",
     "overconfidence",
-    "timing_unclear"
+    "bullish_misread"
   ],
   "recent_misfires": [
     {
       "call_date": "2026-04-21",
+      "session": "historical",
       "window_days": 3,
       "symbol": "2800.HK",
+      "theme": "hong-kong-broad-market",
       "state": "buy_candidate",
       "confidence": 0.55,
       "base_price": 26.76,
       "future_price": 26.26,
       "return_pct": -1.868,
       "verdict": "fail",
-      "learning_tag": "bullish_misread"
+      "learning_tag": "bullish_misread",
+      "selection_source_theme": null,
+      "selection_reason": null
     }
-  ]
+  ],
+  "recent_selection_errors": []
 }

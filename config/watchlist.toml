@@ -1,35 +1,35 @@
 [[symbols]]
 symbol = "0700.HK"
-name = "Tencent"
+name = "Tencent / 腾讯控股"
 kind = "stock"
 theme = "internet-platform"
 
 [[symbols]]
 symbol = "9988.HK"
-name = "Alibaba"
+name = "Alibaba / 阿里巴巴-W"
 kind = "stock"
 theme = "internet-platform"
 
 [[symbols]]
 symbol = "1810.HK"
-name = "Xiaomi"
+name = "Xiaomi / 小米集团-W"
 kind = "stock"
 theme = "consumer-tech"
 
 [[symbols]]
 symbol = "2800.HK"
-name = "Tracker Fund of Hong Kong"
+name = "Tracker Fund of Hong Kong / 盈富基金"
 kind = "etf"
 theme = "hong-kong-broad-market"
 
 [[symbols]]
 symbol = "3033.HK"
-name = "Hang Seng Tech ETF"
+name = "CSOP Hang Seng TECH Index ETF / 南方东英恒生科技指数ETF"
 kind = "etf"
 theme = "hang-seng-tech"
 
 [[symbols]]
 symbol = "3067.HK"
-name = "iShares Hang Seng TECH ETF"
+name = "iShares Hang Seng TECH ETF / 安硕恒生科技ETF"
 kind = "etf"
 theme = "hang-seng-tech"
