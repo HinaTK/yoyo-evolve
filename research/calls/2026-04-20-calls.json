@@ -1,0 +1,142 @@
+{
+  "date": "2026-04-20",
+  "generated_at": "2026-04-20T08:50:00Z",
+  "recommendations": [
+    {
+      "symbol": "2800.HK",
+      "state": "hold",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 5,
+      "horizon_days_max": 10,
+      "confidence": 0.55,
+      "rationale": "Cleanest broad-market setup: above MA20 and MA60 in a neutral range regime, but volume and posterior context argue for moderate conviction only.",
+      "evidence": [
+        "Close 26.66, up 0.832% on the day",
+        "Above MA20 25.749 and MA60 26.3957",
+        "60-day range position 0.5632",
+        "Volume ratio vs 20-day average 0.8131",
+        "Recent 2026-04-17 hold T+3 evaluated pass and T+5 evaluated mixed"
+      ],
+      "risks": [
+        "Volume was not especially strong, so participation was not emphatic",
+        "Market regime remains neutral/range rather than trending",
+        "Broad ETF can stall even while structurally stronger than tech exposure"
+      ],
+      "invalidation": "Downgrade if price loses MA60 again and fails to hold above the 26.40-26.44 follow-through area."
+    },
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.25,
+      "rationale": "Strong one-day rebound, but still below MA60 with weak theme-level ETF confirmation and poor posterior record, so it does not meet the upgrade bar.",
+      "evidence": [
+        "Close 522.5, up 2.351% on the day",
+        "Above MA20 501.625 but below MA60 537.5917",
+        "60-day range position 0.2913",
+        "Volume ratio vs 20-day average 0.91",
+        "3033.HK and 3067.HK remain below MA60",
+        "Posterior pass rate for 0700.HK remains very low at 0.062"
+      ],
+      "risks": [
+        "Single-day strength may be a range bounce rather than a trend restart",
+        "Tech ETF confirmation is incomplete",
+        "Posterior record argues against overconfident bullish calls"
+      ],
+      "invalidation": "Upgrade only if Tencent reclaims and holds above MA60 with concurrent tech ETF confirmation; downgrade further if it slips back below MA20."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.25,
+      "rationale": "Above MA20 but still below MA60 with small gain, soft volume, absent ETF confirmation, and a recent failed hold evaluation.",
+      "evidence": [
+        "Close 137.0, up 0.44% on the day",
+        "Above MA20 125.71 but below MA60 142.215",
+        "60-day range position 0.3364",
+        "Volume ratio vs 20-day average 0.7231",
+        "Recent 2026-04-17 hold T+5 evaluated fail at -3.592%",
+        "Tech ETFs remain below MA60"
+      ],
+      "risks": [
+        "Weak volume makes the bounce easy to fade",
+        "Recent evaluation history warns against upgrading on thin evidence",
+        "Could remain trapped between MA20 support and MA60 resistance"
+      ],
+      "invalidation": "Upgrade only if price reclaims MA60 with stronger participation and ETF confirmation; downgrade if it loses MA20."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "watch_only",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.25,
+      "rationale": "Marginally above MA20 but still below MA60 on weak volume; evidence is too thin for a bullish upgrade while recent avoid timing was mixed.",
+      "evidence": [
+        "Close 32.32, up 1.0% on the day",
+        "Slightly above MA20 32.155 but below MA60 34.024",
+        "60-day range position 0.2578",
+        "Volume ratio vs 20-day average 0.643",
+        "Recent 2026-04-17 avoid T+3 evaluated fail and T+5 evaluated pass"
+      ],
+      "risks": [
+        "Weak volume undermines rebound quality",
+        "Still below MA60, so trend repair is incomplete",
+        "Can whipsaw inside a range and punish both late buyers and premature bears"
+      ],
+      "invalidation": "Upgrade only if Xiaomi holds above MA20 and then reclaims MA60 with better volume; downgrade if it falls back below MA20."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.25,
+      "rationale": "Key theme-confirmation ETF shows a bounce attempt above MA20, but remains below MA60 and does not confirm a completed tech trend turn.",
+      "evidence": [
+        "Close 4.95, up 0.284% on the day",
+        "Above MA20 4.7478 but below MA60 5.0635",
+        "60-day range position 0.3279",
+        "Volume ratio vs 20-day average 0.9559"
+      ],
+      "risks": [
+        "Could still be the right shoulder of a failed rebound",
+        "Lack of MA60 reclaim limits follow-through confidence"
+      ],
+      "invalidation": "Upgrade only on sustained reclaim of MA60; downgrade if it loses MA20."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.25,
+      "rationale": "Same incomplete tech-theme setup as 3033.HK, but with notably lighter participation, making it weak evidence for a durable trend change.",
+      "evidence": [
+        "Close 10.63, up 0.378% on the day",
+        "Above MA20 10.1925 but below MA60 10.8558",
+        "60-day range position 0.3294",
+        "Volume ratio vs 20-day average 0.5415"
+      ],
+      "risks": [
+        "Weak participation raises the chance of a failed bounce",
+        "As a correlated tech ETF, it can reverse quickly if broad sentiment softens"
+      ],
+      "invalidation": "Upgrade only if 3067.HK reclaims MA60 with materially stronger volume; downgrade if it loses MA20."
+    }
+  ]
+}

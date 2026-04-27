@@ -1,0 +1,132 @@
+{
+  "date": "2026-04-08",
+  "generated_at": "2026-04-24T07:21:57Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.54,
+      "rationale": "Strong rebound day, but Tencent remains below both 20-day and 60-day averages in a downtrend, so this looks like an early bounce rather than a confirmed swing entry.",
+      "evidence": [
+        "Closed at 508.0, up 3.843% on the day",
+        "Still below ma20 518.09 and ma60 553.08",
+        "60-day range position is 0.1744, near the lower end of the range",
+        "Volume ratio 1.1013 shows only modest confirmation"
+      ],
+      "risks": [
+        "Downtrend can resume quickly after a single rebound session",
+        "Price is still below short-term resistance around the 20-day average"
+      ],
+      "invalidation": "Upgrade only if price reclaims and holds above the 20-day average with stronger volume; a break back below 500 after this bounce would confirm weakness."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "buy_candidate",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.67,
+      "rationale": "Alibaba showed the strongest stock move in the group with clear volume expansion, making it a credible rebound candidate even though the broader trend is still not repaired.",
+      "evidence": [
+        "Closed at 126.5, up 6.751% on the day",
+        "Volume ratio 1.8789 indicates strong participation",
+        "Flagged for volume-expansion in today's regime signals",
+        "Finished just below ma20 127.305 after trading as high as 127.9"
+      ],
+      "risks": [
+        "Primary regime is still downtrend because price remains below ma60 145.8",
+        "Failure to reclaim the 20-day average could turn this into a bull trap"
+      ],
+      "invalidation": "If price fails to hold above 121-122 on follow-through or is rejected again below the 20-day average, the rebound setup is invalid."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "watch_only",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.58,
+      "rationale": "Xiaomi posted a strong gain, but it closed exactly at the session high while still sitting below both moving averages, so confirmation is not strong enough yet for accumulation.",
+      "evidence": [
+        "Closed at 32.76, up 6.088% on the day",
+        "Still below ma20 33.249 and ma60 34.897",
+        "60-day range position is 0.2392, still in the lower quarter of its range",
+        "Volume ratio 1.2798 shows some confirmation but not a breakout surge"
+      ],
+      "risks": [
+        "Single-session momentum can fade quickly in a downtrend",
+        "Nearby overhead resistance at the 20-day average may cap follow-through"
+      ],
+      "invalidation": "A failure to push above the 20-day average within the next few sessions or a reversal back toward 31.5 would invalidate the rebound watch."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "hold",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 21,
+      "horizon_days_max": 90,
+      "confidence": 0.65,
+      "rationale": "The broad Hong Kong ETF is acting more stable than the single-name rebounds, trading above the 20-day average in a range regime, which supports holding rather than chasing.",
+      "evidence": [
+        "Closed at 26.2, up 3.15% on the day",
+        "Above ma20 25.643 but still slightly below ma60 26.4657",
+        "Range regime flag suggests consolidation rather than breakdown",
+        "60-day range position is 0.431, healthier than the tech names near the bottom of their ranges"
+      ],
+      "risks": [
+        "Failure to clear the 60-day average could keep the ETF trapped in a range",
+        "Broad market beta can weaken if the current risk-on tone fades"
+      ],
+      "invalidation": "A close back below the 20-day average with weakening breadth would invalidate the hold bias and shift the name back to watch-only."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "accumulate",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.69,
+      "rationale": "Among the tech exposures, 3033.HK offers the cleanest way to participate in the risk-on rebound because it is already back above its 20-day average with liquid volume while diversifying single-name risk.",
+      "evidence": [
+        "Closed at 4.83, up 5.689% on the day",
+        "Above ma20 4.7905 while still below ma60 5.1762",
+        "Range regime is healthier than the single-stock downtrend flags",
+        "Volume ratio 1.2568 and very high turnover indicate active participation"
+      ],
+      "risks": [
+        "The ETF is still below its 60-day average, so trend repair is incomplete",
+        "Tech-sector strength could reverse if internet-platform leaders fail to follow through"
+      ],
+      "invalidation": "A loss of the 20-day average on closing basis or a break back below 4.70 would invalidate the accumulation setup."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "hold",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.62,
+      "rationale": "3067.HK confirms the same tech rebound as 3033.HK and is above its 20-day average, but the lower turnover makes it a secondary hold rather than the preferred accumulation vehicle.",
+      "evidence": [
+        "Closed at 10.37, up 5.386% on the day",
+        "Above ma20 10.279 but below ma60 11.0948",
+        "Range regime flag is constructive versus a downtrend label",
+        "Volume ratio 1.1346 confirms participation, though less strongly than 3033.HK"
+      ],
+      "risks": [
+        "Lower liquidity than 3033.HK can make execution less efficient",
+        "Trend remains vulnerable until price clears the 60-day average"
+      ],
+      "invalidation": "A close back below the 20-day average or loss of 10.10 support would invalidate the hold stance."
+    }
+  ]
+}

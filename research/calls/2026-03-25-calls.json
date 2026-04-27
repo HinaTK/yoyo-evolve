@@ -1,0 +1,126 @@
+{
+  "date": "2026-03-25",
+  "generated_at": "2026-03-25T14:39:00Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.58,
+      "rationale": "Tencent is near the bottom of its 60-day range and below key moving averages; wait for stabilization before adding exposure.",
+      "evidence": [
+        "Latest close 505.5 HKD is below ma20 524.745 and ma60 566.915",
+        "60-day range position is very low at 0.0527",
+        "Shares fell 1.654% on the day while market risk_state was risk_on"
+      ],
+      "risks": [
+        "Persistent downtrend can continue despite low range position",
+        "Relative weakness versus Alibaba and tech ETFs may indicate stock-specific pressure"
+      ],
+      "invalidation": "Upgrade only if price reclaims the 20-day moving average with improving relative strength; downgrade to avoid if it breaks below the recent 60-day range on expanding volume."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "buy_candidate",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.64,
+      "rationale": "Alibaba led the watchlist with strong one-day momentum, but remains in a broader downtrend below moving averages.",
+      "evidence": [
+        "Alibaba rose 4.627%, the strongest move among reported symbols",
+        "Volume ratio was elevated at 1.403 versus the 20-day average",
+        "Close 128.9 HKD remains below ma20 131.865 and ma60 148.74"
+      ],
+      "risks": [
+        "The bounce may be a countertrend rally within an established downtrend",
+        "Failure near the 20-day moving average could attract sellers"
+      ],
+      "invalidation": "Invalidate the buy-candidate setup if price fails to hold above 123.2 HKD or cannot reclaim the 20-day moving average within the next few sessions."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.62,
+      "rationale": "Xiaomi showed downside pressure with volume expansion while remaining below major moving averages.",
+      "evidence": [
+        "Latest close 32.52 HKD is below ma20 33.608 and ma60 35.7237",
+        "Regime flags include downtrend and volume-expansion",
+        "Volume ratio was high at 1.509 while price fell 0.49%"
+      ],
+      "risks": [
+        "Oversold conditions could produce a sharp rebound",
+        "Broad risk-on flows may lift consumer-tech despite weak technicals"
+      ],
+      "invalidation": "Reconsider only if price reclaims the 20-day moving average and volume expansion shifts to upside days rather than downside pressure."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "hold",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.6,
+      "rationale": "The broad Hong Kong ETF participated in the risk-on day but remains below its moving averages, favoring holding rather than aggressive accumulation.",
+      "evidence": [
+        "Tracker Fund rose 1.183% on the day",
+        "Close 25.66 HKD is still below ma20 25.897 and ma60 26.567",
+        "60-day range position is 0.2759, better than tech leaders but still subdued"
+      ],
+      "risks": [
+        "Broad-market downtrend may resume if index fails near the 20-day moving average",
+        "ETF upside may lag individual rebound leaders like Alibaba"
+      ],
+      "invalidation": "Shift to accumulate if price closes above the 20-day moving average with market breadth improving; shift to watch_only if it loses 25.3 HKD."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.57,
+      "rationale": "Hang Seng Tech ETF bounced with the sector but volume confirmation was weak and the downtrend remains intact.",
+      "evidence": [
+        "3033.HK rose 2.162%, among the day's leaders",
+        "Close 4.82 HKD remains below ma20 4.8609 and ma60 5.2763",
+        "Volume ratio was only 0.722 despite the price bounce"
+      ],
+      "risks": [
+        "Low-volume rebound may fail quickly",
+        "Technology-sector beta can amplify downside if risk appetite fades"
+      ],
+      "invalidation": "Upgrade if price reclaims 4.8609 with volume above the 20-day average; downgrade if it falls back below 4.69."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "buy_candidate",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.61,
+      "rationale": "3067.HK offers Hang Seng Tech rebound exposure with better volume confirmation than 3033.HK, though trend risk remains.",
+      "evidence": [
+        "3067.HK rose 1.876% on the day",
+        "Volume ratio was elevated at 1.3925",
+        "Close 10.32 HKD remains below ma20 10.422 and ma60 11.3057"
+      ],
+      "risks": [
+        "Still in a downtrend and below both 20-day and 60-day moving averages",
+        "ETF liquidity and turnover are lower than larger alternatives in the snapshot"
+      ],
+      "invalidation": "Invalidate the buy-candidate view if price cannot reclaim the 20-day moving average or breaks below 10.07 on elevated volume."
+    }
+  ]
+}

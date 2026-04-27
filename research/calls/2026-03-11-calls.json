@@ -1,0 +1,126 @@
+{
+  "date": "2026-03-11",
+  "generated_at": "2026-03-11T10:28:00Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.58,
+      "rationale": "Tencent is holding a range with strong volume, but remains below its 60-day average; wait for confirmation before adding risk.",
+      "evidence": [
+        "Latest close 552.0 HKD is above MA20 528.25 but below MA60 579.725",
+        "Regime flags show range and volume-expansion with volume ratio 1.5985",
+        "60-day range position is mid-low at 0.3817 after a mild -0.271% daily move"
+      ],
+      "risks": [
+        "High-volume range action may be distribution rather than accumulation",
+        "Failure to reclaim the 60-day average could keep the stock capped"
+      ],
+      "invalidation": "Turn constructive only if price reclaims and holds above the 60-day average; turn avoid if it breaks below the recent low near 548 on continued heavy volume."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.66,
+      "rationale": "Alibaba remains in a downtrend near the lower end of its 60-day range, so fresh exposure should wait.",
+      "evidence": [
+        "Latest close 133.2 HKD is below MA20 144.11 and MA60 151.77",
+        "Regime flag is downtrend",
+        "60-day range position is low at 0.1462"
+      ],
+      "risks": [
+        "Oversold positioning can produce sharp counter-trend rebounds",
+        "Low relative volume may make the signal less decisive"
+      ],
+      "invalidation": "Reconsider if Alibaba closes back above MA20 with improving volume and stops making lower lows."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.68,
+      "rationale": "Xiaomi is the weakest stock in the watchlist today and remains below both key moving averages.",
+      "evidence": [
+        "Latest close 33.34 HKD is below MA20 34.711 and MA60 36.9157",
+        "Daily move of -0.833% makes it the largest laggard in the snapshot",
+        "Regime flag is downtrend with low 60-day range position 0.1547"
+      ],
+      "risks": [
+        "A broad tech rebound could lift Xiaomi despite weak current trend",
+        "Volume ratio 0.8165 is not capitulation-level, so downside pressure may persist slowly"
+      ],
+      "invalidation": "Reconsider if price regains MA20 and the 60-day range position improves above 0.30 with stronger relative volume."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "watch_only",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.57,
+      "rationale": "The broad Hong Kong market ETF is slightly weak and below trend, but its diversified exposure makes it a watch rather than an outright avoid.",
+      "evidence": [
+        "Latest close 26.1 HKD is below MA20 26.567 and MA60 26.579",
+        "Regime flag is downtrend",
+        "60-day range position is low-mid at 0.2409 with muted volume ratio 0.5359"
+      ],
+      "risks": [
+        "Weak market breadth can continue pulling the ETF lower",
+        "Low volume may mean there is not yet a strong reversal signal"
+      ],
+      "invalidation": "Become more constructive only if price closes back above both MA20 and MA60; become avoid if it breaks below 26.0 with expanding volume."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.62,
+      "rationale": "Hang Seng Tech exposure remains in a downtrend below both moving averages, so new buys need patience.",
+      "evidence": [
+        "Latest close 4.936 HKD is below MA20 5.0557 and MA60 5.3645",
+        "Regime flag is downtrend",
+        "60-day range position is low at 0.2263 with volume ratio 0.4167"
+      ],
+      "risks": [
+        "Tech ETFs can rebound quickly if policy or liquidity sentiment improves",
+        "Low volume makes the current decline less forceful but also lacks accumulation evidence"
+      ],
+      "invalidation": "Reconsider if 3033.HK reclaims MA20 and relative volume expands above its 20-day average."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.61,
+      "rationale": "3067.HK is the relative leader today only because it fell less, while its trend structure remains weak.",
+      "evidence": [
+        "Latest close 10.59 HKD is below MA20 10.833 and MA60 11.4913",
+        "Regime flag is downtrend",
+        "It led the snapshot with only -0.094% daily move, but range position remains low at 0.2237"
+      ],
+      "risks": [
+        "Relative resilience may be early stabilization rather than weakness",
+        "Thin turnover compared with other ETFs can make signals noisier"
+      ],
+      "invalidation": "Reconsider if 3067.HK closes above MA20 with range position improving above 0.35 and no new lower low."
+    }
+  ]
+}

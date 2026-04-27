@@ -1,0 +1,138 @@
+{
+  "date": "2026-04-14",
+  "generated_at": "2026-04-24T07:45:22Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.46,
+      "rationale": "Tencent bounced modestly in a still-weak trend, so the setup is not strong enough for a fresh swing entry yet.",
+      "evidence": [
+        "Price closed at 493.2, up 0.653% on the day.",
+        "Latest close remains below the 20-day MA of 509.5 and the 60-day MA of 545.1083.",
+        "60-day range position is only 0.0766, showing it is still trading near the lower end of its recent range.",
+        "Volume ratio versus 20-day average is 0.6852, so the bounce lacked strong participation.",
+        "Regime flag is downtrend."
+      ],
+      "risks": [
+        "Weak-volume rebound can fail quickly inside a broader downtrend.",
+        "Internet-platform sentiment may stay fragile if sector leadership does not broaden."
+      ],
+      "invalidation": "Upgrade only if price reclaims the 20-day moving average with stronger-than-average volume; avoid the setup if it breaks back below 486.2 and stays in the lower 10% of its 60-day range."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.51,
+      "rationale": "Alibaba showed the strongest one-day move among the stocks, but it is still below key moving averages and the rebound came on light volume.",
+      "evidence": [
+        "Price closed at 124.5, up 1.055% on the day, the strongest stock move in the snapshot.",
+        "Latest close is still below the 20-day MA of 125.76 and well below the 60-day MA of 144.2467.",
+        "60-day range position is 0.1091, meaning it remains near the lower end of its recent range.",
+        "Volume ratio versus 20-day average is only 0.5577.",
+        "Regime flag is downtrend."
+      ],
+      "risks": [
+        "A leader on a weak tape can still fail if follow-through does not appear within a few sessions.",
+        "Low participation suggests the move may be short covering rather than genuine accumulation."
+      ],
+      "invalidation": "A stronger long setup appears only if price closes above the 20-day moving average with improving volume; the watch thesis weakens if price loses 123.2 and momentum stalls again."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.72,
+      "rationale": "Xiaomi remains one of the weakest charts in the group, with price near the bottom of its 60-day range and no sign of conviction behind the bounce.",
+      "evidence": [
+        "Price closed at 30.88, up 0.718% on the day.",
+        "Latest close is below the 20-day MA of 32.742 and the 60-day MA of 34.4147.",
+        "60-day range position is just 0.0301, the weakest in the watchlist.",
+        "Volume ratio versus 20-day average is 0.5371, indicating low participation.",
+        "Regime flag is downtrend."
+      ],
+      "risks": [
+        "Deeply oversold names can squeeze sharply even before the trend improves.",
+        "Consumer-tech beta can rebound fast if market risk appetite broadens further."
+      ],
+      "invalidation": "Avoid stance is invalidated if price reclaims the 20-day moving average and moves materially off the bottom of its 60-day range on stronger volume; until then, weakness below 30.44 confirms the bearish setup."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "hold",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.63,
+      "rationale": "The broad-market ETF has the healthiest technical profile in the list, sitting above its 20-day average in a range regime, but it has not yet cleared the 60-day trend filter.",
+      "evidence": [
+        "Price closed at 26.2, up 0.924% on the day.",
+        "Latest close is above the 20-day MA of 25.663.",
+        "Latest close is still slightly below the 60-day MA of 26.435.",
+        "60-day range position is 0.431, much stronger than the tech names.",
+        "Regime flag is range rather than downtrend."
+      ],
+      "risks": [
+        "Failure near the 60-day moving average could turn the range setup back into a rejection.",
+        "Broad-market strength may lag if tech weakness resumes."
+      ],
+      "invalidation": "Hold remains valid while price stays above the 20-day moving average; downgrade if it loses 25.663 decisively, and upgrade only if it closes above the 60-day moving average with follow-through."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.56,
+      "rationale": "Hang Seng Tech ETF is still in a downtrend, but the liquid ETF structure and above-average volume make it the better vehicle to monitor for sector confirmation.",
+      "evidence": [
+        "Price closed at 4.75, up 0.55% on the day.",
+        "Latest close is just below the 20-day MA of 4.7564 and below the 60-day MA of 5.1172.",
+        "60-day range position is 0.1639, still weak but better than the weakest single stocks.",
+        "Volume ratio versus 20-day average is 1.103, the only clear above-average participation in the list.",
+        "Regime flag is downtrend."
+      ],
+      "risks": [
+        "Sector ETFs can remain trapped below trend even with one strong volume day.",
+        "If leading constituents fail, ETF confirmation may disappear quickly."
+      ],
+      "invalidation": "Watch thesis improves only if price reclaims the 20-day moving average and starts to build above it; a drop back through 4.702 would confirm the downtrend remains in control."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.48,
+      "rationale": "iShares Hang Seng TECH ETF tracks the same weak sector setup as 3033.HK but with less convincing volume, so it stays on watch rather than becoming an active candidate.",
+      "evidence": [
+        "Price closed at 10.2, up 0.791% on the day.",
+        "Latest close is just below the 20-day MA of 10.2095 and below the 60-day MA of 10.9698.",
+        "60-day range position is 0.1595, showing it remains near the lower part of its recent range.",
+        "Volume ratio versus 20-day average is 0.6132, weaker than 3033.HK.",
+        "Regime flag is downtrend."
+      ],
+      "risks": [
+        "Lower participation reduces confidence in any breakout attempt.",
+        "Tech-sector weakness could persist even in a short-term risk-on tape."
+      ],
+      "invalidation": "A more constructive stance requires a close above the 20-day moving average with stronger volume; continued inability to hold above 10.1 would keep the downtrend intact."
+    }
+  ]
+}

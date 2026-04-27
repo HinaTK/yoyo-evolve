@@ -1,0 +1,126 @@
+{
+  "date": "2026-04-21",
+  "generated_at": "2026-04-21T08:53:00Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.42,
+      "rationale": "Tencent is holding above its 20-day average but remains below its 60-day average with weak volume, so the setup is not confirmed.",
+      "evidence": [
+        "Latest close 519.0 HKD is above ma20 501.925 but below ma60 536.075.",
+        "1-day move was -0.67%, making Tencent the weakest item in the snapshot.",
+        "Volume ratio to 20-day average was 0.5597, indicating below-average participation."
+      ],
+      "risks": [
+        "Continued weakness below the 60-day average may keep the stock range-bound or drifting lower.",
+        "Low volume reduces confidence that buyers are accumulating the dip."
+      ],
+      "invalidation": "Upgrade only if price reclaims the 60-day average with above-average volume; avoid if it breaks below the recent 60-day range low."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.41,
+      "rationale": "Alibaba is above its 20-day average but still below its 60-day average and trading on weak volume, so evidence is insufficient for a buy call.",
+      "evidence": [
+        "Latest close 136.3 HKD is above ma20 125.925 but below ma60 141.8133.",
+        "1-day move was -0.511%, placing Alibaba among the laggards.",
+        "Volume ratio to 20-day average was 0.4723."
+      ],
+      "risks": [
+        "Failure to reclaim the 60-day average could signal another lower-high within the range.",
+        "Weak participation may make rebounds fragile."
+      ],
+      "invalidation": "Upgrade only on a close above the 60-day average with stronger volume; downgrade to avoid if it loses the 20-day average decisively."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "watch_only",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.43,
+      "rationale": "Xiaomi showed slight relative strength but remains below its 60-day average and has very weak volume confirmation.",
+      "evidence": [
+        "Latest close 32.4 HKD is above ma20 31.959 but below ma60 33.956.",
+        "1-day move was +0.248%, the strongest stock move in the watchlist.",
+        "Volume ratio to 20-day average was only 0.3988."
+      ],
+      "risks": [
+        "The bounce may be only a low-volume move inside a range.",
+        "Range position 0.2702 shows the stock remains in the lower part of its 60-day range."
+      ],
+      "invalidation": "Upgrade only if Xiaomi reclaims the 60-day average or prints a higher-volume breakout; downgrade if it closes back below the 20-day average."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "buy_candidate",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.55,
+      "rationale": "Tracker Fund is the clearest relative-strength candidate because it leads the watchlist and trades above both key moving averages, though weak volume keeps confidence moderate.",
+      "evidence": [
+        "Latest close 26.76 HKD is above ma20 25.799 and ma60 26.3957.",
+        "1-day move was +0.375%, the strongest move in the snapshot.",
+        "Range position 0.592 is the highest among the tracked symbols."
+      ],
+      "risks": [
+        "Volume ratio to 20-day average was only 0.3997, so the breakout lacks strong participation.",
+        "Market summary risk_state is neutral, not bullish."
+      ],
+      "invalidation": "Invalidate the buy-candidate setup if 2800.HK closes back below its 60-day average or if the broad market risk state turns bearish."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.45,
+      "rationale": "Hang Seng Tech ETF is above its 20-day average but still below its 60-day average, so the tech rebound is not yet confirmed.",
+      "evidence": [
+        "Latest close 4.956 HKD is above ma20 4.7516 but below ma60 5.0523.",
+        "1-day move was +0.121%, modestly positive.",
+        "Volume ratio to 20-day average was 0.7237, better than most watchlist items but still below average."
+      ],
+      "risks": [
+        "Failure below the 60-day average may keep tech in a range rather than a trend.",
+        "Underlying internet-platform stocks were laggards on the same day."
+      ],
+      "invalidation": "Upgrade only on a close above the 60-day average with improving volume; downgrade if it loses the 20-day average."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.39,
+      "rationale": "iShares Hang Seng TECH ETF mirrors the tech ETF watch setup but has weaker liquidity and no positive daily move, so it is only a secondary watch item.",
+      "evidence": [
+        "Latest close 10.63 HKD is above ma20 10.201 but below ma60 10.8322.",
+        "1-day move was 0.0%, weaker than 3033.HK.",
+        "Turnover was 13929.27, far below 3033.HK turnover of 634425.3 in the snapshot."
+      ],
+      "risks": [
+        "Lower turnover may increase execution risk versus the more liquid Hang Seng Tech ETF alternative.",
+        "The ETF remains below its 60-day average in a neutral market regime."
+      ],
+      "invalidation": "Prefer the more liquid 3033.HK unless 3067.HK reclaims its 60-day average with improved turnover."
+    }
+  ]
+}

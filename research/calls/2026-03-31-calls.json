@@ -1,0 +1,126 @@
+{
+  "date": "2026-03-31",
+  "generated_at": "2026-03-31T14:59:00Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.42,
+      "rationale": "Relative leader but still in a clear downtrend, so wait for trend repair before treating it as actionable.",
+      "evidence": [
+        "Latest close 484.0 is below ma20 519.75 and ma60 559.5167.",
+        "Tencent was the strongest stock on the watchlist with +0.498% 1d move.",
+        "60-day range position is only 0.0159, near the bottom of the recent range."
+      ],
+      "risks": [
+        "Downtrend may continue despite one-day relative strength.",
+        "Volume ratio 0.8421 does not confirm a strong accumulation day."
+      ],
+      "invalidation": "Upgrade only if price reclaims the 20-day moving average with improving volume; avoid if it breaks below the recent 480 area with broad market weakness."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.55,
+      "rationale": "Alibaba is at the bottom of its 60-day range and below both moving averages, with no reversal evidence in the snapshot.",
+      "evidence": [
+        "Latest close 119.0 is below ma20 128.265 and ma60 147.215.",
+        "1d move was -1.245%, making it one of the session laggards.",
+        "60-day range position is 0.0, indicating a fresh or near-range low."
+      ],
+      "risks": [
+        "Sharp oversold rebounds can occur from range lows.",
+        "Internet-platform theme could recover if sector sentiment turns quickly."
+      ],
+      "invalidation": "Avoid stance is invalidated if price reclaims the 20-day moving average and holds above it with volume confirmation."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.56,
+      "rationale": "Xiaomi is the weakest stock in the snapshot and remains in a downtrend near the bottom of its 60-day range.",
+      "evidence": [
+        "Latest close 31.76 is below ma20 33.347 and ma60 35.2757.",
+        "1d move was -1.915%, the largest decline among watched stocks.",
+        "60-day range position is 0.0207, close to recent lows."
+      ],
+      "risks": [
+        "The stock may be oversold and vulnerable to a reflex bounce.",
+        "Consumer-tech news flow could create a gap reversal not visible in the snapshot."
+      ],
+      "invalidation": "Avoid stance is invalidated if price reclaims the 20-day moving average and stops making new 60-day lows."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "watch_only",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.45,
+      "rationale": "Broad-market ETF showed mild relative strength, but the market regime remains downtrend/neutral rather than confirmed risk-on.",
+      "evidence": [
+        "Latest close 25.08 is below ma20 25.632 and ma60 26.5123.",
+        "1d move was +0.32%, making it one of the leaders in a weak snapshot.",
+        "60-day range position is 0.1092, still in the lower part of the recent range."
+      ],
+      "risks": [
+        "Broad market downtrend may continue while price remains below both moving averages.",
+        "Volume ratio 0.6574 suggests the positive day lacked strong confirmation."
+      ],
+      "invalidation": "Upgrade only after a sustained reclaim of the 20-day moving average; avoid if it loses the 24.82 snapshot low with expanding downside volume."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.57,
+      "rationale": "Hang Seng Tech exposure is not confirmed because the ETF is at a 60-day low and below both trend measures.",
+      "evidence": [
+        "Latest close 4.55 is below ma20 4.8006 and ma60 5.2242.",
+        "60-day range position is 0.0, indicating a range low.",
+        "Volume ratio 0.3736 shows weak participation rather than confirmed reversal demand."
+      ],
+      "risks": [
+        "A sector-wide short-covering rebound could lift the ETF quickly from depressed levels.",
+        "Low volume can make single-day confirmation less reliable."
+      ],
+      "invalidation": "Avoid stance is invalidated if the ETF reclaims the 20-day moving average and closes above it on improving volume."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.44,
+      "rationale": "The ETF is at the bottom of its range but has better volume confirmation than 3033.HK, making it a watch rather than a fresh avoid.",
+      "evidence": [
+        "Latest close 9.79 is below ma20 10.2985 and ma60 11.1963.",
+        "60-day range position is 0.0, showing no confirmed base yet.",
+        "Volume ratio 1.0475 is above its 20-day average, unlike the other Hang Seng Tech ETF in the snapshot."
+      ],
+      "risks": [
+        "Being below both moving averages keeps downside trend risk high.",
+        "Above-average volume could represent distribution rather than accumulation."
+      ],
+      "invalidation": "Upgrade only if price reclaims the 20-day moving average with constructive breadth; avoid if it breaks below 9.70 with continued sector weakness."
+    }
+  ]
+}

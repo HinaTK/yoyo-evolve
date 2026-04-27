@@ -1,0 +1,132 @@
+{
+  "date": "2026-04-23",
+  "generated_at": "2026-04-23T09:00:00Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.58,
+      "rationale": "Quality internet-platform name, but price action remains weak in a risk-off tape; wait for stabilization before adding.",
+      "evidence": [
+        "Closed at 495.2 HKD, down 1.746% on the day",
+        "Below both MA20 501.565 and MA60 532.67 with downtrend regime flag",
+        "60-day range position is low at 0.0969, suggesting stress rather than confirmed recovery"
+      ],
+      "risks": [
+        "Downtrend can continue despite appearing cheap within the 60-day range",
+        "Broader market risk state is risk_off",
+        "Volume ratio near average at 1.0323 does not show decisive accumulation"
+      ],
+      "invalidation": "Upgrade only if price reclaims MA20 with improving breadth, or avoid if it breaks materially below the recent 60-day low on rising volume."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "buy_candidate",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.61,
+      "rationale": "Relative leader among watched stocks and still above MA20, but position sizing should stay cautious because it remains below MA60.",
+      "evidence": [
+        "Closed at 130.4 HKD, down only 0.837%, the strongest stock move in the watchlist",
+        "Above MA20 126.85 while below MA60 140.7967, consistent with a short-term rebound inside a wider range",
+        "Market summary lists Alibaba among leaders with range regime flag"
+      ],
+      "risks": [
+        "Still below MA60, so medium-term trend has not repaired",
+        "Low volume ratio of 0.6504 weakens confirmation of the move",
+        "Risk-off market conditions can pull relative leaders lower"
+      ],
+      "invalidation": "Downgrade to watch_only if price loses MA20 or closes below 129.5 with expanding volume."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.64,
+      "rationale": "Weak consumer-tech price action near the bottom of its 60-day range makes this a poor entry until trend repair appears.",
+      "evidence": [
+        "Closed at 31.18 HKD, down 1.95% on the day",
+        "Below MA20 31.845 and MA60 33.824 with downtrend regime flag",
+        "60-day range position is very low at 0.0807 and Xiaomi is listed among market laggards"
+      ],
+      "risks": [
+        "Could rebound sharply from oversold conditions and leave avoid stance too conservative",
+        "Consumer-tech sentiment may remain volatile",
+        "Below-average volume ratio of 0.8446 provides limited capitulation signal"
+      ],
+      "invalidation": "Reconsider only after a close back above MA20 with follow-through, or if new fundamental evidence offsets the technical weakness."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "hold",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.62,
+      "rationale": "Broad-market exposure is holding up better than tech ETFs and remains above MA20, but the risk-off backdrop argues against aggressive accumulation.",
+      "evidence": [
+        "Closed at 26.2 HKD, down 0.983%, one of the better relative moves in the watchlist",
+        "Above MA20 25.919 and close to MA60 26.382 with range regime flag",
+        "Volume ratio of 1.1064 and market summary lists it among leaders"
+      ],
+      "risks": [
+        "Below MA60 by a small margin, so upside confirmation is incomplete",
+        "Broad risk-off market can pressure index exposure",
+        "If leaders are only defensive rather than advancing, returns may stay muted"
+      ],
+      "invalidation": "Downgrade to watch_only if price loses MA20; upgrade to accumulate if it reclaims MA60 with stable or rising volume."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.6,
+      "rationale": "Hang Seng Tech exposure is weak and below key moving averages; watch for a base rather than buying the decline immediately.",
+      "evidence": [
+        "Closed at 4.758 HKD, down 2.058% on the day",
+        "Slightly below MA20 4.7636 and below MA60 5.0261 with downtrend regime flag",
+        "60-day range position is low at 0.1705 and it is listed among laggards"
+      ],
+      "risks": [
+        "Technology weakness may persist in a risk-off market",
+        "Below-average volume ratio of 0.8509 does not confirm strong buyer support",
+        "ETF concentration in pressured tech names can amplify drawdowns"
+      ],
+      "invalidation": "Move to avoid if it breaks below 4.744 on rising volume; upgrade only after reclaiming MA20 and forming higher lows."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.59,
+      "rationale": "Similar Hang Seng Tech weakness to 3033.HK, with slightly worse daily performance and no clear accumulation signal.",
+      "evidence": [
+        "Closed at 10.22 HKD, down 2.201%, the weakest watchlist move",
+        "Below MA20 10.2255 and MA60 10.7772 with downtrend regime flag",
+        "60-day range position is low at 0.1686 and market summary lists it as the top laggard"
+      ],
+      "risks": [
+        "Continued tech-sector selling can deepen losses",
+        "Low volume ratio of 0.7919 shows weak participation rather than strong support",
+        "Low turnover relative to larger ETF alternatives may reduce execution quality"
+      ],
+      "invalidation": "Downgrade to avoid if it closes below 10.18 with rising volume; upgrade only after it reclaims MA20 and stops underperforming 3033.HK."
+    }
+  ]
+}

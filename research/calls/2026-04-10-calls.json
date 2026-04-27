@@ -1,0 +1,129 @@
+{
+  "date": "2026-04-10",
+  "generated_at": "2026-04-24T07:33:42Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.63,
+      "rationale": "Tencent remains in a confirmed downtrend and is trading below both 20-day and 60-day averages, so the setup looks more like stabilization watch than immediate accumulation.",
+      "evidence": [
+        "Latest close 504.5 is below ma20 515.265 and ma60 549.2883",
+        "Regime flag is downtrend with 60-day range position 0.1513",
+        "Volume ratio 20 is 0.7533, showing no strong reversal participation"
+      ],
+      "risks": [
+        "Downtrend can continue and push price to fresh 60-day lows",
+        "Low relative volume may mean rebounds lack conviction"
+      ],
+      "invalidation": "Upgrade only if price reclaims the 20-day average with stronger-than-average volume and the downtrend regime starts to break."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.61,
+      "rationale": "Alibaba showed relative strength on the day, but the broader trend is still down and price remains below key moving averages, so it is an early watch rather than a buy signal.",
+      "evidence": [
+        "1-day move was +2.116%, best among the stocks in the snapshot",
+        "Latest close 125.5 is still below ma20 126.615 and ma60 145.1317",
+        "Regime flag remains downtrend and 60-day range position is only 0.1273"
+      ],
+      "risks": [
+        "Single-day rebound may fail inside an ongoing downtrend",
+        "Price remains far below ma60, limiting evidence of trend repair"
+      ],
+      "invalidation": "Upgrade only if follow-through lifts price above the 20-day average and holds there with improving volume."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.79,
+      "rationale": "Xiaomi is the weakest name in the set, sitting at the bottom of its 60-day range and below both moving averages, which argues for staying out until a clear base forms.",
+      "evidence": [
+        "1-day move was -1.467%, the worst in the snapshot",
+        "Latest close 30.9 is below ma20 32.997 and ma60 34.665",
+        "60-day range position is 0.0025, essentially at the bottom of the range",
+        "Regime flag is downtrend"
+      ],
+      "risks": [
+        "Persistent weakness can lead to downside continuation rather than mean reversion",
+        "Buying near range lows without confirmation can trap capital in a falling trend"
+      ],
+      "invalidation": "Avoid stance is invalidated only if price builds a base and reclaims the 20-day average with sustained volume improvement."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "hold",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.67,
+      "rationale": "Tracker Fund is the most stable setup in the group, trading above its 20-day average inside a range regime, which supports a hold rather than aggressive buying.",
+      "evidence": [
+        "Latest close 26.16 is above ma20 25.662",
+        "Regime flag is range rather than downtrend",
+        "60-day range position 0.4195 places it near the middle of its recent band",
+        "1-day move was +0.538%, showing mild positive participation"
+      ],
+      "risks": [
+        "Price is still below ma60 26.4523, so upside may stall near resistance",
+        "Range regime can keep returns muted and choppy"
+      ],
+      "invalidation": "Downgrade if price loses the 20-day average and the regime shifts from range back into a clearer downtrend."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.65,
+      "rationale": "Hang Seng Tech ETF is showing a short-term bounce, but it remains below both key moving averages inside a downtrend, so it belongs on a rebound watchlist instead of in active accumulation.",
+      "evidence": [
+        "1-day move was +0.933%, leading the ETFs",
+        "Latest close 4.758 is slightly below ma20 4.7757 and well below ma60 5.1477",
+        "Regime flag is downtrend with 60-day range position 0.1705"
+      ],
+      "risks": [
+        "Sector ETF can reverse quickly if tech sentiment weakens again",
+        "Failure to reclaim ma20 would confirm the bounce as temporary"
+      ],
+      "invalidation": "Upgrade only if price retakes the 20-day average and starts building higher lows within the next several weeks."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.64,
+      "rationale": "iShares Hang Seng TECH ETF mirrors the same tentative rebound profile as 3033.HK, but the broader trend is still negative and confirmation is missing.",
+      "evidence": [
+        "1-day move was +0.691%",
+        "Latest close 10.2 is below ma20 10.25 and ma60 11.0345",
+        "Regime flag is downtrend with 60-day range position 0.1595",
+        "Volume ratio 20 is 0.6655, suggesting limited conviction"
+      ],
+      "risks": [
+        "Low relative volume weakens the case for a durable reversal",
+        "ETF remains exposed to broad Hang Seng Tech weakness"
+      ],
+      "invalidation": "Upgrade only if price reclaims the 20-day average with stronger volume and stops making lower lows."
+    }
+  ]
+}

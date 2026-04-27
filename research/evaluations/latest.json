@@ -1,9 +1,68 @@
 {
-  "generated_at": "2026-04-23T13:16:22Z",
-  "evaluations": 0,
-  "verdict_counts": {},
-  "learning_counts": {},
-  "symbol_stats": {},
-  "top_learning_candidates": [],
-  "recent_misfires": []
+  "generated_at": "2026-04-27T01:22:21Z",
+  "evaluations": 304,
+  "verdict_counts": {
+    "informational": 162,
+    "fail": 79,
+    "pass": 49,
+    "mixed": 14
+  },
+  "learning_counts": {
+    "defensive_misread": 31,
+    "bullish_misread": 27,
+    "overconfidence": 21,
+    "timing_unclear": 14
+  },
+  "symbol_stats": {
+    "0700.HK": {
+      "samples": 50,
+      "avg_return_pct": -1.745,
+      "pass_rate": 0.04
+    },
+    "9988.HK": {
+      "samples": 51,
+      "avg_return_pct": -0.044,
+      "pass_rate": 0.235
+    },
+    "1810.HK": {
+      "samples": 50,
+      "avg_return_pct": -1.752,
+      "pass_rate": 0.28
+    },
+    "2800.HK": {
+      "samples": 51,
+      "avg_return_pct": 0.389,
+      "pass_rate": 0.137
+    },
+    "3033.HK": {
+      "samples": 51,
+      "avg_return_pct": -0.417,
+      "pass_rate": 0.176
+    },
+    "3067.HK": {
+      "samples": 51,
+      "avg_return_pct": -0.388,
+      "pass_rate": 0.098
+    }
+  },
+  "top_learning_candidates": [
+    "defensive_misread",
+    "bullish_misread",
+    "overconfidence",
+    "timing_unclear"
+  ],
+  "recent_misfires": [
+    {
+      "call_date": "2026-04-21",
+      "window_days": 3,
+      "symbol": "2800.HK",
+      "state": "buy_candidate",
+      "confidence": 0.55,
+      "base_price": 26.76,
+      "future_price": 26.26,
+      "return_pct": -1.868,
+      "verdict": "fail",
+      "learning_tag": "bullish_misread"
+    }
+  ]
 }

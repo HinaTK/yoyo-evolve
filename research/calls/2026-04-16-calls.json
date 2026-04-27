@@ -1,0 +1,132 @@
+{
+  "date": "2026-04-16",
+  "generated_at": "2026-04-24T08:00:25Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "hold",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.63,
+      "rationale": "Tencent rebounded back above its 20-day average in a risk-on tape, but it remains below the 60-day average and still looks range-bound rather than in a clean breakout.",
+      "evidence": [
+        "Closed at 517.0, up 3.607% on the day",
+        "Price finished above ma20 505.0 but below ma60 541.0333",
+        "Market summary risk_state is risk_on",
+        "regime_flags includes range"
+      ],
+      "risks": [
+        "Volume ratio 0.8644 shows the rebound was not strongly volume-confirmed",
+        "Price is still below the 60-day average, so resistance may appear before trend continuation"
+      ],
+      "invalidation": "If Tencent loses the 20-day average decisively and closes back below 505 with no improvement in relative strength, the hold stance breaks down."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "buy_candidate",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.72,
+      "rationale": "Alibaba showed the strongest single-name momentum in the watchlist, with a high-volume risk-on push above its 20-day average, making it a credible swing entry candidate while it remains in a range recovery.",
+      "evidence": [
+        "Closed at 135.8, up 5.599% on the day",
+        "Volume ratio 1.2742 was the strongest volume confirmation among the stocks",
+        "Price is above ma20 125.655",
+        "Alibaba is the top leader in the market summary"
+      ],
+      "risks": [
+        "Price remains below ma60 143.1717, so the setup is still a recovery inside a range rather than a confirmed uptrend",
+        "A sharp one-day move can mean poor entry if follow-through fails immediately"
+      ],
+      "invalidation": "If Alibaba fails to hold above the 20-day average near 125.7 after this breakout attempt, the buy-candidate setup is invalid."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "watch_only",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 45,
+      "confidence": 0.58,
+      "rationale": "Xiaomi participated in the market bounce but remains in a documented downtrend and still trades below both moving averages, so the move looks more like a tradable rebound to monitor than a confirmed entry.",
+      "evidence": [
+        "Closed at 32.06, up 3.754% on the day",
+        "Price is below ma20 32.464 and below ma60 34.2013",
+        "regime_flags includes downtrend",
+        "range_pos_60 of 0.1944 places it in the lower part of its 60-day range"
+      ],
+      "risks": [
+        "The prevailing downtrend can reassert quickly after a one-day bounce",
+        "Volume ratio 0.9148 does not show strong accumulation behind the rebound"
+      ],
+      "invalidation": "If Xiaomi cannot reclaim and hold above the 20-day average around 32.46, the rebound should continue to be treated as non-actionable."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "accumulate",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 21,
+      "horizon_days_max": 90,
+      "confidence": 0.66,
+      "rationale": "The broad-market ETF is trading above both the 20-day and 60-day averages in a risk-on environment, which supports gradual accumulation even though the day’s move was less aggressive than tech.",
+      "evidence": [
+        "Closed at 26.7, up 1.753% on the day",
+        "Price is above ma20 25.718 and above ma60 26.4133",
+        "Market summary risk_state is risk_on",
+        "range_pos_60 of 0.5747 shows it is holding in the upper half of its recent range"
+      ],
+      "risks": [
+        "Volume ratio 0.6532 is weak, so the advance lacks strong participation",
+        "As the weakest daily mover among the names, it may lag if leadership remains concentrated in tech"
+      ],
+      "invalidation": "If 2800.HK closes back below the 60-day average near 26.41 and loses the upper-half range position, the accumulate thesis weakens materially."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "hold",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.64,
+      "rationale": "The Hang Seng Tech ETF is participating in the risk-on rebound and has reclaimed its 20-day average, but it remains below the 60-day average, so the cleaner posture is hold rather than aggressive adding.",
+      "evidence": [
+        "Closed at 4.994, up 3.739% on the day",
+        "Price is above ma20 4.7534 but below ma60 5.0888",
+        "regime_flags includes range",
+        "Theme strength is supported by strong moves in Alibaba and Tencent"
+      ],
+      "risks": [
+        "The ETF is still below the 60-day average, which can act as near-term resistance",
+        "Volume ratio 0.8459 is below average, so the rebound is not strongly confirmed by participation"
+      ],
+      "invalidation": "If 3033.HK loses the 20-day average near 4.75 after reclaiming it, the hold stance should be downgraded."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "hold",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.65,
+      "rationale": "3067.HK confirms the same tech rebound as 3033.HK, with a move back above the 20-day average, but it is still below the 60-day average and remains a range-recovery setup rather than a confirmed breakout.",
+      "evidence": [
+        "Closed at 10.71, up 3.779% on the day",
+        "Price is above ma20 10.204 and below ma60 10.9093",
+        "It appears in the market summary leaders list",
+        "regime_flags includes range"
+      ],
+      "risks": [
+        "Volume ratio 0.8004 is below average, limiting conviction in the move",
+        "Failure near the 60-day average could turn this into another failed range rally"
+      ],
+      "invalidation": "If 3067.HK cannot hold above the 20-day average around 10.20 and rolls over before clearing 10.91, the rebound thesis is invalidated."
+    }
+  ]
+}

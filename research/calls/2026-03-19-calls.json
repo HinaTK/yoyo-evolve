@@ -1,0 +1,138 @@
+{
+  "date": "2026-03-19",
+  "generated_at": "2026-03-19T09:15:00Z",
+  "recommendations": [
+    {
+      "symbol": "1810.HK",
+      "state": "watch_only",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.4,
+      "rationale": "Positive relative strength and volume expansion, but risk-off market and weak tech ETF confirmation prevent upgrade.",
+      "evidence": [
+        "Latest close HKD 36.32, up 3.36% while broad market and tech ETFs declined",
+        "Volume ratio was 2.02x versus 20-day average",
+        "Price is above 20-day moving average 34.25 and near 60-day moving average 36.21",
+        "60-day range position 0.529, strongest in the watchlist",
+        "Regime flags: range, volume-expansion"
+      ],
+      "risks": [
+        "Market regime is risk_off, so single-name strength may fail without ETF confirmation",
+        "Hang Seng Tech ETFs remain in downtrends",
+        "Recent posterior evaluations showed failed bullish Xiaomi calls, keeping timing confidence low"
+      ],
+      "invalidation": "Close back below the 20-day moving average near HKD 34.25, or loss of relative strength while tech ETFs remain weak."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "watch_only",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.55,
+      "rationale": "Use as broad-market gatekeeper; it is not confirming risk-on behavior today.",
+      "evidence": [
+        "Latest close HKD 25.76, down 1.98%",
+        "Below 20-day moving average 26.22 and 60-day moving average 26.61",
+        "60-day range position 0.097, near bottom of recent range",
+        "Volume ratio 1.48x, indicating selling pressure was not quiet",
+        "Regime flag: downtrend"
+      ],
+      "risks": [
+        "Near-term technical bounce is possible because price is near the bottom of its 60-day range",
+        "Recent hold calls on 2800.HK failed, so broad weakness should not be treated as a dip-buy signal without evidence"
+      ],
+      "invalidation": "Recovery close back above the 20-day moving average near HKD 26.22 followed by tech ETF stabilization invalidates the defensive posture; break below today's low near HKD 25.72 confirms continued weakness."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.5,
+      "rationale": "Weak tech ETF confirmation; use as a confirmation gauge before upgrading single-name technology exposure.",
+      "evidence": [
+        "Latest close HKD 4.88, down 2.40%",
+        "Below 20-day moving average 4.95 and 60-day moving average 5.32",
+        "60-day range position 0.174",
+        "Regime flag: downtrend"
+      ],
+      "risks": [
+        "Near-term oversold bounce risk exists after broad weakness",
+        "ETF volume is not panic-like, so weakness could chop rather than trend cleanly lower"
+      ],
+      "invalidation": "Sustained close above the 20-day moving average near HKD 4.95 begins to repair confirmation; move above the 60-day average near HKD 5.32 is needed before stronger bullish calls."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.5,
+      "rationale": "Weak tech ETF confirmation; use as a confirmation gauge before upgrading single-name technology exposure.",
+      "evidence": [
+        "Latest close HKD 10.46, down 2.43%",
+        "Below 20-day moving average 10.61 and 60-day moving average 11.39",
+        "60-day range position 0.167",
+        "Regime flag: downtrend"
+      ],
+      "risks": [
+        "Near-term oversold bounce risk exists after broad weakness",
+        "ETF volume is not uniformly panic-like, so weakness could chop rather than trend cleanly lower"
+      ],
+      "invalidation": "Sustained close above the 20-day moving average near HKD 10.61 begins to repair confirmation; move above the 60-day average near HKD 11.39 is needed before stronger bullish calls."
+    },
+    {
+      "symbol": "0700.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.6,
+      "rationale": "Weakest tape in the watchlist with a sharp volume-backed breakdown near range lows.",
+      "evidence": [
+        "Latest close HKD 513.00, down 6.81%",
+        "Volume ratio 1.96x versus 20-day average",
+        "Below 20-day moving average 528.58 and 60-day moving average 573.74",
+        "60-day range position 0.084",
+        "Regime flags: downtrend, volume-expansion",
+        "Recent 2026-03-18 hold call over T+5 returned -9.46% and failed"
+      ],
+      "risks": [
+        "Near-term rebound risk is elevated after a sharp one-day fall near range lows",
+        "A bounce could be violent if selling pressure exhausts quickly"
+      ],
+      "invalidation": "Close back above the 20-day moving average near HKD 528.58, especially with stabilization in 3033.HK and 3067.HK; continued break below today's low near HKD 512.00 confirms downside pressure."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.4,
+      "rationale": "Weak and below moving averages, but fresh high-conviction avoid timing is less clean than Tencent.",
+      "evidence": [
+        "Latest close HKD 132.00, down 4.14%",
+        "Below 20-day moving average 136.87 and 60-day moving average 150.20",
+        "60-day range position 0.121",
+        "Regime flag: downtrend",
+        "Volume ratio 1.26x, elevated but less extreme than Tencent or Xiaomi"
+      ],
+      "risks": [
+        "Continued internet-platform weakness can pull it lower with Tencent",
+        "Short-term rebound is possible because price is near the lower part of its 60-day range"
+      ],
+      "invalidation": "Recovery above the 20-day moving average near HKD 136.87 plus improving Hang Seng Tech ETF confirmation invalidates the bearish watch; break below today's low near HKD 131.20 increases downside risk."
+    }
+  ]
+}

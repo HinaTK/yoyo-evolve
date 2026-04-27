@@ -1,0 +1,126 @@
+{
+  "date": "2026-03-30",
+  "generated_at": "2026-04-24T06:23:47Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.58,
+      "rationale": "Tencent is liquid and strategically important, but the current tape is risk-off and technically weak; wait for stabilization before adding exposure.",
+      "evidence": [
+        "Latest close 481.6 HKD was down 2.392% on the day, the weakest move in the watchlist.",
+        "Price is below both the 20-day moving average of 521.075 and 60-day moving average of 561.4333, with a downtrend regime flag.",
+        "60-day range position is 0.0, showing the stock closed at the bottom of its recent range."
+      ],
+      "risks": [
+        "Further risk-off selling could continue while price remains below key moving averages.",
+        "A sharp rebound from oversold levels could occur before a clean confirmation signal appears."
+      ],
+      "invalidation": "Upgrade only if Tencent reclaims the 20-day moving average with improving volume or forms multiple closes above the recent low; downgrade to avoid if new lows persist on rising volume."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.56,
+      "rationale": "Alibaba is less weak than Tencent today but remains in a confirmed downtrend, so it belongs on watch rather than as an immediate buy.",
+      "evidence": [
+        "Latest close 120.5 HKD was down 1.713% on the day.",
+        "Price is below the 20-day moving average of 129.055 and far below the 60-day moving average of 147.6117.",
+        "60-day range position is 0.0149 with a downtrend regime flag, indicating proximity to recent lows."
+      ],
+      "risks": [
+        "Weak internet-platform sentiment could keep compressing multiples.",
+        "Low range position may signal either a value entry or an unfinished breakdown."
+      ],
+      "invalidation": "Upgrade if Alibaba reclaims 129 HKD area with sustained closes and improving relative strength; downgrade if it breaks the recent low near 117.9 HKD with heavy volume."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "watch_only",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.55,
+      "rationale": "Xiaomi has relatively better 60-day range position than the tech ETFs, but it is still below trend and not yet an accumulation setup.",
+      "evidence": [
+        "Latest close 32.38 HKD was down 1.879% on the day.",
+        "Price is below the 20-day moving average of 33.338 and 60-day moving average of 35.4013.",
+        "Volume ratio of 0.7176 is below the 20-day average, suggesting the decline was not yet capitulation volume."
+      ],
+      "risks": [
+        "Consumer-tech weakness may continue if market risk appetite deteriorates.",
+        "A low-volume selloff can still drift lower without producing a clear washout."
+      ],
+      "invalidation": "Upgrade if Xiaomi reclaims the 20-day moving average and holds above it; downgrade if it closes below the 32 HKD area with expanding volume."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "watch_only",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.6,
+      "rationale": "The broad Hong Kong ETF is the relative leader in a weak tape, making it the cleanest index exposure to monitor, but the trend is still negative.",
+      "evidence": [
+        "Latest close 25.0 HKD was down 0.794%, the smallest decline in the watchlist.",
+        "Market snapshot classifies the overall risk state as risk_off.",
+        "Price remains below the 20-day moving average of 25.676 and 60-day moving average of 26.5247, with a downtrend flag."
+      ],
+      "risks": [
+        "Broad-market weakness can persist even when the ETF is outperforming individual tech names.",
+        "Relative leadership may reflect defensiveness rather than a durable reversal."
+      ],
+      "invalidation": "Upgrade if 2800.HK reclaims and holds above the 20-day moving average; downgrade if it loses the 24.66 HKD intraday low with rising volume."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.62,
+      "rationale": "Hang Seng Tech exposure is technically weak and sitting at the bottom of its range; avoid new allocation until the downtrend improves.",
+      "evidence": [
+        "Latest close 4.59 HKD was down 1.923% on the day.",
+        "Price is below the 20-day moving average of 4.8112 and 60-day moving average of 5.2382.",
+        "60-day range position is 0.0 with a downtrend flag."
+      ],
+      "risks": [
+        "Avoiding now could miss a short-covering rebound if tech sentiment snaps back.",
+        "ETF structure diversifies single-name risk but cannot offset broad Hang Seng Tech trend weakness."
+      ],
+      "invalidation": "Move from avoid to watch_only if 3033.HK reclaims the 20-day moving average or shows a higher-low base over multiple sessions."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.61,
+      "rationale": "The iShares Hang Seng TECH ETF mirrors the weak tech-index setup, with price at the bottom of its 60-day range and below trend.",
+      "evidence": [
+        "Latest close 9.85 HKD was down 1.892% on the day.",
+        "Price is below the 20-day moving average of 10.319 and 60-day moving average of 11.2255.",
+        "60-day range position is 0.0 and the regime flag is downtrend."
+      ],
+      "risks": [
+        "Oversold tech exposure can rebound quickly if policy or liquidity sentiment improves.",
+        "Lower turnover than 3033.HK may make signals less robust for short-term interpretation."
+      ],
+      "invalidation": "Move from avoid to watch_only if 3067.HK closes back above 10.319 HKD or forms a confirmed higher low above the recent 9.685 HKD low."
+    }
+  ]
+}

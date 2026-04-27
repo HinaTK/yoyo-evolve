@@ -1,0 +1,126 @@
+{
+  "date": "2026-04-17",
+  "generated_at": "2026-04-24T08:04:39Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.52,
+      "rationale": "Tencent is holding above its 20-day average but remains below its 60-day average in a risk-off tape, which supports patience rather than fresh aggression.",
+      "evidence": [
+        "Latest close 510.5 is above ma20 503.025 but below ma60 539.175.",
+        "1-day move was -1.257% with low participation, as volume_ratio_20 was 0.5361.",
+        "Market summary flagged risk_state as risk_off and Tencent carried a range regime flag."
+      ],
+      "risks": [
+        "Risk-off market conditions can drag internet-platform names lower even without stock-specific weakness.",
+        "Low relative volume reduces conviction that support near the 20-day average will hold."
+      ],
+      "invalidation": "Invalidate the watch stance if price loses the 20-day average decisively and closes below recent support after volume expands."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "hold",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.63,
+      "rationale": "Alibaba showed relative strength versus the rest of the list, but with price still below the 60-day average in a range regime, the cleaner call is hold rather than chase.",
+      "evidence": [
+        "Alibaba was the day's leader at +0.442% while average stock move was -0.334%.",
+        "Latest close 136.4 is above ma20 125.745 but below ma60 142.7017.",
+        "Range position 0.3255 indicates price is still in the lower half of the 60-day range rather than in a breakout zone."
+      ],
+      "risks": [
+        "Failure to reclaim the 60-day average could turn relative strength into another range rejection.",
+        "Broader market risk_off conditions can overwhelm single-name resilience."
+      ],
+      "invalidation": "Invalidate the hold view if Alibaba reverses back below the 20-day average and relative strength versus peers disappears."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.73,
+      "rationale": "Xiaomi remains in a downtrend and trades below both short- and medium-term moving averages, so the current setup does not justify new swing exposure.",
+      "evidence": [
+        "Regime flags explicitly marked Xiaomi as downtrend.",
+        "Latest close 32.0 is below ma20 32.296 and ma60 34.1037.",
+        "Range position 0.2081 places the stock near the lower end of its 60-day range."
+      ],
+      "risks": [
+        "A sharp rebound from depressed range positioning can produce fast short-covering rallies.",
+        "Consumer-tech sentiment could improve quickly if broader tech ETFs stabilize."
+      ],
+      "invalidation": "Invalidate the avoid call if Xiaomi reclaims the 20-day average and starts holding above it with improving participation."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "hold",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.58,
+      "rationale": "The broad Hong Kong ETF is still above both moving averages despite a weak day, which supports holding existing exposure but not pressing size into a risk-off session.",
+      "evidence": [
+        "Latest close 26.44 is above ma20 25.73 and slightly above ma60 26.402.",
+        "Range position is 0.5, indicating a middle-of-range rather than stretched setup.",
+        "The day fell -0.974%, but volume_ratio_20 was only 0.6709, showing limited urgency in the selling."
+      ],
+      "risks": [
+        "If the broad market weakens further, the ETF can slip back below its 60-day average and lose trend support.",
+        "Risk-off conditions in ETFs were worse than stocks on average, which can continue."
+      ],
+      "invalidation": "Invalidate the hold stance if 2800.HK closes back below its 60-day average and fails to recover quickly."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.55,
+      "rationale": "Hang Seng Tech ETF is above its 20-day average but still below its 60-day average, leaving it in a tradable range without a decisive trend edge.",
+      "evidence": [
+        "Latest close 4.936 is above ma20 4.7503 but below ma60 5.076.",
+        "1-day move was -1.161% while volume_ratio_20 was 1.0267, showing active but not capitulative selling.",
+        "Market summary labeled the market risk_off and the ETF remained in a range regime."
+      ],
+      "risks": [
+        "Higher trading activity on a down day may signal distribution rather than healthy consolidation.",
+        "Tech ETF weakness can spill over from large constituents even if individual names look mixed."
+      ],
+      "invalidation": "Invalidate the watch stance if 3033.HK either breaks above the 60-day average with follow-through or loses the 20-day average with expanding downside volume."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.54,
+      "rationale": "iShares Hang Seng TECH ETF shows the same mixed range structure as the peer tech ETF, so the setup is better monitored than acted on today.",
+      "evidence": [
+        "Latest close 10.59 is above ma20 10.197 but below ma60 10.882.",
+        "The ETF declined -1.12% in a market labeled risk_off.",
+        "Range position 0.3137 keeps price in the lower third of the 60-day range, not in a clear momentum zone."
+      ],
+      "risks": [
+        "Low relative volume at 0.5679 may hide weak conviction in buyers supporting the 20-day average.",
+        "A further tech-sector pullback could push the ETF back into a clearer downside trend."
+      ],
+      "invalidation": "Invalidate the watch stance if 3067.HK loses the 20-day average decisively or, conversely, reclaims the 60-day average with confirmation."
+    }
+  ]
+}

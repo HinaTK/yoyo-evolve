@@ -116,7 +116,7 @@ run_prompt() {
         done
         ps_cmd+=" --skills ./skills"
         if [ -n "$TIMEOUT_CMD" ]; then
-            powershell.exe -NoProfile -Command "$ps_cmd" 2>&1 | tee "$log_file"
+            "$TIMEOUT_CMD" "$TIMEOUT" powershell.exe -NoProfile -Command "$ps_cmd" 2>&1 | tee "$log_file"
         else
             powershell.exe -NoProfile -Command "$ps_cmd" 2>&1 | tee "$log_file"
         fi
@@ -130,13 +130,21 @@ run_prompt() {
     fi
 }
 
-ASSESSMENT_FILE="$ROOT_DIR/research/daily/$DATE-market-assessment.md"
-PLAN_FILE="$ROOT_DIR/research/daily/$DATE-plan.md"
-REPORT_FILE="$ROOT_DIR/research/daily/$DATE-report.md"
-CALLS_FILE="$ROOT_DIR/research/calls/$DATE-calls.json"
-REFLECTION_FILE="$ROOT_DIR/research/daily/$DATE-reflection.md"
-EVALUATION_FILE="$ROOT_DIR/research/evaluations/latest.md"
-JOURNAL_FILE="$ROOT_DIR/journals/investment_journal.md"
+ASSESSMENT_REL="research/daily/$DATE-market-assessment.md"
+PLAN_REL="research/daily/$DATE-plan.md"
+REPORT_REL="research/daily/$DATE-report.md"
+CALLS_REL="research/calls/$DATE-calls.json"
+REFLECTION_REL="research/daily/$DATE-reflection.md"
+EVALUATION_REL="research/evaluations/latest.md"
+JOURNAL_REL="journals/investment_journal.md"
+
+ASSESSMENT_FILE="$ROOT_DIR/$ASSESSMENT_REL"
+PLAN_FILE="$ROOT_DIR/$PLAN_REL"
+REPORT_FILE="$ROOT_DIR/$REPORT_REL"
+CALLS_FILE="$ROOT_DIR/$CALLS_REL"
+REFLECTION_FILE="$ROOT_DIR/$REFLECTION_REL"
+EVALUATION_FILE="$ROOT_DIR/$EVALUATION_REL"
+JOURNAL_FILE="$ROOT_DIR/$JOURNAL_REL"
 
 "$PYTHON_BIN" "$ROOT_DIR/scripts/evaluate_investment_calls.py" \
     --calls-dir "$ROOT_DIR/research/calls" \
@@ -154,7 +162,7 @@ $YOYO_CONTEXT
 
 Use the investment-loop skill.
 
-Your job: write a market assessment to $ASSESSMENT_FILE.
+Your job: write a market assessment to $ASSESSMENT_REL.
 
 Inputs:
 - Investment profile:
@@ -178,7 +186,7 @@ Output requirements:
 - Keep facts separate from interpretations.
 - Cover market regime, theme strength, ETF confirmation, standout names, and risk posture.
 - End with 3-5 high-priority research questions for today.
-- Save only markdown to $ASSESSMENT_FILE.
+- Save only markdown to $ASSESSMENT_REL.
 EOF
 
 PLAN_PROMPT=$(mktemp)
@@ -189,7 +197,7 @@ $YOYO_CONTEXT
 
 Use the investment-loop skill.
 
-Your job: write a focused daily plan to $PLAN_FILE.
+Your job: write a focused daily plan to $PLAN_REL.
 
 Inputs:
 - Market assessment:
@@ -210,7 +218,7 @@ Plan requirements:
 - For each candidate, state why it deserves attention today.
 - For each candidate, list missing evidence required before any upgrade to accumulate/buy.
 - Include one section called "Disqualifiers" for cases that force watch_only or avoid.
-- Save only markdown to $PLAN_FILE.
+- Save only markdown to $PLAN_REL.
 EOF
 
 REPORT_PROMPT=$(mktemp)
@@ -221,7 +229,7 @@ $YOYO_CONTEXT
 
 Use the investment-loop skill.
 
-Your job: write the daily recommendation report to $REPORT_FILE.
+Your job: write the daily recommendation report to $REPORT_REL.
 
 Inputs:
 - Market assessment:
@@ -244,7 +252,7 @@ Report requirements:
 - Every recommendation must include: state, rationale, evidence, risks, invalidation, horizon, confidence.
 - If evidence is weak, use watch_only.
 - Do not invent catalysts that are absent from the snapshot.
-- Save only markdown to $REPORT_FILE.
+- Save only markdown to $REPORT_REL.
 EOF
 
 CALLS_PROMPT=$(mktemp)
@@ -255,7 +263,7 @@ $YOYO_CONTEXT
 
 Use the investment-loop skill.
 
-Your job: convert today's report into structured machine-readable recommendations and save them to $CALLS_FILE.
+Your job: convert today's report into structured machine-readable recommendations and save them to $CALLS_REL.
 
 Inputs:
 - Daily report:
@@ -288,7 +296,7 @@ Output requirements:
     ]
   }
 - Include only symbols that appear in today's report as actionable, watch, or avoid names.
-- Save only JSON to $CALLS_FILE.
+- Save only JSON to $CALLS_REL.
 EOF
 
 REFLECT_PROMPT=$(mktemp)
@@ -300,8 +308,8 @@ $YOYO_CONTEXT
 Use the investment-loop skill.
 
 Your job:
-1. Write a reflection to $REFLECTION_FILE.
-2. Append a short dated entry to $JOURNAL_FILE.
+1. Write a reflection to $REFLECTION_REL.
+2. Append a short dated entry to $JOURNAL_REL.
 
 Inputs:
 - Market assessment:
@@ -325,9 +333,9 @@ Reflection requirements:
 - Name 1-3 likely failure modes for today's recommendations.
 - Suggest concrete priority shifts for the next cycle.
 - If posterior evaluation shows repeated patterns, update:
-  - $ROOT_DIR/memory/active_investment_learnings.md
-  - $ROOT_DIR/memory/investment_rules.md
-  - $ROOT_DIR/memory/investment_error_patterns.md
+  - memory/active_investment_learnings.md
+  - memory/investment_rules.md
+  - memory/investment_error_patterns.md
   Keep changes concise and operational.
 EOF
 

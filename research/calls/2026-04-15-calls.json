@@ -1,0 +1,94 @@
+{
+  "date": "2026-04-15",
+  "generated_at": "2026-04-15T15:53:00Z",
+  "recommendations": [
+    {
+      "symbol": "3033.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.64,
+      "rationale": "Cleanest way to monitor improving tech appetite, but the move is still early and not confirmed above the medium-term trend.",
+      "evidence": [
+        "Closed at 4.814, up 1.347% on the day",
+        "Above 20-day MA at 4.7536",
+        "Still below 60-day MA at 5.1018",
+        "Regime remains range with 60-day range position 0.2164"
+      ],
+      "risks": [
+        "Move may still be a range bounce rather than a durable trend change",
+        "Volume ratio 0.7338 is below average and not decisive",
+        "Recent posterior miss on an avoid call here shows rebound risk is real"
+      ],
+      "invalidation": "Downgrade if price loses the 20-day MA and closes back into the lower range; upgrade only if it sustains above the 20-day MA and begins reclaiming the 60-day MA."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.63,
+      "rationale": "Confirms that tech strength was broader than a single ETF, but medium-term trend repair is still incomplete.",
+      "evidence": [
+        "Closed at 10.32, up 1.176% on the day",
+        "Above 20-day MA at 10.204",
+        "Still below 60-day MA at 10.9368",
+        "Regime remains range with 60-day range position 0.2062"
+      ],
+      "risks": [
+        "Can still be a rebound inside a weak medium-term structure",
+        "Volume ratio 0.7787 remains below average",
+        "Recent posterior review showed prior avoid calls here were too defensive"
+      ],
+      "invalidation": "The setup weakens if it loses the 20-day MA; it strengthens only if it holds above the 20-day MA and starts repairing the gap to the 60-day MA."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 3,
+      "horizon_days_max": 10,
+      "confidence": 0.48,
+      "rationale": "Strongest single-stock move in the snapshot, but still too early to chase because it remains well below the 60-day trend despite better ETF confirmation.",
+      "evidence": [
+        "Closed at 128.6, up 3.293% on the day",
+        "Above 20-day MA at 125.565",
+        "Still below 60-day MA at 143.725",
+        "Theme confirmation improved because both 3033.HK and 3067.HK also closed above their 20-day MAs"
+      ],
+      "risks": [
+        "Move may be headline-driven without durable follow-through",
+        "Still far below the 60-day MA, so trend repair is incomplete",
+        "Posterior pass rate remains modest, arguing against aggressive upgrading"
+      ],
+      "invalidation": "The setup weakens if it loses the 20-day MA; it becomes more credible only if ETF strength persists and the stock keeps building above the 20-day MA toward the 60-day MA."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "hold",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 5,
+      "horizon_days_max": 20,
+      "confidence": 0.66,
+      "rationale": "Steadiest broad-market posture in the list, offering base-case exposure without relying on an unconfirmed tech breakout.",
+      "evidence": [
+        "Closed at 26.24, up 0.153% on the day",
+        "Above 20-day MA at 25.689",
+        "Only slightly below 60-day MA at 26.4217",
+        "Recent posterior evaluation of a prior hold call was pass at T+3 and mixed at T+10"
+      ],
+      "risks": [
+        "Momentum is limited, with volume ratio only 0.4815",
+        "Still below the 60-day MA, so this is stability rather than breakout",
+        "If tech strength fades quickly, broad-market support may also stall"
+      ],
+      "invalidation": "Reassess if price loses the 20-day MA; conviction improves only if it reclaims the 60-day MA with stronger participation."
+    }
+  ]
+}

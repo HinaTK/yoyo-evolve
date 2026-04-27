@@ -1,0 +1,126 @@
+{
+  "date": "2026-04-13",
+  "generated_at": "2026-04-24T07:39:40Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.84,
+      "rationale": "Tencent is in a confirmed short-term downtrend near the bottom of its 60-day range, so this is a weak swing setup in a risk-off tape.",
+      "evidence": [
+        "Latest close 490.0 is below ma20 512.165 and ma60 547.2717",
+        "60-day range position is 0.0555, showing price is near the bottom of its recent range",
+        "Market summary is risk_off and Tencent fell 2.874% on the day"
+      ],
+      "risks": [
+        "A sharp oversold rebound could reverse the bearish setup quickly",
+        "Large-cap internet stocks can gap higher on policy or sentiment shifts"
+      ],
+      "invalidation": "Invalidate this avoid call if price reclaims and closes above the 20-day average with improving relative strength versus the rest of the watchlist."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.8,
+      "rationale": "Alibaba remains in a downtrend and is trading weakly below both moving averages, which argues against initiating a swing long here.",
+      "evidence": [
+        "Latest close 123.2 is below ma20 126.115 and ma60 144.7433",
+        "60-day range position is 0.0855, indicating price is still near recent lows",
+        "Regime flag is downtrend and the broader market summary is risk_off"
+      ],
+      "risks": [
+        "Low volume ratio could mean selling pressure is fading rather than accelerating",
+        "A sector-wide rebound in China internet could lift Alibaba even without company-specific strength"
+      ],
+      "invalidation": "Invalidate this avoid call if Alibaba closes back above the 20-day average and the internet-platform theme shows sustained ETF confirmation."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.86,
+      "rationale": "Xiaomi is pressing the extreme low of its 60-day range while still below both key moving averages, so the current setup is weak and vulnerable to further downside.",
+      "evidence": [
+        "Latest close 30.66 is below ma20 32.863 and ma60 34.5457",
+        "60-day range position is 0.0, the weakest reading in the watchlist",
+        "Regime flag is downtrend despite only a modest 1-day move of -0.777%"
+      ],
+      "risks": [
+        "Being at the bottom of the range can also create fast mean-reversion bounces",
+        "Consumer-tech sentiment can improve quickly if broader growth appetite returns"
+      ],
+      "invalidation": "Invalidate this avoid call if Xiaomi stops making new range lows and reclaims the 20-day average with stronger volume."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "watch_only",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.62,
+      "rationale": "Tracker Fund is the only name not in a downtrend and is holding above its 20-day average, but the market regime is still risk-off so this is not yet a clean buy setup.",
+      "evidence": [
+        "Latest close 25.96 is above ma20 25.655 but still below ma60 26.445",
+        "Regime flag is range rather than downtrend",
+        "Its 1-day move of -0.765% was less severe than the average stock move of -1.828%"
+      ],
+      "risks": [
+        "Broad-market ETFs can still roll over if risk-off conditions persist",
+        "Low volume ratio of 0.4442 weakens confidence in immediate upside follow-through"
+      ],
+      "invalidation": "Invalidate this watch stance if 2800 breaks back below the 20-day average and loses its relative resilience versus the rest of the list."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.78,
+      "rationale": "Hang Seng Tech ETF is still in a downtrend and below both moving averages, so the sector ETF is not yet confirming a constructive tech swing.",
+      "evidence": [
+        "Latest close 4.724 is below ma20 4.7651 and ma60 5.1337",
+        "60-day range position is 0.1426, showing price is still near the lower end of the range",
+        "Regime flag is downtrend even though it was one of the least-bad performers on the day"
+      ],
+      "risks": [
+        "Sector ETFs can rebound sharply from depressed levels before trend measures turn",
+        "High trading activity can amplify upside if sentiment shifts quickly"
+      ],
+      "invalidation": "Invalidate this avoid call if 3033 closes above the 20-day average and begins confirming improving strength across Hang Seng tech holdings."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 60,
+      "confidence": 0.79,
+      "rationale": "iShares Hang Seng TECH ETF shows the same weak sector structure as 3033, with price below both moving averages in a risk-off market.",
+      "evidence": [
+        "Latest close 10.12 is below ma20 10.2265 and ma60 11.0045",
+        "60-day range position is 0.1284, keeping it close to recent lows",
+        "Regime flag is downtrend and the market summary is risk_off"
+      ],
+      "risks": [
+        "ETF structure reduces single-name risk and can recover quickly if the sector turns",
+        "Lower turnover than 3033 may make price action noisier and less representative day to day"
+      ],
+      "invalidation": "Invalidate this avoid call if 3067 regains the 20-day average and the Hang Seng tech ETF complex starts confirming a broader sector reversal."
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "date": "2026-03-20",
+  "generated_at": "2026-03-20T14:23:00Z",
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.54,
+      "rationale": "Tencent is holding up better than other internet-platform names, but the setup remains below key moving averages in a risk-off tape.",
+      "evidence": [
+        "Closed at 508.0 HKD, down 0.975% on the day versus average stock move of -5.284%.",
+        "Price is below both MA20 527.875 and MA60 572.125 with downtrend regime flag.",
+        "Volume ratio 0.816 shows no capitulation or confirmation despite price near the 60-day range low."
+      ],
+      "risks": [
+        "Relative strength can fail if broad Hong Kong tech selling continues.",
+        "Trading near the bottom of the 60-day range leaves limited technical support evidence."
+      ],
+      "invalidation": "Upgrade only if price reclaims MA20 with improving volume; downgrade if it breaks below the 60-day low on volume expansion."
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.68,
+      "rationale": "Alibaba shows a high-volume breakdown at the bottom of its 60-day range, so risk control argues against new exposure.",
+      "evidence": [
+        "Closed at 123.7 HKD, down 6.288% on the day.",
+        "Range position is 0.0, indicating a 60-day range low.",
+        "Volume ratio 2.1492 and regime flags downtrend plus volume-expansion confirm distribution pressure.",
+        "Price is below MA20 135.7 and MA60 149.8583."
+      ],
+      "risks": [
+        "Sharp selloffs can produce short-covering rebounds.",
+        "Internet-platform policy or earnings news could reverse sentiment quickly."
+      ],
+      "invalidation": "Avoid stance is invalidated if price reclaims MA20 on above-average volume and stops making new 60-day lows."
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.66,
+      "rationale": "Xiaomi is the weakest watchlist name today, with a large down move and expanded volume in a downtrend.",
+      "evidence": [
+        "Closed at 33.2 HKD, down 8.59% on the day and at the session low.",
+        "Volume ratio 2.1176 shows selling pressure expanded materially.",
+        "Price is below MA20 34.14 and MA60 36.095 with downtrend and volume-expansion flags.",
+        "It is listed among the day's laggards in the market summary."
+      ],
+      "risks": [
+        "Oversold rebounds are possible after an 8.59% one-day decline.",
+        "Consumer-tech sentiment could improve if company-specific news offsets market weakness."
+      ],
+      "invalidation": "Avoid stance is invalidated if Xiaomi regains MA20 and holds above it for multiple sessions with volume normalization."
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "watch_only",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.57,
+      "rationale": "The broad Hong Kong ETF is the relative leader, but it is still below trend and showing volume expansion on a down day.",
+      "evidence": [
+        "Closed at 25.56 HKD, down 0.776%, the best relative move among watchlist items.",
+        "Price is below MA20 26.165 and MA60 26.6027 with a downtrend flag.",
+        "Range position 0.0224 is near the 60-day low.",
+        "Volume ratio 1.6568 indicates expanded activity during the decline."
+      ],
+      "risks": [
+        "Broad-market weakness may continue while risk_state remains risk_off.",
+        "Volume expansion on a down day can signal institutional de-risking rather than accumulation."
+      ],
+      "invalidation": "Consider improving stance only if 2800.HK reclaims MA20 and risk_state shifts away from risk_off; downgrade if it makes new lows with continued volume expansion."
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.61,
+      "rationale": "Hang Seng Tech exposure remains weak, with the ETF below both moving averages and near the bottom of its 60-day range.",
+      "evidence": [
+        "Closed at 4.77 HKD, down 2.254% on the day.",
+        "Price is below MA20 4.9325 and MA60 5.3097 with a downtrend flag.",
+        "Range position 0.0724 is close to the 60-day low.",
+        "It appears among the market summary laggards."
+      ],
+      "risks": [
+        "Tech ETFs can rebound quickly if large platform stocks stabilize.",
+        "Volume ratio 0.9463 does not show capitulation, so timing of further downside is uncertain."
+      ],
+      "invalidation": "Avoid stance is invalidated if the ETF reclaims MA20 and peer tech ETFs also confirm with improving breadth."
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.55,
+      "rationale": "The iShares Hang Seng TECH ETF is slightly stronger than 3033.HK today, but still lacks a constructive trend signal.",
+      "evidence": [
+        "Closed at 10.29 HKD, down 1.625% on the day.",
+        "Price is below MA20 10.573 and MA60 11.3765 with a downtrend flag.",
+        "Range position 0.0921 remains near the 60-day low.",
+        "Volume ratio 1.041 is near average, showing no strong accumulation evidence."
+      ],
+      "risks": [
+        "Hang Seng Tech weakness may persist while underlying internet-platform names are under pressure.",
+        "Near-low range position can turn into a breakdown if broad risk-off conditions continue."
+      ],
+      "invalidation": "Upgrade only after reclaiming MA20 with confirmation from 3033.HK or major tech constituents; downgrade if it breaks to new 60-day lows."
+    }
+  ]
+}
