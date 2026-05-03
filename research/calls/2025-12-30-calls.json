@@ -1,0 +1,86 @@
+{
+  "date": "2025-12-30",
+  "session": "historical",
+  "generated_at": "2026-04-29T02:04:20Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "0857.HK",
+      "state": "avoid",
+      "theme": "energy",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.72,
+      "rationale": "趋势分数很强，但成交量确认不足且历史后验表现触发风控否决，只能作为能源板块诊断样本，不适合作为可执行买入。",
+      "evidence": [
+        "综合得分61.85，低于行动阈值65.0，qualified_for_action=false",
+        "价格11.87高于MA20 10.853和MA60 10.2045，且MA20高于MA60，技术趋势为uptrend",
+        "volume_ratio_20仅0.116，低于0.6的成交量门槛",
+        "symbol_risk_veto=true：19次已评估调用胜率0.158，平均收益-13.923%，并出现超过-8%的不利记录"
+      ],
+      "risks": [
+        "能源板块动量可能继续延伸，avoid可能错过趋势行情",
+        "当前价格处于60日区间上沿之外，追高风险和均值回归风险同时存在",
+        "历史选择错误标签反复出现，说明该标的在本策略下可能存在系统性误选风险"
+      ],
+      "invalidation": "只有在成交量比率恢复到0.6以上、symbol_risk_veto解除、且得分超过65并通过成本门槛后，才取消avoid判断。",
+      "selection_source_theme": "energy",
+      "selection_reason": "它是能源主题得分第一和主题leader，但历史风控否决与低量能使其只适合列为avoid诊断，而不是行动候选。"
+    },
+    {
+      "symbol": "0941.HK",
+      "state": "avoid",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.7,
+      "rationale": "中国移动维持上升趋势并是电信股主题leader，但低成交量确认和极低历史胜率触发风控否决，当前不应升级为买入或持有建议。",
+      "evidence": [
+        "综合得分59.66，低于行动阈值65.0，qualified_for_action=false",
+        "价格85.25高于MA20 81.55和MA60 79.82，趋势标记为uptrend",
+        "volume_ratio_20仅0.1343，低于0.6的成交量门槛",
+        "symbol_risk_veto=true：18次已评估调用胜率0.056，平均收益-1.306%，并包含symbol_selection_error记录"
+      ],
+      "risks": [
+        "防御高息资产在风险偏好切换时可能继续获得资金流入",
+        "区间位置1.0839显示价格已接近或突破近期区间上沿，短线追入的风险收益不佳",
+        "历史样本显示本策略对该标的判断质量较弱"
+      ],
+      "invalidation": "若后续样本改善使symbol_risk_veto解除、量能超过0.6、得分升破65并通过最低100bps边际门槛，则重新评估。",
+      "selection_source_theme": "telecom-dividend",
+      "selection_reason": "它是电信红利主题得分第一和主题leader；同主题0728.HK得分更低且不是leader，因此0941.HK是诊断代表，但风控否决要求保持avoid。"
+    },
+    {
+      "symbol": "0002.HK",
+      "state": "watch_only",
+      "theme": "utilities-defensive",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.58,
+      "rationale": "中电控股是公用防御主题leader，趋势结构健康且无symbol_risk_veto，但得分未达行动阈值、量能不足，因此只能观察。",
+      "evidence": [
+        "综合得分57.15，高于观察阈值45但低于行动阈值65.0，qualified_for_action=false",
+        "价格75.95高于MA20 74.5825和MA60 73.9937，MA20高于MA60，趋势标记为uptrend",
+        "volume_ratio_20为0.2451，仍低于0.6的成交量门槛",
+        "symbol_risk.action_veto=false，没有历史风控否决标签"
+      ],
+      "risks": [
+        "公用事业板块走势偏防御，风险偏好上升时可能跑输高beta板块",
+        "成交量确认不足，突破或趋势延续的可靠性有限",
+        "range_pos_60为0.9654，接近60日区间高位，短线安全边际不充分"
+      ],
+      "invalidation": "若价格跌回MA20和MA60下方，或主题leader地位丧失，watch_only失效；若量能超过0.6且得分升破65并通过成本门槛，再考虑升级。",
+      "selection_source_theme": "utilities-defensive",
+      "selection_reason": "它是公用防御主题得分第一和主题leader；同主题0006.HK得分略低、不是leader且有symbol_risk_veto，因此0002.HK是更合适的非行动观察对象。"
+    }
+  ]
+}

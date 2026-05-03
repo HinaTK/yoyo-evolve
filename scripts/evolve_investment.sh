@@ -7,6 +7,9 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 if [ -f "$ROOT_DIR/.env" ]; then
     while IFS='=' read -r key value; do
+        key="${key#$'\xef\xbb\xbf'}"
+        key="${key%$'\r'}"
+        value="${value%$'\r'}"
         case "$key" in
             ''|'#'*) continue ;;
         esac
@@ -26,6 +29,12 @@ MODEL="${MODEL:-claude-opus-4-6}"
 PROVIDER="${PROVIDER:-anthropic}"
 BASE_URL="${BASE_URL:-}"
 TIMEOUT="${TIMEOUT:-900}"
+YOYO_SKIP_PROJECT_CONTEXT="${YOYO_SKIP_PROJECT_CONTEXT:-true}"
+PROMPT_PAUSE_SECONDS="${PROMPT_PAUSE_SECONDS:-0}"
+PROMPT_PROVIDER_RETRIES="${PROMPT_PROVIDER_RETRIES:-3}"
+PROVIDER_RETRY_SECONDS="${PROVIDER_RETRY_SECONDS:-120}"
+SKIP_EXISTING_OUTPUTS="${SKIP_EXISTING_OUTPUTS:-true}"
+INVESTMENT_LIGHT_CONTEXT="${INVESTMENT_LIGHT_CONTEXT:-true}"
 FORCE_SNAPSHOT="${FORCE_SNAPSHOT:-false}"
 if [ -z "${SNAPSHOT_FILE:-}" ]; then
     if [ "$SESSION" = "morning" ] || [ "$SESSION" = "midday" ]; then
@@ -65,6 +74,7 @@ export DATE
 export SESSION
 export SNAPSHOT_FILE
 export RADAR_SNAPSHOT_FILE
+export YOYO_SKIP_PROJECT_CONTEXT
 
 python_path() {
     if command -v cygpath >/dev/null 2>&1; then
@@ -95,6 +105,9 @@ else
 fi
 RANKING_FILE="$ROOT_DIR/research/rankings/$OUTPUT_STEM-ranking.json"
 RANKING_REL="research/rankings/$OUTPUT_STEM-ranking.json"
+ACTIVE_STRATEGY_FILE="$ROOT_DIR/config/active_strategy.toml"
+OPTIMIZATION_CONFIG="$ROOT_DIR/config/optimization.toml"
+SYMBOL_RISK_FILE="$ROOT_DIR/research/experiments/symbol_risk_memory.json"
 export RANKING_FILE
 WATCHLIST_CONFIG_PY="$(python_path "$WATCHLIST_CONFIG")"
 TRADE_UNIVERSE_CONFIG_PY="$(python_path "$TRADE_UNIVERSE_CONFIG")"
@@ -121,13 +134,17 @@ case "$SESSION" in
         ;;
 esac
 
-mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations" "$ROOT_DIR/research/rankings"
+mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations" "$ROOT_DIR/research/rankings" "$ROOT_DIR/research/experiments"
 
 if [ -f "$ROOT_DIR/scripts/yoyo_context.sh" ]; then
     # shellcheck disable=SC1091
     source "$ROOT_DIR/scripts/yoyo_context.sh"
 else
     YOYO_CONTEXT=""
+fi
+
+if [ "$SESSION" = "historical" ] && [ "$INVESTMENT_LIGHT_CONTEXT" = "true" ]; then
+    YOYO_CONTEXT="Historical investment replay mode. Use the explicit investment profile, rules, memory, evaluation, snapshot, and ranking inputs below; do not rely on generic repository identity context."
 fi
 
 if [ "$FORCE_SNAPSHOT" = "true" ] || [ ! -f "$SNAPSHOT_FILE" ]; then
@@ -138,14 +155,33 @@ if [ "$RADAR_SNAPSHOT_FILE" != "$SNAPSHOT_FILE" ] && { [ "$FORCE_SNAPSHOT" = "tr
     "$PYTHON_BIN" "$ROOT_DIR/scripts/fetch_investment_data.py" --date "$DATE" --watchlist "$RADAR_CONFIG" --output-file "$RADAR_SNAPSHOT_FILE"
 fi
 
+"$PYTHON_BIN" "$ROOT_DIR/scripts/build_snapshot_registry.py" \
+    --snapshot-dir "$ROOT_DIR/data/snapshots" \
+    --output "$ROOT_DIR/data/snapshots/registry.json"
+
+if [ -f "$OPTIMIZATION_CONFIG" ]; then
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/optimize_investment_params.py" --config "$OPTIMIZATION_CONFIG" --as-of-date "$DATE" --session "$SESSION"
+fi
+
+if [ -f "$ROOT_DIR/research/evaluations/latest.json" ]; then
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/build_symbol_risk_memory.py" \
+        --latest-json "$ROOT_DIR/research/evaluations/latest.json" \
+        --output "$SYMBOL_RISK_FILE" \
+        --as-of-date "$DATE" || true
+fi
+
 RANK_ARGS=$($PYTHON_BIN - <<'PY'
 import pathlib, shlex, tomllib
 profile = tomllib.load(open(pathlib.Path('config') / 'investment_profile.toml', 'rb'))
+opt_path = pathlib.Path('config') / 'optimization.toml'
+opt = tomllib.load(open(opt_path, 'rb')) if opt_path.exists() else {}
 ranking = profile.get('ranking', {})
 costs = profile.get('costs', {})
 args = []
 for name, value in [
     ('--max-candidates', ranking.get('max_candidates', 8)),
+    ('--actionable-top-n', opt.get('actionable_top_n', ranking.get('actionable_top_n', 1))),
+    ('--diagnostic-top-n', opt.get('diagnostic_top_n', opt.get('top_n', ranking.get('diagnostic_top_n', 3)))),
     ('--min-watch-score', ranking.get('min_watch_score', 45)),
     ('--min-action-score', ranking.get('min_action_score', 65)),
     ('--round-trip-bps', costs.get('estimated_round_trip_bps', 35)),
@@ -155,7 +191,11 @@ for name, value in [
 print(' '.join(shlex.quote(arg) for arg in args))
 PY
 )
-"$PYTHON_BIN" "$ROOT_DIR/scripts/rank_investment_universe.py" --snapshot "$SNAPSHOT_FILE" --output "$RANKING_FILE" $RANK_ARGS
+SYMBOL_RISK_ARG=()
+if [ -f "$SYMBOL_RISK_FILE" ]; then
+    SYMBOL_RISK_ARG=(--symbol-risk-json "$SYMBOL_RISK_FILE")
+fi
+"$PYTHON_BIN" "$ROOT_DIR/scripts/rank_investment_universe.py" --snapshot "$SNAPSHOT_FILE" --output "$RANKING_FILE" --strategy-config "$ACTIVE_STRATEGY_FILE" "${SYMBOL_RISK_ARG[@]}" $RANK_ARGS
 
 if [ ! -f "$YOYO_BIN" ]; then
     echo "→ Building yoyo binary..."
@@ -253,26 +293,114 @@ run_prompt() {
         prompt_path="$(cygpath -w "$prompt_file")"
     fi
 
-    if [[ "$YOYO_BIN" == *.exe ]] && command -v powershell.exe >/dev/null 2>&1; then
-        local ps_cmd
-        ps_cmd="Get-Content -Raw '$prompt_path' | & '$exe_path'"
-        for arg in "${provider_args[@]}"; do
-            ps_cmd+=" '$arg'"
-        done
-        ps_cmd+=" --skills ./skills"
-        if [ -n "$TIMEOUT_CMD" ]; then
-            "$TIMEOUT_CMD" "$TIMEOUT" powershell.exe -NoProfile -Command "$ps_cmd" 2>&1 | tee "$log_file"
+    local attempt=1
+    local max_attempts="$PROMPT_PROVIDER_RETRIES"
+    while true; do
+        local status=0
+        set +e
+        if [[ "$YOYO_BIN" == *.exe ]] && command -v powershell.exe >/dev/null 2>&1; then
+            local ps_cmd
+            ps_cmd="Get-Content -Raw '$prompt_path' | & '$exe_path'"
+            for arg in "${provider_args[@]}"; do
+                ps_cmd+=" '$arg'"
+            done
+            ps_cmd+=" --skills ./skills"
+            if [ -n "$TIMEOUT_CMD" ]; then
+                "$TIMEOUT_CMD" "$TIMEOUT" powershell.exe -NoProfile -Command "$ps_cmd" 2>&1 | tee "$log_file"
+            else
+                powershell.exe -NoProfile -Command "$ps_cmd" 2>&1 | tee "$log_file"
+            fi
+            status=${PIPESTATUS[0]}
         else
-            powershell.exe -NoProfile -Command "$ps_cmd" 2>&1 | tee "$log_file"
+            if [ -n "$TIMEOUT_CMD" ]; then
+                "$TIMEOUT_CMD" "$TIMEOUT" "$YOYO_BIN" "${provider_args[@]}" --skills ./skills < "$prompt_file" 2>&1 | tee "$log_file"
+            else
+                "$YOYO_BIN" "${provider_args[@]}" --skills ./skills < "$prompt_file" 2>&1 | tee "$log_file"
+            fi
+            status=${PIPESTATUS[0]}
         fi
-        return
-    fi
+        set -e
 
-    if [ -n "$TIMEOUT_CMD" ]; then
-        "$TIMEOUT_CMD" "$TIMEOUT" "$YOYO_BIN" "${provider_args[@]}" --skills ./skills < "$prompt_file" 2>&1 | tee "$log_file"
-    else
-        "$YOYO_BIN" "${provider_args[@]}" --skills ./skills < "$prompt_file" 2>&1 | tee "$log_file"
+        if grep -Eiq '(^|[[:space:]])error: (Auth error|No API key found)|HTTP 401|Invalid API key|OPENAI_API_KEY is not set|ANTHROPIC_API_KEY is not set|API_KEY is not set' "$log_file"; then
+            echo "Fatal provider error detected. See log: $log_file" >&2
+            return 1
+        fi
+
+        if [ "$status" -eq 0 ]; then
+            return 0
+        fi
+
+        if grep -Eiq 'Stream ended|Rate limited|Too Many Requests|HTTP 429|HTTP 503|Service Unavailable|auth_unavailable' "$log_file" && [ "$attempt" -lt "$max_attempts" ]; then
+            local wait_seconds=15
+            if grep -Eiq 'Rate limited|Too Many Requests|HTTP 429|HTTP 503|Service Unavailable|auth_unavailable' "$log_file"; then
+                wait_seconds="$PROVIDER_RETRY_SECONDS"
+            fi
+            attempt=$((attempt + 1))
+            echo "Transient provider error detected; retrying prompt attempt $attempt/$max_attempts after ${wait_seconds}s." >&2
+            sleep "$wait_seconds"
+            continue
+        fi
+
+        return "$status"
+    done
+}
+
+require_output_file() {
+    local path="$1"
+    local label="$2"
+    if [ ! -s "$path" ]; then
+        echo "Expected $label output missing or empty: $path" >&2
+        return 1
     fi
+}
+
+require_json_file() {
+    local path="$1"
+    require_output_file "$path" "JSON"
+    "$PYTHON_BIN" - "$path" <<'PY'
+import json
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+json.loads(path.read_text(encoding='utf-8'))
+PY
+}
+
+pause_after_prompt() {
+    if [ "${PROMPT_PAUSE_SECONDS:-0}" -gt 0 ]; then
+        sleep "$PROMPT_PAUSE_SECONDS"
+    fi
+}
+
+should_skip_output() {
+    local path="$1"
+    [ "$SKIP_EXISTING_OUTPUTS" = "true" ] && [ "${FORCE_REPLAY:-false}" != "true" ] && [ -s "$path" ]
+}
+
+run_markdown_stage() {
+    local prompt_file="$1"
+    local output_file="$2"
+    local label="$3"
+    if should_skip_output "$output_file"; then
+        echo "Skip $label: existing output found at $output_file"
+    else
+        run_prompt "$prompt_file" "$(mktemp)"
+    fi
+    require_output_file "$output_file" "$label"
+    pause_after_prompt
+}
+
+run_json_stage() {
+    local prompt_file="$1"
+    local output_file="$2"
+    if should_skip_output "$output_file"; then
+        echo "Skip JSON: existing output found at $output_file"
+    else
+        run_prompt "$prompt_file" "$(mktemp)"
+    fi
+    require_json_file "$output_file"
+    pause_after_prompt
 }
 
 ASSESSMENT_REL="research/daily/$OUTPUT_STEM-market-assessment.md"
@@ -281,6 +409,7 @@ REPORT_REL="research/daily/$OUTPUT_STEM-report.md"
 CALLS_REL="research/calls/$OUTPUT_STEM-calls.json"
 REFLECTION_REL="research/daily/$OUTPUT_STEM-reflection.md"
 EVALUATION_REL="research/evaluations/latest.md"
+OPTIMIZATION_REL="research/experiments/latest_optimization.md"
 JOURNAL_REL="journals/investment_journal.md"
 
 ASSESSMENT_FILE="$ROOT_DIR/$ASSESSMENT_REL"
@@ -289,15 +418,22 @@ REPORT_FILE="$ROOT_DIR/$REPORT_REL"
 CALLS_FILE="$ROOT_DIR/$CALLS_REL"
 REFLECTION_FILE="$ROOT_DIR/$REFLECTION_REL"
 EVALUATION_FILE="$ROOT_DIR/$EVALUATION_REL"
+OPTIMIZATION_FILE="$ROOT_DIR/$OPTIMIZATION_REL"
 JOURNAL_FILE="$ROOT_DIR/$JOURNAL_REL"
 
 "$PYTHON_BIN" "$ROOT_DIR/scripts/evaluate_investment_calls.py" \
     --calls-dir "$ROOT_DIR/research/calls" \
     --snapshot-dir "$ROOT_DIR/data/snapshots" \
     --summary-md "$EVALUATION_FILE" \
-    --summary-json "$ROOT_DIR/research/evaluations/latest.json"
+    --summary-json "$ROOT_DIR/research/evaluations/latest.json" \
+    --records-json "$ROOT_DIR/research/evaluations/latest_records.json"
 
 EVALUATION_SUMMARY=$(cat "$EVALUATION_FILE")
+if [ -f "$OPTIMIZATION_FILE" ]; then
+    OPTIMIZATION_SUMMARY=$(cat "$OPTIMIZATION_FILE")
+else
+    OPTIMIZATION_SUMMARY="No parameter optimization summary is available yet."
+fi
 
 ASSESS_PROMPT=$(mktemp)
 cat > "$ASSESS_PROMPT" <<EOF
@@ -338,6 +474,8 @@ $ERRORS
 $ACTIVE_LEARNINGS
 - Posterior evaluation summary:
 $EVALUATION_SUMMARY
+- Parameter optimization summary:
+$OPTIMIZATION_SUMMARY
 
 Output requirements:
 - Write the markdown report in Simplified Chinese.
@@ -346,6 +484,7 @@ Output requirements:
 - Cover market regime, theme strength, ETF confirmation, standout names, and risk posture.
 - If a radar theme is strong but not represented in the trade universe, say it is an external opportunity to consider adding later, not an immediate recommendation.
 - If a radar theme is represented in the trade universe, compare the available symbols and identify the best current expression of that theme.
+- Treat actionable_candidates as the only deterministic layer eligible for upgrade consideration; use diagnostic_candidates only for observation and explanation.
 - End with 3-5 high-priority research questions for today.
 - Save only markdown to $ASSESSMENT_REL.
 EOF
@@ -385,6 +524,8 @@ $RULES
 $ACTIVE_LEARNINGS
 - Posterior evaluation summary:
 $EVALUATION_SUMMARY
+- Parameter optimization summary:
+$OPTIMIZATION_SUMMARY
 
 Plan requirements:
 - Write the markdown plan in Simplified Chinese.
@@ -394,6 +535,7 @@ Plan requirements:
 - For each strong theme, compare same-theme symbols in the trade universe and explain why the selected symbol is currently better than its peers.
 - For each candidate, state why it deserves attention today.
 - For each candidate, list missing evidence required before any upgrade to accumulate/buy.
+- Only actionable_candidates may be considered for upgrade; diagnostic_candidates are watch/avoid diagnostics only.
 - Include a clear "今日优先级" section ranking candidates from strongest to weakest.
 - Include one section called "Disqualifiers" for cases that force watch_only or avoid.
 - Save only markdown to $PLAN_REL.
@@ -434,6 +576,8 @@ $ERRORS
 $ACTIVE_LEARNINGS
 - Posterior evaluation summary:
 $EVALUATION_SUMMARY
+- Parameter optimization summary:
+$OPTIMIZATION_SUMMARY
 
 Report requirements:
 - Write the markdown report in Simplified Chinese.
@@ -444,6 +588,9 @@ Report requirements:
 - Do not recommend radar-only symbols as trades unless they are also present in the configured trade universe; instead list them under "可考虑加入交易池".
 - For dynamic symbol selection, include a "为什么选它而不是同主题其他标的" paragraph for each top candidate.
 - Use the deterministic ranking as the starting point. You may override it only if you explicitly explain the evidence-based reason.
+- Treat diagnostic_only=true or qualified_for_watch=false ranking rows as diagnostics only; do not upgrade them to actionable recommendations.
+- Treat actionable_candidates as the only deterministic layer eligible for buy_candidate/accumulate/hold consideration; diagnostic_candidates can only explain watch_only/avoid context.
+- Prefer is_theme_leader=true rows for each theme; do not upgrade same-theme non-leaders unless the report gives explicit evidence that overrides the deterministic theme rank.
 - Do not upgrade to buy_candidate, hold, or accumulate unless the setup passes the cost gate in the ranking file.
 - Provide sections for market regime, top candidates, avoids, and portfolio posture.
 - Every recommendation must include: state, rationale, evidence, risks, invalidation, horizon, confidence.
@@ -480,18 +627,25 @@ $RADAR_SNAPSHOT
 $SNAPSHOT
 - Deterministic trade universe ranking:
 $RANKING
+- Parameter optimization summary:
+$OPTIMIZATION_SUMMARY
 
 Output requirements:
 - Write valid JSON only.
 - Keep JSON keys and enum values in English exactly as specified.
 - Write human-readable values such as rationale, evidence, risks, and invalidation in Simplified Chinese.
-- Recommendations should normally come from top_candidates in the deterministic ranking. If you include a lower-ranked symbol, explain why in selection_reason.
+- Actionable recommendations should come only from actionable_candidates in the deterministic ranking. Diagnostic candidates may only become watch/avoid rows when the report discussed them.
+- Do not turn diagnostic_only=true or qualified_for_watch=false rows into actionable states; they may only appear as watch/avoid diagnostics when the report discussed them.
+- Do not turn qualified_for_action=false rows into buy_candidate, accumulate, or hold.
+- If is_theme_leader=false, keep the state non-actionable unless selection_reason explains why it is better than the deterministic same-theme leader.
 - Do not use actionable states unless the ranking score and cost gate support enough expected edge.
 - Use this exact schema:
   {
     "date": "$DATE",
     "session": "$SESSION",
     "generated_at": "ISO-8601 UTC timestamp",
+    "strategy_version": "copy from deterministic ranking strategy_version",
+    "strategy_weights": "copy from deterministic ranking strategy_weights object",
     "recommendations": [
       {
         "symbol": "0700.HK",
@@ -550,6 +704,8 @@ $ERRORS
 $ACTIVE_LEARNINGS
 - Posterior evaluation summary:
 $EVALUATION_SUMMARY
+- Parameter optimization summary:
+$OPTIMIZATION_SUMMARY
 
 Reflection requirements:
 - Write the reflection in Simplified Chinese.
@@ -568,11 +724,11 @@ Reflection requirements:
 - If memory updates are not allowed, do not edit memory files and do not append to $JOURNAL_REL; keep this as an intraday working note only.
 EOF
 
-run_prompt "$ASSESS_PROMPT" "$(mktemp)"
-run_prompt "$PLAN_PROMPT" "$(mktemp)"
-run_prompt "$REPORT_PROMPT" "$(mktemp)"
-run_prompt "$CALLS_PROMPT" "$(mktemp)"
-run_prompt "$REFLECT_PROMPT" "$(mktemp)"
+run_markdown_stage "$ASSESS_PROMPT" "$ASSESSMENT_FILE" "market assessment"
+run_markdown_stage "$PLAN_PROMPT" "$PLAN_FILE" "daily plan"
+run_markdown_stage "$REPORT_PROMPT" "$REPORT_FILE" "daily report"
+run_json_stage "$CALLS_PROMPT" "$CALLS_FILE"
+run_markdown_stage "$REFLECT_PROMPT" "$REFLECTION_FILE" "reflection"
 
 rm -f "$ASSESS_PROMPT" "$PLAN_PROMPT" "$REPORT_PROMPT" "$CALLS_PROMPT" "$REFLECT_PROMPT"
 

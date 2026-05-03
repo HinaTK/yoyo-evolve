@@ -1,0 +1,40 @@
+{
+  "date": "2025-12-11",
+  "session": "historical",
+  "generated_at": "2025-12-11T16:09:00Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "0857.HK",
+      "state": "buy_candidate",
+      "theme": "energy",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.62,
+      "rationale": "中国石油是本轮确定性排名中唯一actionable_candidate，在risk_off环境下仍保持上行趋势、放量确认和能源主题领先，适合作为谨慎买入候选而非立即重仓。",
+      "evidence": [
+        "确定性排名得分79.93，高于行动阈值65.0，并且qualified_for_action为true。",
+        "收盘价11.63港元，高于MA20 10.8135和MA60 10.1555，且MA20高于MA60。",
+        "1日涨幅1.48%，60日区间位置1.0623，显示趋势延续而非低位反弹。",
+        "20日成交量比率1.0735，满足volume_confirmed，价格突破有成交量配合。",
+        "在energy主题内排名第1，优于同主题0883.HK；0883.HK虽强但is_theme_leader=false且被标记为diagnostic_only。"
+      ],
+      "risks": [
+        "整体市场状态为risk_off，平均股票1日跌幅为-0.949%，顺势个股也可能受系统性回撤拖累。",
+        "60日区间位置超过1.0，短线可能已有追高风险，入场需要分批或等待回踩确认。",
+        "能源主题短期强势可能与油价和防御偏好相关，若宏观风险偏好切换，资金可能轮动离开。",
+        "成本门槛要求预期波段边际同时超过往返成本35bps和最低边际100bps，若后续波动收窄则不应升级仓位。"
+      ],
+      "invalidation": "若收盘跌破MA20 10.8135，或成交量比率跌回1.0以下且价格不能维持强于能源同业，则取消buy_candidate并降为watch_only。",
+      "selection_source_theme": "energy",
+      "selection_reason": "0857.HK是能源主题确定性得分最高者，score 79.93高于0883.HK的73.0；同时0857.HK是theme_leader且qualified_for_action=true，而0883.HK为同主题非领导者并仅作diagnostic_candidate。"
+    }
+  ]
+}

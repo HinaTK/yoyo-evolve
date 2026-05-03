@@ -1,79 +1,206 @@
 {
-  "generated_at": "2026-04-27T11:24:56Z",
-  "evaluations": 304,
+  "generated_at": "2026-04-30T03:48:32Z",
+  "evaluations": 766,
   "verdict_counts": {
-    "informational": 162,
-    "fail": 79,
-    "pass": 49,
-    "mixed": 14
+    "mixed": 148,
+    "pass": 84,
+    "fail": 215,
+    "informational": 319
   },
   "learning_counts": {
-    "theme_error": 49,
-    "defensive_misread": 6,
-    "symbol_selection_error": 27,
-    "overconfidence": 9,
-    "bullish_misread": 9,
-    "timing_unclear": 14
+    "timing_unclear": 140,
+    "bullish_misread": 13,
+    "theme_error": 89,
+    "symbol_selection_error": 152,
+    "overconfidence": 33,
+    "defensive_misread": 17
   },
   "session_counts": {
-    "historical": 304
+    "historical": 760,
+    "morning": 6
   },
   "symbol_stats": {
+    "0857.HK": {
+      "samples": 33,
+      "avg_return_pct": 0.879,
+      "pass_rate": 0.091
+    },
+    "0941.HK": {
+      "samples": 30,
+      "avg_return_pct": 0.217,
+      "pass_rate": 0.0
+    },
+    "0006.HK": {
+      "samples": 19,
+      "avg_return_pct": -0.064,
+      "pass_rate": 0.0
+    },
     "0700.HK": {
-      "samples": 50,
-      "avg_return_pct": -1.745,
-      "pass_rate": 0.04
+      "samples": 108,
+      "avg_return_pct": 1.824,
+      "pass_rate": 0.074
     },
     "9988.HK": {
-      "samples": 51,
-      "avg_return_pct": -0.044,
-      "pass_rate": 0.235
+      "samples": 103,
+      "avg_return_pct": 3.581,
+      "pass_rate": 0.165
     },
     "1810.HK": {
-      "samples": 50,
-      "avg_return_pct": -1.752,
-      "pass_rate": 0.28
+      "samples": 108,
+      "avg_return_pct": 1.438,
+      "pass_rate": 0.213
     },
     "2800.HK": {
-      "samples": 51,
-      "avg_return_pct": 0.389,
-      "pass_rate": 0.137
+      "samples": 109,
+      "avg_return_pct": 0.786,
+      "pass_rate": 0.064
     },
     "3033.HK": {
-      "samples": 51,
-      "avg_return_pct": -0.417,
-      "pass_rate": 0.176
+      "samples": 107,
+      "avg_return_pct": 1.61,
+      "pass_rate": 0.14
     },
     "3067.HK": {
-      "samples": 51,
-      "avg_return_pct": -0.388,
-      "pass_rate": 0.098
+      "samples": 107,
+      "avg_return_pct": 1.632,
+      "pass_rate": 0.103
+    },
+    "9618.HK": {
+      "samples": 2,
+      "avg_return_pct": 0.824,
+      "pass_rate": 0.0
+    },
+    "0388.HK": {
+      "samples": 4,
+      "avg_return_pct": 0.473,
+      "pass_rate": 0.0
+    },
+    "2020.HK": {
+      "samples": 2,
+      "avg_return_pct": -0.72,
+      "pass_rate": 0.0
+    },
+    "0002.HK": {
+      "samples": 3,
+      "avg_return_pct": -0.242,
+      "pass_rate": 0.0
+    },
+    "1024.HK": {
+      "samples": 4,
+      "avg_return_pct": 1.035,
+      "pass_rate": 0.0
+    },
+    "1177.HK": {
+      "samples": 6,
+      "avg_return_pct": -0.122,
+      "pass_rate": 0.0
+    },
+    "1093.HK": {
+      "samples": 6,
+      "avg_return_pct": -0.179,
+      "pass_rate": 0.0
+    },
+    "0728.HK": {
+      "samples": 2,
+      "avg_return_pct": -0.378,
+      "pass_rate": 0.0
+    },
+    "0883.HK": {
+      "samples": 5,
+      "avg_return_pct": -0.352,
+      "pass_rate": 0.0
+    },
+    "1299.HK": {
+      "samples": 2,
+      "avg_return_pct": 0.0,
+      "pass_rate": 0.0
+    },
+    "0005.HK": {
+      "samples": 6,
+      "avg_return_pct": -1.649,
+      "pass_rate": 0.0
     }
   },
   "top_learning_candidates": [
-    "theme_error",
     "symbol_selection_error",
     "timing_unclear",
+    "theme_error",
     "overconfidence",
-    "bullish_misread"
+    "defensive_misread"
   ],
-  "recent_misfires": [
+  "recent_misfires": [],
+  "recent_selection_errors": [
     {
-      "call_date": "2026-04-21",
+      "call_date": "2026-04-22",
+      "session": "historical",
+      "window_days": 5,
+      "symbol": "0700.HK",
+      "theme": "internet-platform",
+      "state": "watch_only",
+      "confidence": 0.56,
+      "base_price": 504.0,
+      "future_price": 478.6,
+      "return_pct": -5.04,
+      "verdict": "informational",
+      "learning_tag": "symbol_selection_error",
+      "selection_source_theme": null,
+      "selection_reason": null,
+      "peer_count": 5,
+      "peer_median_return_pct": -2.849,
+      "peer_best_symbol": "9988.HK",
+      "peer_best_return_pct": -0.989,
+      "peer_rank": 5,
+      "selected_vs_best_bps": -405.1,
+      "selected_vs_median_bps": -219.1,
+      "same_theme_best_missed": true
+    },
+    {
+      "call_date": "2026-04-24",
       "session": "historical",
       "window_days": 3,
-      "symbol": "2800.HK",
-      "theme": "hong-kong-broad-market",
-      "state": "buy_candidate",
-      "confidence": 0.55,
-      "base_price": 26.76,
-      "future_price": 26.26,
-      "return_pct": -1.868,
-      "verdict": "fail",
-      "learning_tag": "bullish_misread",
+      "symbol": "0700.HK",
+      "theme": "internet-platform",
+      "state": "watch_only",
+      "confidence": 0.48,
+      "base_price": 493.4,
+      "future_price": 478.6,
+      "return_pct": -3.0,
+      "verdict": "informational",
+      "learning_tag": "symbol_selection_error",
       "selection_source_theme": null,
-      "selection_reason": null
+      "selection_reason": null,
+      "peer_count": 5,
+      "peer_median_return_pct": -1.214,
+      "peer_best_symbol": "1024.HK",
+      "peer_best_return_pct": -0.137,
+      "peer_rank": 5,
+      "selected_vs_best_bps": -286.2,
+      "selected_vs_median_bps": -178.6,
+      "same_theme_best_missed": true
+    },
+    {
+      "call_date": "2026-04-24",
+      "session": "historical",
+      "window_days": 3,
+      "symbol": "9988.HK",
+      "theme": "internet-platform",
+      "state": "buy_candidate",
+      "confidence": 0.56,
+      "base_price": 131.8,
+      "future_price": 130.2,
+      "return_pct": -1.214,
+      "verdict": "fail",
+      "learning_tag": "symbol_selection_error",
+      "selection_source_theme": null,
+      "selection_reason": null,
+      "peer_count": 5,
+      "peer_median_return_pct": -1.214,
+      "peer_best_symbol": "1024.HK",
+      "peer_best_return_pct": -0.137,
+      "peer_rank": 3,
+      "selected_vs_best_bps": -107.7,
+      "selected_vs_median_bps": 0.0,
+      "same_theme_best_missed": true
     }
-  ],
-  "recent_selection_errors": []
+  ]
 }

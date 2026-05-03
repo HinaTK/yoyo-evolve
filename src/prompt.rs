@@ -578,7 +578,7 @@ pub fn is_retriable_error(error_msg: &str) -> bool {
 /// 3. **Model not found** (404/invalid model) — suggests known models for the provider
 pub fn diagnose_api_error(error: &str, model: &str) -> Option<String> {
     let lower = error.to_lowercase();
-    let provider = infer_provider_from_model(model);
+    let provider = diagnostic_provider(model);
 
     // ── Authentication / API key errors ──────────────────────────────
     if lower.contains("401")
@@ -588,7 +588,12 @@ pub fn diagnose_api_error(error: &str, model: &str) -> Option<String> {
         || lower.contains("invalid x-api-key")
         || lower.contains("authentication")
     {
-        let env_var = crate::cli::provider_api_key_env(&provider).unwrap_or("ANTHROPIC_API_KEY");
+        let env_var =
+            crate::cli::provider_api_key_env(&provider).unwrap_or(if provider == "custom" {
+                "API_KEY"
+            } else {
+                "ANTHROPIC_API_KEY"
+            });
         let config_hint = "Or add api_key to .yoyo.toml, or use --api-key <key>.";
         let key_set = std::env::var(env_var).is_ok();
         let status = if key_set {
@@ -686,6 +691,14 @@ pub fn diagnose_api_error(error: &str, model: &str) -> Option<String> {
     }
 
     None
+}
+
+fn diagnostic_provider(model: &str) -> String {
+    std::env::var("PROVIDER")
+        .ok()
+        .map(|value| value.trim().to_lowercase())
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| infer_provider_from_model(model))
 }
 
 /// Infer the provider name from a model identifier.
@@ -910,6 +923,8 @@ enum PromptResult {
     RetriableError { error_msg: String, usage: Usage },
     /// A context overflow error — caller should compact and retry.
     ContextOverflow { error_msg: String, usage: Usage },
+    /// A non-retriable API error — caller should surface it and fail.
+    FatalError { error_msg: String, usage: Usage },
 }
 
 /// Execute a single prompt attempt and process all events.
@@ -951,6 +966,7 @@ async fn handle_prompt_events(
     let mut collected_text = String::new();
     let mut retriable_error: Option<String> = None;
     let mut overflow_error: Option<String> = None;
+    let mut fatal_error: Option<String> = None;
     let mut last_tool_error: Option<String> = None;
     let mut md_renderer = MarkdownRenderer::new();
     let mut spinner: Option<Spinner> = Some(Spinner::start());
@@ -1300,6 +1316,7 @@ async fn handle_prompt_events(
                                             if let Some(diagnostic) = diagnose_api_error(err_msg, model) {
                                                 eprintln!("{YELLOW}  💡 {}{RESET}", diagnostic.replace('\n', &format!("\n{YELLOW}     {RESET}")));
                                             }
+                                            fatal_error = Some(err_msg.clone());
                                         }
                                     }
                                 }
@@ -1388,6 +1405,11 @@ async fn handle_prompt_events(
         }
     } else if let Some(err_msg) = retriable_error {
         PromptResult::RetriableError {
+            error_msg: err_msg,
+            usage,
+        }
+    } else if let Some(err_msg) = fatal_error {
+        PromptResult::FatalError {
             error_msg: err_msg,
             usage,
         }
@@ -1532,6 +1554,10 @@ pub async fn run_prompt_with_changes(
                     | PromptResult::ContextOverflow {
                         error_msg: retry_err,
                         usage: retry_usage,
+                    }
+                    | PromptResult::FatalError {
+                        error_msg: retry_err,
+                        usage: retry_usage,
                     } => {
                         total_usage.input += retry_usage.input;
                         total_usage.output += retry_usage.output;
@@ -1544,6 +1570,14 @@ pub async fn run_prompt_with_changes(
                         api_error = Some(retry_err);
                     }
                 }
+                break;
+            }
+            PromptResult::FatalError { error_msg, usage } => {
+                total_usage.input += usage.input;
+                total_usage.output += usage.output;
+                total_usage.cache_read += usage.cache_read;
+                total_usage.cache_write += usage.cache_write;
+                api_error = Some(error_msg);
                 break;
             }
         }
@@ -1762,6 +1796,14 @@ pub async fn run_prompt_with_content_and_changes(
                     "\n{YELLOW}  ⚡ context overflow detected — cannot retry with image content{RESET}"
                 );
                 eprintln!("{DIM}  ({error_msg}){RESET}");
+                api_error = Some(error_msg);
+                break;
+            }
+            PromptResult::FatalError { error_msg, usage } => {
+                total_usage.input += usage.input;
+                total_usage.output += usage.output;
+                total_usage.cache_read += usage.cache_read;
+                total_usage.cache_write += usage.cache_write;
                 api_error = Some(error_msg);
                 break;
             }

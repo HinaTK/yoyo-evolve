@@ -1,0 +1,158 @@
+{
+    "date": "2026-01-22",
+    "session": "historical",
+    "generated_at": "2026-01-22T01:31:00Z",
+    "strategy_version": "l5_mvp_conservative_v1",
+    "strategy_weights": {
+        "trend_weight": 0.45,
+        "momentum_weight": 0.3,
+        "range_weight": 0.15,
+        "risk_penalty_weight": 1.15
+    },
+    "recommendations": [
+        {
+            "symbol": "2800.HK",
+            "state": "watch_only",
+            "theme": "hong-kong-broad-market",
+            "kind": "etf",
+            "horizon_days_min": 14,
+            "horizon_days_max": 90,
+            "confidence": 0.42,
+            "rationale": "\u5927\u76d8ETF\u8d70\u52bf\u6e29\u548c\u6539\u5584\uff0c\u4f46\u5206\u6570\u4f4e\u4e8e\u884c\u52a8\u95e8\u69db\u4e14\u5386\u53f2\u7b26\u53f7\u98ce\u9669\u5426\u51b3\u4ecd\u5728\uff0c\u6682\u53ea\u89c2\u5bdf\u3002",
+            "evidence": [
+                "\u6536\u76d8\u4ef726.24\uff0c\u9ad8\u4e8eMA20 25.8446\u5e76\u7565\u9ad8\u4e8eMA60 26.1507\u3002",
+                "1\u65e5\u6da8\u5e451.74%\uff0c20\u65e5\u6210\u4ea4\u91cf\u6bd4\u73871.1216\uff0c\u91cf\u80fd\u6709\u57fa\u672c\u786e\u8ba4\u3002",
+                "\u6392\u540d\u5206\u657056.6\uff0c\u4ec5\u6ee1\u8db3\u89c2\u5bdf\u9608\u503c45\uff0c\u4f4e\u4e8e\u884c\u52a8\u9608\u503c65\u3002",
+                "symbol_risk\u6807\u8bb0action_veto=true\uff0c\u5386\u53f2pass_rate=0.071 over 99 evaluated calls\u3002"
+            ],
+            "risks": [
+                "\u98ce\u9669\u504f\u597d\u867d\u4e3arisk_on\uff0c\u4f46\u5bbd\u57faETF\u4ecd\u5904\u533a\u95f4\u72b6\u6001\uff0c\u9884\u671f\u8fb9\u9645\u4e0d\u8db3\u3002",
+                "\u8fd1\u671f\u5386\u53f2\u8bef\u5224\u8bb0\u5f55\u63d0\u793a\u8be5\u6807\u7684\u4fe1\u53f7\u53ef\u9760\u6027\u504f\u4f4e\u3002",
+                "\u6210\u672c\u95e8\u69db\u8981\u6c42\u9884\u671f\u6ce2\u6bb5\u4f18\u52bf\u8d85\u8fc7\u5f80\u8fd435bps\u4e0e\u6700\u4f4e100bps\uff0c\u76ee\u524d\u8bc1\u636e\u4e0d\u8db3\u3002"
+            ],
+            "invalidation": "\u82e5\u8dcc\u56deMA20\u4e0b\u65b9\u4e14\u6210\u4ea4\u91cf\u4e0d\u80fd\u7ef4\u6301\uff0c\u6216\u98ce\u9669\u72b6\u6001\u8f6c\u5f31\uff0c\u5219\u53d6\u6d88\u89c2\u5bdf\u3002",
+            "selection_source_theme": "hong-kong-broad-market",
+            "selection_reason": "\u8be5\u4e3b\u9898\u5185\u53ea\u67092800.HK\uff0c\u4e14\u4e3a\u4e3b\u9898\u9886\u5bfc\u8005\uff1b\u4f46\u56e0\u4f4e\u4e8e\u884c\u52a8\u5206\u6570\u5e76\u5b58\u5728\u5386\u53f2\u98ce\u9669\u5426\u51b3\uff0c\u4ec5\u4fdd\u7559watch_only\u3002"
+        },
+        {
+            "symbol": "3033.HK",
+            "state": "avoid",
+            "theme": "hang-seng-tech",
+            "kind": "etf",
+            "horizon_days_min": 14,
+            "horizon_days_max": 90,
+            "confidence": 0.5,
+            "rationale": "\u6052\u751f\u79d1\u6280ETF\u53cd\u5f39\u4ecd\u5f31\uff0c\u5206\u6570\u4f4e\u4e8e\u89c2\u5bdf\u9608\u503c\u4e14\u4e0d\u662f\u540c\u4e3b\u9898\u9886\u5bfc\u8005\uff0c\u4e0d\u5e94\u884c\u52a8\u3002",
+            "evidence": [
+                "\u6392\u540d\u5206\u657042.65\uff0c\u4f4e\u4e8e\u89c2\u5bdf\u9608\u503c45\u4e14\u4f4e\u4e8e\u884c\u52a8\u9608\u503c65\u3002",
+                "\u6536\u76d8\u4ef74.81\u4ec5\u9ad8\u4e8eMA20 4.7717\uff0c\u4f46\u4f4e\u4e8eMA60 4.9835\u3002",
+                "20\u65e5\u6210\u4ea4\u91cf\u6bd4\u73870.6564\uff0c\u91cf\u80fd\u786e\u8ba4\u4e0d\u8db3\u3002",
+                "\u540c\u4e3b\u9898\u9886\u5bfc\u8005\u4e3a3067.HK\uff0c3033.HK\u88ab\u6807\u8bb0not_theme_score_leader\u3002"
+            ],
+            "risks": [
+                "\u79d1\u6280\u4e3b\u9898\u5747\u503c\u5206\u657043.52\uff0c\u672a\u8fbe\u5230\u89c2\u5bdf\u8981\u6c42\u3002",
+                "symbol_risk\u6807\u8bb0action_veto=true\uff0c\u5386\u53f2pass_rate=0.103 over 97 evaluated calls\u3002",
+                "\u82e5\u8ffd\u968f\u5355\u65e5\u53cd\u5f39\uff0c\u5bb9\u6613\u5728\u533a\u95f4\u4e0b\u6cbf\u53cd\u590d\u9707\u8361\u4e2d\u88ab\u6210\u672c\u4fb5\u8680\u3002"
+            ],
+            "invalidation": "\u53ea\u6709\u5f53\u4ef7\u683c\u91cd\u65b0\u7ad9\u4e0aMA60\u3001\u4e3b\u9898\u9886\u5bfc\u5206\u6570\u8d85\u8fc7\u884c\u52a8\u9608\u503c\u4e14\u98ce\u9669\u5426\u51b3\u89e3\u9664\u65f6\uff0c\u624d\u91cd\u65b0\u8bc4\u4f30\u3002",
+            "selection_source_theme": "hang-seng-tech",
+            "selection_reason": "\u8be5\u6807\u7684\u5728\u540c\u4e3b\u9898\u4e2d\u5f31\u4e8e3067.HK\u4e14\u672a\u8fbe\u89c2\u5bdf\u9608\u503c\uff0c\u56e0\u6b64\u4f5c\u4e3a\u907f\u514d\u9879\u800c\u975e\u5019\u9009\u3002"
+        },
+        {
+            "symbol": "3067.HK",
+            "state": "avoid",
+            "theme": "hang-seng-tech",
+            "kind": "etf",
+            "horizon_days_min": 14,
+            "horizon_days_max": 90,
+            "confidence": 0.5,
+            "rationale": "\u867d\u662f\u6052\u751f\u79d1\u6280ETF\u4e3b\u9898\u9886\u5bfc\u8005\uff0c\u4f46\u4e3b\u9898\u6574\u4f53\u672a\u8fc7\u89c2\u5bdf\u9608\u503c\uff0c\u4e14\u5386\u53f2\u98ce\u9669\u5426\u51b3\u9650\u5236\u884c\u52a8\u3002",
+            "evidence": [
+                "\u6392\u540d\u5206\u657044.39\uff0c\u4f4e\u4e8e\u89c2\u5bdf\u9608\u503c45\u4e14\u4f4e\u4e8e\u884c\u52a8\u9608\u503c65\u3002",
+                "\u6536\u76d8\u4ef710.31\u9ad8\u4e8eMA20 10.2455\uff0c\u4f46\u4f4e\u4e8eMA60 10.6875\u3002",
+                "range_pos_60\u4e3a0.2039\uff0c\u4ec5\u590460\u65e5\u533a\u95f4\u504f\u4f4e\u4f4d\u7f6e\u3002",
+                "symbol_risk\u6807\u8bb0action_veto=true\uff0c\u5386\u53f2pass_rate=0.062 over 97 evaluated calls\u3002"
+            ],
+            "risks": [
+                "\u79d1\u6280\u4e3b\u9898\u4ecd\u5904range\u800c\u975e\u660e\u786e\u4e0a\u884c\u8d8b\u52bf\u3002",
+                "\u4f4e\u5386\u53f2\u80dc\u7387\u548cselection_error\u8bb0\u5f55\u964d\u4f4e\u4fe1\u53f7\u53ef\u4fe1\u5ea6\u3002",
+                "\u4f4e\u4e8e\u884c\u52a8\u5206\u6570\u65f6\u8fdb\u5165\u4e0d\u7b26\u5408\u6210\u672c\u4e0e\u8fb9\u9645\u95e8\u69db\u3002"
+            ],
+            "invalidation": "\u82e5\u5206\u6570\u5347\u81f365\u4ee5\u4e0a\u3001\u4ef7\u683c\u7ad9\u7a33MA60\u4e14\u5386\u53f2\u98ce\u9669\u5426\u51b3\u89e3\u9664\uff0c\u518d\u4eceavoid\u6539\u4e3a\u89c2\u5bdf\u6216\u5019\u9009\u3002",
+            "selection_source_theme": "hang-seng-tech",
+            "selection_reason": "3067.HK\u662f\u540c\u4e3b\u9898\u5206\u6570\u9886\u5bfc\u8005\uff0c\u4f46\u5206\u6570\u4ecd\u4e0d\u8db3\u4e14qualified_for_action=false\uff0c\u56e0\u6b64\u4fdd\u6301\u975e\u884c\u52a8\u7684avoid\u3002"
+        },
+        {
+            "symbol": "0700.HK",
+            "state": "avoid",
+            "theme": "internet-platform",
+            "kind": "stock",
+            "horizon_days_min": 14,
+            "horizon_days_max": 90,
+            "confidence": 0.64,
+            "rationale": "\u817e\u8baf\u5904\u4e8e\u4e0b\u884c\u8d8b\u52bf\u4e0e60\u65e5\u533a\u95f4\u4f4e\u4f4d\uff0c\u4e14\u540c\u4e3b\u9898\u66f4\u5f3a\u6807\u7684\u662f9618.HK\uff1b\u4e0d\u5e94\u56e0\u5355\u65e5\u53cd\u5f39\u8ffd\u5165\u3002",
+            "evidence": [
+                "\u6392\u540d\u5206\u65700\uff0c\u4f4e\u4e8e\u89c2\u5bdf\u548c\u884c\u52a8\u9608\u503c\u3002",
+                "\u6536\u76d8\u4ef7479.2\u4f4e\u4e8eMA20 498.1\u548cMA60 526.9\u3002",
+                "range_pos_60\u4ec50.0364\uff0cregime_flags\u5305\u542bdowntrend\u3002",
+                "\u540c\u4e3b\u9898\u9886\u5bfc\u8005\u4e3a9618.HK\uff0c0700.HK\u88ab\u6807\u8bb0not_theme_score_leader\u3002"
+            ],
+            "risks": [
+                "\u5386\u53f2symbol_risk\u4e3aaction_veto=true\uff0cpass_rate=0.020 over 98 evaluated calls\u3002",
+                "\u4e0b\u884c\u8d8b\u52bf\u4e2d\u5355\u65e51.14%\u53cd\u5f39\u53ef\u80fd\u53ea\u662f\u5f31\u53cd\u62bd\u3002",
+                "\u4e92\u8054\u7f51\u5e73\u53f0\u4e3b\u9898\u5185\u5206\u5316\u660e\u663e\uff0c\u5f31\u52bf\u6807\u7684\u62d6\u7d2f\u673a\u4f1a\u6210\u672c\u3002"
+            ],
+            "invalidation": "\u82e5\u91cd\u65b0\u7ad9\u4e0aMA20\u548cMA60\u3001range_pos_60\u56de\u52300.3\u4ee5\u4e0a\u5e76\u89e3\u9664symbol_risk_veto\uff0c\u518d\u91cd\u65b0\u8bc4\u4f30\u3002",
+            "selection_source_theme": "internet-platform",
+            "selection_reason": "\u4f5c\u4e3a\u89c2\u5bdf\u540d\u5355\u6210\u5206\u88ab\u7eb3\u5165\u8bca\u65ad\uff1b\u5b83\u4e0d\u662f\u540c\u4e3b\u9898\u9886\u5bfc\u8005\u4e14\u591a\u9879\u786c\u6027\u98ce\u9669\u672a\u8fc7\uff0c\u56e0\u6b64\u9009\u62e9avoid\u3002"
+        },
+        {
+            "symbol": "9988.HK",
+            "state": "avoid",
+            "theme": "internet-platform",
+            "kind": "stock",
+            "horizon_days_min": 14,
+            "horizon_days_max": 90,
+            "confidence": 0.55,
+            "rationale": "\u963f\u91cc\u5355\u65e5\u6da8\u5e45\u8f83\u5f3a\uff0c\u4f46\u8d8b\u52bf\u8bc1\u636e\u4e0d\u8db3\u3001\u4f4e\u4e8e\u89c2\u5bdf\u9608\u503c\u4e14\u5b58\u5728\u5386\u53f2\u98ce\u9669\u5426\u51b3\u3002",
+            "evidence": [
+                "1\u65e5\u6da8\u5e453.24%\uff0c\u4f46\u6392\u540d\u5206\u657044.75\uff0c\u4ecd\u4f4e\u4e8e\u89c2\u5bdf\u9608\u503c45\u548c\u884c\u52a8\u9608\u503c65\u3002",
+                "\u6536\u76d8\u4ef7130.6\u9ad8\u4e8eMA20 127.52\uff0c\u4f46\u4f4e\u4e8eMA60 138.9633\u3002",
+                "20\u65e5\u6210\u4ea4\u91cf\u6bd4\u73870.7696\uff0c\u672a\u5f62\u6210\u5f3a\u91cf\u80fd\u786e\u8ba4\u3002",
+                "\u540c\u4e3b\u9898\u9886\u5bfc\u8005\u4e3a9618.HK\uff0c9988.HK\u88ab\u6807\u8bb0not_theme_score_leader\u3002"
+            ],
+            "risks": [
+                "symbol_risk\u4e3aaction_veto=true\uff0cpass_rate=0.129 over 93 evaluated calls\u3002",
+                "\u8fd1\u671f\u591a\u6b21misfire\u548cselection_error\u663e\u793a\u8be5\u7b26\u53f7\u5386\u53f2\u8868\u73b0\u4e0d\u7a33\u5b9a\u3002",
+                "\u5728\u4f4e\u4e8e\u89c2\u5bdf\u9608\u503c\u65f6\u4e70\u5165\uff0c\u9884\u671f\u4f18\u52bf\u96be\u4ee5\u8986\u76d6\u6210\u672c\u95e8\u69db\u3002"
+            ],
+            "invalidation": "\u82e5\u4ef7\u683c\u7ad9\u7a33MA60\u3001\u6210\u4ea4\u91cf\u6269\u5f20\u4e14\u5206\u6570\u8d85\u8fc765\u5e76\u89e3\u9664\u98ce\u9669\u5426\u51b3\uff0c\u518d\u8003\u8651\u5347\u7ea7\u3002",
+            "selection_source_theme": "internet-platform",
+            "selection_reason": "\u89c2\u5bdf\u540d\u5355\u4e2d\u6709\u5355\u65e5\u53cd\u5f39\uff0c\u4f46\u540c\u4e3b\u9898\u786e\u5b9a\u6027\u5f31\u4e8e9618.HK\u4e14\u672a\u6ee1\u8db3\u9608\u503c\uff0c\u56e0\u6b64\u4e0d\u9009\u4e3a\u884c\u52a8\u5019\u9009\u3002"
+        },
+        {
+            "symbol": "1810.HK",
+            "state": "avoid",
+            "theme": "consumer-tech",
+            "kind": "stock",
+            "horizon_days_min": 14,
+            "horizon_days_max": 90,
+            "confidence": 0.62,
+            "rationale": "\u5c0f\u7c73\u4ecd\u5904\u4e0b\u884c\u8d8b\u52bf\u548c60\u65e5\u533a\u95f4\u4f4e\u4f4d\uff0c\u5c3d\u7ba1\u91cf\u80fd\u5c1a\u53ef\uff0c\u4f46\u7ed3\u6784\u4e0d\u652f\u6301\u884c\u52a8\u3002",
+            "evidence": [
+                "\u6392\u540d\u5206\u65700\uff0c\u4f4e\u4e8e\u89c2\u5bdf\u548c\u884c\u52a8\u9608\u503c\u3002",
+                "\u6536\u76d8\u4ef730.14\u4f4e\u4e8eMA20 31.574\u548cMA60 33.5827\u3002",
+                "range_pos_60\u4ec50.0306\uff0cregime_flags\u5305\u542bdowntrend\u3002",
+                "20\u65e5\u6210\u4ea4\u91cf\u6bd4\u73871.1533\uff0c\u4f46\u672a\u80fd\u6539\u53d8\u4ef7\u683c\u4f4e\u4e8e\u53cc\u5747\u7ebf\u7684\u5f31\u52bf\u7ed3\u6784\u3002"
+            ],
+            "risks": [
+                "symbol_risk\u4e3aaction_veto=true\uff0cpass_rate=0.173 over 98 evaluated calls\u3002",
+                "\u6d88\u8d39\u79d1\u6280\u4e3b\u9898\u53ea\u6709\u5355\u4e00\u6807\u7684\uff0c\u7f3a\u5c11\u540c\u4e3b\u9898\u786e\u8ba4\u3002",
+                "\u4f4e\u4f4d\u53cd\u5f39\u5bb9\u6613\u53d7\u6574\u4f53\u79d1\u6280\u98ce\u9669\u504f\u597d\u56de\u843d\u5f71\u54cd\u3002"
+            ],
+            "invalidation": "\u82e5\u91cd\u65b0\u7ad9\u4e0aMA20\u548cMA60\u3001\u8131\u79bb60\u65e5\u4f4e\u4f4d\u5e76\u8fbe\u5230\u89c2\u5bdf\u9608\u503c\u4ee5\u4e0a\uff0c\u518d\u53d6\u6d88avoid\u3002",
+            "selection_source_theme": "consumer-tech",
+            "selection_reason": "\u8be5\u4e3b\u9898\u5185\u53ea\u67091810.HK\uff1b\u56e0downtrend\u3001\u4f4e\u533a\u95f4\u4f4d\u7f6e\u548c\u98ce\u9669\u5426\u51b3\uff0c\u4f5c\u4e3a\u907f\u514d\u9879\u800c\u975e\u89c2\u5bdf\u5019\u9009\u3002"
+        }
+    ]
+}

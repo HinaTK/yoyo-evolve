@@ -1,0 +1,212 @@
+{
+  "date": "2025-12-22",
+  "session": "historical",
+  "generated_at": "2025-12-22T12:52:00Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "0857.HK",
+      "state": "watch_only",
+      "theme": "energy",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.48,
+      "rationale": "技术面是全市场最强候选，但历史后验触发 symbol_risk_veto，不能升级为买入候选。",
+      "evidence": [
+        "确定性排名得分 81.90，价格高于 MA20 与 MA60，且 MA20 高于 MA60。",
+        "1 日涨幅 1.83%，60 日区间位置 1.0769，量能比 1.2254，处于 uptrend。",
+        "qualified_for_action=false，disqualifiers 包含 symbol_risk_veto。"
+      ],
+      "risks": [
+        "历史评估 11 次调用通过率仅 0.091，平均收益 -13.388%。",
+        "记录中出现超过 -8% 的不利回撤，并包含 symbol_selection_error。"
+      ],
+      "invalidation": "若价格跌回 MA20 下方或能源主题不再领先，则移出观察；若后验风险标签未改善，不得转为行动状态。",
+      "selection_source_theme": "energy",
+      "selection_reason": "它是能源主题分数领导者，分数高于 0883.HK 与 0386.HK；但风险否决使本次只能观察。"
+    },
+    {
+      "symbol": "0941.HK",
+      "state": "watch_only",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.46,
+      "rationale": "防御型电信主题相对强，但历史命中率太低，当前只能作为观察样本。",
+      "evidence": [
+        "确定性排名得分 76.46，价格高于 MA20 与 MA60，且 MA20 高于 MA60。",
+        "1 日涨幅 0.30%，60 日区间位置 1.0362，量能比 1.0334，处于 uptrend。",
+        "qualified_for_action=false，disqualifiers 包含 symbol_risk_veto。"
+      ],
+      "risks": [
+        "历史评估 10 次调用通过率仅 0.100，平均收益 -0.927%。",
+        "记录包含 repeated_symbol_selection_error，说明过去同类选择质量不足。"
+      ],
+      "invalidation": "若跌破 MA20 或量能确认消失，则取消观察；除非风险否决解除，否则不得升级为买入。",
+      "selection_source_theme": "telecom-dividend",
+      "selection_reason": "它是 telecom-dividend 主题领导者，强于同主题 0728.HK；但后验风险否决限制为 watch_only。"
+    },
+    {
+      "symbol": "0006.HK",
+      "state": "watch_only",
+      "theme": "utilities-defensive",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.44,
+      "rationale": "公用事业防御主题得分领先，但该标的历史评估质量很弱，不适合行动。",
+      "evidence": [
+        "确定性排名得分 75.51，价格高于 MA20 与 MA60，且 MA20 高于 MA60。",
+        "1 日涨幅 0.08%，60 日区间位置 1.0092，量能比 1.0304，处于 uptrend。",
+        "qualified_for_action=false，disqualifiers 包含 symbol_risk_veto。"
+      ],
+      "risks": [
+        "历史评估 7 次调用通过率为 0.000，平均收益 -6.152%。",
+        "记录中出现超过 -8% 的不利回撤，并包含 symbol_selection_error。"
+      ],
+      "invalidation": "若价格跌破 MA20 或防御主题失去相对强度，则移出观察；风险否决解除前不得行动。",
+      "selection_source_theme": "utilities-defensive",
+      "selection_reason": "它是 utilities-defensive 主题领导者，分数高于 0002.HK；但后验风险否决使它只适合观察。"
+    },
+    {
+      "symbol": "0700.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.72,
+      "rationale": "腾讯处于明确下行结构，且同主题领导者不是腾讯，当前不应逆势选择。",
+      "evidence": [
+        "确定性排名得分 0，regime_flags 包含 downtrend。",
+        "最新收盘 473.8 低于 MA20 499.19 与 MA60 528.995，60 日区间位置 -0.0335。",
+        "同主题 internet-platform 的主题领导者为 9618.HK，腾讯 theme_rank 为 3。"
+      ],
+      "risks": [
+        "互联网平台整体风险偏弱，市场状态为 risk_off。",
+        "历史后验显示 pass_rate=0.033 over 60 evaluated calls，并有近期 symbol-selection errors。"
+      ],
+      "invalidation": "只有重新站上 MA20 与 MA60、主题领导地位改善且风险否决解除后，才可重新评估为观察。",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "它来自今日 watchlist，但不是同主题领导者，且技术与后验风险同时不支持行动。"
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.7,
+      "rationale": "阿里巴巴低于关键均线并处于 downtrend，当前没有足够边际收益覆盖成本门槛。",
+      "evidence": [
+        "确定性排名得分 0，regime_flags 包含 downtrend。",
+        "最新收盘 126.5 低于 MA20 127.345 与 MA60 139.6083。",
+        "同主题 internet-platform 的主题领导者为 9618.HK，阿里 theme_rank 为 4。"
+      ],
+      "risks": [
+        "1 日跌幅 -2.84%，弱于大盘 ETF。",
+        "历史后验 pass_rate=0.197 over 61 evaluated calls，并有 adverse breach 与 symbol_selection_error 记录。"
+      ],
+      "invalidation": "若价格重新站上 MA20 与 MA60、相对强度进入同主题前列且风险标签改善，再重新评估。",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "它来自今日 watchlist，但同主题排序落后且 downtrend 明确，因此选择 avoid 而非行动。"
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.74,
+      "rationale": "小米放量下跌并跌破关键均线，短线风险控制优先于抄底。",
+      "evidence": [
+        "确定性排名得分 0，regime_flags 包含 downtrend。",
+        "1 日跌幅 -3.79%，量能比 1.4645，最新收盘 29.92 低于 MA20 31.7 与 MA60 33.671。",
+        "60 日区间位置 -0.1149，显示价格跌出近期区间下沿。"
+      ],
+      "risks": [
+        "放量下跌可能代表抛压尚未释放完毕。",
+        "历史后验包含 negative_symbol_avg_return 与 recent_symbol_adverse_breach。"
+      ],
+      "invalidation": "只有重新站上 MA20、60 日区间位置修复至正区间并停止放量下跌后，才可转为观察。",
+      "selection_source_theme": "consumer-tech",
+      "selection_reason": "它来自今日 watchlist 且为 consumer-tech 单一配置标的，但趋势与风险均不合格。"
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "avoid",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.68,
+      "rationale": "香港宽基 ETF 处于下行状态，市场总览为 risk_off，不适合用宽基承接风险。",
+      "evidence": [
+        "确定性排名得分 0，regime_flags 包含 downtrend。",
+        "最新收盘 25.98 略低于 MA20 25.993，并低于 MA60 26.36。",
+        "市场摘要 risk_state=risk_off，ETF 平均 1 日涨跌幅为 -1.847%。"
+      ],
+      "risks": [
+        "宽基在 risk_off 中缺乏主题超额收益。",
+        "历史后验 pass_rate=0.115 over 61 evaluated calls，触发 low_symbol_pass_rate。"
+      ],
+      "invalidation": "若重新站上 MA20 与 MA60，且市场状态由 risk_off 修复为中性或风险偏好，再重新评估。",
+      "selection_source_theme": "hong-kong-broad-market",
+      "selection_reason": "它来自今日 watchlist 且是宽基主题唯一标的，但趋势、市场状态与后验风险均不支持行动。"
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.73,
+      "rationale": "恒生科技 ETF 处于下行趋势，价格低于双均线，科技 Beta 当前不值得承担。",
+      "evidence": [
+        "确定性排名得分 0，regime_flags 包含 downtrend。",
+        "最新收盘 4.726 低于 MA20 4.7682 与 MA60 4.9981。",
+        "1 日跌幅 -2.15%，60 日区间位置 0.1443，接近弱势区间。"
+      ],
+      "risks": [
+        "科技 ETF 在 risk_off 环境中可能继续承压。",
+        "历史后验 pass_rate=0.164 over 61 evaluated calls，触发 low_symbol_pass_rate。"
+      ],
+      "invalidation": "若价格重新站上 MA20 与 MA60，且恒生科技主题相对强度改善，再从 avoid 降级为 watch_only。",
+      "selection_source_theme": "hang-seng-tech",
+      "selection_reason": "它来自今日 watchlist，是同主题分数领导者，但绝对得分为 0 且处于 downtrend，因此不能行动。"
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.73,
+      "rationale": "3067.HK 与同主题科技 ETF 一样处于下行趋势，并且不是同主题领导者。",
+      "evidence": [
+        "确定性排名得分 0，regime_flags 包含 downtrend。",
+        "最新收盘 10.15 低于 MA20 10.238 与 MA60 10.7185。",
+        "同主题领导者为 3033.HK，3067.HK 为 same_theme_non_leader。"
+      ],
+      "risks": [
+        "1 日跌幅 -2.40%，弱于 3033.HK。",
+        "历史后验 pass_rate=0.082 over 61 evaluated calls，并有 records_pass_rate=0.217 over 23 decisive records。"
+      ],
+      "invalidation": "若站回 MA20 与 MA60，并相对 3033.HK 出现明确流动性或强度优势，才可重新评估。",
+      "selection_source_theme": "hang-seng-tech",
+      "selection_reason": "它来自今日 watchlist，但不是同主题领导者，且没有优于 3033.HK 的选择理由。"
+    }
+  ]
+}

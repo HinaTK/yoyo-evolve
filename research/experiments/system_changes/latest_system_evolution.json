@@ -1,0 +1,81 @@
+{
+  "generated_at": "2026-04-27T13:59:12Z",
+  "auto_implement_requested": false,
+  "implemented": false,
+  "task_count": 3,
+  "tasks": [
+    {
+      "id": "investment_task_01",
+      "title": "Align backtest candidate policy with production recommendation gates",
+      "evidence": [
+        "sample_quality=relaxed_fallback",
+        "strict_sample_count=1",
+        "relaxed_sample_count=196"
+      ],
+      "objective": "Keep relaxed fallback useful for diagnostics while preventing below-threshold backtest samples from being confused with promotable production recommendations.",
+      "validation": [
+        "python -m py_compile scripts/backtest_investment_strategy.py scripts/optimize_investment_params.py",
+        "python -m unittest tests/test_investment_level5_level6.py"
+      ]
+    },
+    {
+      "id": "investment_task_02",
+      "title": "Align diagnostic and qualified candidate reporting",
+      "evidence": [
+        "diagnostic_sample_count=196",
+        "qualified_sample_count=1"
+      ],
+      "objective": "Ensure production prompts and backtests use the same qualified candidate gate, while diagnostic-only rows remain visibly non-promotable.",
+      "validation": [
+        "python scripts/backtest_investment_strategy.py",
+        "python -m unittest tests/test_investment_level5_level6.py"
+      ]
+    },
+    {
+      "id": "investment_task_03",
+      "title": "Add adverse-move protection to research ranking",
+      "evidence": [
+        "latest_optimization max_adverse_pct=-11.729",
+        "latest_backtest avg_alpha_pct=-7.614"
+      ],
+      "objective": "Add or test drawdown-aware research filters without reducing cost, edge, or exposure gates.",
+      "validation": [
+        "python scripts/backtest_investment_strategy.py",
+        "python -m unittest tests/test_investment_level5_level6.py"
+      ]
+    }
+  ],
+  "change_evaluation_passed": true,
+  "change_finding_count": 0,
+  "changed_paths": [
+    "INVESTMENT_SYSTEM.md",
+    "config/active_strategy.toml",
+    "config/optimization.toml",
+    "research/evaluations/latest.json",
+    "research/evaluations/latest.md",
+    "research/experiments/latest_backtest.json",
+    "research/experiments/latest_backtest.md",
+    "research/experiments/latest_optimization.json",
+    "research/experiments/latest_optimization.md",
+    "research/experiments/symbol_risk_memory.json",
+    "research/experiments/system_changes/latest_change_evaluation.json",
+    "research/experiments/system_changes/latest_change_evaluation.md",
+    "research/experiments/system_changes/latest_improvement_plan.json",
+    "research/experiments/system_changes/latest_system_evolution.json",
+    "research/experiments/system_changes/latest_system_evolution.md",
+    "scripts/backtest_investment_strategy.py",
+    "scripts/build_snapshot_registry.py",
+    "scripts/build_symbol_risk_memory.py",
+    "scripts/evaluate_investment_calls.py",
+    "scripts/evaluate_investment_system_change.py",
+    "scripts/evolve_investment.sh",
+    "scripts/evolve_investment_system.sh",
+    "scripts/optimize_investment_params.py",
+    "scripts/plan_investment_system_improvements.py",
+    "scripts/rank_investment_universe.py",
+    "tests/test_investment_level5_level6.py"
+  ],
+  "change_findings": [],
+  "python_unittest_exit": 0,
+  "change_evaluator_exit": 0
+}

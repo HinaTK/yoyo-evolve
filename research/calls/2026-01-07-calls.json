@@ -1,0 +1,234 @@
+{
+  "date": "2026-01-07",
+  "session": "historical",
+  "generated_at": "2026-01-07T10:10:00Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "0857.HK",
+      "state": "watch_only",
+      "theme": "energy",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.44,
+      "rationale": "能源主题强、个股趋势强，但历史后验触发 symbol_risk_veto，不能升级为行动建议。",
+      "evidence": [
+        "确定性排名得分 84.42，theme_rank=1/3，price_above_ma20、price_above_ma60、ma20_above_ma60 均满足。",
+        "最新收盘 11.98，高于 MA20 10.853 与 MA60 10.2045，range_pos_60=1.1084，volume_ratio_20=1.2356。",
+        "symbol_risk.action_veto=true，历史 31 次评估平均收益 -11.434%，并含 repeated_symbol_selection_error。"
+      ],
+      "risks": [
+        "range_pos_60 大于 1，短线可能追高或均值回归。",
+        "后验记录显示该符号选择错误反复出现，强主题未必等于该股可交易。"
+      ],
+      "invalidation": "若跌破 MA20 或同主题内 0883.HK/0386.HK 持续跑赢且风险否决未解除，则取消观察。",
+      "selection_source_theme": "energy",
+      "selection_reason": "它是确定性能源主题 leader，但因 symbol_risk_veto 仅保留为诊断观察，不优于可行动候选。"
+    },
+    {
+      "symbol": "0941.HK",
+      "state": "watch_only",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.42,
+      "rationale": "电信红利主题和价格趋势较强，但历史通过率低且被风险否决，维持观察。",
+      "evidence": [
+        "确定性排名得分 81.98，theme_rank=1/2，趋势分 100。",
+        "最新收盘 85.45，高于 MA20 81.55 与 MA60 79.82，range_pos_60=1.1119，volume_ratio_20=1.5041。",
+        "symbol_risk.action_veto=true，pass_rate=0.071 over 28 evaluated calls，且含 repeated_symbol_selection_error。"
+      ],
+      "risks": [
+        "价格处于 60 日区间上沿之外，短期回撤风险上升。",
+        "历史胜率和平均收益不足，不能证明当前上涨具备扣除成本后的边际优势。"
+      ],
+      "invalidation": "若跌破 MA20 或 0728.HK 在同主题中连续更强且 0941.HK 风险否决仍存在，则停止跟踪该表达。",
+      "selection_source_theme": "telecom-dividend",
+      "selection_reason": "它是电信红利主题确定性 leader；同主题 0728.HK 为非 leader，因此未替代，但本符号仍只能 watch_only。"
+    },
+    {
+      "symbol": "0883.HK",
+      "state": "watch_only",
+      "theme": "energy",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.35,
+      "rationale": "基本趋势不错，但不是能源主题 leader，且自身历史风险否决更强，只能作为同主题诊断对照。",
+      "evidence": [
+        "确定性排名得分 73.93，theme_rank=2/3，disqualifiers 包含 not_theme_score_leader 与 symbol_risk_veto。",
+        "最新收盘 29.38，高于 MA20 27.258 与 MA60 26.6937，range_pos_60=0.8462。",
+        "symbol_risk.action_veto=true，pass_rate=0.000 over 3 evaluated calls，平均收益 -25.434%。"
+      ],
+      "risks": [
+        "不是同主题 leader，规则上不得转为行动状态。",
+        "历史样本虽少但亏损和符号选择错误严重。"
+      ],
+      "invalidation": "若继续不是能源主题 leader，或跌破 MA20，则从观察清单移除。",
+      "selection_source_theme": "energy",
+      "selection_reason": "报告讨论它是被 veto 的能源 peer；未选择它替代 0857.HK，因为没有证据表明它优于确定性同主题 leader。"
+    },
+    {
+      "symbol": "1299.HK",
+      "state": "watch_only",
+      "theme": "financials-insurance",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.38,
+      "rationale": "保险板块有反弹但得分低于行动门槛，等待重新站稳 MA60 后再评估。",
+      "evidence": [
+        "确定性排名得分 58.00，低于 min_action_score 65，qualification_flags 包含 below_action_score。",
+        "最新收盘 84.95，接近 MA20 84.9275，但仍低于 MA60 85.1517。",
+        "pct_change_1d=2.16，volume_ratio_20=1.2945，显示短线反弹但趋势确认不足。"
+      ],
+      "risks": [
+        "MA20 与 MA60 附近容易反复，趋势尚未确认。",
+        "金融保险 beta 受市场风险偏好和利率预期影响较大。"
+      ],
+      "invalidation": "若再次跌破 MA20 且 range_pos_60 回落，或得分持续低于 watch 阈值，则取消观察。",
+      "selection_source_theme": "financials-insurance",
+      "selection_reason": "它是金融保险主题唯一成员与主题 leader，但分数不支持行动，只能观察。"
+    },
+    {
+      "symbol": "0388.HK",
+      "state": "watch_only",
+      "theme": "financials-exchange",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.37,
+      "rationale": "HKEX 有放量反弹和行动分数，但历史 pass_rate 为 0 且被 symbol_risk_veto，不能买入。",
+      "evidence": [
+        "确定性排名得分 67.30，达到行动分数但 disqualifiers 包含 symbol_risk_veto。",
+        "最新收盘 419.8，高于 MA20 406.12 与 MA60 406.7173，volume_ratio_20=1.5564。",
+        "symbol_risk.action_veto=true，原因包含 pass_rate=0.000 over 2 evaluated calls。"
+      ],
+      "risks": [
+        "交易所股对市场成交和风险偏好敏感，反弹可能随大盘转弱而失效。",
+        "历史样本虽少但没有通过记录，边际优势不足。"
+      ],
+      "invalidation": "若跌回 MA60 下方或放量无法延续，则停止观察。",
+      "selection_source_theme": "financials-exchange",
+      "selection_reason": "它是金融交易所主题唯一 leader；风险否决覆盖行动信号，因此仅 watch_only。"
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "watch_only",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.34,
+      "rationale": "宽基 ETF 反弹确认市场 risk_on，但自身分数低于行动门槛且历史低通过率，暂不作为交易。",
+      "evidence": [
+        "确定性排名得分 56.60，qualification_flags 包含 below_action_score。",
+        "最新收盘 26.24，高于 MA20 25.8446 与 MA60 26.1507，volume_ratio_20=1.1216。",
+        "symbol_risk.action_veto=true，pass_rate=0.089 over 79 evaluated calls。"
+      ],
+      "risks": [
+        "宽基 ETF 的历史 bullish failure 较多，单日 risk_on 不能证明 T+3/T+5 延续。",
+        "若科技和互联网权重仍弱，指数反弹可能缺乏持续性。"
+      ],
+      "invalidation": "若重新跌破 MA60 或市场 breadth/成交不能延续，则取消观察。",
+      "selection_source_theme": "hong-kong-broad-market",
+      "selection_reason": "它是宽基市场唯一配置标的，用于确认大盘环境；分数和风险门槛不足以行动。"
+    },
+    {
+      "symbol": "0700.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.72,
+      "rationale": "腾讯仍处下行趋势，低于 MA20/MA60，且风险否决明显；risk_on 不能抵消个股弱势。",
+      "evidence": [
+        "确定性排名得分 0，regime_flags 包含 downtrend。",
+        "最新收盘 479.2，低于 MA20 498.1 与 MA60 526.9，range_pos_60=0.0364。",
+        "disqualifiers 包含 downtrend_regime、price_below_ma20_and_ma60、symbol_risk_veto。"
+      ],
+      "risks": [
+        "若互联网平台板块快速反转，avoid 可能错过早期反弹。",
+        "单日 risk_on 可能带来空头回补，但当前不构成趋势修复。"
+      ],
+      "invalidation": "若重新站上 MA20 且主题 leader 结构改善，再从 avoid 调回 watch_only。",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "报告点名为风险提示；它不是互联网平台 leader，且无证据优于 9618.HK。"
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.7,
+      "rationale": "小米所属 consumer-tech 主题得分为 0，价格低于均线并处下行趋势，避免追反弹。",
+      "evidence": [
+        "确定性排名得分 0，theme consumer-tech avg_score=0.0。",
+        "最新收盘 30.14，低于 MA20 31.574 与 MA60 33.5827，range_pos_60=0.0306。",
+        "disqualifiers 包含 downtrend_regime、range_pos_60_below_0_12、price_below_ma20_and_ma60、symbol_risk_veto。"
+      ],
+      "risks": [
+        "成交量 volume_ratio_20=1.1533 可能带来短线波动。",
+        "若板块突然放量站回 MA20，avoid 判断需要更新。"
+      ],
+      "invalidation": "若站回 MA20 并且 consumer-tech 主题得分恢复到 watch 阈值以上，则改为观察。",
+      "selection_source_theme": "consumer-tech",
+      "selection_reason": "它是 consumer-tech 唯一成员和主题 leader，但主题与个股均不合格，因此作为 avoid 诊断。"
+    },
+    {
+      "symbol": "1177.HK",
+      "state": "avoid",
+      "theme": "healthcare-pharma",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.71,
+      "rationale": "医药主题弱势，1177.HK 低于 MA20/MA60 且得分为 0，继续回避。",
+      "evidence": [
+        "确定性排名得分 0，healthcare-pharma 主题 avg_score=0.0。",
+        "最新收盘 5.46，低于 MA20 5.9 与 MA60 6.1472，range_pos_60=-0.0144。",
+        "disqualifiers 包含 downtrend_regime、range_pos_60_below_0_12、price_below_ma20_and_ma60、symbol_risk_veto。"
+      ],
+      "risks": [
+        "低位个股可能出现技术性反抽，但趋势证据不足。",
+        "主题整体为 0 分，单只个股反弹持续性存疑。"
+      ],
+      "invalidation": "若站回 MA20 且 healthcare-pharma 主题不再为 0 分，则从 avoid 调整为 watch_only。",
+      "selection_source_theme": "healthcare-pharma",
+      "selection_reason": "它是 healthcare-pharma 主题 leader，但 leader 本身不合格，作为 avoid 诊断保留。"
+    },
+    {
+      "symbol": "1093.HK",
+      "state": "avoid",
+      "theme": "healthcare-pharma",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.69,
+      "rationale": "石药同属弱势医药主题，非主题 leader 且处下行趋势，不应行动。",
+      "evidence": [
+        "确定性排名得分 0，theme_rank=2/2，disqualifiers 包含 not_theme_score_leader 与 symbol_risk_veto。",
+        "最新收盘 8.36，低于 MA20 9.123 与 MA60 9.374，range_pos_60=0.0791。",
+        "symbol_risk.action_veto=true，pass_rate=0.000 over 4 evaluated calls，且 records include symbol_selection_error。"
+      ],
+      "risks": [
+        "若医药板块整体超跌反弹，可能短线跑赢 avoid 判断。",
+        "非 leader 身份意味着即使主题修复，也需先比较 1177.HK 等同主题标的。"
+      ],
+      "invalidation": "若重新站上 MA20、摆脱 downtrend，并能解释为何优于主题 leader 1177.HK，才可改为观察。",
+      "selection_source_theme": "healthcare-pharma",
+      "selection_reason": "报告与 1177.HK 一并点名为弱势诊断；它不是主题 leader，不能转为行动状态。"
+    }
+  ]
+}

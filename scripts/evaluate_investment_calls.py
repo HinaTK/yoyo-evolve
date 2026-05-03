@@ -114,12 +114,17 @@ def peer_return_stats(
     if selected is None:
         return {}
     sorted_returns = sorted(returns, key=lambda item: item[1], reverse=True)
+    best_symbol, best_return = sorted_returns[0]
+    median_return = statistics.median(value for _symbol, value in returns)
     return {
         "peer_count": len(returns),
-        "peer_median_return_pct": round(statistics.median(value for _symbol, value in returns), 3),
-        "peer_best_symbol": sorted_returns[0][0],
-        "peer_best_return_pct": round(sorted_returns[0][1], 3),
+        "peer_median_return_pct": round(median_return, 3),
+        "peer_best_symbol": best_symbol,
+        "peer_best_return_pct": round(best_return, 3),
         "peer_rank": next(index + 1 for index, (symbol, _value) in enumerate(sorted_returns) if symbol == selected_symbol),
+        "selected_vs_best_bps": round((selected - best_return) * 100, 1),
+        "selected_vs_median_bps": round((selected - median_return) * 100, 1),
+        "same_theme_best_missed": best_symbol != selected_symbol and best_return > selected + 1.0,
     }
 
 
@@ -129,9 +134,12 @@ def classify_learning(
     verdict: str,
     peer_median_return_pct: float | None = None,
     peer_count: int = 0,
+    same_theme_best_missed: bool = False,
 ) -> str | None:
     confidence = float(call.get("confidence", 0.0))
     state = call.get("state")
+    if same_theme_best_missed:
+        return "symbol_selection_error"
     if peer_count >= 2 and peer_median_return_pct is not None and return_pct < peer_median_return_pct - 1.0:
         return "symbol_selection_error"
     if verdict == "fail" and peer_median_return_pct is not None:
@@ -202,6 +210,7 @@ def evaluate_calls(
                     verdict,
                     peer_stats.get("peer_median_return_pct"),
                     int(peer_stats.get("peer_count", 0)),
+                    bool(peer_stats.get("same_theme_best_missed")),
                 )
                 record = {
                     "call_date": payload["date"],
@@ -298,7 +307,8 @@ def write_markdown(summary_path: pathlib.Path, summary: dict[str, Any], evaluati
             lines.append(
                 f"- `{item['call_date']}` `{item['session']}` `{item['symbol']}` `{item['theme']}` T+{item['window_days']}: "
                 f"{item['return_pct']}% vs peer median {item.get('peer_median_return_pct')}%, "
-                f"best `{item.get('peer_best_symbol')}` {item.get('peer_best_return_pct')}%"
+                f"best `{item.get('peer_best_symbol')}` {item.get('peer_best_return_pct')}%, "
+                f"selected_vs_best_bps={item.get('selected_vs_best_bps')}, missed_best={item.get('same_theme_best_missed')}"
             )
     else:
         lines.append("- No recent same-theme symbol-selection errors detected.")
@@ -318,6 +328,7 @@ def main() -> int:
     parser.add_argument("--snapshot-dir", default="data/snapshots")
     parser.add_argument("--summary-md", default="research/evaluations/latest.md")
     parser.add_argument("--summary-json", default="research/evaluations/latest.json")
+    parser.add_argument("--records-json", default="research/evaluations/latest_records.json")
     parser.add_argument("--windows", nargs="+", type=int, default=[3, 5, 10, 20], help="Close/historical evaluation windows.")
     parser.add_argument("--intraday-windows", nargs="+", type=int, default=[0, 1, 3], help="Morning/midday evaluation windows, where 0 means same-day close.")
     args = parser.parse_args()
@@ -326,10 +337,23 @@ def main() -> int:
     snapshot_dir = pathlib.Path(args.snapshot_dir)
     summary_md = pathlib.Path(args.summary_md)
     summary_json = pathlib.Path(args.summary_json)
+    records_json = pathlib.Path(args.records_json)
     summary_md.parent.mkdir(parents=True, exist_ok=True)
+    records_json.parent.mkdir(parents=True, exist_ok=True)
 
     evaluations, summary = evaluate_calls(calls_dir, snapshot_dir, args.windows, args.intraday_windows)
     summary_json.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    records_json.write_text(
+        json.dumps(
+            {
+                "generated_at": summary["generated_at"],
+                "records": evaluations,
+                "record_count": len(evaluations),
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     write_markdown(summary_md, summary, evaluations)
     print(f"Posterior evaluation summary written to {summary_md}")
     return 0

@@ -1,0 +1,40 @@
+{
+  "date": "2026-01-09",
+  "session": "historical",
+  "generated_at": "2026-01-09T11:07:00Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "0005.HK",
+      "state": "watch_only",
+      "theme": "financials-bank",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.62,
+      "rationale": "汇丰是本轮确定性排名中唯一未被风险否决的行动候选，但缺少明确超过100个基点最低边际门槛的预期收益证据，因此先列为观察而非买入。",
+      "evidence": [
+        "确定性排名将0005.HK列为唯一actionable_candidates，score为71.01且qualified_for_action为true。",
+        "价格141.0高于MA20的137.425和MA60的133.1856，且MA20高于MA60，趋势结构偏正面。",
+        "regime_flags包含uptrend，range_pos_60为0.8805，处于60日区间偏高位置。",
+        "symbol_risk.action_veto为false，当前没有历史风险否决原因。",
+        "参数优化未推广新策略，主动策略仍保持l5_mvp_conservative_v1，说明应维持保守执行。"
+      ],
+      "risks": [
+        "volume_ratio_20仅0.7907，量能确认不足，突破延续性需要进一步验证。",
+        "range_pos_60为0.8805，短线位置偏高，追价容易承受回撤。",
+        "成本门槛要求预期波段边际同时超过往返成本35个基点和最低100个基点，但输入未给出足够明确的预期edge。",
+        "参数优化样本质量为relaxed_fallback且平均净收益为负，系统层面仍需保守。"
+      ],
+      "invalidation": "若收盘跌回MA20下方，或金融银行主题强度转弱并失去同主题领先地位，则取消该观察。",
+      "selection_source_theme": "financials-bank",
+      "selection_reason": "0005.HK是financials-bank主题唯一成员，也是唯一通过行动资格且未触发symbol_risk_veto的候选；没有同主题替代品需要比较。"
+    }
+  ]
+}

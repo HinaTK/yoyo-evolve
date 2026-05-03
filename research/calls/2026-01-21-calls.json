@@ -1,0 +1,152 @@
+{
+  "date": "2026-01-21",
+  "session": "historical",
+  "generated_at": "2026-01-21T01:01:00Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "2800.HK",
+      "state": "watch_only",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.43,
+      "rationale": "大市ETF修复到均线附近且市场风险状态偏积极，但历史命中率与成本门槛不足以支持行动。",
+      "evidence": [
+        "排名分数56.60，高于观察阈值45但低于行动阈值65。",
+        "收盘26.24，高于20日均线25.8446和60日均线26.1507，1日上涨1.74%。",
+        "成交量为20日均量的1.1216倍，市场摘要为risk_on。",
+        "symbol_risk_veto为true，96次评估调用通过率仅0.073，且近期有不利失误。"
+      ],
+      "risks": [
+        "历史信号质量偏弱，近期同标的失误提示追涨风险。",
+        "分数低于行动阈值，预期摆动边际未证明超过往返成本35bps和最低100bps边际门槛。"
+      ],
+      "invalidation": "若重新跌回20日和60日均线下方，或风险状态转弱，则从观察名单移除。",
+      "selection_source_theme": "hong-kong-broad-market",
+      "selection_reason": "该主题仅有2800.HK，作为宽基确认工具保留观察；因风险否决和低行动分数不升级。"
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.57,
+      "rationale": "阿里当日反弹较强，但在同主题中不是确定性领导者，且历史风险否决明确，当前应回避而非追入。",
+      "evidence": [
+        "1日上涨3.24%，收盘130.60高于20日均线127.52，但仍低于60日均线138.9633。",
+        "排名分数44.75，低于观察阈值45并低于行动阈值65。",
+        "同主题领导者为9618.HK，9988.HK为theme_rank 2且is_theme_leader=false。",
+        "symbol_risk_veto为true，90次评估调用通过率0.133，并记录近期不利失误和多次symbol_selection_error。"
+      ],
+      "risks": [
+        "短线反弹可能只是区间内修复，未完成60日均线确认。",
+        "历史选择错误较多，若仅因单日涨幅选择，容易重复追涨失误。"
+      ],
+      "invalidation": "只有在分数升至观察阈值以上、重新站上60日均线、风险否决解除且相对同主题领导者更优时，才重新评估为观察。",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "该标的是今日 watchlist 名称，但排名低于同主题领导者9618.HK且存在风险否决，因此不选作行动标的。"
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.52,
+      "rationale": "恒生科技ETF虽小幅修复并为主题内分数较高者，但整体科技主题未达观察阈值且历史风险否决存在。",
+      "evidence": [
+        "排名分数44.39，低于观察阈值45且低于行动阈值65。",
+        "收盘10.31高于20日均线10.2455，但低于60日均线10.6875。",
+        "hang-seng-tech主题平均分43.52，主题领导者3067.HK仍未达观察资格。",
+        "symbol_risk_veto为true，94次评估调用通过率0.064，记录重复symbol_selection_error。"
+      ],
+      "risks": [
+        "科技ETF仍处区间偏弱位置，60日均线压制未解除。",
+        "历史通过率低，可能继续出现反弹失败。"
+      ],
+      "invalidation": "若主题平均分升至观察阈值以上、3067.HK站上60日均线且风险否决解除，再重新纳入观察。",
+      "selection_source_theme": "hang-seng-tech",
+      "selection_reason": "在3033.HK与3067.HK中，3067.HK是确定性主题领导者；但未达观察阈值且有风险否决，所以只能列为回避诊断。"
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.54,
+      "rationale": "3033.HK跟随科技ETF反弹，但分数低于主题领导者且仍未通过观察和行动门槛。",
+      "evidence": [
+        "排名分数42.65，低于观察阈值45和行动阈值65。",
+        "收盘4.81高于20日均线4.7717，但低于60日均线4.9835。",
+        "同主题领导者为3067.HK，3033.HK为theme_rank 2且is_theme_leader=false。",
+        "symbol_risk_veto为true，94次评估调用通过率0.106，并记录重复symbol_selection_error。"
+      ],
+      "risks": [
+        "同主题内不是最优表达，可能继续落后3067.HK。",
+        "低通过率和低分数说明信号边际不足。"
+      ],
+      "invalidation": "若3033.HK分数超过3067.HK、站上60日均线且风险否决解除，再考虑从回避改为观察。",
+      "selection_source_theme": "hang-seng-tech",
+      "selection_reason": "该标的是今日 watchlist 名称；因不是同主题领导者且无优于3067.HK的证据，保持非行动回避。"
+    },
+    {
+      "symbol": "0700.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.66,
+      "rationale": "腾讯处于明确下行结构和60日低位附近，且历史风险否决强，不应因单日小涨转为观察或行动。",
+      "evidence": [
+        "排名分数为0，低于观察阈值45和行动阈值65。",
+        "收盘479.20低于20日均线498.10和60日均线526.90，regime_flags包含downtrend。",
+        "range_pos_60为0.0364，处于60日区间低位。",
+        "symbol_risk_veto为true，95次评估调用通过率0.021，并有历史不利阈值突破和多次symbol_selection_error。"
+      ],
+      "risks": [
+        "下行趋势中反弹容易失败。",
+        "同主题领导者为9618.HK，腾讯并非当前最强表达。"
+      ],
+      "invalidation": "只有重新站上20日和60日均线、range_pos_60回到建设性区间且风险否决解除，才取消回避。",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "该标的是今日 watchlist 名称；相对同主题领导者9618.HK明显落后，且无选择它优于领导者的证据。"
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.64,
+      "rationale": "小米虽然成交量确认，但趋势、区间位置和历史风险均不支持观察或行动。",
+      "evidence": [
+        "排名分数为0，低于观察阈值45和行动阈值65。",
+        "收盘30.14低于20日均线31.574和60日均线33.5827，regime_flags包含downtrend。",
+        "range_pos_60为0.0306，处于60日区间低位。",
+        "symbol_risk_veto为true，95次评估调用通过率0.179，并出现历史不利阈值突破。"
+      ],
+      "risks": [
+        "下行趋势尚未修复，低位反弹可能继续失败。",
+        "consumer-tech主题平均分为0，缺乏主题确认。"
+      ],
+      "invalidation": "若价格重新站上20日和60日均线、主题分数恢复到观察阈值以上且风险否决解除，再重新评估。",
+      "selection_source_theme": "consumer-tech",
+      "selection_reason": "该主题仅有1810.HK，但主题和个股分数均为0，按规则保持回避。"
+    }
+  ]
+}

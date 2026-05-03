@@ -1,0 +1,47 @@
+# Optimization policy for Level 5 MVP. This file permits only conservative,
+# research-only ranking parameter search and never enables automatic trading.
+
+active_strategy = "config/active_strategy.toml"
+snapshot_registry = "data/snapshots/registry.json"
+snapshot_dir = "data/snapshots"
+output_dir = "research/experiments"
+enabled = true
+
+# `actionable_top_n` is the small set eligible for upgrade consideration.
+# `diagnostic_top_n` is the wider observation/explanation layer. `top_n`
+# remains as a legacy alias for diagnostic_top_n.
+actionable_top_n = 1
+diagnostic_top_n = 3
+top_n = 3
+horizon_days = 3
+round_trip_bps = 35
+benchmark_symbol = "2800.HK"
+min_watch_score = 45
+min_action_score = 65
+candidate_policy = "relaxed"
+min_samples = 30
+min_improvement_bps = 25
+min_win_rate = 0.45
+max_adverse_limit_pct = -8.0
+max_adverse_breach_rate = 0.25
+walk_forward_windows = 3
+
+[promotion]
+enabled = true
+sessions = ["close", "historical"]
+
+[search]
+trend_weight = [0.40, 0.45, 0.50]
+momentum_weight = [0.25, 0.30, 0.35]
+range_weight = [0.10, 0.15, 0.20]
+risk_penalty_weight = [1.00, 1.15, 1.30]
+
+[safety_invariants]
+automatic_trading_enabled = false
+forbid_automatic_trading = true
+forbid_cost_gate_reduction = true
+forbid_edge_gate_reduction = true
+forbid_history_tampering = true
+forbid_snapshot_mutation = true
+auto_select_active_research_strategy = true
+research_only = true

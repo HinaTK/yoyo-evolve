@@ -1,0 +1,40 @@
+{
+  "date": "2025-12-12",
+  "session": "historical",
+  "generated_at": "2025-12-12T08:15:00Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "0941.HK",
+      "state": "buy_candidate",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.66,
+      "rationale": "中国移动是本轮风险偏弱环境中少数仍满足行动门槛的防御型趋势标的：价格高于MA20和MA60，MA20高于MA60，主题内排名第一且没有后验风险否决。",
+      "evidence": [
+        "确定性排名将0941.HK列为唯一actionable_candidate，评分76.65，高于65.0行动门槛。",
+        "最新收盘价84.75港元，1日上涨0.41%，在risk_off市场中保持正收益。",
+        "价格高于MA20 81.1925和MA60 79.7225，且MA20高于MA60，趋势结构完整。",
+        "60日区间位置1.0507，显示相对强势突破；20日成交量比率0.9838，接近均量。",
+        "同主题内0941.HK为telecom-dividend主题领导者，优于0728.HK，且无symbol_risk否决。"
+      ],
+      "risks": [
+        "60日区间位置已高于1.0，短线可能存在追高和均值回归压力。",
+        "市场总体risk_off，若防御板块补跌，个股趋势也可能失效。",
+        "成交量仅接近均量而非明显放量，突破确认强度不是最高。",
+        "电信股偏防御和股息属性，若市场突然切回高贝塔成长风格，相对收益可能下降。"
+      ],
+      "invalidation": "若收盘跌破MA20 81.1925或主题领导地位被0728.HK取代，同时市场risk_off继续扩散，则取消buy_candidate并降为watch_only。",
+      "selection_source_theme": "telecom-dividend",
+      "selection_reason": "在telecom-dividend主题中，0941.HK评分76.65、主题排名第一、价格同时高于MA20和MA60且无风险否决；0728.HK虽上涨0.78%但评分59.38、低于行动门槛且不是主题领导者，因此不升级为行动标的。"
+    }
+  ]
+}

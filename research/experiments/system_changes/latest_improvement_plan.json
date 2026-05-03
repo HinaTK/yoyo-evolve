@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-04-27T13:59:11Z",
+  "task_count": 3,
+  "tasks": [
+    {
+      "id": "investment_task_01",
+      "title": "Align backtest candidate policy with production recommendation gates",
+      "evidence": [
+        "sample_quality=relaxed_fallback",
+        "strict_sample_count=1",
+        "relaxed_sample_count=196"
+      ],
+      "objective": "Keep relaxed fallback useful for diagnostics while preventing below-threshold backtest samples from being confused with promotable production recommendations.",
+      "validation": [
+        "python -m py_compile scripts/backtest_investment_strategy.py scripts/optimize_investment_params.py",
+        "python -m unittest tests/test_investment_level5_level6.py"
+      ]
+    },
+    {
+      "id": "investment_task_02",
+      "title": "Align diagnostic and qualified candidate reporting",
+      "evidence": [
+        "diagnostic_sample_count=196",
+        "qualified_sample_count=1"
+      ],
+      "objective": "Ensure production prompts and backtests use the same qualified candidate gate, while diagnostic-only rows remain visibly non-promotable.",
+      "validation": [
+        "python scripts/backtest_investment_strategy.py",
+        "python -m unittest tests/test_investment_level5_level6.py"
+      ]
+    },
+    {
+      "id": "investment_task_03",
+      "title": "Add adverse-move protection to research ranking",
+      "evidence": [
+        "latest_optimization max_adverse_pct=-11.729",
+        "latest_backtest avg_alpha_pct=-7.614"
+      ],
+      "objective": "Add or test drawdown-aware research filters without reducing cost, edge, or exposure gates.",
+      "validation": [
+        "python scripts/backtest_investment_strategy.py",
+        "python -m unittest tests/test_investment_level5_level6.py"
+      ]
+    }
+  ]
+}

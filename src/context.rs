@@ -103,6 +103,13 @@ pub fn get_recently_changed_files(max_files: usize) -> Option<Vec<String>> {
 /// Appends project file listing, recently changed files, git status, and memories
 /// when available.
 pub fn load_project_context() -> Option<String> {
+    if std::env::var("YOYO_SKIP_PROJECT_CONTEXT")
+        .map(|value| value == "1" || value.eq_ignore_ascii_case("true"))
+        .unwrap_or(false)
+    {
+        return None;
+    }
+
     let mut context = String::new();
     let mut found = Vec::new();
     for name in PROJECT_CONTEXT_FILES {

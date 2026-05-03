@@ -1,0 +1,158 @@
+{
+  "date": "2026-01-12",
+  "session": "historical",
+  "generated_at": "2026-01-12T13:25:00Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "0700.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.72,
+      "rationale": "腾讯处于下行结构且排名分数为零，当前不符合保守策略的观察或行动门槛。",
+      "evidence": [
+        "最新收盘479.2低于MA20 498.1和MA60 526.9，regime_flags包含downtrend。",
+        "60日区间位置仅0.0364，低于0.12风险阈值。",
+        "确定性排名score为0，qualified_for_watch=false，qualified_for_action=false。",
+        "同主题确定性领先标的是9618.HK，腾讯theme_rank为4/5。",
+        "symbol_risk触发action_veto，历史评估pass_rate=0.025 over 80 evaluated calls。"
+      ],
+      "risks": [
+        "互联网平台板块短线风险偏好改善可能带来技术性反弹。",
+        "大型权重股若受指数资金推动，价格可能先反弹再重新验证趋势。"
+      ],
+      "invalidation": "只有当价格重新站上MA20和MA60、60日区间位置显著修复，并且确定性排名至少达到watch门槛且symbol_risk不再否决时，才取消avoid。",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "列入是因为其在今日watchlist中；相对同主题领先者9618.HK，腾讯趋势和风险记录更弱，因此仅作为回避诊断而非行动标的。"
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.66,
+      "rationale": "阿里巴巴单日上涨但确定性分数低于观察门槛，且同主题并非领先标的，暂不追高。",
+      "evidence": [
+        "最新收盘130.6，单日上涨3.24%，但仍低于MA60 138.9633。",
+        "排名score为44.75，低于min_watch_score 45.0。",
+        "qualification_flags包含below_watch_score和same_theme_non_leader。",
+        "disqualifiers包含not_theme_score_leader和symbol_risk_veto。",
+        "symbol_risk显示pass_rate=0.160 over 75 evaluated calls，且存在近期误判和symbol_selection_error记录。"
+      ],
+      "risks": [
+        "若平台经济主题继续扩散，低位反弹可能延续。",
+        "价格已站上MA20，短线动量可能造成等待成本。"
+      ],
+      "invalidation": "若阿里巴巴升至同主题第一、score超过watch门槛并解除symbol_risk_veto，同时价格站稳MA60，则从avoid改为watch_only重新评估。",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "列入是因为其在今日watchlist中；虽然单日涨幅强，但确定性同主题领先者为9618.HK，阿里巴巴未能证明优于主题领先者。"
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.74,
+      "rationale": "小米处于下行趋势且分数为零，即使成交量确认也不足以抵消趋势和风险否决。",
+      "evidence": [
+        "最新收盘30.14低于MA20 31.574和MA60 33.5827。",
+        "regime_flags包含downtrend，60日区间位置仅0.0306。",
+        "排名score为0，qualified_for_watch=false，qualified_for_action=false。",
+        "disqualifiers包含downtrend_regime、range_pos_60_below_0_12、price_below_ma20_and_ma60和symbol_risk_veto。",
+        "symbol_risk显示pass_rate=0.212 over 80 evaluated calls，并有-8.0%不利阈值突破记录。"
+      ],
+      "risks": [
+        "消费科技若出现事件催化，超跌反弹可能较快。",
+        "成交量比率1.1533显示交易活跃，短线波动可能放大。"
+      ],
+      "invalidation": "若价格重新站上MA20和MA60、区间位置脱离底部，并且排名分数恢复到watch门槛以上且风险否决解除，则停止avoid。",
+      "selection_source_theme": "consumer-tech",
+      "selection_reason": "列入是因为其在今日watchlist中；该主题仅有小米一个配置标的，但趋势和风险门槛均不支持行动或观察升级。"
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "watch_only",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.58,
+      "rationale": "盈富基金反映大市风险偏好改善，达到观察条件但未达到行动分数，且历史风险否决仍在。",
+      "evidence": [
+        "市场摘要risk_state为risk_on，ETF平均单日涨幅为1.7%。",
+        "2800.HK最新收盘26.24，单日上涨1.74%，高于MA20 25.8446和MA60 26.1507。",
+        "排名score为56.6，高于min_watch_score 45.0但低于min_action_score 65.0。",
+        "qualification_flags包含score_meets_watch_threshold、price_above_ma20、price_above_ma60和volume_confirmed。",
+        "qualified_for_action=false，symbol_risk触发action_veto，历史pass_rate=0.086 over 81 evaluated calls。"
+      ],
+      "risks": [
+        "分数未超过行动门槛，预期边际不足以覆盖成本门槛和最低edge要求。",
+        "symbol_risk记录显示近期存在不利回报，可能反映宽基信号质量不足。"
+      ],
+      "invalidation": "若跌回MA20下方或risk_state转弱，则移出watch_only；若score超过65且历史风险否决解除，再评估是否可行动。",
+      "selection_source_theme": "hong-kong-broad-market",
+      "selection_reason": "作为宽基ETF且为该主题唯一标的，可用于观察市场风险偏好；但无actionable_candidates支持，因此不升级为买入。"
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.64,
+      "rationale": "3033.HK反弹仍未达到观察门槛，且不是恒生科技ETF同主题分数领先者。",
+      "evidence": [
+        "最新收盘4.81，单日上涨1.78%，高于MA20 4.7717但低于MA60 4.9835。",
+        "排名score为42.65，低于min_watch_score 45.0。",
+        "qualification_flags包含below_watch_score和same_theme_non_leader。",
+        "disqualifiers包含not_theme_score_leader和symbol_risk_veto。",
+        "同主题领先者为3067.HK，3033.HK theme_rank为2/2。"
+      ],
+      "risks": [
+        "恒生科技板块若继续修复，ETF可能同步上涨。",
+        "价格已站上MA20，短线反弹可能延续但确认不足。"
+      ],
+      "invalidation": "若3033.HK超过同主题3067.HK成为主题领先者、score升破watch门槛并解除symbol_risk_veto，则从avoid改为watch_only。",
+      "selection_source_theme": "hang-seng-tech",
+      "selection_reason": "列入是因为其在今日watchlist中；同主题存在分数更高的3067.HK，且3033.HK未解释为何优于主题领先者。"
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.62,
+      "rationale": "3067.HK虽是恒生科技ETF主题内领先者，但分数仍低于观察门槛且风险否决存在。",
+      "evidence": [
+        "最新收盘10.31，单日上涨1.58%，高于MA20 10.2455但低于MA60 10.6875。",
+        "排名score为44.39，略低于min_watch_score 45.0，低于min_action_score 65.0。",
+        "qualification_flags包含below_watch_score、price_above_ma20和volume_confirmed。",
+        "qualified_for_watch=false，qualified_for_action=false。",
+        "symbol_risk触发action_veto，pass_rate=0.076 over 79 evaluated calls。"
+      ],
+      "risks": [
+        "主题内分数接近观察线，若科技板块继续上行，可能较快重新进入观察区。",
+        "当前低于MA60，反弹仍可能只是区间内修复。"
+      ],
+      "invalidation": "若收盘重新站上MA60、score升至45以上并解除风险否决，则从avoid改为watch_only；若进一步超过65且满足成本edge门槛，再评估行动。",
+      "selection_source_theme": "hang-seng-tech",
+      "selection_reason": "列入是因为其在今日watchlist中且为恒生科技ETF主题分数领先者；但领先不足以越过watch和action门槛。"
+    }
+  ]
+}

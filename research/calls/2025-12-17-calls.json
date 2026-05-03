@@ -1,0 +1,256 @@
+{
+  "date": "2025-12-17",
+  "session": "historical",
+  "generated_at": "2026-04-28T12:17:31Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "0857.HK",
+      "state": "watch_only",
+      "theme": "energy",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.58,
+      "rationale": "中国石油是能源主题的量化第一名，但历史后验风险触发行动否决，只能观察，不能转为买入。",
+      "evidence": [
+        "确定性排名得分81.90，趋势分100，动量分69.15，价格高于20日和60日均线。",
+        "60日区间位置1.0769且成交量为20日均量的1.2254倍，短期相对强势明确。",
+        "qualified_for_action=false，disqualifiers包含symbol_risk_veto，历史5次评估通过率仅0.200且平均回报为-11.219%。"
+      ],
+      "risks": [
+        "能源主题虽强，但该标的历史选择错误和不利回撤记录较重。",
+        "60日区间位置已高于1，追高后的均值回归风险上升。"
+      ],
+      "invalidation": "若价格跌回20日均线下方或能源主题不再领先，同时后验风险否决仍未解除，则继续不行动。",
+      "selection_source_theme": "energy",
+      "selection_reason": "它是能源主题得分领袖，优于同主题0883.HK和0386.HK；但symbol_risk_veto阻止任何行动性状态。"
+    },
+    {
+      "symbol": "0941.HK",
+      "state": "watch_only",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.55,
+      "rationale": "中国移动趋势质量高且为电信红利主题领袖，但历史通过率为零，当前只适合观察。",
+      "evidence": [
+        "确定性排名得分76.46，趋势分100，价格高于20日和60日均线，20日均线高于60日均线。",
+        "成交量为20日均量的1.0334倍，60日区间位置1.0362，显示强势延续。",
+        "qualified_for_action=false，symbol_risk.action_veto=true，原因是4次评估通过率0.000。"
+      ],
+      "risks": [
+        "后验记录显示该标的此前信号质量不足，不能忽视样本虽少但方向不佳的风险。",
+        "防御红利股强势可能来自避险轮动，若市场风险偏好恢复，资金可能切换。"
+      ],
+      "invalidation": "若跌破20日均线或电信红利主题强度回落，观察名单降级；除非后验风险改善，否则不升级为买入。",
+      "selection_source_theme": "telecom-dividend",
+      "selection_reason": "它是电信红利主题得分领袖，强于同主题0728.HK；但symbol_risk_veto使状态保持非行动。"
+    },
+    {
+      "symbol": "0006.HK",
+      "state": "watch_only",
+      "theme": "utilities-defensive",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.53,
+      "rationale": "电能实业处于防御公用事业主题强势位置，但样本后验仍否决行动。",
+      "evidence": [
+        "确定性排名得分75.51，趋势分100，价格高于20日和60日均线，20日均线高于60日均线。",
+        "60日区间位置1.0092，成交量为20日均量的1.0304倍，技术形态偏强。",
+        "qualified_for_action=false，symbol_risk.action_veto=true，1次评估通过率0.000且平均回报-0.920%。"
+      ],
+      "risks": [
+        "公用事业强势可能只是风险偏好下降时的防御轮动，不一定有足够波段边际。",
+        "后验样本少但负面，不能用单日强势抵消风险规则。"
+      ],
+      "invalidation": "若价格跌破20日均线或防御主题不再领先，则从观察名单移除；行动否决解除前不买入。",
+      "selection_source_theme": "utilities-defensive",
+      "selection_reason": "它是公用事业主题得分领袖，强于0002.HK；但symbol_risk_veto使其只能作为观察诊断。"
+    },
+    {
+      "symbol": "9618.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.52,
+      "rationale": "京东是互联网平台中唯一相对健康的主题领袖，但得分低于行动门槛，不能升级。",
+      "evidence": [
+        "确定性排名得分63.25，低于65行动门槛但高于45观察门槛。",
+        "价格高于20日和60日均线，20日均线高于60日均线，regime_flags为uptrend。",
+        "同主题腾讯、阿里、快手等均处于downtrend或得分为0，京东是该主题leader。"
+      ],
+      "risks": [
+        "互联网平台主题整体平均得分只有16.40，单一强势股可能难以脱离板块压力。",
+        "当日下跌1.45%，动量分仅37.07，突破延续证据还不充分。"
+      ],
+      "invalidation": "若跌破20日均线或得分继续低于观察门槛，则取消观察；只有得分超过行动门槛且成本门支持时才可升级。",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "它是互联网平台主题得分领袖，明显优于0700.HK、9988.HK、3690.HK和1024.HK；但below_action_score限制为watch_only。"
+    },
+    {
+      "symbol": "0388.HK",
+      "state": "watch_only",
+      "theme": "financials-exchange",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.46,
+      "rationale": "港交所刚好进入观察阈值，但处于区间状态且行动分不足，只适合低优先级观察。",
+      "evidence": [
+        "确定性排名得分47.16，高于45观察门槛但低于65行动门槛。",
+        "价格407.6略高于20日均线405.27和60日均线406.8653，60日区间位置0.4559。",
+        "regime_flags为range，成交量为20日均量的0.872，趋势确认不强。"
+      ],
+      "risks": [
+        "区间行情中信号边际弱，容易反复跌回均线下方。",
+        "市场风险状态为risk_off，交易所类资产可能受成交和风险偏好拖累。"
+      ],
+      "invalidation": "若收盘跌破20日和60日均线，或得分跌破45，则移出观察。",
+      "selection_source_theme": "financials-exchange",
+      "selection_reason": "它是金融交易所主题唯一成员且qualified_for_watch=true；但below_action_score使其不能成为行动候选。"
+    },
+    {
+      "symbol": "0700.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.72,
+      "rationale": "腾讯在当前快照中处于下行趋势且后验风险否决，不应作为今日波段候选。",
+      "evidence": [
+        "得分为0，regime_flags为downtrend，价格473.8低于20日均线499.19和60日均线528.995。",
+        "60日区间位置为-0.0335，显示跌破近期区间下沿。",
+        "symbol_risk.action_veto=true，54次评估通过率0.037且平均回报-1.879%。"
+      ],
+      "risks": [
+        "大型平台股可能因政策或业绩消息快速反弹，空仓观察会错过急涨。",
+        "成交量仍高于20日均量，波动可能加大。"
+      ],
+      "invalidation": "若重新站上20日均线并解除downtrend，同时相对同主题领袖京东的得分差距收窄，再重新评估。",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "它不是互联网平台主题领袖，得分和趋势均显著弱于9618.HK，且存在symbol_risk_veto。"
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "avoid",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.7,
+      "rationale": "阿里巴巴处于下行趋势并低于关键均线，后验风险也不支持行动。",
+      "evidence": [
+        "得分为0，regime_flags为downtrend，价格126.5低于20日均线127.345和60日均线139.6083。",
+        "当日跌幅2.84%，动量分25.93，短期相对弱。",
+        "symbol_risk.action_veto=true，55次评估通过率0.218且平均回报-0.165%。"
+      ],
+      "risks": [
+        "若互联网平台整体反弹，阿里可能出现超跌修复。",
+        "60日区间位置0.1455尚未极端破位，短线可能震荡。"
+      ],
+      "invalidation": "若价格重新站上20日均线和60日均线，并且得分超过观察门槛，再从avoid改为watch_only。",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "同主题领袖为9618.HK；阿里不是主题领袖且被downtrend和symbol_risk_veto共同否决。"
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.73,
+      "rationale": "小米当日大跌且跌破区间，趋势和后验风险都不支持今日行动。",
+      "evidence": [
+        "得分为0，regime_flags为downtrend，价格29.92低于20日均线31.7和60日均线33.671。",
+        "当日跌幅3.79%，成交量为20日均量的1.4645倍，属于放量下跌。",
+        "60日区间位置-0.1149，symbol_risk.action_veto=true且历史平均回报-1.722%。"
+      ],
+      "risks": [
+        "放量下跌后可能有技术反抽，但当前证据不足以提前参与。",
+        "单一消费科技主题缺少同主题替代标的，可能低估基本面催化。"
+      ],
+      "invalidation": "若重新站上20日均线并且放量下跌后出现持续修复，再重新进入观察。",
+      "selection_source_theme": "consumer-tech",
+      "selection_reason": "它是consumer-tech唯一成员，但趋势得分和风险规则均不合格，因此选择避免而不是行动。"
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "avoid",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.68,
+      "rationale": "盈富基金代表港股大盘，但市场状态为risk_off且ETF自身处于下行趋势。",
+      "evidence": [
+        "得分为0，regime_flags为downtrend，价格25.98低于20日均线25.993和60日均线26.36。",
+        "市场摘要显示risk_state为risk_off，ETF平均跌幅为-1.847%。",
+        "symbol_risk.action_veto=true，55次评估通过率0.127。"
+      ],
+      "risks": [
+        "大盘ETF可能因政策或流动性刺激快速修复。",
+        "跌幅仅0.99%，当前更像弱势延续而非恐慌出清。"
+      ],
+      "invalidation": "若重新站上20日和60日均线且risk_state不再为risk_off，再重新评估为watch_only。",
+      "selection_source_theme": "hong-kong-broad-market",
+      "selection_reason": "它是港股大盘主题唯一成员，但downtrend、均线破位和symbol_risk_veto使其不合格。"
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.71,
+      "rationale": "恒生科技ETF主题处于明显下行，当前没有足够边际覆盖成本门槛。",
+      "evidence": [
+        "得分为0，regime_flags为downtrend，价格4.726低于20日均线4.7682和60日均线4.9981。",
+        "当日跌幅2.15%，60日区间位置0.1443，接近弱势区间底部。",
+        "symbol_risk.action_veto=true，55次评估通过率0.182且平均回报-0.427%。"
+      ],
+      "risks": [
+        "科技ETF弹性高，若风险偏好快速恢复可能反弹较快。",
+        "成交量低于20日均量，卖压确认不如价格跌幅强。"
+      ],
+      "invalidation": "若恒生科技主题重新站上20日均线并且得分超过观察门槛，再取消avoid。",
+      "selection_source_theme": "hang-seng-tech",
+      "selection_reason": "它是恒生科技ETF主题得分领袖但得分仍为0，且被downtrend和symbol_risk_veto否决。"
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "avoid",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.72,
+      "rationale": "3067.HK同属恒生科技ETF但不是主题领袖，且趋势和后验风险均不合格。",
+      "evidence": [
+        "得分为0，regime_flags为downtrend，价格10.15低于20日均线10.238和60日均线10.7185。",
+        "当日跌幅2.40%，60日区间位置0.1412，处于弱势区域。",
+        "symbol_risk.action_veto=true，55次评估通过率0.091且平均回报-0.378%。"
+      ],
+      "risks": [
+        "成交量为20日均量的1.3234倍，若出现反转，确认速度可能较快。",
+        "ETF之间差异小，主题反弹时可能同步修复。"
+      ],
+      "invalidation": "若价格重新站上20日和60日均线，且恒生科技主题整体得分恢复到观察门槛上方，再重新评估。",
+      "selection_source_theme": "hang-seng-tech",
+      "selection_reason": "同主题领袖为3033.HK；3067.HK不是主题领袖，并且downtrend、均线破位和symbol_risk_veto均不支持行动。"
+    }
+  ]
+}

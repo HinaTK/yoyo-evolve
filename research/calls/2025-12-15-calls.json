@@ -1,0 +1,86 @@
+{
+  "date": "2025-12-15",
+  "session": "historical",
+  "generated_at": "2026-04-28T11:54:08Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "0006.HK",
+      "state": "buy_candidate",
+      "theme": "utilities-defensive",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.62,
+      "rationale": "电能实业是本轮确定性排序中唯一通过行动门槛且未触发风险否决的候选；但大盘处于 risk_off，策略近期样本质量偏弱，因此只列为买入候选而非直接加仓。",
+      "evidence": [
+        "确定性排名将 0006.HK 列为唯一 actionable_candidate，score=75.51，高于 min_action_score=65。",
+        "价格 65.25 高于 ma20=63.41 与 ma60=62.3317，且 ma20 高于 ma60，趋势结构完整。",
+        "volume_ratio_20=1.0304，满足成交量确认；regime_flags 包含 uptrend。",
+        "同主题 utilities-defensive 中 0006.HK 为 theme_leader，优于 0002.HK，且 symbol_risk.action_veto=false。"
+      ],
+      "risks": [
+        "市场摘要为 risk_off，防御股虽相对强势，但整体港股风险偏好仍弱。",
+        "range_pos_60=1.0092，价格接近或略高于 60 日区间上沿，短线追高回撤风险较高。",
+        "参数优化未提升策略，Champion 样本仅 3 个且 win_rate=0.0，信号需要保守使用。",
+        "公用事业防御主题弹性有限，若市场快速切回成长或科技主线，可能跑输高 beta 板块。"
+      ],
+      "invalidation": "若收盘跌回 ma20 下方且成交量不能修复，或 utilities-defensive 主题不再保持领先，应取消买入候选并降为 watch_only。",
+      "selection_source_theme": "utilities-defensive",
+      "selection_reason": "在同主题中 0006.HK 是确定性 theme_leader，score=75.51 高于 0002.HK 的 69.37，并且通过成交量确认与行动门槛；0002.HK 因 not_theme_score_leader 只能作为诊断项。"
+    },
+    {
+      "symbol": "0857.HK",
+      "state": "avoid",
+      "theme": "energy",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.78,
+      "rationale": "中国石油技术分数最高但被历史后验风险否决；在研究纪律下，不能把 qualified_for_action=false 的诊断候选升级为行动。",
+      "evidence": [
+        "确定性排名中 0857.HK score=81.9，regime_flags 包含 uptrend，但 diagnostic_only=true 且 qualified_for_action=false。",
+        "symbol_risk.action_veto=true，原因包括 pass_rate=0.000 over 4 evaluated calls 与 avg_return_pct=-14.068。",
+        "风险记录包含 adverse breach 与 repeated symbol_selection_error，说明过去同标的选择质量差。",
+        "能源主题虽强，但该标的被明确列入 diagnostic_candidates 而非 actionable_candidates。"
+      ],
+      "risks": [
+        "若油气股继续强趋势，回避 0857.HK 可能错过短期动量收益。",
+        "该标的当前趋势、动量和成交量确认都较强，风险否决可能过度惩罚历史样本。"
+      ],
+      "invalidation": "只有在后续多次评估显示该标的历史后验风险改善、symbol_risk_veto 解除，并再次通过行动门槛时，才可从 avoid 重新升为 watch_only 或 buy_candidate。",
+      "selection_source_theme": "energy",
+      "selection_reason": "0857.HK 是能源主题分数 leader，但选择原因同时触发否决：历史调用胜率为 0 且存在重复 symbol_selection_error；因此相对同主题 0883.HK 也不应行动，只保留为回避诊断。"
+    },
+    {
+      "symbol": "0941.HK",
+      "state": "avoid",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.7,
+      "rationale": "中国移动趋势质量较好并为电信红利主题 leader，但历史调用 pass_rate 为 0，触发 symbol_risk_veto；本轮只能作为回避诊断。",
+      "evidence": [
+        "确定性排名中 0941.HK score=76.46，高于行动门槛，且 price_above_ma20、price_above_ma60、ma20_above_ma60 均成立。",
+        "regime_flags 包含 uptrend，volume_ratio_20=1.0334，成交量确认基本有效。",
+        "symbol_risk.action_veto=true，原因为 pass_rate=0.000 over 3 evaluated calls。",
+        "该标的 diagnostic_only=true 且 qualified_for_action=false，因此不能作为 buy_candidate、accumulate 或 hold。"
+      ],
+      "risks": [
+        "电信红利主题具备防御属性，risk_off 环境下可能继续获得资金偏好。",
+        "历史样本数量仅 3 个，pass_rate=0 的后验结论可能仍不稳定。",
+        "若市场偏好高股息防御资产，回避 0941.HK 可能导致主题暴露不足。"
+      ],
+      "invalidation": "若后续评估中 symbol_risk_veto 解除，且 0941.HK 继续保持主题 leader、价格站稳 ma20 与 ma60 上方，可先恢复为 watch_only，再等待行动门槛确认。",
+      "selection_source_theme": "telecom-dividend",
+      "selection_reason": "0941.HK 是 telecom-dividend 主题 leader，分数高于 0728.HK；但它被历史 pass_rate=0 风险否决，所以本次选择它不是为了行动，而是为了记录应回避的强信号陷阱。"
+    }
+  ]
+}

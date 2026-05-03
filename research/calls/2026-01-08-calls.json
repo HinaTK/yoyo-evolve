@@ -1,0 +1,38 @@
+{
+  "date": "2026-01-08",
+  "session": "historical",
+  "generated_at": "2026-01-08T10:37:00Z",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "recommendations": [
+    {
+      "symbol": "0005.HK",
+      "state": "buy_candidate",
+      "theme": "financials-bank",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.62,
+      "rationale": "汇丰是本轮确定性排名中唯一通过行动门槛且未触发历史风险否决的候选，适合作为金融板块的审慎买入候选。",
+      "evidence": [
+        "确定性排名将0005.HK列为唯一actionable_candidates，score为71.01，高于65.0行动阈值。",
+        "价格141.0高于ma20 137.425和ma60 133.1856，且ma20高于ma60，趋势结构保持向上。",
+        "range_pos_60为0.8805，处于建设性区间；regime_flags包含uptrend。",
+        "symbol_risk.action_veto为false，未记录历史风险否决原因。"
+      ],
+      "risks": [
+        "volume_ratio_20仅0.7907，量能确认不足，突破持续性需要后续成交验证。",
+        "60日区间位置较高，短线追高后的回撤风险上升。",
+        "参数优化未推广新策略，当前研究框架仍处于样本与胜率不足的保守状态。"
+      ],
+      "invalidation": "若收盘重新跌破ma20且相对同主题或大市金融权重转弱，或后续评估显示预期摆动边际不足以覆盖35bps往返成本和100bps最低边际门槛，则撤销买入候选。",
+      "selection_source_theme": "financials-bank",
+      "selection_reason": "0005.HK是financials-bank主题中唯一成员、主题领导者，并且是全市场筛选后唯一qualified_for_action=true且无symbol_risk_veto的行动候选。"
+    }
+  ]
+}
