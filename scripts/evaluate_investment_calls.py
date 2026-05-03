@@ -15,6 +15,7 @@ BEARISH_STATES = {"trim", "sell_candidate", "avoid"}
 NEUTRAL_STATES = {"watch_only"}
 INTRADAY_SESSIONS = {"morning", "midday"}
 EVALUATED_SESSIONS = {"morning", "midday", "close", "historical"}
+SESSION_ORDER = {"morning": 0, "midday": 1, "close": 2, "historical": 2}
 SNAPSHOT_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})(?:-(morning|midday|close|historical))?$")
 CALL_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})(?:-(morning|midday|close|historical))?-calls$")
 
@@ -54,6 +55,16 @@ def snapshot_for(snapshots: dict[tuple[dt.date, str], dict[str, Any]], day: dt.d
     if session == "historical":
         session = "close"
     return snapshots.get((day, session)) or snapshots.get((day, "close"))
+
+
+def visible_at(day: dt.date, session: str, as_of_date: dt.date | None, as_of_session: str | None) -> bool:
+    if as_of_date is None:
+        return True
+    if day > as_of_date:
+        return False
+    if day < as_of_date or as_of_session is None:
+        return True
+    return SESSION_ORDER.get(session, SESSION_ORDER["close"]) <= SESSION_ORDER.get(as_of_session, SESSION_ORDER["close"])
 
 
 def snapshot_item(snapshot: dict[str, Any], symbol: str) -> dict[str, Any] | None:
@@ -165,8 +176,14 @@ def evaluate_calls(
     snapshot_dir: pathlib.Path,
     close_windows: list[int],
     intraday_windows: list[int],
+    as_of_date: dt.date | None = None,
+    as_of_session: str | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    snapshot_paths = available_snapshots(snapshot_dir)
+    snapshot_paths = {
+        key: path
+        for key, path in available_snapshots(snapshot_dir).items()
+        if visible_at(key[0], key[1], as_of_date, as_of_session)
+    }
     snapshots = {key: load_json(path) for key, path in snapshot_paths.items()}
     evaluations: list[dict[str, Any]] = []
     verdict_counts = Counter()
@@ -180,6 +197,8 @@ def evaluate_calls(
         if session not in EVALUATED_SESSIONS:
             continue
         call_date = parse_date(payload["date"])
+        if not visible_at(call_date, session, as_of_date, as_of_session):
+            continue
         base_snapshot = snapshot_for(snapshots, call_date, session)
         if base_snapshot is None:
             continue
@@ -331,6 +350,8 @@ def main() -> int:
     parser.add_argument("--records-json", default="research/evaluations/latest_records.json")
     parser.add_argument("--windows", nargs="+", type=int, default=[3, 5, 10, 20], help="Close/historical evaluation windows.")
     parser.add_argument("--intraday-windows", nargs="+", type=int, default=[0, 1, 3], help="Morning/midday evaluation windows, where 0 means same-day close.")
+    parser.add_argument("--as-of-date", default=None, help="Limit calls and snapshots to data visible on this date.")
+    parser.add_argument("--as-of-session", choices=sorted(EVALUATED_SESSIONS), default=None, help="Limit same-day calls and snapshots to this session or earlier.")
     args = parser.parse_args()
 
     calls_dir = pathlib.Path(args.calls_dir)
@@ -341,7 +362,8 @@ def main() -> int:
     summary_md.parent.mkdir(parents=True, exist_ok=True)
     records_json.parent.mkdir(parents=True, exist_ok=True)
 
-    evaluations, summary = evaluate_calls(calls_dir, snapshot_dir, args.windows, args.intraday_windows)
+    as_of_date = parse_date(args.as_of_date) if args.as_of_date else None
+    evaluations, summary = evaluate_calls(calls_dir, snapshot_dir, args.windows, args.intraday_windows, as_of_date, args.as_of_session)
     summary_json.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     records_json.write_text(
         json.dumps(

@@ -143,13 +143,21 @@ fn resolve_path(path: &str) -> String {
 /// Check if `path` is under (or equal to) `dir`.
 /// Both should be absolute, normalized paths.
 fn path_is_under(path: &str, dir: &str) -> bool {
-    // Ensure dir ends with separator for prefix matching
-    let dir_with_sep = if dir.ends_with('/') {
-        dir.to_string()
-    } else {
-        format!("{}/", dir)
-    };
-    path == dir || path.starts_with(&dir_with_sep)
+    #[cfg(windows)]
+    {
+        let path = path.replace('/', "\\").to_ascii_lowercase();
+        let dir = dir.replace('/', "\\").to_ascii_lowercase();
+        let path = std::path::Path::new(&path);
+        let dir = std::path::Path::new(&dir);
+        return path == dir || path.starts_with(dir);
+    }
+
+    #[cfg(not(windows))]
+    {
+        let path = std::path::Path::new(path);
+        let dir = std::path::Path::new(dir);
+        path == dir || path.starts_with(dir)
+    }
 }
 
 /// Simple glob matching: `*` matches any sequence of characters (including empty).
@@ -545,15 +553,25 @@ env = { API_KEY = "secret" }
     }
 
     #[test]
+    #[cfg(unix)]
     fn test_config_module_resolve_path_normalizes_parent_dir() {
         let resolved = resolve_path("/tmp/a/../b");
         assert_eq!(resolved, "/tmp/b");
     }
 
     #[test]
+    #[cfg(unix)]
     fn test_config_module_resolve_path_absolute() {
         let resolved = resolve_path("/usr/bin/env");
         assert!(resolved.starts_with('/'));
+        assert!(resolved.contains("usr"));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn test_config_module_resolve_path_windows_absolute() {
+        let resolved = resolve_path(r"C:\usr\bin\env");
+        assert!(resolved.starts_with(r"C:\"));
         assert!(resolved.contains("usr"));
     }
 
@@ -563,5 +581,26 @@ env = { API_KEY = "secret" }
         assert!(path_is_under("/etc", "/etc"));
         assert!(!path_is_under("/etcetc", "/etc"));
         assert!(!path_is_under("/tmp/file", "/etc"));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn test_config_module_path_is_under_windows_separators() {
+        assert!(path_is_under(
+            r"C:\repo\project\research\daily\report.md",
+            r"C:\repo\project\research"
+        ));
+        assert!(path_is_under(
+            r"C:\repo\project\research",
+            r"C:\repo\project\research"
+        ));
+        assert!(!path_is_under(
+            r"C:\repo\project\research-backup\report.md",
+            r"C:\repo\project\research"
+        ));
+        assert!(path_is_under(
+            r"C:\Repo\Project\Research\daily\report.md",
+            r"c:\repo\project\research"
+        ));
     }
 }

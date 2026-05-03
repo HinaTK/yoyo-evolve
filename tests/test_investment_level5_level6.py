@@ -17,6 +17,7 @@ import plan_investment_system_improvements as planner  # noqa: E402
 import rank_investment_universe as ranker  # noqa: E402
 import backtest_investment_strategy as backtester  # noqa: E402
 import build_symbol_risk_memory as symbol_risk  # noqa: E402
+import validate_investment_calls as calls_validator  # noqa: E402
 
 
 class InvestmentLevel5Level6Tests(unittest.TestCase):
@@ -89,6 +90,31 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         registry.write_text(json.dumps({"entries": entries}), encoding="utf-8")
         return registry
 
+    def valid_call(self, symbol="AAA.HK", state="buy_candidate"):
+        return {
+            "symbol": symbol,
+            "state": state,
+            "theme": "growth",
+            "kind": "stock",
+            "horizon_days_min": 3,
+            "horizon_days_max": 10,
+            "confidence": 0.7,
+            "rationale": "test rationale",
+            "evidence": ["test evidence"],
+            "risks": ["test risk"],
+            "invalidation": "test invalidation",
+            "selection_source_theme": "growth",
+            "selection_reason": "test selection reason",
+        }
+
+    def ranking_with_row(self, row):
+        return {
+            "actionable_candidates": [row] if row.get("qualified_for_action") else [],
+            "diagnostic_candidates": [row],
+            "top_candidates": [row],
+            "all_ranked": [row],
+        }
+
     def test_optimizer_fail_closed_when_execution_is_enabled(self):
         active = {"safety_invariants": {"automatic_trading_enabled": True}}
         opt = {"safety_invariants": {key: True for key in optimizer.IMMUTABLE_TRUE_INVARIANTS}}
@@ -147,6 +173,86 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertFalse(result["passed"])
         self.assertIn("automatic_execution_disabled", rules)
         self.assertIn("no_execution_terms", rules)
+
+    def test_evaluate_calls_as_of_skips_future_snapshot(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            calls_dir = tmp_path / "calls"
+            snapshot_dir = tmp_path / "snapshots"
+            calls_dir.mkdir()
+            snapshot_dir.mkdir()
+            self.write_trade_snapshot(snapshot_dir / "2026-04-01.json", "2026-04-01", 10.0, 10.0)
+            self.write_trade_snapshot(snapshot_dir / "2026-04-02.json", "2026-04-02", 11.0, 10.0)
+            (calls_dir / "2026-04-01-calls.json").write_text(
+                json.dumps({"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call()]}),
+                encoding="utf-8",
+            )
+
+            evaluations, _summary = call_eval.evaluate_calls(
+                calls_dir,
+                snapshot_dir,
+                close_windows=[1],
+                intraday_windows=[0],
+                as_of_date=call_eval.parse_date("2026-04-01"),
+                as_of_session="close",
+            )
+
+            self.assertEqual(evaluations, [])
+
+    def test_calls_validator_rejects_diagnostic_actionable(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": False,
+            "qualified_for_watch": True,
+            "diagnostic_only": True,
+            "cost_gate_passed": True,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call()]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"})
+
+        self.assertTrue(any("diagnostic_only" in error for error in errors))
+        self.assertTrue(any("actionable_candidates" in error for error in errors))
+
+    def test_calls_validator_rejects_diagnostic_sell_states(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": False,
+            "qualified_for_watch": False,
+            "diagnostic_only": True,
+        }
+
+        for state in ("trim", "sell_candidate"):
+            calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state=state)]}
+            errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"})
+            self.assertTrue(any("diagnostic or non-watch" in error for error in errors))
+
+    def test_calls_validator_allows_diagnostic_watch_and_avoid(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": False,
+            "qualified_for_watch": False,
+            "diagnostic_only": True,
+        }
+
+        for state in ("watch_only", "avoid"):
+            calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state=state)]}
+            errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"})
+            self.assertEqual(errors, [])
+
+    def test_calls_validator_accepts_legal_actionable(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call()]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"})
+
+        self.assertEqual(errors, [])
 
     def test_backtest_skips_registry_entries_with_payload_date_mismatch(self):
         registry = {

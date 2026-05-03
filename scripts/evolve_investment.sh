@@ -249,20 +249,35 @@ PY
 )
 
 SNAPSHOT=$($PYTHON_BIN - <<'PY'
-import os, pathlib
+import os, pathlib, sys
 path = pathlib.Path(os.environ['SNAPSHOT_FILE_PY'])
 if not path.exists():
-    latest = sorted(path.parent.glob('*.json'))[-1]
+    if os.environ.get('ALLOW_LATEST_SNAPSHOT_FALLBACK') != 'true':
+        raise SystemExit(f"Missing required snapshot file: {path}")
+    candidates = sorted(
+        item for item in path.parent.glob('*.json')
+        if item.name != 'registry.json' and not item.stem.endswith('-radar')
+    )
+    if not candidates:
+        raise SystemExit(f"Missing required snapshot file and no fallback snapshots found: {path}")
+    latest = candidates[-1]
+    print(f"WARNING: using latest snapshot fallback for missing {path}: {latest}", file=sys.stderr)
     path = latest
 print(path.read_text(encoding='utf-8'))
 PY
 )
 
 RADAR_SNAPSHOT=$($PYTHON_BIN - <<'PY'
-import os, pathlib
+import os, pathlib, sys
 path = pathlib.Path(os.environ['RADAR_SNAPSHOT_FILE_PY'])
 if not path.exists():
-    latest = sorted(path.parent.glob('*.json'))[-1]
+    if os.environ.get('ALLOW_LATEST_SNAPSHOT_FALLBACK') != 'true':
+        raise SystemExit(f"Missing required radar snapshot file: {path}")
+    candidates = sorted(item for item in path.parent.glob('*-radar.json'))
+    if not candidates:
+        raise SystemExit(f"Missing required radar snapshot file and no fallback snapshots found: {path}")
+    latest = candidates[-1]
+    print(f"WARNING: using latest radar snapshot fallback for missing {path}: {latest}", file=sys.stderr)
     path = latest
 print(path.read_text(encoding='utf-8'))
 PY
@@ -400,6 +415,12 @@ run_json_stage() {
         run_prompt "$prompt_file" "$(mktemp)"
     fi
     require_json_file "$output_file"
+    if [ "${CALLS_FILE:-}" = "$output_file" ]; then
+        "$PYTHON_BIN" "$ROOT_DIR/scripts/validate_investment_calls.py" \
+            --calls "$output_file" \
+            --ranking "$RANKING_FILE" \
+            --trade-universe "$TRADE_UNIVERSE_CONFIG"
+    fi
     pause_after_prompt
 }
 
@@ -426,7 +447,9 @@ JOURNAL_FILE="$ROOT_DIR/$JOURNAL_REL"
     --snapshot-dir "$ROOT_DIR/data/snapshots" \
     --summary-md "$EVALUATION_FILE" \
     --summary-json "$ROOT_DIR/research/evaluations/latest.json" \
-    --records-json "$ROOT_DIR/research/evaluations/latest_records.json"
+    --records-json "$ROOT_DIR/research/evaluations/latest_records.json" \
+    --as-of-date "$DATE" \
+    --as-of-session "$SESSION"
 
 EVALUATION_SUMMARY=$(cat "$EVALUATION_FILE")
 if [ -f "$OPTIMIZATION_FILE" ]; then
