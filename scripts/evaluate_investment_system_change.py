@@ -9,6 +9,11 @@ import subprocess
 from dataclasses import dataclass
 from typing import Any
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python < 3.11 fallback is intentionally minimal.
+    tomllib = None
+
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUTPUT_DIR = ROOT / "research" / "experiments" / "system_changes"
@@ -16,6 +21,14 @@ OUTPUT_DIR = ROOT / "research" / "experiments" / "system_changes"
 FALSE_LOCKS = {
     "recommendation_only": "recommendation_only must stay enabled",
     "research_only": "research_only must stay enabled",
+}
+FINAL_TRUE_INVARIANTS = {
+    "forbid_automatic_trading",
+    "forbid_cost_gate_reduction",
+    "forbid_edge_gate_reduction",
+    "forbid_history_tampering",
+    "forbid_snapshot_mutation",
+    "research_only",
 }
 NUMERIC_FLOORS = {
     "estimated_round_trip_bps",
@@ -161,6 +174,74 @@ def numeric_assignments(lines: list[DiffLine], marker: str) -> dict[str, list[fl
     return found
 
 
+def load_toml(path: pathlib.Path) -> dict[str, Any]:
+    if tomllib is not None:
+        return tomllib.loads(path.read_text(encoding="utf-8"))
+
+    data: dict[str, Any] = {}
+    current = data
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        if line.startswith("[") and line.endswith("]") and not line.startswith("[["):
+            current = data
+            for part in line[1:-1].split("."):
+                current = current.setdefault(part.strip(), {})
+            continue
+        if "=" not in line:
+            continue
+        key, value = [part.strip() for part in line.split("=", 1)]
+        if value.lower() in {"true", "false"}:
+            current[key] = value.lower() == "true"
+        elif value.startswith('"') and value.endswith('"'):
+            current[key] = value[1:-1]
+        else:
+            current[key] = value
+    return data
+
+
+def final_state_findings(repo: pathlib.Path) -> list[dict[str, Any]]:
+    findings: list[dict[str, Any]] = []
+    config_dir = repo / "config"
+    if not config_dir.exists():
+        return findings
+
+    def add(path: str, message: str) -> None:
+        findings.append({"severity": "fail", "path": path, "rule": "final_state_invariant", "message": message})
+
+    portfolio_path = "config/portfolio.toml"
+    path = repo / portfolio_path
+    if not path.is_file():
+        add(portfolio_path, "portfolio.toml must exist so recommendation-only mode can be verified.")
+    else:
+        try:
+            data = load_toml(path)
+            portfolio = data.get("portfolio", data)
+            if portfolio.get("mode") != "recommendation_only":
+                add(portfolio_path, "portfolio.mode must remain recommendation_only in the final repo state.")
+        except Exception as exc:  # noqa: BLE001 - invariant checks should fail closed on malformed config.
+            add(portfolio_path, f"Could not parse final portfolio TOML: {exc}")
+
+    for rel in ("config/active_strategy.toml", "config/optimization.toml"):
+        path = repo / rel
+        if not path.is_file():
+            add(rel, f"{rel} must exist so research-only safety invariants can be verified.")
+            continue
+        try:
+            data = load_toml(path)
+            invariants = data.get("safety_invariants", {})
+            if invariants.get("automatic_trading_enabled") is not False:
+                add(rel, "safety_invariants.automatic_trading_enabled must be false in the final repo state.")
+            for key in sorted(FINAL_TRUE_INVARIANTS):
+                if invariants.get(key) is not True:
+                    add(rel, f"safety_invariants.{key} must be true in the final repo state.")
+        except Exception as exc:  # noqa: BLE001 - invariant checks should fail closed on malformed config.
+            add(rel, f"Could not parse final safety invariant TOML: {exc}")
+
+    return findings
+
+
 def evaluate_change(repo: pathlib.Path, changed_paths: list[str], diff_text: str, untracked_paths: list[str] | None = None) -> dict[str, Any]:
     lines = parse_diff(diff_text)
     if untracked_paths:
@@ -203,6 +284,8 @@ def evaluate_change(repo: pathlib.Path, changed_paths: list[str], diff_text: str
                 findings.append({"severity": "fail", "path": item.path, "rule": "anti_leakage_fields_preserved", "message": "Future/as-of leakage guard fields must not be deleted."})
             if any(re.search(rf"\b{re.escape(term)}\b", lower) for term in LOGIC_GUARDS):
                 findings.append({"severity": "fail", "path": item.path, "rule": "evaluation_logic_preserved", "message": "Cost/net return/benchmark/evaluation logic must not be removed."})
+
+    findings.extend(final_state_findings(repo))
 
     passed = not any(item["severity"] == "fail" for item in findings)
     return {

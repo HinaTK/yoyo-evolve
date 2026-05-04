@@ -174,6 +174,59 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertIn("automatic_execution_disabled", rules)
         self.assertIn("no_execution_terms", rules)
 
+    def test_change_evaluator_checks_final_repo_state_invariants(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            config_dir = tmp_path / "config"
+            config_dir.mkdir()
+            (config_dir / "portfolio.toml").write_text('[portfolio]\nmode = "live"\n', encoding="utf-8")
+            (config_dir / "active_strategy.toml").write_text(
+                "[safety_invariants]\nautomatic_trading_enabled = false\nresearch_only = false\n",
+                encoding="utf-8",
+            )
+
+            result = change_eval.evaluate_change(tmp_path, [], "", [])
+
+            final_findings = [finding for finding in result["findings"] if finding["rule"] == "final_state_invariant"]
+            self.assertFalse(result["passed"])
+            self.assertGreaterEqual(len(final_findings), 2)
+            self.assertTrue(any(finding["path"] == "config/portfolio.toml" for finding in final_findings))
+            self.assertTrue(any(finding["path"] == "config/active_strategy.toml" for finding in final_findings))
+
+    def test_change_evaluator_allows_safe_final_repo_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            config_dir = tmp_path / "config"
+            config_dir.mkdir()
+            (config_dir / "portfolio.toml").write_text('[portfolio]\nmode = "recommendation_only"\n', encoding="utf-8")
+            safety = (
+                "[safety_invariants]\n"
+                "automatic_trading_enabled = false\n"
+                "forbid_automatic_trading = true\n"
+                "forbid_cost_gate_reduction = true\n"
+                "forbid_edge_gate_reduction = true\n"
+                "forbid_history_tampering = true\n"
+                "forbid_snapshot_mutation = true\n"
+                "research_only = true\n"
+            )
+            (config_dir / "active_strategy.toml").write_text(safety, encoding="utf-8")
+            (config_dir / "optimization.toml").write_text(safety, encoding="utf-8")
+
+            result = change_eval.evaluate_change(tmp_path, [], "", [])
+
+            self.assertTrue(result["passed"])
+
+    def test_change_evaluator_fails_when_required_config_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            (tmp_path / "config").mkdir()
+
+            result = change_eval.evaluate_change(tmp_path, [], "", [])
+
+            rules = {finding["rule"] for finding in result["findings"]}
+            self.assertFalse(result["passed"])
+            self.assertIn("final_state_invariant", rules)
+
     def test_evaluate_calls_as_of_skips_future_snapshot(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = pathlib.Path(tmp)
@@ -198,6 +251,32 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
             )
 
             self.assertEqual(evaluations, [])
+
+    def test_evaluate_calls_morning_as_of_skips_same_day_close_snapshot(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            calls_dir = tmp_path / "calls"
+            snapshot_dir = tmp_path / "snapshots"
+            calls_dir.mkdir()
+            snapshot_dir.mkdir()
+            self.write_trade_snapshot(snapshot_dir / "2026-04-01.json", "2026-04-01", 10.0, 10.0)
+            (calls_dir / "2026-04-01-morning-calls.json").write_text(
+                json.dumps({"date": "2026-04-01", "session": "morning", "recommendations": [self.valid_call()]}),
+                encoding="utf-8",
+            )
+
+            evaluations, summary = call_eval.evaluate_calls(
+                calls_dir,
+                snapshot_dir,
+                close_windows=[1],
+                intraday_windows=[0],
+                as_of_date=call_eval.parse_date("2026-04-01"),
+                as_of_session="morning",
+            )
+
+            self.assertEqual(evaluations, [])
+            self.assertEqual(summary["as_of_date"], "2026-04-01")
+            self.assertEqual(summary["as_of_session"], "morning")
 
     def test_calls_validator_rejects_diagnostic_actionable(self):
         row = {

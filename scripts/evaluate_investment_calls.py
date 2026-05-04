@@ -257,6 +257,8 @@ def evaluate_calls(
 
     summary = {
         "generated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "as_of_date": as_of_date.isoformat() if as_of_date else None,
+        "as_of_session": as_of_session,
         "evaluations": len(evaluations),
         "verdict_counts": dict(verdict_counts),
         "learning_counts": dict(learning_counts),
@@ -281,6 +283,7 @@ def write_markdown(summary_path: pathlib.Path, summary: dict[str, Any], evaluati
         "# Posterior Evaluation Summary",
         "",
         f"Generated: `{summary['generated_at']}`",
+        f"As-of: date=`{summary.get('as_of_date') or 'null'}`, session=`{summary.get('as_of_session') or 'null'}`",
         f"Evaluations: `{summary['evaluations']}`",
         "",
         "## Verdict Counts",
@@ -369,6 +372,8 @@ def main() -> int:
         json.dumps(
             {
                 "generated_at": summary["generated_at"],
+                "as_of_date": summary["as_of_date"],
+                "as_of_session": summary["as_of_session"],
                 "records": evaluations,
                 "record_count": len(evaluations),
             },
