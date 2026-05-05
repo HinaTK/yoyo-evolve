@@ -19,6 +19,7 @@ import backtest_investment_strategy as backtester  # noqa: E402
 import build_symbol_risk_memory as symbol_risk  # noqa: E402
 import create_investment_run_manifest as run_manifest  # noqa: E402
 import generate_investment_draft_calls as draft_calls  # noqa: E402
+import generate_investment_risk_review as risk_review  # noqa: E402
 import validate_investment_calls as calls_validator  # noqa: E402
 
 
@@ -867,6 +868,21 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
 
         self.assertTrue(any("upgrades beyond deterministic draft" in error for error in errors))
 
+    def test_calls_validator_rejects_bullish_draft_flipped_to_trim(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="trim")]}
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="buy_candidate")]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft)
+
+        self.assertTrue(any("upgrades beyond deterministic draft" in error for error in errors))
+
     def test_calls_validator_rejects_actionable_without_matching_draft(self):
         row = {
             "symbol": "AAA.HK",
@@ -896,6 +912,129 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft)
 
         self.assertTrue(any("trim state requires matching deterministic draft call" in error for error in errors))
+
+    def test_risk_review_passes_clean_buy_candidate(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "volume_ratio_20": 1.4,
+            "regime_flags": [],
+        }
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="buy_candidate")]}
+
+        review = risk_review.build_review(draft, self.ranking_with_row(row), {"risk": {"max_single_position_pct": 10}})
+        verdict = review["verdicts"][0]
+
+        self.assertEqual(verdict["risk_decision"], "pass")
+        self.assertEqual(verdict["final_state_cap"], "buy_candidate")
+        self.assertEqual(verdict["max_position_pct"], 10)
+
+    def test_risk_review_downgrades_buy_candidate_on_weak_volume(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "volume_ratio_20": 0.8,
+            "regime_flags": [],
+        }
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="buy_candidate")]}
+
+        review = risk_review.build_review(draft, self.ranking_with_row(row), {"risk": {"max_single_position_pct": 10}})
+        verdict = review["verdicts"][0]
+
+        self.assertEqual(verdict["risk_decision"], "downgrade")
+        self.assertEqual(verdict["final_state_cap"], "watch_only")
+        self.assertLess(verdict["max_position_pct"], 10)
+        self.assertIn("volume_ratio_20_below_1_0", verdict["risk_tags"])
+
+    def test_risk_review_vetoes_symbol_risk_memory(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "volume_ratio_20": 1.5,
+            "regime_flags": [],
+        }
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="buy_candidate")]}
+        memory = {"symbols": {"AAA.HK": {"action_veto": True, "tags": ["low_symbol_pass_rate"], "reasons": ["test veto"]}}}
+
+        review = risk_review.build_review(draft, self.ranking_with_row(row), {"risk": {"max_single_position_pct": 10}}, memory)
+        verdict = review["verdicts"][0]
+
+        self.assertEqual(verdict["risk_decision"], "veto")
+        self.assertEqual(verdict["final_state_cap"], "avoid")
+        self.assertEqual(verdict["max_position_pct"], 0.0)
+        self.assertIn("symbol_risk_veto", verdict["risk_tags"])
+
+    def test_calls_validator_rejects_final_state_above_risk_cap(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="buy_candidate")]}
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="buy_candidate")]}
+        review = {"verdicts": [{"symbol": "AAA.HK", "final_state_cap": "watch_only"}]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft, review)
+
+        self.assertTrue(any("exceeds deterministic risk final_state_cap" in error for error in errors))
+
+    def test_calls_validator_rejects_bullish_risk_cap_flipped_to_trim(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="trim")]}
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="trim")]}
+        review = {"verdicts": [{"symbol": "AAA.HK", "final_state_cap": "buy_candidate"}]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft, review)
+
+        self.assertTrue(any("exceeds deterministic risk final_state_cap" in error for error in errors))
+
+    def test_calls_validator_requires_risk_verdict_for_non_diagnostic_state(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="trim")]}
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="trim")]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft, {"verdicts": []})
+
+        self.assertTrue(any("requires matching deterministic risk verdict" in error for error in errors))
+
+    def test_calls_validator_rejects_watch_state_above_avoid_risk_cap(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": False,
+            "qualified_for_watch": False,
+            "diagnostic_only": True,
+            "cost_gate_passed": False,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="watch_only")]}
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="watch_only")]}
+        review = {"verdicts": [{"symbol": "AAA.HK", "final_state_cap": "avoid"}]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft, review)
+
+        self.assertTrue(any("exceeds deterministic risk final_state_cap" in error for error in errors))
 
     def test_build_symbol_risk_memory_from_summary_fields(self):
         data = {

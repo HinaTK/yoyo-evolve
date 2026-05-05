@@ -28,6 +28,15 @@ VALID_STATES = {"watch_only", "buy_candidate", "accumulate", "hold", "trim", "se
 ACTIONABLE_STATES = {"buy_candidate", "accumulate", "hold"}
 NON_DIAGNOSTIC_STATES = ACTIONABLE_STATES | {"trim", "sell_candidate"}
 STATE_RANK = {"avoid": 0, "watch_only": 1, "sell_candidate": 2, "trim": 2, "buy_candidate": 2, "accumulate": 3, "hold": 3}
+ALLOWED_FINAL_STATES_BY_CAP = {
+    "avoid": {"avoid"},
+    "watch_only": {"watch_only", "avoid"},
+    "buy_candidate": {"buy_candidate", "watch_only", "avoid"},
+    "accumulate": {"accumulate", "buy_candidate", "watch_only", "avoid"},
+    "hold": {"hold", "watch_only", "avoid"},
+    "trim": {"trim", "watch_only", "avoid"},
+    "sell_candidate": {"sell_candidate", "trim", "watch_only", "avoid"},
+}
 
 
 def load_json(path: pathlib.Path) -> Any:
@@ -60,7 +69,30 @@ def draft_rows(draft_calls: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
     return rows
 
 
-def validate(calls: dict[str, Any], ranking: dict[str, Any], symbols: set[str], draft_calls: dict[str, Any] | None = None) -> list[str]:
+def risk_review_rows(risk_review: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    if not risk_review:
+        return {}
+    rows = {}
+    for verdict in risk_review.get("verdicts", []):
+        if isinstance(verdict, dict) and verdict.get("symbol"):
+            rows[str(verdict["symbol"])] = verdict
+    return rows
+
+
+def state_allowed_under_cap(state: str, cap: str) -> bool:
+    allowed = ALLOWED_FINAL_STATES_BY_CAP.get(cap)
+    if allowed is None:
+        return False
+    return state in allowed
+
+
+def validate(
+    calls: dict[str, Any],
+    ranking: dict[str, Any],
+    symbols: set[str],
+    draft_calls: dict[str, Any] | None = None,
+    risk_review: dict[str, Any] | None = None,
+) -> list[str]:
     errors: list[str] = []
     for field in REQUIRED_TOP_LEVEL:
         if field not in calls:
@@ -73,6 +105,7 @@ def validate(calls: dict[str, Any], ranking: dict[str, Any], symbols: set[str], 
 
     actionable_symbols, rows = ranking_rows(ranking)
     drafts = draft_rows(draft_calls)
+    risk_verdicts = risk_review_rows(risk_review)
     for index, rec in enumerate(recommendations):
         prefix = f"recommendations[{index}]"
         if not isinstance(rec, dict):
@@ -100,14 +133,24 @@ def validate(calls: dict[str, Any], ranking: dict[str, Any], symbols: set[str], 
 
         row = rows.get(str(symbol))
         draft = drafts.get(str(symbol))
+        risk_verdict = risk_verdicts.get(str(symbol))
         if draft is not None and state in STATE_RANK:
             draft_state = draft.get("state")
             if draft_state not in STATE_RANK:
                 errors.append(f"{prefix} draft state {draft_state!r} is not valid")
-            elif STATE_RANK[state] > STATE_RANK[draft_state]:
+            elif not state_allowed_under_cap(str(state), str(draft_state)):
                 errors.append(f"{prefix}.{state} state upgrades beyond deterministic draft state {draft_state}")
         elif draft_calls is not None and state in NON_DIAGNOSTIC_STATES:
             errors.append(f"{prefix}.{state} state requires matching deterministic draft call")
+        if risk_review is not None:
+            if risk_verdict is None and state in NON_DIAGNOSTIC_STATES:
+                errors.append(f"{prefix}.{state} state requires matching deterministic risk verdict")
+            elif risk_verdict is not None:
+                cap = risk_verdict.get("final_state_cap")
+                if cap not in STATE_RANK:
+                    errors.append(f"{prefix} risk final_state_cap {cap!r} is not valid")
+                elif state in STATE_RANK and not state_allowed_under_cap(str(state), str(cap)):
+                    errors.append(f"{prefix}.{state} state exceeds deterministic risk final_state_cap {cap}")
         if state in NON_DIAGNOSTIC_STATES:
             if row is None:
                 errors.append(f"{prefix}.{state} state requires a ranking row")
@@ -147,6 +190,7 @@ def main() -> int:
     parser.add_argument("--ranking", required=True)
     parser.add_argument("--trade-universe", required=True)
     parser.add_argument("--draft-calls", default=None, help="Optional deterministic draft calls JSON to enforce no-upgrade policy.")
+    parser.add_argument("--risk-review", default=None, help="Optional deterministic risk review JSON to enforce final state caps.")
     args = parser.parse_args()
 
     errors = validate(
@@ -154,6 +198,7 @@ def main() -> int:
         load_json(pathlib.Path(args.ranking)),
         trade_universe_symbols(pathlib.Path(args.trade_universe)),
         load_json(pathlib.Path(args.draft_calls)) if args.draft_calls else None,
+        load_json(pathlib.Path(args.risk_review)) if args.risk_review else None,
     )
     if errors:
         print("Investment calls validation failed:", file=sys.stderr)

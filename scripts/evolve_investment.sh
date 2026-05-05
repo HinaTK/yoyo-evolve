@@ -134,7 +134,7 @@ case "$SESSION" in
         ;;
 esac
 
-mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations" "$ROOT_DIR/research/rankings" "$ROOT_DIR/research/experiments"
+mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations" "$ROOT_DIR/research/rankings" "$ROOT_DIR/research/experiments" "$ROOT_DIR/research/risk"
 
 if [ -f "$ROOT_DIR/scripts/yoyo_context.sh" ]; then
     # shellcheck disable=SC1091
@@ -442,7 +442,8 @@ run_json_stage() {
             --calls "$output_file" \
             --ranking "$RANKING_FILE" \
             --trade-universe "$TRADE_UNIVERSE_CONFIG" \
-            --draft-calls "$DRAFT_CALLS_FILE"
+            --draft-calls "$DRAFT_CALLS_FILE" \
+            --risk-review "$RISK_REVIEW_FILE"
     fi
     pause_after_prompt
 }
@@ -452,6 +453,7 @@ PLAN_REL="research/daily/$OUTPUT_STEM-plan.md"
 REPORT_REL="research/daily/$OUTPUT_STEM-report.md"
 CALLS_REL="research/calls/$OUTPUT_STEM-calls.json"
 DRAFT_CALLS_REL="research/calls/$OUTPUT_STEM-draft-policy.json"
+RISK_REVIEW_REL="research/risk/$OUTPUT_STEM-risk-review.json"
 REFLECTION_REL="research/daily/$OUTPUT_STEM-reflection.md"
 EVALUATION_REL="research/evaluations/latest.md"
 OPTIMIZATION_REL="research/experiments/latest_optimization.md"
@@ -463,6 +465,7 @@ PLAN_FILE="$ROOT_DIR/$PLAN_REL"
 REPORT_FILE="$ROOT_DIR/$REPORT_REL"
 CALLS_FILE="$ROOT_DIR/$CALLS_REL"
 DRAFT_CALLS_FILE="$ROOT_DIR/$DRAFT_CALLS_REL"
+RISK_REVIEW_FILE="$ROOT_DIR/$RISK_REVIEW_REL"
 REFLECTION_FILE="$ROOT_DIR/$REFLECTION_REL"
 EVALUATION_FILE="$ROOT_DIR/$EVALUATION_REL"
 OPTIMIZATION_FILE="$ROOT_DIR/$OPTIMIZATION_REL"
@@ -487,6 +490,7 @@ write_run_manifest() {
         --file radar_snapshot "$RADAR_SNAPSHOT_FILE" \
         --file ranking "$RANKING_FILE" \
         --file draft_calls "$DRAFT_CALLS_FILE" \
+        --file risk_review "$RISK_REVIEW_FILE" \
         --file final_calls "$CALLS_FILE" \
         --file market_assessment "$ASSESSMENT_FILE" \
         --file daily_plan "$PLAN_FILE" \
@@ -504,6 +508,20 @@ write_run_manifest
     --session "$SESSION" \
     $HORIZON_ARGS \
     --include-diagnostics
+
+write_run_manifest
+
+RISK_ARGS=()
+if [ -f "$SYMBOL_RISK_FILE" ]; then
+    RISK_ARGS=(--symbol-risk-json "$SYMBOL_RISK_FILE")
+fi
+mkdir -p "$(dirname "$RISK_REVIEW_FILE")"
+"$PYTHON_BIN" "$ROOT_DIR/scripts/generate_investment_risk_review.py" \
+    --draft-calls "$DRAFT_CALLS_FILE" \
+    --ranking "$RANKING_FILE" \
+    --investment-profile "$ROOT_DIR/config/investment_profile.toml" \
+    "${RISK_ARGS[@]}" \
+    --output "$RISK_REVIEW_FILE"
 
 write_run_manifest
 
@@ -722,6 +740,8 @@ $SNAPSHOT
 $RANKING
 - Deterministic draft policy calls:
 $( [ -f "$DRAFT_CALLS_FILE" ] && cat "$DRAFT_CALLS_FILE" )
+- Deterministic risk review:
+$( [ -f "$RISK_REVIEW_FILE" ] && cat "$RISK_REVIEW_FILE" )
 - Parameter optimization summary:
 $OPTIMIZATION_SUMMARY
 
@@ -731,6 +751,8 @@ Output requirements:
 - Write human-readable values such as rationale, evidence, risks, and invalidation in Simplified Chinese.
 - Actionable recommendations should come only from actionable_candidates in the deterministic ranking. Diagnostic candidates may only become watch/avoid rows when the report discussed them.
 - Start from the deterministic draft policy calls. You may explain or downgrade draft recommendations, but do not upgrade any row beyond the deterministic draft state.
+- Apply the deterministic risk review as a hard second-layer cap: no final state may exceed final_state_cap, veto means avoid, and downgrade means watch_only unless the risk review says otherwise.
+- Include risk review reasons and required_confirmations in each affected recommendation's risks, evidence, or invalidation text.
 - Do not turn diagnostic_only=true or qualified_for_watch=false rows into actionable states; they may only appear as watch/avoid diagnostics when the report discussed them.
 - Do not turn qualified_for_action=false rows into buy_candidate, accumulate, or hold.
 - If is_theme_leader=false, keep the state non-actionable unless selection_reason explains why it is better than the deterministic same-theme leader.

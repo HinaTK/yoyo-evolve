@@ -132,6 +132,15 @@ Level 6 kernel hardening adds traceable run lineage and deterministic draft call
 - `scripts/generate_investment_draft_calls.py` creates deterministic draft policy JSON from ranking layers. LLM report/calls stages may explain or downgrade these drafts, but should not upgrade beyond the deterministic draft state.
 - `scripts/create_investment_run_manifest.py` writes `research/runs/<date>-<session>/manifest.json` with as-of metadata, model/provider, and sha256/size/existence metadata for key inputs and outputs. The investment loop writes the manifest before LLM stages and refreshes it after final outputs exist.
 
+Level 6 risk review hardening adds a second deterministic policy layer between draft calls and final LLM calls:
+
+- `scripts/generate_investment_risk_review.py` reads deterministic draft calls, ranking rows, `config/investment_profile.toml`, and optional symbol risk memory, then writes `research/risk/<date>-<session>-risk-review.json`.
+- Each verdict records `risk_decision`, `final_state_cap`, `max_position_pct`, `risk_tags`, `reasons`, and `required_confirmations` for a symbol.
+- Symbol risk memory vetoes and deterministic `avoid` drafts force `avoid`; `watch_only` drafts remain capped at `watch_only`.
+- Draft `buy_candidate` rows can pass only when action qualification, cost gate, volume confirmation, and trend checks all pass; otherwise the review downgrades to `watch_only` or vetoes severe disqualifiers.
+- `scripts/validate_investment_calls.py` accepts `--risk-review` and rejects any non-diagnostic final call without a matching risk verdict or above that verdict's `final_state_cap`.
+- `scripts/evolve_investment.sh` generates the risk review after the draft policy, records it in the run manifest, includes it in the calls prompt, and passes it to final validation.
+
 ## Current Limitations
 
 - It is research assistance, not financial advice or automated execution.
