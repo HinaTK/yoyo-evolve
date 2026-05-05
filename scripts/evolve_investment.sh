@@ -175,8 +175,19 @@ import pathlib, shlex, tomllib
 profile = tomllib.load(open(pathlib.Path('config') / 'investment_profile.toml', 'rb'))
 opt_path = pathlib.Path('config') / 'optimization.toml'
 opt = tomllib.load(open(opt_path, 'rb')) if opt_path.exists() else {}
+active_path = pathlib.Path('config') / 'active_strategy.toml'
+active = tomllib.load(open(active_path, 'rb')) if active_path.exists() else {}
 ranking = profile.get('ranking', {})
 costs = profile.get('costs', {})
+active_gate = active.get('cost_gate', {})
+opt_safety = opt.get('safety_invariants', {})
+active_safety = active.get('safety_invariants', {})
+round_trip_bps = costs.get('estimated_round_trip_bps', 35)
+minimum_edge_bps = costs.get('minimum_edge_bps', 100)
+if active_safety.get('forbid_cost_gate_reduction', True) and opt_safety.get('forbid_cost_gate_reduction', True):
+    round_trip_bps = max(float(round_trip_bps), float(active_gate.get('estimated_round_trip_bps', round_trip_bps)), float(opt.get('round_trip_bps', round_trip_bps)))
+if active_safety.get('forbid_edge_gate_reduction', True) and opt_safety.get('forbid_edge_gate_reduction', True):
+    minimum_edge_bps = max(float(minimum_edge_bps), float(active_gate.get('minimum_edge_bps', minimum_edge_bps)), float(opt.get('minimum_edge_bps', minimum_edge_bps)))
 args = []
 for name, value in [
     ('--max-candidates', ranking.get('max_candidates', 8)),
@@ -184,10 +195,21 @@ for name, value in [
     ('--diagnostic-top-n', opt.get('diagnostic_top_n', opt.get('top_n', ranking.get('diagnostic_top_n', 3)))),
     ('--min-watch-score', ranking.get('min_watch_score', 45)),
     ('--min-action-score', ranking.get('min_action_score', 65)),
-    ('--round-trip-bps', costs.get('estimated_round_trip_bps', 35)),
-    ('--minimum-edge-bps', costs.get('minimum_edge_bps', 100)),
+    ('--round-trip-bps', round_trip_bps),
+    ('--minimum-edge-bps', minimum_edge_bps),
 ]:
     args.extend([name, str(value)])
+print(' '.join(shlex.quote(arg) for arg in args))
+PY
+)
+HORIZON_ARGS=$($PYTHON_BIN - <<'PY'
+import pathlib, shlex, tomllib
+profile = tomllib.load(open(pathlib.Path('config') / 'investment_profile.toml', 'rb'))
+agent = profile.get('agent', {})
+args = [
+    '--horizon-days-min', str(agent.get('time_window_days_min', 14)),
+    '--horizon-days-max', str(agent.get('time_window_days_max', 90)),
+]
 print(' '.join(shlex.quote(arg) for arg in args))
 PY
 )
@@ -419,7 +441,8 @@ run_json_stage() {
         "$PYTHON_BIN" "$ROOT_DIR/scripts/validate_investment_calls.py" \
             --calls "$output_file" \
             --ranking "$RANKING_FILE" \
-            --trade-universe "$TRADE_UNIVERSE_CONFIG"
+            --trade-universe "$TRADE_UNIVERSE_CONFIG" \
+            --draft-calls "$DRAFT_CALLS_FILE"
     fi
     pause_after_prompt
 }
@@ -428,19 +451,66 @@ ASSESSMENT_REL="research/daily/$OUTPUT_STEM-market-assessment.md"
 PLAN_REL="research/daily/$OUTPUT_STEM-plan.md"
 REPORT_REL="research/daily/$OUTPUT_STEM-report.md"
 CALLS_REL="research/calls/$OUTPUT_STEM-calls.json"
+DRAFT_CALLS_REL="research/calls/$OUTPUT_STEM-draft-policy.json"
 REFLECTION_REL="research/daily/$OUTPUT_STEM-reflection.md"
 EVALUATION_REL="research/evaluations/latest.md"
 OPTIMIZATION_REL="research/experiments/latest_optimization.md"
+RUN_MANIFEST_REL="research/runs/$OUTPUT_STEM/manifest.json"
 JOURNAL_REL="journals/investment_journal.md"
 
 ASSESSMENT_FILE="$ROOT_DIR/$ASSESSMENT_REL"
 PLAN_FILE="$ROOT_DIR/$PLAN_REL"
 REPORT_FILE="$ROOT_DIR/$REPORT_REL"
 CALLS_FILE="$ROOT_DIR/$CALLS_REL"
+DRAFT_CALLS_FILE="$ROOT_DIR/$DRAFT_CALLS_REL"
 REFLECTION_FILE="$ROOT_DIR/$REFLECTION_REL"
 EVALUATION_FILE="$ROOT_DIR/$EVALUATION_REL"
 OPTIMIZATION_FILE="$ROOT_DIR/$OPTIMIZATION_REL"
+RUN_MANIFEST_FILE="$ROOT_DIR/$RUN_MANIFEST_REL"
 JOURNAL_FILE="$ROOT_DIR/$JOURNAL_REL"
+
+write_run_manifest() {
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/create_investment_run_manifest.py" \
+        --date "$DATE" \
+        --session "$SESSION" \
+        --as-of-date "$DATE" \
+        --as-of-session "$SESSION" \
+        --model "$MODEL" \
+        --provider "$PROVIDER" \
+        --runs-root "$ROOT_DIR/research/runs" \
+        --file investment_profile "$ROOT_DIR/config/investment_profile.toml" \
+        --file active_strategy "$ACTIVE_STRATEGY_FILE" \
+        --file optimization_config "$OPTIMIZATION_CONFIG" \
+        --file trade_universe "$TRADE_UNIVERSE_CONFIG" \
+        --file market_radar "$RADAR_CONFIG" \
+        --file trade_snapshot "$SNAPSHOT_FILE" \
+        --file radar_snapshot "$RADAR_SNAPSHOT_FILE" \
+        --file ranking "$RANKING_FILE" \
+        --file draft_calls "$DRAFT_CALLS_FILE" \
+        --file final_calls "$CALLS_FILE" \
+        --file market_assessment "$ASSESSMENT_FILE" \
+        --file daily_plan "$PLAN_FILE" \
+        --file daily_report "$REPORT_FILE" \
+        --file reflection "$REFLECTION_FILE" \
+        --file evaluation "$ROOT_DIR/research/evaluations/latest.json"
+}
+
+write_run_manifest
+
+"$PYTHON_BIN" "$ROOT_DIR/scripts/generate_investment_draft_calls.py" \
+    --ranking "$RANKING_FILE" \
+    --output "$DRAFT_CALLS_FILE" \
+    --date "$DATE" \
+    --session "$SESSION" \
+    $HORIZON_ARGS \
+    --include-diagnostics
+
+write_run_manifest
+
+"$PYTHON_BIN" "$ROOT_DIR/scripts/validate_investment_calls.py" \
+    --calls "$DRAFT_CALLS_FILE" \
+    --ranking "$RANKING_FILE" \
+    --trade-universe "$TRADE_UNIVERSE_CONFIG"
 
 "$PYTHON_BIN" "$ROOT_DIR/scripts/evaluate_investment_calls.py" \
     --calls-dir "$ROOT_DIR/research/calls" \
@@ -650,6 +720,8 @@ $RADAR_SNAPSHOT
 $SNAPSHOT
 - Deterministic trade universe ranking:
 $RANKING
+- Deterministic draft policy calls:
+$( [ -f "$DRAFT_CALLS_FILE" ] && cat "$DRAFT_CALLS_FILE" )
 - Parameter optimization summary:
 $OPTIMIZATION_SUMMARY
 
@@ -658,6 +730,7 @@ Output requirements:
 - Keep JSON keys and enum values in English exactly as specified.
 - Write human-readable values such as rationale, evidence, risks, and invalidation in Simplified Chinese.
 - Actionable recommendations should come only from actionable_candidates in the deterministic ranking. Diagnostic candidates may only become watch/avoid rows when the report discussed them.
+- Start from the deterministic draft policy calls. You may explain or downgrade draft recommendations, but do not upgrade any row beyond the deterministic draft state.
 - Do not turn diagnostic_only=true or qualified_for_watch=false rows into actionable states; they may only appear as watch/avoid diagnostics when the report discussed them.
 - Do not turn qualified_for_action=false rows into buy_candidate, accumulate, or hold.
 - If is_theme_leader=false, keep the state non-actionable unless selection_reason explains why it is better than the deterministic same-theme leader.
@@ -670,9 +743,9 @@ Output requirements:
     "strategy_version": "copy from deterministic ranking strategy_version",
     "strategy_weights": "copy from deterministic ranking strategy_weights object",
     "recommendations": [
-      {
-        "symbol": "0700.HK",
-        "state": "watch_only|buy_candidate|accumulate|hold|trim|sell_candidate|avoid",
+        {
+          "symbol": "0700.HK",
+          "state": "watch_only|buy_candidate|accumulate|hold|trim|sell_candidate|avoid",
         "theme": "string",
         "kind": "stock|etf",
         "horizon_days_min": 14,
@@ -681,12 +754,12 @@ Output requirements:
         "rationale": "short string",
         "evidence": ["fact 1", "fact 2"],
         "risks": ["risk 1", "risk 2"],
-        "invalidation": "single string",
-        "selection_source_theme": "theme that caused this symbol to be selected",
-        "selection_reason": "why this symbol was selected over same-theme alternatives"
-      }
-    ]
-  }
+          "invalidation": "single string",
+          "selection_source_theme": "theme that caused this symbol to be selected",
+          "selection_reason": "why this symbol was selected over same-theme alternatives"
+        }
+      ]
+    }
 - Include only symbols that appear in today's report as actionable, watch, or avoid names.
 - Include only configured trade universe symbols in recommendations. Do not include radar-only symbols in this JSON.
 - Save only JSON to $CALLS_REL.
@@ -752,6 +825,8 @@ run_markdown_stage "$PLAN_PROMPT" "$PLAN_FILE" "daily plan"
 run_markdown_stage "$REPORT_PROMPT" "$REPORT_FILE" "daily report"
 run_json_stage "$CALLS_PROMPT" "$CALLS_FILE"
 run_markdown_stage "$REFLECT_PROMPT" "$REFLECTION_FILE" "reflection"
+
+write_run_manifest
 
 rm -f "$ASSESS_PROMPT" "$PLAN_PROMPT" "$REPORT_PROMPT" "$CALLS_PROMPT" "$REFLECT_PROMPT"
 

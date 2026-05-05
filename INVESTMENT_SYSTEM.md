@@ -126,6 +126,12 @@ Level 6 third-round stabilization separates action eligibility from diagnostics 
 - `scripts/build_symbol_risk_memory.py` creates `research/experiments/symbol_risk_memory.json` from latest evaluation summaries. If only aggregate summary fields are available, metadata marks `as_of_limited=true` instead of claiming full as-of training.
 - Backtests and optimization distinguish `actionable_top_n` from `diagnostic_top_n`; promotion uses the conservative actionable sample layer and the higher `min_samples` gate.
 
+Level 6 kernel hardening adds traceable run lineage and deterministic draft calls:
+
+- Ranking rows now include per-candidate `expected_edge_bps`, `net_expected_edge_bps`, `cost_gate_passed`, `edge_method`, and `evidence_window`. Action qualification requires the edge/cost gate to pass; validator rejects actionable final calls without those fields.
+- `scripts/generate_investment_draft_calls.py` creates deterministic draft policy JSON from ranking layers. LLM report/calls stages may explain or downgrade these drafts, but should not upgrade beyond the deterministic draft state.
+- `scripts/create_investment_run_manifest.py` writes `research/runs/<date>-<session>/manifest.json` with as-of metadata, model/provider, and sha256/size/existence metadata for key inputs and outputs. The investment loop writes the manifest before LLM stages and refreshes it after final outputs exist.
+
 ## Current Limitations
 
 - It is research assistance, not financial advice or automated execution.

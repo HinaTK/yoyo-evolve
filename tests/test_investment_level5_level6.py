@@ -17,6 +17,8 @@ import plan_investment_system_improvements as planner  # noqa: E402
 import rank_investment_universe as ranker  # noqa: E402
 import backtest_investment_strategy as backtester  # noqa: E402
 import build_symbol_risk_memory as symbol_risk  # noqa: E402
+import create_investment_run_manifest as run_manifest  # noqa: E402
+import generate_investment_draft_calls as draft_calls  # noqa: E402
 import validate_investment_calls as calls_validator  # noqa: E402
 
 
@@ -108,6 +110,14 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         }
 
     def ranking_with_row(self, row):
+        defaults = {
+            "expected_edge_bps": 160.0,
+            "net_expected_edge_bps": 125.0,
+            "cost_gate_passed": True,
+            "edge_method": "technical_snapshot_score_v1",
+            "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+        }
+        row = {**defaults, **row}
         return {
             "actionable_candidates": [row] if row.get("qualified_for_action") else [],
             "diagnostic_candidates": [row],
@@ -333,6 +343,27 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
 
         self.assertEqual(errors, [])
 
+    def test_calls_validator_rejects_actionable_without_edge_fields(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+        }
+        ranking = {
+            "actionable_candidates": [row],
+            "diagnostic_candidates": [row],
+            "top_candidates": [row],
+            "all_ranked": [row],
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call()]}
+
+        errors = calls_validator.validate(calls, ranking, {"AAA.HK"})
+
+        self.assertTrue(any("expected_edge_bps" in error for error in errors))
+        self.assertTrue(any("net_expected_edge_bps" in error for error in errors))
+
     def test_backtest_skips_registry_entries_with_payload_date_mismatch(self):
         registry = {
             "entries": [
@@ -377,6 +408,7 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
                 candidate_policy="relaxed",
                 min_samples=2,
                 max_adverse_limit_pct=-8.0,
+                minimum_edge_bps=0,
             )
 
             self.assertEqual(result["summary"]["sample_quality"], "relaxed_fallback")
@@ -409,6 +441,7 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
                 candidate_policy="strict",
                 min_samples=1,
                 max_adverse_limit_pct=-8.0,
+                minimum_edge_bps=0,
             )
 
             self.assertIn("adverse_breach_rate", result["summary"])
@@ -447,6 +480,7 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
                 candidate_policy="strict",
                 min_samples=1,
                 max_adverse_limit_pct=-8.0,
+                minimum_edge_bps=0,
             )
 
             symbols = {record["symbol"] for record in result["records"]}
@@ -641,6 +675,40 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertIn("symbol_risk_veto", ranked[0]["disqualifiers"])
         self.assertTrue(ranked[0]["diagnostic_only"])
 
+    def test_ranker_adds_edge_fields_and_cost_gate_blocks_action(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 12.0, "ma20": 10.0, "ma60": 10.0, "range_pos_60": 0.9, "pct_change_1d": 2.0, "volume_ratio_20": 1.5, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=35, minimum_edge_bps=500)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        row = ranked[0]
+        self.assertIn("expected_edge_bps", row)
+        self.assertIn("net_expected_edge_bps", row)
+        self.assertEqual(row["edge_method"], "technical_snapshot_score_v1")
+        self.assertEqual(row["evidence_window"], "1d_momentum_20d_volume_20d_60d_trend_60d_range")
+        self.assertFalse(row["cost_gate_passed"])
+        self.assertFalse(row["qualified_for_action"])
+        self.assertIn("cost_gate_failed", row["disqualifiers"])
+
+    def test_ranker_cost_gate_can_pass_for_strong_candidate(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertTrue(ranked[0]["cost_gate_passed"])
+        self.assertTrue(ranked[0]["qualified_for_action"])
+
     def test_ranker_emits_actionable_and_diagnostic_layers(self):
         strong = ranker.item_score(
             {"symbol": "AAA.HK", "theme": "ai", "latest_close": 14.0, "ma20": 10.0, "ma60": 10.0, "range_pos_60": 0.9, "pct_change_1d": 2.0, "volume_ratio_20": 1.5, "regime_flags": []},
@@ -653,6 +721,7 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
             min_watch_score=0,
         )
         ranked = sorted(ranker.annotate_theme_positions([strong, weak]), key=lambda row: row["score"], reverse=True)
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=0, minimum_edge_bps=0)
         ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
 
         actionable, diagnostics, top = ranker.candidate_layers(ranked, actionable_top_n=1, diagnostic_top_n=2)
@@ -661,6 +730,172 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertEqual(len(diagnostics), 2)
         self.assertTrue(any(row["diagnostic_only"] for row in diagnostics))
         self.assertEqual(top[0]["symbol"], "AAA.HK")
+
+    def test_run_manifest_hashes_existing_files_and_allows_missing_outputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            existing = tmp_path / "input.json"
+            missing = tmp_path / "future.json"
+            runs_root = tmp_path / "runs"
+            existing.write_text("alpha", encoding="utf-8")
+            args = mock.Mock(
+                date="2026-04-27",
+                session="morning",
+                as_of_date=None,
+                as_of_session=None,
+                model="test-model",
+                provider="test-provider",
+                file=[("input", str(existing)), ("future_output", str(missing))],
+            )
+
+            manifest = run_manifest.build_manifest(args)
+            argv = ["manifest", "--date", "2026-04-27", "--session", "morning", "--model", "test-model", "--provider", "test-provider", "--runs-root", str(runs_root), "--file", "input", str(existing), "--file", "future_output", str(missing)]
+            with mock.patch.object(sys, "argv", argv):
+                self.assertEqual(run_manifest.main(), 0)
+
+            written = json.loads((runs_root / "2026-04-27-morning" / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["run_id"], "2026-04-27-morning")
+            self.assertTrue(written["files"]["input"]["exists"])
+            self.assertEqual(written["files"]["input"]["sha256"], "8ed3f6ad685b959ead7022518e1af76cd816f8e8ec7ccdda1ed4018e8f2223f8")
+            self.assertFalse(written["files"]["future_output"]["exists"])
+            self.assertIsNone(written["files"]["future_output"]["sha256"])
+
+    def test_draft_calls_only_buy_when_qualified_and_cost_gate_passed(self):
+        ranking = {
+            "as_of_date": "2026-04-27",
+            "as_of_session": "close",
+            "actionable_candidates": [
+                {
+                    "symbol": "AAA.HK",
+                    "theme": "growth",
+                    "kind": "stock",
+                    "score": 80,
+                    "trend_score": 90,
+                    "momentum_score": 70,
+                    "qualified_for_action": True,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": False,
+                    "cost_gate_passed": True,
+                    "expected_edge_bps": 160,
+                    "net_expected_edge_bps": 125,
+                    "edge_method": "technical_snapshot_score_v1",
+                    "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+                }
+            ],
+            "diagnostic_candidates": [
+                {
+                    "symbol": "BBB.HK",
+                    "theme": "defensive",
+                    "kind": "stock",
+                    "score": 50,
+                    "trend_score": 55,
+                    "momentum_score": 45,
+                    "qualified_for_action": True,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": False,
+                    "cost_gate_passed": False,
+                    "expected_edge_bps": 40,
+                    "net_expected_edge_bps": 5,
+                },
+                {
+                    "symbol": "CCC.HK",
+                    "theme": "weak",
+                    "kind": "stock",
+                    "score": 10,
+                    "trend_score": 5,
+                    "momentum_score": 20,
+                    "qualified_for_action": False,
+                    "qualified_for_watch": False,
+                    "diagnostic_only": True,
+                    "cost_gate_passed": False,
+                    "disqualifiers": ["downtrend_regime"],
+                },
+            ],
+        }
+
+        calls = draft_calls.build_calls(ranking, include_diagnostics=True)
+        states = {rec["symbol"]: rec["state"] for rec in calls["recommendations"]}
+
+        self.assertEqual(states["AAA.HK"], "buy_candidate")
+        self.assertEqual(states["BBB.HK"], "watch_only")
+        self.assertEqual(states["CCC.HK"], "avoid")
+        self.assertEqual(calls["recommendations"][0]["horizon_days_min"], 14)
+        self.assertEqual(calls["recommendations"][0]["horizon_days_max"], 90)
+        self.assertEqual(calls_validator.validate(calls, {**ranking, "all_ranked": ranking["actionable_candidates"] + ranking["diagnostic_candidates"]}, {"AAA.HK", "BBB.HK", "CCC.HK"}), [])
+
+    def test_draft_calls_caps_diagnostics_at_watch_even_if_row_is_qualified(self):
+        ranking = {
+            "as_of_date": "2026-04-27",
+            "actionable_candidates": [],
+            "diagnostic_candidates": [
+                {
+                    "symbol": "AAA.HK",
+                    "theme": "growth",
+                    "kind": "stock",
+                    "score": 80,
+                    "trend_score": 90,
+                    "momentum_score": 70,
+                    "qualified_for_action": True,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": False,
+                    "cost_gate_passed": True,
+                    "expected_edge_bps": 160,
+                    "net_expected_edge_bps": 125,
+                    "edge_method": "technical_snapshot_score_v1",
+                    "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+                }
+            ],
+        }
+
+        calls = draft_calls.build_calls(ranking, include_diagnostics=True)
+
+        self.assertEqual(calls["recommendations"][0]["state"], "watch_only")
+        self.assertIn("source_layer=diagnostic_candidates", calls["recommendations"][0]["selection_reason"])
+
+    def test_calls_validator_rejects_final_state_upgrade_beyond_draft(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="accumulate")]}
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="buy_candidate")]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft)
+
+        self.assertTrue(any("upgrades beyond deterministic draft" in error for error in errors))
+
+    def test_calls_validator_rejects_actionable_without_matching_draft(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call()]}
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": []}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft)
+
+        self.assertTrue(any("matching deterministic draft call" in error for error in errors))
+
+    def test_calls_validator_rejects_sell_state_without_matching_draft(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="trim")]}
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": []}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft)
+
+        self.assertTrue(any("trim state requires matching deterministic draft call" in error for error in errors))
 
     def test_build_symbol_risk_memory_from_summary_fields(self):
         data = {

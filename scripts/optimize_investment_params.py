@@ -208,6 +208,12 @@ def main() -> int:
     top_n = diagnostic_top_n
     horizon_days = int(opt.get("horizon_days", 3))
     round_trip_bps = float(opt.get("round_trip_bps", 35))
+    minimum_edge_bps = float(opt.get("minimum_edge_bps", 100))
+    active_cost_gate = active_raw.get("cost_gate", {})
+    if safety.get("forbid_cost_gate_reduction"):
+        round_trip_bps = max(round_trip_bps, float(active_cost_gate.get("estimated_round_trip_bps", round_trip_bps)))
+    if safety.get("forbid_edge_gate_reduction"):
+        minimum_edge_bps = max(minimum_edge_bps, float(active_cost_gate.get("minimum_edge_bps", minimum_edge_bps)))
     benchmark_symbol = str(opt.get("benchmark_symbol", "2800.HK"))
     min_watch_score = float(opt.get("min_watch_score", 45))
     min_action_score = float(opt.get("min_action_score", 65))
@@ -243,6 +249,7 @@ def main() -> int:
         as_of_date,
         actionable_top_n,
         diagnostic_top_n,
+        minimum_edge_bps,
     )
     baseline_score = robust_score(baseline, window_count)
     results.append({"strategy_version": active["strategy_version"], "weights": active["weights"], "summary": baseline["summary"], "robust_score": round(baseline_score, 4)})
@@ -265,6 +272,7 @@ def main() -> int:
             as_of_date,
             actionable_top_n,
             diagnostic_top_n,
+            minimum_edge_bps,
         )
         score = robust_score(candidate, window_count)
         results.append({"strategy_version": version, "weights": weights, "summary": candidate["summary"], "robust_score": round(score, 4)})

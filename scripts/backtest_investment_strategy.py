@@ -12,7 +12,7 @@ from typing import Any
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-from rank_investment_universe import DEFAULT_STRATEGY_WEIGHTS, annotate_theme_positions, apply_action_qualification, candidate_layers, item_score, load_strategy_config  # noqa: E402
+from rank_investment_universe import DEFAULT_STRATEGY_WEIGHTS, annotate_theme_positions, apply_action_qualification, apply_edge_cost_fields, candidate_layers, item_score, load_strategy_config  # noqa: E402
 
 
 def load_json(path: pathlib.Path) -> Any:
@@ -99,6 +99,7 @@ def backtest(
     as_of_date: dt.date | None = None,
     actionable_top_n: int | None = None,
     diagnostic_top_n: int | None = None,
+    minimum_edge_bps: float = 100.0,
 ) -> dict[str, Any]:
     if candidate_policy not in {"strict", "relaxed"}:
         raise ValueError("candidate_policy must be strict or relaxed")
@@ -120,6 +121,7 @@ def backtest(
             future_items = snapshot_items(future_snapshot)
             base_items = snapshot_items(base_snapshot)
             scored = annotate_theme_positions([item_score(item, weights, min_watch_score) for item in base_items.values()])
+            apply_edge_cost_fields(scored, round_trip_bps, minimum_edge_bps)
             ranked = sorted(scored, key=lambda row: row["score"], reverse=True)
             apply_action_qualification(ranked, min_action_score, {})
             actionable, diagnostics, _top = candidate_layers(ranked, actionable_top_n, diagnostic_top_n)
@@ -218,6 +220,7 @@ def backtest(
         "diagnostic_top_n": diagnostic_top_n,
         "horizon_days": horizon_days,
         "round_trip_bps": round_trip_bps,
+        "minimum_edge_bps": minimum_edge_bps,
         "benchmark_symbol": benchmark_symbol,
         "min_watch_score": min_watch_score,
         "min_action_score": min_action_score,
@@ -292,6 +295,7 @@ def main() -> int:
     parser.add_argument("--diagnostic-top-n", type=int, default=None)
     parser.add_argument("--horizon-days", type=int, default=3)
     parser.add_argument("--round-trip-bps", type=float, default=35)
+    parser.add_argument("--minimum-edge-bps", type=float, default=100)
     parser.add_argument("--benchmark-symbol", default="2800.HK")
     parser.add_argument("--min-watch-score", type=float, default=45)
     parser.add_argument("--min-action-score", type=float, default=65)
@@ -319,6 +323,7 @@ def main() -> int:
         as_of_date,
         args.actionable_top_n,
         args.diagnostic_top_n,
+        args.minimum_edge_bps,
     )
     output_dir = pathlib.Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)

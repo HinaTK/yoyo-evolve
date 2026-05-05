@@ -58,6 +58,7 @@ def load_strategy_config(path: pathlib.Path | None) -> dict[str, Any]:
         "strategy_version": str(data.get("strategy_version") or data.get("strategy_id") or path.stem),
         "status": str(data.get("status") or "unknown"),
         "weights": weights,
+        "cost_gate": data.get("cost_gate", {}),
         "safety_invariants": safety,
     }
 
@@ -142,6 +143,57 @@ def qualification_signals(item: dict[str, Any], score: float, min_watch_score: f
     if price and ma20 and ma60 and price < ma20 and price < ma60:
         disqualifiers.append("price_below_ma20_and_ma60")
     return qualification_flags, disqualifiers
+
+
+def expected_edge_fields(row: dict[str, Any], round_trip_bps: float, minimum_edge_bps: float) -> dict[str, Any]:
+    score = float(row.get("score") or 0.0)
+    range_pos = float(row.get("range_pos_60") or 0.0)
+    pct_change = float(row.get("pct_change_1d") or 0.0)
+    volume_ratio = row.get("volume_ratio_20")
+    volume_ratio = float(volume_ratio) if volume_ratio is not None else 0.0
+    risk = float(row.get("risk_penalty") or 0.0)
+
+    price = float(row.get("latest_close") or 0.0)
+    ma20 = float(row.get("ma20") or 0.0)
+    ma60 = float(row.get("ma60") or 0.0)
+    flags = set(row.get("regime_flags") or [])
+
+    gross_edge = 0.0
+    gross_edge += max(0.0, score - 55.0) * 5.0
+    if price and ma20 and price >= ma20:
+        gross_edge += 18.0
+    if price and ma60 and price >= ma60:
+        gross_edge += 24.0
+    if ma20 and ma60 and ma20 >= ma60:
+        gross_edge += 18.0
+    if 0.30 <= range_pos <= 0.80:
+        gross_edge += 30.0 * range_pos
+    elif range_pos > 0.80:
+        gross_edge += 12.0
+    gross_edge += clamp(pct_change, -2.0, 3.0) * 6.0
+    gross_edge += clamp((volume_ratio - 1.0) * 24.0, -18.0, 24.0)
+    gross_edge -= risk * 2.0
+    if "downtrend" in flags:
+        gross_edge -= 35.0
+
+    expected_edge_bps = round(clamp(gross_edge, 0.0, 300.0), 2)
+    net_expected_edge_bps = round(expected_edge_bps - round_trip_bps, 2)
+    return {
+        "expected_edge_bps": expected_edge_bps,
+        "net_expected_edge_bps": net_expected_edge_bps,
+        "cost_gate_passed": bool(expected_edge_bps > round_trip_bps and net_expected_edge_bps >= minimum_edge_bps),
+        "edge_method": "technical_snapshot_score_v1",
+        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+    }
+
+
+def apply_edge_cost_fields(ranked: list[dict[str, Any]], round_trip_bps: float, minimum_edge_bps: float) -> None:
+    for row in ranked:
+        row.update(expected_edge_fields(row, round_trip_bps, minimum_edge_bps))
+        if row["cost_gate_passed"]:
+            row.setdefault("qualification_flags", []).append("cost_gate_passed")
+        else:
+            row.setdefault("qualification_flags", []).append("cost_gate_failed")
 
 
 def item_score(item: dict[str, Any], weights: dict[str, float] | None = None, min_watch_score: float = 45.0) -> dict[str, Any]:
@@ -240,6 +292,9 @@ def apply_action_qualification(ranked: list[dict[str, Any]], min_action_score: f
         if row["symbol_risk"]["action_veto"]:
             row.setdefault("disqualifiers", []).append("symbol_risk_veto")
             row["diagnostic_only"] = True
+        if not bool(row.get("cost_gate_passed")):
+            row.setdefault("disqualifiers", []).append("cost_gate_failed")
+            row["diagnostic_only"] = True
         score_ok = float(row.get("score") or 0.0) >= min_action_score
         if score_ok:
             row.setdefault("qualification_flags", []).append("score_meets_action_threshold")
@@ -249,6 +304,7 @@ def apply_action_qualification(ranked: list[dict[str, Any]], min_action_score: f
             row.get("qualified_for_watch")
             and score_ok
             and row.get("is_theme_leader")
+            and row.get("cost_gate_passed")
             and not row["symbol_risk"]["action_veto"]
         )
         if not row["qualified_for_action"]:
@@ -295,6 +351,7 @@ def main() -> int:
     symbol_risk = load_symbol_risk(pathlib.Path(args.symbol_risk_json) if args.symbol_risk_json else None)
     diagnostic_top_n = args.diagnostic_top_n if args.diagnostic_top_n is not None else (args.top_n if args.top_n is not None else 3)
     scored = annotate_theme_positions([item_score(item, strategy["weights"], args.min_watch_score) for item in snapshot.get("items", [])])
+    apply_edge_cost_fields(scored, args.round_trip_bps, args.minimum_edge_bps)
     ranked = sorted(scored, key=lambda row: row["score"], reverse=True)
     apply_action_qualification(ranked, args.min_action_score, symbol_risk)
     actionable_candidates, diagnostic_candidates, top_candidates = candidate_layers(ranked, args.actionable_top_n, diagnostic_top_n)
