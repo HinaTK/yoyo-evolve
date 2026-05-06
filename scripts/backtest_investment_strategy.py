@@ -12,7 +12,7 @@ from typing import Any
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-from rank_investment_universe import DEFAULT_STRATEGY_WEIGHTS, annotate_theme_positions, apply_action_qualification, apply_edge_cost_fields, candidate_layers, item_score, load_strategy_config  # noqa: E402
+from rank_investment_universe import DEFAULT_STRATEGY_WEIGHTS, annotate_theme_positions, apply_action_qualification, apply_edge_cost_fields, candidate_layers, item_score, load_strategy_config, load_symbol_risk  # noqa: E402
 
 
 def load_json(path: pathlib.Path) -> Any:
@@ -100,6 +100,7 @@ def backtest(
     actionable_top_n: int | None = None,
     diagnostic_top_n: int | None = None,
     minimum_edge_bps: float = 100.0,
+    symbol_risk: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     if candidate_policy not in {"strict", "relaxed"}:
         raise ValueError("candidate_policy must be strict or relaxed")
@@ -109,6 +110,7 @@ def backtest(
     actionable_top_n = top_n if actionable_top_n is None else actionable_top_n
     diagnostic_top_n = top_n if diagnostic_top_n is None else diagnostic_top_n
     diagnostic_records = []
+    symbol_risk = symbol_risk or {}
 
     def collect_records(use_relaxed_top_n: bool) -> list[dict[str, Any]]:
         collected = []
@@ -123,7 +125,7 @@ def backtest(
             scored = annotate_theme_positions([item_score(item, weights, min_watch_score) for item in base_items.values()])
             apply_edge_cost_fields(scored, round_trip_bps, minimum_edge_bps)
             ranked = sorted(scored, key=lambda row: row["score"], reverse=True)
-            apply_action_qualification(ranked, min_action_score, {})
+            apply_action_qualification(ranked, min_action_score, symbol_risk)
             actionable, diagnostics, _top = candidate_layers(ranked, actionable_top_n, diagnostic_top_n)
             if use_relaxed_top_n:
                 candidates = list(actionable)
@@ -324,6 +326,7 @@ def main() -> int:
     parser.add_argument("--horizon-days", type=int, default=3)
     parser.add_argument("--round-trip-bps", type=float, default=35)
     parser.add_argument("--minimum-edge-bps", type=float, default=100)
+    parser.add_argument("--symbol-risk-json", default=None, help="Optional symbol risk memory JSON for current-production diagnostic backtests.")
     parser.add_argument("--benchmark-symbol", default="2800.HK")
     parser.add_argument("--min-watch-score", type=float, default=45)
     parser.add_argument("--min-action-score", type=float, default=65)
@@ -352,6 +355,7 @@ def main() -> int:
         args.actionable_top_n,
         args.diagnostic_top_n,
         args.minimum_edge_bps,
+        load_symbol_risk(pathlib.Path(args.symbol_risk_json)) if args.symbol_risk_json else None,
     )
     output_dir = pathlib.Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)

@@ -44,16 +44,40 @@ def symbol_from_record(record: dict[str, Any]) -> str | None:
     return str(symbol) if symbol else None
 
 
-def add_reason(symbols: dict[str, dict[str, Any]], symbol: str, tag: str, reason: str) -> None:
+def add_reason(symbols: dict[str, dict[str, Any]], symbol: str, tag: str, reason: str, action_veto: bool = False) -> None:
     row = symbols.setdefault(symbol, {"tags": [], "reasons": [], "action_veto": False})
     if tag not in row["tags"]:
         row["tags"].append(tag)
     if reason not in row["reasons"]:
         row["reasons"].append(reason)
-    row["action_veto"] = True
+    row["action_veto"] = row["action_veto"] or action_veto
 
 
-def build_memory(inputs: list[dict[str, Any]], as_of_date: str) -> dict[str, Any]:
+def add_backtest_adverse_reasons(symbols: dict[str, dict[str, Any]], backtest: dict[str, Any] | None) -> None:
+    if not backtest:
+        return
+    limit = float((backtest.get("summary") or {}).get("max_adverse_limit_pct") or -8.0)
+    per_symbol: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for record in backtest.get("records") or []:
+        symbol = symbol_from_record(record)
+        if not symbol or not record.get("eligible_for_action_from_layer"):
+            continue
+        per_symbol[symbol].append(record)
+
+    for symbol, records in per_symbol.items():
+        adverse_values = [float(record["max_adverse_pct"]) for record in records if record.get("max_adverse_pct") is not None]
+        breaches = [value for value in adverse_values if value <= limit]
+        if len(records) >= 3 and breaches:
+            add_reason(
+                symbols,
+                symbol,
+                "backtest_adverse_breach",
+                f"backtest_max_adverse_pct<={limit:.1f}% in {len(breaches)} of {len(records)} promotable samples",
+                action_veto=True,
+            )
+
+
+def build_memory(inputs: list[dict[str, Any]], as_of_date: str, backtest: dict[str, Any] | None = None) -> dict[str, Any]:
     symbols: dict[str, dict[str, Any]] = {}
     selection_error_counts: Counter[str] = Counter()
     complete_records = False
@@ -127,13 +151,15 @@ def build_memory(inputs: list[dict[str, Any]], as_of_date: str) -> dict[str, Any
                 f"recent symbol-selection errors={count}",
             )
 
+    add_backtest_adverse_reasons(symbols, backtest)
+
     return {
         "metadata": {
             "generated_at": utc_now(),
             "as_of_date": as_of_date,
             "as_of_limited": not complete_records,
-            "source_count": len(inputs),
-            "method": "summary_symbol_stats_recent_errors_mvp" if not complete_records else "records_plus_summary_mvp",
+            "source_count": len(inputs) + (1 if backtest else 0),
+            "method": "summary_symbol_stats_recent_errors_backtest_mvp" if not complete_records else "records_plus_summary_backtest_mvp",
         },
         "symbols": dict(sorted(symbols.items())),
     }
@@ -143,13 +169,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Build as-of symbol risk memory from investment evaluation summaries.")
     parser.add_argument("--latest-json", default=str(ROOT / "research" / "evaluations" / "latest.json"))
     parser.add_argument("--records-json", default=str(ROOT / "research" / "evaluations" / "latest_records.json"))
+    parser.add_argument("--backtest-json", default=str(ROOT / "research" / "experiments" / "latest_backtest.json"))
     parser.add_argument("--evaluations-dir", default=str(ROOT / "research" / "evaluations"))
     parser.add_argument("--output", default=str(ROOT / "research" / "experiments" / "symbol_risk_memory.json"))
     parser.add_argument("--as-of-date", required=True)
     args = parser.parse_args()
 
     inputs = evaluation_inputs(pathlib.Path(args.latest_json), pathlib.Path(args.records_json), pathlib.Path(args.evaluations_dir))
-    result = build_memory(inputs, args.as_of_date)
+    backtest_path = pathlib.Path(args.backtest_json)
+    result = build_memory(inputs, args.as_of_date, load_json(backtest_path) if backtest_path.exists() else None)
     output = pathlib.Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, indent=2), encoding="utf-8")

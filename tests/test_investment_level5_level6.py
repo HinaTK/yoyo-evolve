@@ -492,6 +492,35 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
             self.assertNotIn("AAA.HK", symbols)
             self.assertTrue(all(record["qualified_for_watch"] for record in result["records"]))
 
+    def test_backtest_applies_symbol_risk_veto(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 10.0)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-02.json", "2026-04-02", 11.0, 10.2)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-02"])
+            first = json.loads((tmp_path / "trade-2026-04-01.json").read_text(encoding="utf-8"))
+            first["items"][0].update({"latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8})
+            (tmp_path / "trade-2026-04-01.json").write_text(json.dumps(first), encoding="utf-8")
+
+            result = backtester.backtest(
+                registry,
+                "test_strategy",
+                ranker.DEFAULT_STRATEGY_WEIGHTS,
+                top_n=2,
+                horizon_days=1,
+                round_trip_bps=0,
+                benchmark_symbol="2800.HK",
+                min_watch_score=0,
+                min_action_score=0,
+                candidate_policy="strict",
+                min_samples=1,
+                max_adverse_limit_pct=-8.0,
+                minimum_edge_bps=0,
+                symbol_risk={"AAA.HK": {"action_veto": True, "reasons": ["test veto"], "tags": ["backtest_adverse_breach"]}},
+            )
+
+            self.assertNotIn("AAA.HK", {record["symbol"] for record in result["records"]})
+
     def test_optimizer_does_not_promote_relaxed_fallback_champion(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = pathlib.Path(tmp)
@@ -1098,12 +1127,30 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         result = symbol_risk.build_memory([data], "2026-04-27")
 
         row = result["symbols"]["0700.HK"]
-        self.assertTrue(row["action_veto"])
         self.assertIn("low_symbol_pass_rate", row["tags"])
         self.assertIn("negative_symbol_avg_return", row["tags"])
         self.assertIn("recent_symbol_adverse_breach", row["tags"])
         self.assertIn("repeated_symbol_selection_error", row["tags"])
+        self.assertFalse(row["action_veto"])
         self.assertTrue(result["metadata"]["as_of_limited"])
+
+    def test_build_symbol_risk_memory_from_backtest_adverse_records(self):
+        backtest = {
+            "summary": {"max_adverse_limit_pct": -8.0},
+            "records": [
+                {"symbol": "9992.HK", "eligible_for_action_from_layer": True, "max_adverse_pct": -8.4},
+                {"symbol": "9992.HK", "eligible_for_action_from_layer": True, "max_adverse_pct": -2.0},
+                {"symbol": "9992.HK", "eligible_for_action_from_layer": True, "max_adverse_pct": -1.0},
+                {"symbol": "0883.HK", "eligible_for_action_from_layer": True, "max_adverse_pct": -8.2},
+            ],
+        }
+
+        result = symbol_risk.build_memory([], "2026-05-06", backtest)
+
+        row = result["symbols"]["9992.HK"]
+        self.assertTrue(row["action_veto"])
+        self.assertIn("backtest_adverse_breach", row["tags"])
+        self.assertNotIn("0883.HK", result["symbols"])
 
     def test_peer_return_stats_marks_same_theme_best_missed(self):
         base = {
