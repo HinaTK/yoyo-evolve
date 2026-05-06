@@ -14,7 +14,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from backtest_investment_strategy import backtest  # noqa: E402
-from rank_investment_universe import DEFAULT_SAFETY_INVARIANTS, DEFAULT_STRATEGY_WEIGHTS, load_strategy_config  # noqa: E402
+from rank_investment_universe import DEFAULT_SAFETY_INVARIANTS, DEFAULT_STRATEGY_WEIGHTS, load_strategy_config, load_symbol_risk  # noqa: E402
 
 
 IMMUTABLE_TRUE_INVARIANTS = {
@@ -195,11 +195,13 @@ def main() -> int:
         return 0
     active_path = ROOT / opt.get("active_strategy", "config/active_strategy.toml")
     registry_path = ROOT / opt.get("snapshot_registry", "data/snapshots/registry.json")
+    symbol_risk_path = ROOT / opt.get("symbol_risk_memory", "research/experiments/symbol_risk_memory.json")
     output_dir = ROOT / opt.get("output_dir", "research/experiments")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     active = load_strategy_config(active_path)
     active_raw = read_toml(active_path)
+    symbol_risk = load_symbol_risk(symbol_risk_path)
     safety = invariant_block(active, opt)
     as_of_date = parse_date(args.as_of_date)
 
@@ -250,6 +252,7 @@ def main() -> int:
         actionable_top_n,
         diagnostic_top_n,
         minimum_edge_bps,
+        symbol_risk,
     )
     baseline_score = robust_score(baseline, window_count)
     results.append({"strategy_version": active["strategy_version"], "weights": active["weights"], "summary": baseline["summary"], "robust_score": round(baseline_score, 4)})
@@ -273,6 +276,7 @@ def main() -> int:
             actionable_top_n,
             diagnostic_top_n,
             minimum_edge_bps,
+            symbol_risk,
         )
         score = robust_score(candidate, window_count)
         results.append({"strategy_version": version, "weights": weights, "summary": candidate["summary"], "robust_score": round(score, 4)})

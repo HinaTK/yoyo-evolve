@@ -5,6 +5,7 @@ active_strategy = "config/active_strategy.toml"
 snapshot_registry = "data/snapshots/registry.json"
 snapshot_dir = "data/snapshots"
 output_dir = "research/experiments"
+symbol_risk_memory = "research/experiments/symbol_risk_memory.json"
 enabled = true
 
 # `actionable_top_n` is the small set eligible for upgrade consideration.

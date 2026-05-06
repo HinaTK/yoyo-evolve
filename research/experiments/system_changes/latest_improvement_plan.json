@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-06T04:52:25Z",
+  "generated_at": "2026-05-06T11:03:12Z",
   "task_count": 3,
   "attribution_summary": {
     "record_count": 772,
@@ -43,32 +43,6 @@
   "tasks": [
     {
       "id": "investment_task_01",
-      "title": "Reduce low win-rate candidate selection",
-      "evidence": [
-        "latest_optimization win_rate=0.424",
-        "latest_backtest avg_net_return_pct=-0.319"
-      ],
-      "objective": "Tighten research-only ranking or call qualification so weak technical setups remain watch_only instead of being upgraded.",
-      "validation": [
-        "python scripts/backtest_investment_strategy.py",
-        "python scripts/optimize_investment_params.py"
-      ]
-    },
-    {
-      "id": "investment_task_02",
-      "title": "Add adverse-move protection to research ranking",
-      "evidence": [
-        "latest_optimization max_adverse_pct=-8.302",
-        "latest_backtest avg_alpha_pct=0.584"
-      ],
-      "objective": "Add or test drawdown-aware research filters without reducing cost, edge, or exposure gates.",
-      "validation": [
-        "python scripts/backtest_investment_strategy.py",
-        "python -m unittest tests/test_investment_level5_level6.py"
-      ]
-    },
-    {
-      "id": "investment_task_03",
       "title": "Require same-theme best-peer evidence before symbol upgrades",
       "evidence": [
         "symbol_selection_error count=153",
@@ -77,6 +51,33 @@
       "objective": "Make ranking and recommendation prompts show whether the selected symbol beat the same-theme best peer before any watch candidate is upgraded.",
       "validation": [
         "python scripts/evaluate_investment_calls.py",
+        "python -m unittest tests/test_investment_level5_level6.py"
+      ]
+    },
+    {
+      "id": "investment_task_02",
+      "title": "Calibrate confidence after failed calls",
+      "evidence": [
+        "overconfidence count=33",
+        "decisive call pass_rate=0.276"
+      ],
+      "objective": "Lower confidence or force extra evidence for states that recently failed with high confidence.",
+      "validation": [
+        "python scripts/evaluate_investment_calls.py",
+        "python -m unittest tests/test_investment_level5_level6.py"
+      ]
+    },
+    {
+      "id": "investment_task_03",
+      "title": "Improve ranking selection attribution and peer checks",
+      "evidence": [
+        "attribution_tag=ranking_selection_error",
+        "count=114",
+        "record_count=772"
+      ],
+      "objective": "Make ranking or recommendation evidence prefer same-theme leaders when posterior attribution repeatedly shows selected symbols lagged better-ranked peers.",
+      "validation": [
+        "python scripts/attribute_investment_outcomes.py",
         "python -m unittest tests/test_investment_level5_level6.py"
       ]
     }

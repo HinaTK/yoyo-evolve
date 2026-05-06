@@ -1,23 +1,23 @@
 # Investment Strategy Backtest
 
-Generated: `2026-05-06T04:51:19Z`
+Generated: `2026-05-06T11:01:35Z`
 Strategy: `l5_mvp_conservative_v1`
-Samples: `67`
-Production samples: `67`
-Promotable samples: `67`
+Samples: `66`
+Production samples: `66`
+Promotable samples: `66`
 Sample quality: `sufficient`
-Strict samples: `67`
+Strict samples: `66`
 Relaxed samples: `0`
-Qualified samples: `67`
+Qualified samples: `66`
 Diagnostic layer samples: `270`
 Diagnostic-only samples: `270`
 Diagnostic samples: `270`
-Average net return: `-0.319`%
-Win rate: `0.418`
-Average benchmark alpha: `0.584`%
-Average max adverse return: `-0.586`%
-Max adverse-ish return: `-8.837`%
-Adverse breach rate: `0.03`
+Average net return: `-0.028`%
+Win rate: `0.424`
+Average benchmark alpha: `0.792`%
+Average max adverse return: `-0.305`%
+Max adverse-ish return: `-6.557`%
+Adverse breach rate: `0.0`
 
 ## Weights
 - `trend_weight`: 0.45
@@ -26,11 +26,11 @@ Adverse breach rate: `0.03`
 - `risk_penalty_weight`: 1.15
 
 ## Recent Records
+- `2026-03-10` rank 1 `1299.HK`: net=-4.845%, alpha=-2.738%, adverse=-4.495%, qualified=True, diagnostic=False
 - `2026-03-11` rank 1 `0883.HK`: net=4.568%, alpha=4.841%, adverse=3.706%, qualified=True, diagnostic=False
 - `2026-03-12` rank 1 `0883.HK`: net=0.818%, alpha=0.861%, adverse=1.168%, qualified=True, diagnostic=False
 - `2026-03-13` rank 1 `0883.HK`: net=-1.425%, alpha=-2.63%, adverse=-1.075%, qualified=True, diagnostic=False
 - `2026-03-16` rank 1 `0883.HK`: net=0.126%, alpha=1.854%, adverse=-3.872%, qualified=True, diagnostic=False
-- `2026-03-18` rank 1 `9992.HK`: net=-9.187%, alpha=-2.825%, adverse=-8.837%, qualified=True, diagnostic=False
 - `2026-03-19` rank 1 `0883.HK`: net=2.76%, alpha=7.225%, adverse=2.705%, qualified=True, diagnostic=False
 - `2026-03-20` rank 1 `0883.HK`: net=0.045%, alpha=3.76%, adverse=0.395%, qualified=True, diagnostic=False
 - `2026-03-23` rank 1 `0883.HK`: net=-4.547%, alpha=-5.978%, adverse=-6.557%, qualified=True, diagnostic=False
