@@ -1,22 +1,24 @@
 {
-  "generated_at": "2026-04-30T03:48:32Z",
-  "evaluations": 766,
+  "generated_at": "2026-05-06T04:31:51Z",
+  "as_of_date": "2026-05-06",
+  "as_of_session": "close",
+  "evaluations": 772,
   "verdict_counts": {
     "mixed": 148,
     "pass": 84,
-    "fail": 215,
-    "informational": 319
+    "fail": 220,
+    "informational": 320
   },
   "learning_counts": {
     "timing_unclear": 140,
-    "bullish_misread": 13,
-    "theme_error": 89,
-    "symbol_selection_error": 152,
+    "bullish_misread": 14,
+    "theme_error": 92,
+    "symbol_selection_error": 153,
     "overconfidence": 33,
     "defensive_misread": 17
   },
   "session_counts": {
-    "historical": 760,
+    "historical": 766,
     "morning": 6
   },
   "symbol_stats": {
@@ -36,34 +38,34 @@
       "pass_rate": 0.0
     },
     "0700.HK": {
-      "samples": 108,
-      "avg_return_pct": 1.824,
-      "pass_rate": 0.074
+      "samples": 109,
+      "avg_return_pct": 1.711,
+      "pass_rate": 0.073
     },
     "9988.HK": {
-      "samples": 103,
-      "avg_return_pct": 3.581,
-      "pass_rate": 0.165
+      "samples": 104,
+      "avg_return_pct": 3.534,
+      "pass_rate": 0.163
     },
     "1810.HK": {
-      "samples": 108,
-      "avg_return_pct": 1.438,
-      "pass_rate": 0.213
+      "samples": 109,
+      "avg_return_pct": 1.384,
+      "pass_rate": 0.211
     },
     "2800.HK": {
-      "samples": 109,
-      "avg_return_pct": 0.786,
+      "samples": 110,
+      "avg_return_pct": 0.757,
       "pass_rate": 0.064
     },
     "3033.HK": {
-      "samples": 107,
-      "avg_return_pct": 1.61,
-      "pass_rate": 0.14
+      "samples": 108,
+      "avg_return_pct": 1.566,
+      "pass_rate": 0.139
     },
     "3067.HK": {
-      "samples": 107,
-      "avg_return_pct": 1.632,
-      "pass_rate": 0.103
+      "samples": 108,
+      "avg_return_pct": 1.584,
+      "pass_rate": 0.102
     },
     "9618.HK": {
       "samples": 2,

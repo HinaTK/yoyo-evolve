@@ -119,6 +119,11 @@ def plan_tasks(evaluation: dict[str, Any], backtest: dict[str, Any], optimizatio
     sample_quality = str(opt_summary.get("sample_quality") or backtest_summary.get("sample_quality") or "")
     diagnostic_sample_count = as_int(opt_summary.get("diagnostic_sample_count") or backtest_summary.get("diagnostic_sample_count"))
     qualified_sample_count = as_int(opt_summary.get("qualified_sample_count") or backtest_summary.get("qualified_sample_count"))
+    explicit_diagnostic_reporting = any(
+        key in summary
+        for summary in (opt_summary, backtest_summary)
+        for key in ("promotable_sample_count", "diagnostic_layer_sample_count", "diagnostic_only_sample_count")
+    )
     win_rate = as_float(opt_summary.get("win_rate") if opt_summary.get("win_rate") is not None else backtest_summary.get("win_rate"))
     adverse = as_float(opt_summary.get("max_adverse_pct") if opt_summary.get("max_adverse_pct") is not None else backtest_summary.get("max_adverse_pct"))
     adverse_breach_rate = as_float(
@@ -135,7 +140,7 @@ def plan_tasks(evaluation: dict[str, Any], backtest: dict[str, Any], optimizatio
             "Keep relaxed fallback useful for diagnostics while preventing below-threshold backtest samples from being confused with promotable production recommendations.",
             ["python -m py_compile scripts/backtest_investment_strategy.py scripts/optimize_investment_params.py", "python -m unittest tests/test_investment_level5_level6.py"],
         )
-    if diagnostic_sample_count > qualified_sample_count and diagnostic_sample_count >= 3:
+    if diagnostic_sample_count > qualified_sample_count and diagnostic_sample_count >= 3 and not explicit_diagnostic_reporting:
         add_task(
             tasks,
             "Align diagnostic and qualified candidate reporting",

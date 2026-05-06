@@ -1,32 +1,33 @@
 # Posterior Evaluation Summary
 
-Generated: `2026-04-30T03:48:32Z`
-Evaluations: `766`
+Generated: `2026-05-06T04:31:51Z`
+As-of: date=`2026-05-06`, session=`close`
+Evaluations: `772`
 
 ## Verdict Counts
-- `fail`: 215
-- `informational`: 319
+- `fail`: 220
+- `informational`: 320
 - `mixed`: 148
 - `pass`: 84
 
 ## Session Counts
-- `historical`: 760
+- `historical`: 766
 - `morning`: 6
 
 ## Learning Candidates
-- `symbol_selection_error`: 152
+- `symbol_selection_error`: 153
 - `timing_unclear`: 140
-- `theme_error`: 89
+- `theme_error`: 92
 - `overconfidence`: 33
 - `defensive_misread`: 17
-- `bullish_misread`: 13
+- `bullish_misread`: 14
 
 ## Symbol Stats
 - `0002.HK`: samples=3, avg_return=-0.242%, pass_rate=0.0
 - `0005.HK`: samples=6, avg_return=-1.649%, pass_rate=0.0
 - `0006.HK`: samples=19, avg_return=-0.064%, pass_rate=0.0
 - `0388.HK`: samples=4, avg_return=0.473%, pass_rate=0.0
-- `0700.HK`: samples=108, avg_return=1.824%, pass_rate=0.074
+- `0700.HK`: samples=109, avg_return=1.711%, pass_rate=0.073
 - `0728.HK`: samples=2, avg_return=-0.378%, pass_rate=0.0
 - `0857.HK`: samples=33, avg_return=0.879%, pass_rate=0.091
 - `0883.HK`: samples=5, avg_return=-0.352%, pass_rate=0.0
@@ -35,13 +36,13 @@ Evaluations: `766`
 - `1093.HK`: samples=6, avg_return=-0.179%, pass_rate=0.0
 - `1177.HK`: samples=6, avg_return=-0.122%, pass_rate=0.0
 - `1299.HK`: samples=2, avg_return=0.0%, pass_rate=0.0
-- `1810.HK`: samples=108, avg_return=1.438%, pass_rate=0.213
+- `1810.HK`: samples=109, avg_return=1.384%, pass_rate=0.211
 - `2020.HK`: samples=2, avg_return=-0.72%, pass_rate=0.0
-- `2800.HK`: samples=109, avg_return=0.786%, pass_rate=0.064
-- `3033.HK`: samples=107, avg_return=1.61%, pass_rate=0.14
-- `3067.HK`: samples=107, avg_return=1.632%, pass_rate=0.103
+- `2800.HK`: samples=110, avg_return=0.757%, pass_rate=0.064
+- `3033.HK`: samples=108, avg_return=1.566%, pass_rate=0.139
+- `3067.HK`: samples=108, avg_return=1.584%, pass_rate=0.102
 - `9618.HK`: samples=2, avg_return=0.824%, pass_rate=0.0
-- `9988.HK`: samples=103, avg_return=3.581%, pass_rate=0.165
+- `9988.HK`: samples=104, avg_return=3.534%, pass_rate=0.163
 
 ## Recent Misfires
 - No failed calls in the most recent evaluated set.

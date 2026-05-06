@@ -300,9 +300,17 @@ def apply_action_qualification(ranked: list[dict[str, Any]], min_action_score: f
             row.setdefault("qualification_flags", []).append("score_meets_action_threshold")
         else:
             row.setdefault("qualification_flags", []).append("below_action_score")
+        volume_ratio = row.get("volume_ratio_20")
+        volume_action_ok = volume_ratio is not None and float(volume_ratio) >= 1.0
+        if volume_action_ok:
+            row.setdefault("qualification_flags", []).append("volume_meets_action_threshold")
+        else:
+            row.setdefault("qualification_flags", []).append("below_action_volume_ratio")
+            row.setdefault("action_disqualifiers", []).append("volume_ratio_20_below_1_0")
         row["qualified_for_action"] = bool(
             row.get("qualified_for_watch")
             and score_ok
+            and volume_action_ok
             and row.get("is_theme_leader")
             and row.get("cost_gate_passed")
             and not row["symbol_risk"]["action_veto"]
@@ -312,10 +320,23 @@ def apply_action_qualification(ranked: list[dict[str, Any]], min_action_score: f
 
 
 def candidate_layers(ranked: list[dict[str, Any]], actionable_top_n: int, diagnostic_top_n: int) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
-    actionable = [row for row in ranked if row.get("qualified_for_action")][:actionable_top_n]
+    actionable = []
+    for row in ranked:
+        if len(actionable) >= actionable_top_n:
+            break
+        if not row.get("qualified_for_action"):
+            continue
+        candidate = dict(row)
+        candidate["source_layer"] = "actionable_candidates"
+        candidate["eligible_for_action_from_layer"] = True
+        candidate["layer_action_cap"] = "buy_candidate"
+        actionable.append(candidate)
     diagnostics = []
     for row in ranked[:diagnostic_top_n]:
         diagnostic = dict(row)
+        diagnostic["source_layer"] = "diagnostic_candidates"
+        diagnostic["eligible_for_action_from_layer"] = False
+        diagnostic["layer_action_cap"] = "watch_only"
         diagnostic["diagnostic_only"] = not bool(row.get("qualified_for_action"))
         if diagnostic["diagnostic_only"]:
             diagnostic.setdefault("qualification_flags", []).append("diagnostic_candidate")

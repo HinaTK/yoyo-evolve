@@ -156,13 +156,21 @@ def backtest(
                 if candidate.get("diagnostic_only"):
                     low_quality_flags.append("diagnostic_only")
                 low_quality_flags.extend(candidate.get("disqualifiers") or [])
+                default_actionable_layer = sample_type == "actionable"
+                source_layer = candidate.get("source_layer") or ("actionable_candidates" if default_actionable_layer else "diagnostic_candidates")
+                layer_action_cap = candidate.get("layer_action_cap") or ("buy_candidate" if default_actionable_layer else "watch_only")
                 record = {
                     "base_date": entry["date"],
                     "future_date": future_entry["date"],
                     "window_days": (future_entry["_date"] - entry["_date"]).days,
                     "rank": rank,
                     "sample_type": sample_type,
+                    "source_layer": source_layer,
+                    "eligible_for_action_from_layer": bool(candidate.get("eligible_for_action_from_layer", default_actionable_layer)),
+                    "layer_action_cap": layer_action_cap,
                     "symbol": symbol,
+                    "theme": candidate.get("theme"),
+                    "kind": candidate.get("kind"),
                     "score": candidate["score"],
                     "below_watch_score": below_watch_score,
                     "qualified_for_watch": bool(candidate.get("qualified_for_watch")),
@@ -174,7 +182,11 @@ def backtest(
                     "is_theme_leader": bool(candidate.get("is_theme_leader")),
                     "qualification_flags": candidate.get("qualification_flags", []),
                     "disqualifiers": candidate.get("disqualifiers", []),
+                    "action_disqualifiers": candidate.get("action_disqualifiers", []),
                     "low_quality_flags": low_quality_flags,
+                    "pct_change_1d": candidate.get("pct_change_1d"),
+                    "range_pos_60": candidate.get("range_pos_60"),
+                    "volume_ratio_20": candidate.get("volume_ratio_20"),
                     "base_price": round(base_price, 4),
                     "future_price": round(float(future_item["latest_close"]), 4),
                     "net_return_pct": round(net_return, 3),
@@ -202,10 +214,18 @@ def backtest(
     alphas = [record["alpha_pct"] for record in records if record["alpha_pct"] is not None]
     adverse_values = [record["max_adverse_pct"] for record in records if record["max_adverse_pct"] is not None]
     adverse_breaches = [value for value in adverse_values if value < max_adverse_limit_pct]
+    relaxed_diagnostic_sample_count = sum(1 for record in records if record.get("sample_type") == "relaxed_diagnostic")
     qualified_sample_count = sum(1 for record in records if record.get("qualified_for_action"))
-    diagnostic_sample_count = len(diagnostic_records) + sum(1 for record in records if record.get("sample_type") == "relaxed_diagnostic")
+    promotable_sample_count = sum(1 for record in records if record.get("eligible_for_action_from_layer") and record.get("qualified_for_action"))
+    diagnostic_layer_sample_count = len(diagnostic_records)
+    diagnostic_only_sample_count = sum(
+        1
+        for record in [*diagnostic_records, *records]
+        if record.get("source_layer") == "diagnostic_candidates" or record.get("sample_type") == "relaxed_diagnostic" or record.get("diagnostic_only")
+    )
+    diagnostic_sample_count = diagnostic_layer_sample_count + relaxed_diagnostic_sample_count
     strict_sample_count = len(strict_records)
-    relaxed_sample_count = diagnostic_sample_count if use_relaxed else 0
+    relaxed_sample_count = relaxed_diagnostic_sample_count if use_relaxed else 0
     if use_relaxed:
         sample_quality = "relaxed_fallback"
     elif len(records) >= min_samples:
@@ -228,9 +248,13 @@ def backtest(
         "max_adverse_limit_pct": max_adverse_limit_pct,
         "as_of_date": as_of_date.isoformat() if as_of_date else None,
         "sample_count": len(records),
+        "production_sample_count": len(records),
+        "promotable_sample_count": promotable_sample_count,
         "strict_sample_count": strict_sample_count,
         "relaxed_sample_count": relaxed_sample_count,
         "qualified_sample_count": qualified_sample_count,
+        "diagnostic_layer_sample_count": diagnostic_layer_sample_count,
+        "diagnostic_only_sample_count": diagnostic_only_sample_count,
         "diagnostic_sample_count": diagnostic_sample_count,
         "sample_quality": sample_quality,
         "avg_net_return_pct": round(statistics.fmean(returns), 3) if returns else None,
@@ -258,10 +282,14 @@ def write_markdown(path: pathlib.Path, result: dict[str, Any]) -> None:
         f"Generated: `{result['generated_at']}`",
         f"Strategy: `{summary['strategy_version']}`",
         f"Samples: `{summary['sample_count']}`",
+        f"Production samples: `{summary.get('production_sample_count', summary['sample_count'])}`",
+        f"Promotable samples: `{summary.get('promotable_sample_count', summary['qualified_sample_count'])}`",
         f"Sample quality: `{summary['sample_quality']}`",
         f"Strict samples: `{summary['strict_sample_count']}`",
         f"Relaxed samples: `{summary['relaxed_sample_count']}`",
         f"Qualified samples: `{summary['qualified_sample_count']}`",
+        f"Diagnostic layer samples: `{summary.get('diagnostic_layer_sample_count', summary['diagnostic_sample_count'])}`",
+        f"Diagnostic-only samples: `{summary.get('diagnostic_only_sample_count', summary['diagnostic_sample_count'])}`",
         f"Diagnostic samples: `{summary['diagnostic_sample_count']}`",
         f"Average net return: `{summary['avg_net_return_pct']}`%",
         f"Win rate: `{summary['win_rate']}`",

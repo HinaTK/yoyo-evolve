@@ -32,12 +32,18 @@ def evidence(row: dict[str, Any]) -> list[str]:
     return [
         f"score={row.get('score')}, trend_score={row.get('trend_score')}, momentum_score={row.get('momentum_score')}",
         f"expected_edge_bps={row.get('expected_edge_bps')}, net_expected_edge_bps={row.get('net_expected_edge_bps')}, cost_gate_passed={row.get('cost_gate_passed')}",
+        f"source_layer={row.get('source_layer')}, eligible_for_action_from_layer={row.get('eligible_for_action_from_layer')}, layer_action_cap={row.get('layer_action_cap')}",
+        f"same_theme_peer_check theme_rank={row.get('theme_rank')}, theme_leader={row.get('theme_leader')}, is_theme_leader={row.get('is_theme_leader')}, theme_peer_count={row.get('theme_peer_count')}",
         f"latest_close={row.get('latest_close')}, ma20={row.get('ma20')}, ma60={row.get('ma60')}, range_pos_60={row.get('range_pos_60')}, volume_ratio_20={row.get('volume_ratio_20')}",
     ]
 
 
 def risks(row: dict[str, Any], horizon_days_min: int, horizon_days_max: int) -> list[str]:
     values = [str(item) for item in row.get("disqualifiers", [])]
+    if row.get("eligible_for_action_from_layer") is False:
+        values.append("diagnostic_layer_action_cap_watch_only")
+    if row.get("is_theme_leader") is False:
+        values.append("same_theme_non_leader_requires_peer_relative_confirmation")
     if not bool(row.get("cost_gate_passed")):
         values.append("cost_or_minimum_edge_gate_not_met")
     if not values:

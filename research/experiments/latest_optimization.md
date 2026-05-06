@@ -1,29 +1,29 @@
 # Investment Parameter Optimization
 
-Generated: `2026-04-30T03:48:30Z`
+Generated: `2026-05-06T04:52:13Z`
 Updated active strategy: `False`
-Reason: Kept active strategy; gates: challenger=True, promotion=True, session=True, samples=True, improvement=False, win_rate=False, adverse=True, adverse_breach_rate=True, sample_quality=False.
+Reason: Kept active strategy; gates: challenger=True, promotion=True, session=False, samples=True, improvement=False, win_rate=False, adverse=False, adverse_breach_rate=True, sample_quality=True.
 
 ## Champion
-- strategy: `challenger_001`
-- robust_score: `-5.5351`
-- samples: `30`
-- avg_net_return_pct: `-0.176`
-- win_rate: `0.267`
-- avg_alpha_pct: `0.256`
-- sample_quality: `relaxed_fallback`
-- avg_max_adverse_pct: `0.065`
-- max_adverse_pct: `-0.657`
-- adverse_breach_rate: `0.0`
+- strategy: `challenger_007`
+- robust_score: `0.0761`
+- samples: `66`
+- avg_net_return_pct: `-0.185`
+- win_rate: `0.424`
+- avg_alpha_pct: `0.636`
+- sample_quality: `sufficient`
+- avg_max_adverse_pct: `-0.461`
+- max_adverse_pct: `-8.302`
+- adverse_breach_rate: `0.015`
 
 ## Challenger Candidates
-- `challenger_001` score=-5.5351 samples=30 quality=relaxed_fallback avg=-0.176% win=0.267 alpha=0.256% adverse_breach=0.0
-- `challenger_002` score=-5.5351 samples=30 quality=relaxed_fallback avg=-0.176% win=0.267 alpha=0.256% adverse_breach=0.0
-- `challenger_003` score=-5.5351 samples=30 quality=relaxed_fallback avg=-0.176% win=0.267 alpha=0.256% adverse_breach=0.0
-- `challenger_022` score=-5.5351 samples=30 quality=relaxed_fallback avg=-0.176% win=0.267 alpha=0.256% adverse_breach=0.0
-- `challenger_023` score=-5.5351 samples=30 quality=relaxed_fallback avg=-0.176% win=0.267 alpha=0.256% adverse_breach=0.0
-- `challenger_024` score=-5.5351 samples=30 quality=relaxed_fallback avg=-0.176% win=0.267 alpha=0.256% adverse_breach=0.0
-- `challenger_028` score=-5.5351 samples=30 quality=relaxed_fallback avg=-0.176% win=0.267 alpha=0.256% adverse_breach=0.0
-- `challenger_029` score=-5.5351 samples=30 quality=relaxed_fallback avg=-0.176% win=0.267 alpha=0.256% adverse_breach=0.0
-- `challenger_030` score=-5.5351 samples=30 quality=relaxed_fallback avg=-0.176% win=0.267 alpha=0.256% adverse_breach=0.0
-- `challenger_037` score=-5.5351 samples=30 quality=relaxed_fallback avg=-0.176% win=0.267 alpha=0.256% adverse_breach=0.0
+- `challenger_007` score=0.0761 samples=66 quality=sufficient avg=-0.185% win=0.424 alpha=0.636% adverse_breach=0.015
+- `challenger_008` score=0.0761 samples=66 quality=sufficient avg=-0.185% win=0.424 alpha=0.636% adverse_breach=0.015
+- `challenger_009` score=0.0761 samples=66 quality=sufficient avg=-0.185% win=0.424 alpha=0.636% adverse_breach=0.015
+- `challenger_001` score=-0.0549 samples=55 quality=sufficient avg=-0.16% win=0.382 alpha=0.725% adverse_breach=0.018
+- `challenger_002` score=-0.0549 samples=55 quality=sufficient avg=-0.16% win=0.382 alpha=0.725% adverse_breach=0.018
+- `challenger_003` score=-0.0549 samples=55 quality=sufficient avg=-0.16% win=0.382 alpha=0.725% adverse_breach=0.018
+- `challenger_079` score=-0.163 samples=74 quality=sufficient avg=-0.259% win=0.432 alpha=0.508% adverse_breach=0.027
+- `challenger_080` score=-0.163 samples=74 quality=sufficient avg=-0.259% win=0.432 alpha=0.508% adverse_breach=0.027
+- `challenger_081` score=-0.163 samples=74 quality=sufficient avg=-0.259% win=0.432 alpha=0.508% adverse_breach=0.027
+- `challenger_043` score=-0.1683 samples=68 quality=sufficient avg=-0.288% win=0.426 alpha=0.584% adverse_breach=0.029

@@ -416,6 +416,9 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
             self.assertEqual(result["summary"]["sample_quality"], "relaxed_fallback")
             self.assertEqual(result["summary"]["strict_sample_count"], 0)
             self.assertGreater(result["summary"]["relaxed_sample_count"], 0)
+            self.assertEqual(result["summary"]["production_sample_count"], result["summary"]["sample_count"])
+            self.assertIn("diagnostic_layer_sample_count", result["summary"])
+            self.assertGreater(result["summary"]["diagnostic_only_sample_count"], 0)
             self.assertTrue(any(record["below_watch_score"] for record in result["records"]))
 
     def test_backtest_summary_includes_adverse_breach_rate(self):
@@ -574,6 +577,28 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertTrue(any("sample" in title.lower() for title in titles))
         self.assertTrue(any("win-rate" in title.lower() for title in titles))
 
+    def test_planner_does_not_repeat_diagnostic_alignment_when_reporting_explicit(self):
+        evaluation = {"evaluations": 10, "verdict_counts": {"pass": 8, "fail": 2}, "learning_counts": {}}
+        backtest = {
+            "summary": {
+                "sample_count": 59,
+                "production_sample_count": 59,
+                "promotable_sample_count": 59,
+                "qualified_sample_count": 59,
+                "diagnostic_sample_count": 270,
+                "diagnostic_layer_sample_count": 270,
+                "diagnostic_only_sample_count": 270,
+                "sample_quality": "sufficient",
+                "win_rate": 0.5,
+                "avg_net_return_pct": 0.1,
+                "max_adverse_pct": -3.0,
+            }
+        }
+
+        tasks = planner.plan_tasks(evaluation, backtest, {}, "")
+
+        self.assertFalse(any(task["title"] == "Align diagnostic and qualified candidate reporting" for task in tasks))
+
     def test_ranking_weights_change_score_and_emit_strategy_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = pathlib.Path(tmp)
@@ -711,6 +736,22 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertTrue(ranked[0]["cost_gate_passed"])
         self.assertTrue(ranked[0]["qualified_for_action"])
 
+    def test_ranker_requires_volume_confirmation_for_action_not_watch(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 0.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertTrue(ranked[0]["qualified_for_watch"])
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertIn("volume_ratio_20_below_1_0", ranked[0]["action_disqualifiers"])
+        self.assertNotIn("volume_ratio_20_below_1_0", ranked[0]["disqualifiers"])
+
     def test_ranker_emits_actionable_and_diagnostic_layers(self):
         strong = ranker.item_score(
             {"symbol": "AAA.HK", "theme": "ai", "latest_close": 14.0, "ma20": 10.0, "ma60": 10.0, "range_pos_60": 0.9, "pct_change_1d": 2.0, "volume_ratio_20": 1.5, "regime_flags": []},
@@ -730,6 +771,11 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
 
         self.assertEqual([row["symbol"] for row in actionable], ["AAA.HK"])
         self.assertEqual(len(diagnostics), 2)
+        self.assertEqual(actionable[0]["source_layer"], "actionable_candidates")
+        self.assertTrue(actionable[0]["eligible_for_action_from_layer"])
+        self.assertEqual(diagnostics[0]["source_layer"], "diagnostic_candidates")
+        self.assertFalse(diagnostics[0]["eligible_for_action_from_layer"])
+        self.assertEqual(diagnostics[0]["layer_action_cap"], "watch_only")
         self.assertTrue(any(row["diagnostic_only"] for row in diagnostics))
         self.assertEqual(top[0]["symbol"], "AAA.HK")
 
@@ -780,6 +826,10 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
                     "cost_gate_passed": True,
                     "expected_edge_bps": 160,
                     "net_expected_edge_bps": 125,
+                    "theme_rank": 1,
+                    "theme_leader": "AAA.HK",
+                    "is_theme_leader": True,
+                    "theme_peer_count": 2,
                     "edge_method": "technical_snapshot_score_v1",
                     "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
                 }
@@ -821,6 +871,7 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertEqual(states["AAA.HK"], "buy_candidate")
         self.assertEqual(states["BBB.HK"], "watch_only")
         self.assertEqual(states["CCC.HK"], "avoid")
+        self.assertTrue(any("same_theme_peer_check" in item for item in calls["recommendations"][0]["evidence"]))
         self.assertEqual(calls["recommendations"][0]["horizon_days_min"], 14)
         self.assertEqual(calls["recommendations"][0]["horizon_days_max"], 90)
         self.assertEqual(calls_validator.validate(calls, {**ranking, "all_ranked": ranking["actionable_candidates"] + ranking["diagnostic_candidates"]}, {"AAA.HK", "BBB.HK", "CCC.HK"}), [])
