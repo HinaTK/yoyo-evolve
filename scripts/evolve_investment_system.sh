@@ -79,6 +79,9 @@ echo "Building snapshot registry..."
 echo "Evaluating investment calls..."
 "$PYTHON_BIN" scripts/evaluate_investment_calls.py --summary-md research/evaluations/latest.md --summary-json research/evaluations/latest.json --records-json research/evaluations/latest_records.json
 
+echo "Attributing investment outcomes..."
+"$PYTHON_BIN" scripts/attribute_investment_outcomes.py --records-json research/evaluations/latest_records.json --output-json research/evaluations/latest_attribution.json --output-md research/evaluations/latest_attribution.md
+
 echo "Building symbol risk memory..."
 if [ -f research/evaluations/latest.json ]; then
     "$PYTHON_BIN" scripts/build_symbol_risk_memory.py --latest-json research/evaluations/latest.json --output research/experiments/symbol_risk_memory.json --as-of-date "$DATE" || true

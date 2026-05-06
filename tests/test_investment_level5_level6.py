@@ -12,6 +12,7 @@ sys.path.insert(0, str(SCRIPTS))
 
 import evaluate_investment_system_change as change_eval  # noqa: E402
 import evaluate_investment_calls as call_eval  # noqa: E402
+import attribute_investment_outcomes as attribution  # noqa: E402
 import optimize_investment_params as optimizer  # noqa: E402
 import plan_investment_system_improvements as planner  # noqa: E402
 import rank_investment_universe as ranker  # noqa: E402
@@ -1083,6 +1084,174 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
             stats["same_theme_best_missed"],
         )
         self.assertEqual(learning, "symbol_selection_error")
+
+    def test_attribution_tags_cost_and_risk_evidence(self):
+        record = {
+            "call_date": "2026-04-01",
+            "session": "close",
+            "symbol": "AAA.HK",
+            "theme": "growth",
+            "window_days": 3,
+            "state": "buy_candidate",
+            "verdict": "fail",
+            "return_pct": -2.5,
+            "learning_tag": "symbol_selection_error",
+            "same_theme_best_missed": True,
+            "selected_vs_best_bps": -250,
+            "peer_best_symbol": "BBB.HK",
+        }
+        final_call = self.valid_call("AAA.HK", "buy_candidate")
+        draft_call = self.valid_call("AAA.HK", "buy_candidate")
+        risk_verdict = {"risk_decision": "pass", "final_state_cap": "buy_candidate", "risk_tags": []}
+        ranking_row = {
+            "symbol": "AAA.HK",
+            "theme": "growth",
+            "score": 70,
+            "cost_gate_passed": True,
+            "qualified_for_action": True,
+            "net_expected_edge_bps": 120,
+        }
+        ranking = {"all_ranked": [ranking_row, {"symbol": "BBB.HK", "theme": "growth", "score": 90}]}
+
+        tags, evidence = attribution.classify_attribution(record, final_call, draft_call, risk_verdict, ranking_row, ranking)
+
+        self.assertIn("ranking_selection_error", tags)
+        self.assertIn("same_theme_best_missed", tags)
+        self.assertIn("cost_gate_too_loose", tags)
+        self.assertIn("risk_veto_missed", tags)
+        self.assertNotIn("llm_final_deviation", tags)
+        self.assertTrue(any("theme_leader=BBB.HK" in item for item in evidence))
+
+    def test_attribution_tags_llm_final_deviation_for_draft_upgrade(self):
+        record = {
+            "symbol": "AAA.HK",
+            "theme": "growth",
+            "state": "buy_candidate",
+            "verdict": "mixed",
+            "return_pct": 0.1,
+            "learning_tag": None,
+        }
+        final_call = self.valid_call("AAA.HK", "buy_candidate")
+        draft_call = self.valid_call("AAA.HK", "watch_only")
+
+        tags, _evidence = attribution.classify_attribution(record, final_call, draft_call, None, None, {})
+
+        self.assertIn("llm_final_deviation", tags)
+
+    def test_attribution_does_not_blame_risk_when_final_exceeds_risk_cap(self):
+        record = {
+            "symbol": "AAA.HK",
+            "theme": "growth",
+            "state": "buy_candidate",
+            "verdict": "fail",
+            "return_pct": -2.0,
+            "learning_tag": None,
+        }
+        final_call = self.valid_call("AAA.HK", "buy_candidate")
+        draft_call = self.valid_call("AAA.HK", "buy_candidate")
+        risk_verdict = {"risk_decision": "pass", "final_state_cap": "watch_only", "risk_tags": []}
+
+        tags, _evidence = attribution.classify_attribution(record, final_call, draft_call, risk_verdict, None, {})
+
+        self.assertIn("llm_final_deviation", tags)
+        self.assertNotIn("risk_veto_missed", tags)
+
+    def test_attribution_does_not_call_bearish_win_cost_gate_too_strict(self):
+        record = {
+            "symbol": "AAA.HK",
+            "theme": "growth",
+            "state": "trim",
+            "verdict": "fail",
+            "return_pct": 2.0,
+            "learning_tag": "defensive_misread",
+        }
+        final_call = self.valid_call("AAA.HK", "trim")
+        draft_call = self.valid_call("AAA.HK", "trim")
+        ranking_row = {"symbol": "AAA.HK", "cost_gate_passed": False, "qualified_for_action": False, "net_expected_edge_bps": 50}
+
+        tags, _evidence = attribution.classify_attribution(record, final_call, draft_call, None, ranking_row, {"all_ranked": [ranking_row]})
+
+        self.assertNotIn("cost_gate_too_strict", tags)
+
+    def test_attribution_build_is_fail_soft_without_artifacts(self):
+        payload = {
+            "records": [
+                {
+                    "call_date": "2026-04-01",
+                    "session": "close",
+                    "symbol": "AAA.HK",
+                    "window_days": 3,
+                    "state": "buy_candidate",
+                    "verdict": "fail",
+                    "return_pct": -1.5,
+                    "learning_tag": None,
+                }
+            ]
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            result = attribution.build_attribution(payload, tmp_path / "calls", tmp_path / "rankings", tmp_path / "risk")
+
+        self.assertEqual(result["record_count"], 1)
+        entry = result["entries"][0]
+        self.assertNotIn("risk_veto_missed", entry["attribution_tags"])
+        self.assertIn("missing ranking artifact or row", entry["evidence"])
+
+    def test_attribution_does_not_call_pass_watch_cap_too_strict(self):
+        record = {
+            "symbol": "AAA.HK",
+            "theme": "growth",
+            "state": "watch_only",
+            "verdict": "informational",
+            "return_pct": 2.0,
+            "learning_tag": None,
+        }
+        final_call = self.valid_call("AAA.HK", "watch_only")
+        draft_call = self.valid_call("AAA.HK", "watch_only")
+        risk_verdict = {"risk_decision": "pass", "final_state_cap": "watch_only", "risk_tags": []}
+
+        tags, _evidence = attribution.classify_attribution(record, final_call, draft_call, risk_verdict, None, {})
+
+        self.assertNotIn("risk_veto_too_strict", tags)
+
+    def test_attribution_counts_unique_calls_for_planner_thresholds(self):
+        payload = {
+            "records": [
+                {"call_date": "2026-04-01", "session": "close", "symbol": "AAA.HK", "window_days": 3, "state": "buy_candidate", "verdict": "fail", "return_pct": -1.2, "learning_tag": None},
+                {"call_date": "2026-04-01", "session": "close", "symbol": "AAA.HK", "window_days": 5, "state": "buy_candidate", "verdict": "fail", "return_pct": -1.5, "learning_tag": None},
+            ]
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            result = attribution.build_attribution(payload, tmp_path / "calls", tmp_path / "rankings", tmp_path / "risk")
+
+        self.assertEqual(result["attribution_counts"].get("risk_veto_missed"), None)
+        self.assertEqual(result["attribution_call_counts"].get("risk_veto_missed"), None)
+
+    def test_planner_generates_tasks_from_repeated_attribution(self):
+        tasks = planner.plan_tasks(
+            {},
+            {},
+            {},
+            "",
+            {"record_count": 6, "attribution_call_counts": {"risk_veto_too_strict": 2, "cost_gate_too_loose": 3}},
+        )
+
+        titles = [task["title"] for task in tasks]
+        self.assertIn("Calibrate risk veto strictness after saved-opportunity evidence", titles)
+        self.assertIn("Tighten loose cost gate diagnostics", titles)
+        self.assertTrue(any("scripts/attribute_investment_outcomes.py" in command for task in tasks for command in task["validation"]))
+
+    def test_planner_ignores_window_counts_without_call_counts(self):
+        tasks = planner.plan_tasks(
+            {},
+            {},
+            {},
+            "",
+            {"record_count": 6, "attribution_counts": {"risk_veto_too_strict": 6}},
+        )
+
+        self.assertFalse(any(task["title"] == "Calibrate risk veto strictness after saved-opportunity evidence" for task in tasks))
 
 
 if __name__ == "__main__":

@@ -141,6 +141,14 @@ Level 6 risk review hardening adds a second deterministic policy layer between d
 - `scripts/validate_investment_calls.py` accepts `--risk-review` and rejects any non-diagnostic final call without a matching risk verdict or above that verdict's `final_state_cap`.
 - `scripts/evolve_investment.sh` generates the risk review after the draft policy, records it in the run manifest, includes it in the calls prompt, and passes it to final validation.
 
+Layer 3/4 hardening attributes posterior outcomes back to the deterministic and LLM layers, then feeds repeated causes into bounded improvement planning:
+
+- `scripts/attribute_investment_outcomes.py` joins `research/evaluations/latest_records.json` with final calls, draft policy calls, risk reviews, and ranking rows when those artifacts exist.
+- Attribution records tag evidence-supported causes such as `ranking_selection_error`, `same_theme_best_missed`, `cost_gate_too_loose`, `cost_gate_too_strict`, `risk_veto_missed`, `risk_veto_saved_loss`, `risk_veto_too_strict`, `symbol_risk_memory_too_harsh`, and `llm_final_deviation`.
+- The attribution layer is fail-soft: missing historical draft, risk, or ranking artifacts do not block attribution from posterior records.
+- `scripts/evolve_investment_system.sh` runs attribution after posterior evaluation and before planning, writing `research/evaluations/latest_attribution.json` and `research/evaluations/latest_attribution.md`.
+- `scripts/plan_investment_system_improvements.py` reads latest attribution by default and can generate focused tasks when the same attribution tag repeats, with validation commands that stay research-only.
+
 ## Current Limitations
 
 - It is research assistance, not financial advice or automated execution.

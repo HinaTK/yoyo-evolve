@@ -10,6 +10,33 @@ from typing import Any
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_OUT = ROOT / "research" / "experiments" / "system_changes" / "latest_improvement_plan.json"
+ATTRIBUTION_TASK_SPECS = {
+    "risk_veto_too_strict": (
+        "Calibrate risk veto strictness after saved-opportunity evidence",
+        "Adjust deterministic risk-review thresholds or symbol-risk-memory expiry so risk caps stay protective without repeatedly blocking later winners.",
+        ["python -m py_compile scripts/attribute_investment_outcomes.py scripts/generate_investment_risk_review.py", "python -m unittest tests/test_investment_level5_level6.py"],
+    ),
+    "cost_gate_too_strict": (
+        "Diagnose overly strict cost gate opportunity loss",
+        "Add diagnostics or parameter tests for cases where the cost gate blocks candidates that later clear the forward-return hurdle, without lowering production gates by default.",
+        ["python scripts/backtest_investment_strategy.py", "python -m unittest tests/test_investment_level5_level6.py"],
+    ),
+    "risk_veto_missed": (
+        "Add missing deterministic risk veto evidence",
+        "Harden risk review tags so failed bullish calls expose the pre-call risk signal that should have capped or vetoed them.",
+        ["python -m py_compile scripts/generate_investment_risk_review.py scripts/attribute_investment_outcomes.py", "python -m unittest tests/test_investment_level5_level6.py"],
+    ),
+    "cost_gate_too_loose": (
+        "Tighten loose cost gate diagnostics",
+        "Identify why cost-qualified bullish calls failed and add conservative diagnostics or tests before any candidate is upgraded.",
+        ["python scripts/backtest_investment_strategy.py", "python -m unittest tests/test_investment_level5_level6.py"],
+    ),
+    "ranking_selection_error": (
+        "Improve ranking selection attribution and peer checks",
+        "Make ranking or recommendation evidence prefer same-theme leaders when posterior attribution repeatedly shows selected symbols lagged better-ranked peers.",
+        ["python scripts/attribute_investment_outcomes.py", "python -m unittest tests/test_investment_level5_level6.py"],
+    ),
+}
 
 
 def utc_now() -> str:
@@ -53,7 +80,30 @@ def add_task(tasks: list[dict[str, Any]], title: str, evidence: list[str], objec
     tasks.append({"id": f"investment_task_{len(tasks) + 1:02d}", "title": title, "evidence": evidence, "objective": objective, "validation": validation})
 
 
-def plan_tasks(evaluation: dict[str, Any], backtest: dict[str, Any], optimization: dict[str, Any], memory_text: str) -> list[dict[str, Any]]:
+def attribution_count(attribution: dict[str, Any], tag: str) -> int:
+    counts = attribution.get("attribution_call_counts", {}) or {}
+    return as_int(counts.get(tag))
+
+
+def add_attribution_tasks(tasks: list[dict[str, Any]], attribution: dict[str, Any]) -> None:
+    record_count = as_int(attribution.get("record_count"))
+    if not record_count:
+        return
+    for tag in ("risk_veto_too_strict", "cost_gate_too_strict", "risk_veto_missed", "cost_gate_too_loose", "ranking_selection_error"):
+        count = attribution_count(attribution, tag)
+        if count < 2:
+            continue
+        title, objective, validation = ATTRIBUTION_TASK_SPECS[tag]
+        add_task(
+            tasks,
+            title,
+            [f"attribution_tag={tag}", f"count={count}", f"record_count={record_count}"],
+            objective,
+            validation,
+        )
+
+
+def plan_tasks(evaluation: dict[str, Any], backtest: dict[str, Any], optimization: dict[str, Any], memory_text: str, attribution: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     tasks: list[dict[str, Any]] = []
     eval_count = as_int(evaluation.get("evaluations"))
     learning_counts = evaluation.get("learning_counts", {}) or {}
@@ -162,6 +212,7 @@ def plan_tasks(evaluation: dict[str, Any], backtest: dict[str, Any], optimizatio
             "Document and reduce metric-definition drift between posterior calls evaluation and ranking backtests.",
             ["python scripts/evaluate_investment_calls.py", "python scripts/backtest_investment_strategy.py"],
         )
+    add_attribution_tasks(tasks, attribution or {})
     return tasks
 
 
@@ -183,6 +234,7 @@ def main() -> int:
     parser.add_argument("--evaluations", default=str(ROOT / "research" / "evaluations" / "latest.json"))
     parser.add_argument("--backtest", default=str(ROOT / "research" / "experiments" / "latest_backtest.json"))
     parser.add_argument("--optimization", default=str(ROOT / "research" / "experiments" / "latest_optimization.json"))
+    parser.add_argument("--attribution", default=str(ROOT / "research" / "evaluations" / "latest_attribution.json"))
     parser.add_argument("--memory", default=str(ROOT / "memory" / "investment_error_patterns.md"))
     parser.add_argument("--plan-dir", default=str(ROOT / "session_plan"))
     parser.add_argument("--output", default=str(DEFAULT_OUT))
@@ -191,10 +243,20 @@ def main() -> int:
     evaluation = load_json(pathlib.Path(args.evaluations))
     backtest = load_json(pathlib.Path(args.backtest))
     optimization = load_json(pathlib.Path(args.optimization))
+    attribution = load_json(pathlib.Path(args.attribution))
     memory_text = load_text(pathlib.Path(args.memory))
-    tasks = plan_tasks(evaluation, backtest, optimization, memory_text)[:3]
+    tasks = plan_tasks(evaluation, backtest, optimization, memory_text, attribution)[:3]
     write_task_files(tasks, pathlib.Path(args.plan_dir))
-    result = {"generated_at": utc_now(), "task_count": len(tasks), "tasks": tasks}
+    result = {
+        "generated_at": utc_now(),
+        "task_count": len(tasks),
+        "attribution_summary": {
+            "record_count": as_int(attribution.get("record_count")),
+            "top_attribution_tags": attribution.get("top_attribution_tags", [])[:5] if isinstance(attribution.get("top_attribution_tags"), list) else [],
+            "top_attribution_call_tags": attribution.get("top_attribution_call_tags", [])[:5] if isinstance(attribution.get("top_attribution_call_tags"), list) else [],
+        },
+        "tasks": tasks,
+    }
     output = pathlib.Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, indent=2), encoding="utf-8")
