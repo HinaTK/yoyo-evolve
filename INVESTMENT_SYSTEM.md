@@ -1,12 +1,12 @@
-# HK Investment Research System
+# HK + A-Share Investment Research System
 
-This repository is based on yoyo-evolve, but the current local working system has been extended into a Hong Kong stock and ETF research loop.
+This repository is based on yoyo-evolve, but the current local working system has been extended into a Hong Kong and mainland A-share stock/ETF research loop.
 
 The investment system is not an auto-trading bot. It produces recommendation research, structured calls, posterior evaluation, and iterative rule updates. The user makes all final trading decisions.
 
 ## Current Purpose
 
-Use yoyo as a local HK investment assistant that can:
+Use yoyo as a local HK and A-share investment assistant that can:
 
 - scan a broad market radar for sector and theme strength,
 - rank a larger trade universe with deterministic technical scores,
@@ -36,8 +36,8 @@ Local model configuration lives in `.env` and is intentionally ignored by git. U
 
 ## Inputs
 
-- `config/market_radar.toml` — broad radar used to detect sector/theme strength.
-- `config/trade_universe.toml` — symbols the system is allowed to dynamically rank and recommend.
+- `config/market_radar.toml` — broad HK and mainland A-share radar used to detect sector/theme strength.
+- `config/trade_universe.toml` — HK and mainland A-share symbols the system is allowed to dynamically rank and recommend.
 - `config/watchlist.toml` — smaller user-focus list; no longer the only source of recommendations.
 - `config/investment_profile.toml` — risk, cost, selection, and ranking thresholds.
 - `config/portfolio.toml` — currently recommendation-only mode; no real holdings are assumed.
@@ -141,6 +141,13 @@ Level 6 risk review hardening adds a second deterministic policy layer between d
 - `scripts/validate_investment_calls.py` accepts `--risk-review` and rejects any non-diagnostic final call without a matching risk verdict or above that verdict's `final_state_cap`.
 - `scripts/evolve_investment.sh` generates the risk review after the draft policy, records it in the run manifest, includes it in the calls prompt, and passes it to final validation.
 
+Level 6 readiness gates define what the current research metrics are allowed to support:
+
+- `scripts/check_investment_readiness.py` reads the latest backtest, optimization result, and `config/investment_profile.toml`, then writes `research/readiness/latest_readiness.json` and `.md`.
+- `shadow_logging` is the minimum observation stage: at least 60 production samples, positive average net return, sufficient sample quality, and zero adverse-breach rate.
+- `paper_trading` is stricter: at least 70 production samples, win rate at least 0.50, average net return at least 0.15%, median return non-negative, average alpha at least 0.50%, max adverse no worse than -6%, zero adverse-breach rate, and no severe mature-month imbalance.
+- `small_live_observation` is not automatic execution. It requires at least 100 samples, win rate at least 0.56, average net return at least 0.30%, median return at least 0.10%, max adverse no worse than -4%, and at least 20 forward paper-trading days before any tiny, manually confirmed, recommendation-only real-money observation is considered.
+
 Layer 3/4 hardening attributes posterior outcomes back to the deterministic and LLM layers, then feeds repeated causes into bounded improvement planning:
 
 - `scripts/attribute_investment_outcomes.py` joins `research/evaluations/latest_records.json` with final calls, draft policy calls, risk reviews, and ranking rows when those artifacts exist.
@@ -159,4 +166,4 @@ Layer 3/4 hardening attributes posterior outcomes back to the deterministic and 
 
 ## Important Orientation For New AI Sessions
 
-If asked what this repository is for, answer that the upstream project is a self-evolving coding agent CLI, while the current local working system extends it into an HK stock/ETF investment research and posterior-optimization loop. For investment tasks, prefer this document and the investment scripts/configs over the original upstream project description.
+If asked what this repository is for, answer that the upstream project is a self-evolving coding agent CLI, while the current local working system extends it into an HK and mainland A-share stock/ETF investment research and posterior-optimization loop. For investment tasks, prefer this document and the investment scripts/configs over the original upstream project description.

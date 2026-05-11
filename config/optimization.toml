@@ -6,20 +6,23 @@ snapshot_registry = "data/snapshots/registry.json"
 snapshot_dir = "data/snapshots"
 output_dir = "research/experiments"
 symbol_risk_memory = "research/experiments/symbol_risk_memory.json"
+symbol_risk_records = "research/evaluations/latest_records.json"
+symbol_risk_mode = "point_in_time"
 enabled = true
 
 # `actionable_top_n` is the small set eligible for upgrade consideration.
 # `diagnostic_top_n` is the wider observation/explanation layer. `top_n`
 # remains as a legacy alias for diagnostic_top_n.
-actionable_top_n = 1
+actionable_top_n = 2
 diagnostic_top_n = 3
 top_n = 3
-horizon_days = 3
+horizon_days = 14
 round_trip_bps = 35
 benchmark_symbol = "2800.HK"
+max_market_range_for_action = 0.70
 min_watch_score = 45
 min_action_score = 65
-candidate_policy = "relaxed"
+candidate_policy = "strict"
 min_samples = 30
 min_improvement_bps = 25
 min_win_rate = 0.45

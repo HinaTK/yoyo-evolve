@@ -13,8 +13,8 @@ from typing import Any
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-from backtest_investment_strategy import backtest  # noqa: E402
-from rank_investment_universe import DEFAULT_SAFETY_INVARIANTS, DEFAULT_STRATEGY_WEIGHTS, load_strategy_config, load_symbol_risk  # noqa: E402
+from backtest_investment_strategy import backtest, load_symbol_risk_records  # noqa: E402
+from rank_investment_universe import DEFAULT_MAX_MARKET_RANGE_FOR_ACTION, DEFAULT_SAFETY_INVARIANTS, DEFAULT_STRATEGY_WEIGHTS, load_strategy_config, load_symbol_risk  # noqa: E402
 
 
 IMMUTABLE_TRUE_INVARIANTS = {
@@ -196,12 +196,15 @@ def main() -> int:
     active_path = ROOT / opt.get("active_strategy", "config/active_strategy.toml")
     registry_path = ROOT / opt.get("snapshot_registry", "data/snapshots/registry.json")
     symbol_risk_path = ROOT / opt.get("symbol_risk_memory", "research/experiments/symbol_risk_memory.json")
+    symbol_risk_records_path = ROOT / opt.get("symbol_risk_records", "research/evaluations/latest_records.json")
     output_dir = ROOT / opt.get("output_dir", "research/experiments")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     active = load_strategy_config(active_path)
     active_raw = read_toml(active_path)
     symbol_risk = load_symbol_risk(symbol_risk_path)
+    symbol_risk_mode = str(opt.get("symbol_risk_mode", "full"))
+    symbol_risk_records = load_symbol_risk_records(symbol_risk_records_path) if symbol_risk_mode == "point_in_time" else []
     safety = invariant_block(active, opt)
     as_of_date = parse_date(args.as_of_date)
 
@@ -217,6 +220,7 @@ def main() -> int:
     if safety.get("forbid_edge_gate_reduction"):
         minimum_edge_bps = max(minimum_edge_bps, float(active_cost_gate.get("minimum_edge_bps", minimum_edge_bps)))
     benchmark_symbol = str(opt.get("benchmark_symbol", "2800.HK"))
+    max_market_range_for_action = float(opt.get("max_market_range_for_action", DEFAULT_MAX_MARKET_RANGE_FOR_ACTION))
     min_watch_score = float(opt.get("min_watch_score", 45))
     min_action_score = float(opt.get("min_action_score", 65))
     min_samples = int(opt.get("min_samples", 30))
@@ -253,6 +257,10 @@ def main() -> int:
         diagnostic_top_n,
         minimum_edge_bps,
         symbol_risk,
+        benchmark_symbol,
+        max_market_range_for_action,
+        symbol_risk_mode,
+        symbol_risk_records,
     )
     baseline_score = robust_score(baseline, window_count)
     results.append({"strategy_version": active["strategy_version"], "weights": active["weights"], "summary": baseline["summary"], "robust_score": round(baseline_score, 4)})
@@ -277,6 +285,10 @@ def main() -> int:
             diagnostic_top_n,
             minimum_edge_bps,
             symbol_risk,
+            benchmark_symbol,
+            max_market_range_for_action,
+            symbol_risk_mode,
+            symbol_risk_records,
         )
         score = robust_score(candidate, window_count)
         results.append({"strategy_version": version, "weights": weights, "summary": candidate["summary"], "robust_score": round(score, 4)})
@@ -322,6 +334,8 @@ def main() -> int:
         "as_of_date": args.as_of_date,
         "session": args.session,
         "candidate_policy": candidate_policy,
+        "symbol_risk_mode": symbol_risk_mode,
+        "symbol_risk_records": str(symbol_risk_records_path) if symbol_risk_mode == "point_in_time" else None,
         "max_adverse_limit_pct": max_adverse_limit_pct,
         "max_adverse_breach_rate": max_adverse_breach_rate,
         "updated_active_strategy": updated,

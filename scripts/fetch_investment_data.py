@@ -44,11 +44,46 @@ def fetch_text(url: str) -> str:
         return resp.read().decode("gbk", errors="ignore")
 
 
+def exchange_for_symbol(symbol: str) -> str:
+    normalized = symbol.upper()
+    if normalized.endswith(".HK"):
+        return "HKEX"
+    if normalized.endswith(".SH"):
+        return "SSE"
+    if normalized.endswith(".SZ"):
+        return "SZSE"
+    if normalized.endswith(".BJ"):
+        return "BSE"
+    return "UNKNOWN"
+
+
+def currency_for_symbol(symbol: str) -> str:
+    exchange = exchange_for_symbol(symbol)
+    if exchange == "HKEX":
+        return "HKD"
+    if exchange in {"SSE", "SZSE", "BSE"}:
+        return "CNY"
+    return "UNKNOWN"
+
+
 def to_tencent_symbol(symbol: str) -> str:
-    if symbol.endswith(".HK"):
-        code = symbol.split(".")[0].zfill(5)
+    normalized = symbol.strip().upper()
+    if normalized.endswith(".HK"):
+        code = normalized.split(".")[0].zfill(5)
         return f"hk{code}"
-    return symbol.lower()
+    if normalized.endswith(".SH"):
+        return f"sh{normalized.split('.')[0].zfill(6)}"
+    if normalized.endswith(".SZ"):
+        return f"sz{normalized.split('.')[0].zfill(6)}"
+    if normalized.endswith(".BJ"):
+        return f"bj{normalized.split('.')[0].zfill(6)}"
+    return normalized.lower()
+
+
+def tencent_kline_endpoint(tencent_symbol: str) -> str:
+    if tencent_symbol.startswith("hk"):
+        return "hkfqkline"
+    return "fqkline"
 
 
 def parse_trade_date(value: str) -> str | None:
@@ -61,7 +96,7 @@ def parse_trade_date(value: str) -> str | None:
         return None
 
 
-def fetch_tencent_bundle(symbol: str) -> tuple[dict[str, Any], list[list[Any]]]:
+def fetch_tencent_bundle(symbol: str, kline_days: int = 120) -> tuple[dict[str, Any], list[list[Any]]]:
     tencent_symbol = to_tencent_symbol(symbol)
     quote_text = fetch_text(f"https://qt.gtimg.cn/q={tencent_symbol}")
     parts = quote_text.split("~")
@@ -80,10 +115,11 @@ def fetch_tencent_bundle(symbol: str) -> tuple[dict[str, Any], list[list[Any]]]:
         "high": float(parts[33]),
         "low": float(parts[34]),
         "turnover": float(parts[37]),
-        "currency": parts[90] if len(parts) > 90 else "HKD",
+        "currency": parts[90] if len(parts) > 90 and parts[90] else currency_for_symbol(symbol),
     }
 
-    kline = fetch_json(f"https://web.ifzq.gtimg.cn/appstock/app/hkfqkline/get?param={tencent_symbol},day,,,120,qfq")
+    endpoint = tencent_kline_endpoint(tencent_symbol)
+    kline = fetch_json(f"https://web.ifzq.gtimg.cn/appstock/app/{endpoint}/get?param={tencent_symbol},day,,,{kline_days},qfq")
     node = kline["data"][tencent_symbol]
     series = node.get("qfqday") or node.get("day") or []
     if not series:
@@ -151,8 +187,8 @@ def compute_metrics(symbol: str, name: str, kind: str, theme: str, quote: dict[s
         "name": name or quote["name"],
         "kind": kind,
         "theme": theme,
-        "currency": quote.get("currency", "HKD"),
-        "exchange": "HKEX",
+        "currency": quote.get("currency") or currency_for_symbol(symbol),
+        "exchange": exchange_for_symbol(symbol),
         "latest_close": round(latest_close, 4),
         "latest_open": round(latest_open, 4),
         "prev_close": round(prev_close, 4),
@@ -176,7 +212,7 @@ def compute_metrics(symbol: str, name: str, kind: str, theme: str, quote: dict[s
     }
 
 
-def summarize_market(items: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize_market_group(items: list[dict[str, Any]]) -> dict[str, Any]:
     etfs = [item for item in items if item["kind"] == "etf"]
     stocks = [item for item in items if item["kind"] == "stock"]
     avg_stock_move = statistics.fmean([item["pct_change_1d"] for item in stocks]) if stocks else 0.0
@@ -196,9 +232,16 @@ def summarize_market(items: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def summarize_market(items: list[dict[str, Any]]) -> dict[str, Any]:
+    summary = summarize_market_group(items)
+    exchanges = sorted({str(item.get("exchange") or "UNKNOWN") for item in items})
+    summary["by_exchange"] = {exchange: summarize_market_group([item for item in items if str(item.get("exchange") or "UNKNOWN") == exchange]) for exchange in exchanges}
+    return summary
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Fetch investment snapshot data for configured symbols.")
-    parser.add_argument("--watchlist", default=str(ROOT / "config" / "watchlist.toml"))
+    parser.add_argument("--watchlist", default=str(ROOT / "config" / "trade_universe.toml"))
     parser.add_argument("--output-dir", default=str(ROOT / "data" / "snapshots"))
     parser.add_argument("--output-file", default=None)
     parser.add_argument("--date", default=dt.date.today().isoformat())

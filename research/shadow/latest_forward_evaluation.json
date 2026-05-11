@@ -1,0 +1,154 @@
+{
+  "generated_at": "2026-05-11T01:34:49Z",
+  "shadow_dir": "D:\\Code\\yoyo\\research\\shadow",
+  "registry": "D:\\Code\\yoyo\\data\\snapshots\\registry.json",
+  "evaluation_mode": "forward_shadow_only",
+  "counts_toward_forward_evidence": true,
+  "thresholds": {
+    "min_forward_shadow_days": 20,
+    "max_forward_adverse_breach_rate": 0.0,
+    "max_adverse_limit_pct": -8.0,
+    "round_trip_bps": 35.0
+  },
+  "summary": {
+    "total_shadow_log_count": 21,
+    "forward_shadow_log_count": 1,
+    "historical_replay_log_count": 20,
+    "evaluated_log_count": 1,
+    "matured_forward_shadow_days": 0,
+    "no_action_log_count": 1,
+    "pending_sample_count": 0,
+    "sample_count": 0,
+    "win_rate": null,
+    "avg_net_return_pct": null,
+    "median_net_return_pct": null,
+    "avg_alpha_pct": null,
+    "max_adverse_pct": null,
+    "adverse_breach_rate": null,
+    "stop_triggered_rate": null
+  },
+  "gate": {
+    "passed": false,
+    "findings": [
+      {
+        "metric": "forward_shadow_days",
+        "actual": 1,
+        "expected": ">= 20"
+      },
+      {
+        "metric": "matured_forward_shadow_days",
+        "actual": 0,
+        "expected": ">= 20"
+      },
+      {
+        "metric": "forward_sample_count",
+        "actual": 0,
+        "expected": "> 0"
+      }
+    ]
+  },
+  "records": [],
+  "pending_records": [],
+  "skipped_logs": [
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-02-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-05-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-06-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-07-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-08-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-09-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-12-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-13-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-14-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-15-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-16-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-19-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-20-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-21-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-22-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-23-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-26-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-27-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-27-historical-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-04-27-morning-shadow.json",
+      "evidence_mode": "historical_replay",
+      "reason": "not_forward_shadow"
+    }
+  ]
+}

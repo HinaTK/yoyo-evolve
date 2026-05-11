@@ -152,7 +152,12 @@ def classify_attribution(
         cost_passed = ranking_row.get("cost_gate_passed")
         qualified_action = ranking_row.get("qualified_for_action")
         net_edge = ranking_row.get("net_expected_edge_bps")
-        evidence.append(f"ranking score={ranking_row.get('score')} cost_gate_passed={cost_passed} qualified_for_action={qualified_action} net_expected_edge_bps={net_edge}")
+        peer_passed = ranking_row.get("same_theme_peer_evidence_passed")
+        peer_decision = ranking_row.get("peer_relative_decision")
+        evidence.append(f"ranking score={ranking_row.get('score')} cost_gate_passed={cost_passed} qualified_for_action={qualified_action} net_expected_edge_bps={net_edge} same_theme_peer_evidence_passed={peer_passed} peer_relative_decision={peer_decision}")
+        if peer_passed is False and final_state in BULLISH_STATES:
+            tags.append("ranking_selection_error")
+            evidence.append("bullish final state lacked same-theme best-peer evidence")
         if cost_passed is True and draft_state in BULLISH_STATES and final_state in BULLISH_STATES and verdict == "fail":
             tags.append("cost_gate_too_loose")
         unrelated_veto = risk_decision == "veto" or bool(set(ranking_row.get("disqualifiers", [])) - {"cost_gate_failed"})

@@ -70,7 +70,7 @@ def utc_now() -> str:
 
 
 def run_git(repo: pathlib.Path, args: list[str]) -> str:
-    proc = subprocess.run(["git", *args], cwd=repo, text=True, capture_output=True, check=False)
+    proc = subprocess.run(["git", *args], cwd=repo, text=True, encoding="utf-8", errors="replace", capture_output=True, check=False)
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip() or f"git {' '.join(args)} failed")
     return proc.stdout

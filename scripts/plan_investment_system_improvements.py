@@ -113,8 +113,11 @@ def plan_tasks(evaluation: dict[str, Any], backtest: dict[str, Any], optimizatio
     total_decisive = fail_count + pass_count
     call_pass_rate = pass_count / total_decisive if total_decisive else 0.0
     backtest_summary = backtest.get("summary", {}) or {}
-    opt_champion = optimization.get("champion", {}) or {}
-    opt_summary = opt_champion.get("summary", {}) or optimization.get("baseline", {}).get("summary", {}) or {}
+    if optimization.get("updated_active_strategy") is True:
+        opt_active = optimization.get("champion", {}) or {}
+    else:
+        opt_active = optimization.get("baseline", {}) or {}
+    opt_summary = opt_active.get("summary", {}) or backtest_summary
     sample_count = as_int(opt_summary.get("sample_count") or backtest_summary.get("sample_count"))
     sample_quality = str(opt_summary.get("sample_quality") or backtest_summary.get("sample_quality") or "")
     diagnostic_sample_count = as_int(opt_summary.get("diagnostic_sample_count") or backtest_summary.get("diagnostic_sample_count"))

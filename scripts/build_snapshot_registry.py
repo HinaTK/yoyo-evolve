@@ -31,6 +31,28 @@ def classify_snapshot(path: pathlib.Path, payload: dict[str, Any]) -> dict[str, 
 def quality_for(payload: dict[str, Any], file_date: str) -> dict[str, Any]:
     items = payload.get("items", [])
     missing_latest_close = sum(1 for item in items if item.get("latest_close") in (None, ""))
+    future_quote_date_count = 0
+    quote_date_mismatch_count = 0
+    invalid_quote_date_count = 0
+    parsed_quote_dates = []
+    try:
+        snapshot_date = dt.date.fromisoformat(file_date)
+    except ValueError:
+        snapshot_date = None
+    for item in items:
+        quote_date = item.get("quote_trade_date")
+        if not quote_date:
+            continue
+        if str(quote_date) != file_date:
+            quote_date_mismatch_count += 1
+        try:
+            parsed_quote_date = dt.date.fromisoformat(str(quote_date))
+        except ValueError:
+            invalid_quote_date_count += 1
+            continue
+        parsed_quote_dates.append(parsed_quote_date)
+        if snapshot_date is not None and parsed_quote_date > snapshot_date:
+            future_quote_date_count += 1
     generated_at = payload.get("generated_at")
     freshness = "unknown"
     if generated_at:
@@ -44,6 +66,10 @@ def quality_for(payload: dict[str, Any], file_date: str) -> dict[str, Any]:
         "item_count": len(items),
         "missing_latest_close": missing_latest_close,
         "date_mismatch": bool(payload.get("as_of_date") and str(payload.get("as_of_date")) != file_date),
+        "quote_date_mismatch_count": quote_date_mismatch_count,
+        "future_quote_date_count": future_quote_date_count,
+        "invalid_quote_date_count": invalid_quote_date_count,
+        "max_quote_trade_date": max(parsed_quote_dates).isoformat() if parsed_quote_dates else None,
         "freshness": freshness,
         "has_failures": bool(payload.get("failures")),
     }

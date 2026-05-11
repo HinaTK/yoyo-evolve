@@ -1,5 +1,5 @@
 #!/bin/bash
-# scripts/evolve_investment.sh — autonomous investment research loop for hk stocks and ETFs.
+# scripts/evolve_investment.sh — autonomous investment research loop for HK and A-share stocks/ETFs.
 
 set -euo pipefail
 
@@ -36,6 +36,7 @@ PROVIDER_RETRY_SECONDS="${PROVIDER_RETRY_SECONDS:-120}"
 SKIP_EXISTING_OUTPUTS="${SKIP_EXISTING_OUTPUTS:-true}"
 INVESTMENT_LIGHT_CONTEXT="${INVESTMENT_LIGHT_CONTEXT:-true}"
 FORCE_SNAPSHOT="${FORCE_SNAPSHOT:-false}"
+ENABLE_SHADOW_LOGGING="${ENABLE_SHADOW_LOGGING:-true}"
 if [ -z "${SNAPSHOT_FILE:-}" ]; then
     if [ "$SESSION" = "morning" ] || [ "$SESSION" = "midday" ]; then
         SNAPSHOT_FILE="$ROOT_DIR/data/snapshots/$DATE-$SESSION.json"
@@ -134,7 +135,7 @@ case "$SESSION" in
         ;;
 esac
 
-mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations" "$ROOT_DIR/research/rankings" "$ROOT_DIR/research/experiments" "$ROOT_DIR/research/risk"
+mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations" "$ROOT_DIR/research/rankings" "$ROOT_DIR/research/experiments" "$ROOT_DIR/research/risk" "$ROOT_DIR/research/shadow"
 
 if [ -f "$ROOT_DIR/scripts/yoyo_context.sh" ]; then
     # shellcheck disable=SC1091
@@ -218,6 +219,24 @@ if [ -f "$SYMBOL_RISK_FILE" ]; then
     SYMBOL_RISK_ARG=(--symbol-risk-json "$SYMBOL_RISK_FILE")
 fi
 "$PYTHON_BIN" "$ROOT_DIR/scripts/rank_investment_universe.py" --snapshot "$SNAPSHOT_FILE" --output "$RANKING_FILE" --strategy-config "$ACTIVE_STRATEGY_FILE" "${SYMBOL_RISK_ARG[@]}" $RANK_ARGS
+
+if [ "$ENABLE_SHADOW_LOGGING" = "true" ]; then
+    SHADOW_FILE="$ROOT_DIR/research/shadow/$OUTPUT_STEM-shadow.json"
+    if [ -z "${SHADOW_EVIDENCE_MODE:-}" ]; then
+        if [ "$SESSION" = "historical" ]; then
+            SHADOW_EVIDENCE_MODE="historical_replay"
+        else
+            SHADOW_EVIDENCE_MODE="forward_shadow"
+        fi
+    fi
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/log_investment_shadow.py" \
+        --ranking "$RANKING_FILE" \
+        --snapshot "$SNAPSHOT_FILE" \
+        --date "$DATE" \
+        --session "$SESSION" \
+        --output "$SHADOW_FILE" \
+        --evidence-mode "$SHADOW_EVIDENCE_MODE"
+fi
 
 if [ ! -f "$YOYO_BIN" ]; then
     echo "→ Building yoyo binary..."

@@ -1,0 +1,192 @@
+{
+  "date": "2026-01-05",
+  "session": "close",
+  "generated_at": "2026-05-10T15:54:29Z",
+  "mode": "shadow_logging",
+  "evidence_mode": "historical_replay",
+  "counts_toward_forward_evidence": false,
+  "shadow_policy": {
+    "status": "experimental_shadow_only",
+    "production_ranking_unchanged": true,
+    "no_execution": true,
+    "no_portfolio_mutation": true,
+    "risk_filter": "combined_heat_mid_range_market_stall",
+    "exit_rule": "daily_close_stop",
+    "stop_loss_pct": -4.0,
+    "horizon_days": 14,
+    "evidence_mode": "historical_replay",
+    "counts_toward_forward_evidence": false
+  },
+  "source": {
+    "ranking": {
+      "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-05-ranking.json",
+      "exists": true,
+      "sha256": "70f835d0716fdcd6abe114cfc55d3227bed327e4bbbfd099bb8c1eab945e3882",
+      "size_bytes": 49430
+    },
+    "snapshot": {
+      "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-05.json",
+      "exists": true,
+      "sha256": "fdddd8fc4f1f07164b28f1a8d9f75a59b023c1f0c5596fd5e085e55cb9148329",
+      "size_bytes": 48104
+    },
+    "as_of_date": "2026-01-05",
+    "ranking_generated_at": "2026-04-29T05:31:34Z",
+    "strategy_id": "l5_mvp_conservative_v1",
+    "strategy_version": "l5_mvp_conservative_v1",
+    "strategy_status": "active"
+  },
+  "summary": {
+    "production_actionable_count": 0,
+    "shadow_actionable_count": 0,
+    "shadow_diagnostic_count": 3,
+    "downgraded_by_shadow_filter_count": 0
+  },
+  "production_actionable_symbols": [],
+  "shadow_actionable_symbols": [],
+  "shadow_actionable_candidates": [],
+  "shadow_diagnostic_candidates": [
+    {
+      "symbol": "0857.HK",
+      "name": "PetroChina / \u4e2d\u56fd\u77f3\u6cb9\u80a1\u4efd",
+      "market_family": "hk",
+      "theme": "energy",
+      "kind": "stock",
+      "source_layer": "diagnostic_candidates",
+      "score": 78.06,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "latest_close": 11.88,
+      "stop_loss_pct": -4.0,
+      "daily_close_stop_price": 11.4048,
+      "planned_horizon_days": 14,
+      "benchmark_symbol": "2800.HK",
+      "expected_edge_bps": null,
+      "net_expected_edge_bps": null,
+      "cost_gate_passed": null,
+      "range_pos_60": 1.0734,
+      "pct_change_1d": 1.8,
+      "volume_ratio_20": 0.6068,
+      "market_proxy_symbol": null,
+      "market_range_pos_60": null,
+      "same_theme_best_symbol": null,
+      "same_theme_peer_evidence_passed": null,
+      "qualification_flags": [
+        "score_meets_watch_threshold",
+        "price_above_ma20",
+        "price_above_ma60",
+        "ma20_above_ma60",
+        "constructive_range_position",
+        "score_meets_action_threshold",
+        "diagnostic_candidate",
+        "diagnostic_candidate"
+      ],
+      "disqualifiers": [
+        "symbol_risk_veto"
+      ],
+      "action_disqualifiers": [],
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "monitoring_rules": [
+        "Record only; do not change portfolio state from this shadow log.",
+        "Flag if daily close return is <= -4.0% from shadow entry close.",
+        "Evaluate 14-day return and benchmark alpha after the planned horizon."
+      ]
+    },
+    {
+      "symbol": "0006.HK",
+      "name": "Power Assets / \u7535\u80fd\u5b9e\u4e1a",
+      "market_family": "hk",
+      "theme": "utilities-defensive",
+      "kind": "stock",
+      "source_layer": "diagnostic_candidates",
+      "score": 67.34,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "latest_close": 64.65,
+      "stop_loss_pct": -4.0,
+      "daily_close_stop_price": 62.064,
+      "planned_horizon_days": 14,
+      "benchmark_symbol": "2800.HK",
+      "expected_edge_bps": null,
+      "net_expected_edge_bps": null,
+      "cost_gate_passed": null,
+      "range_pos_60": 0.8857,
+      "pct_change_1d": -0.92,
+      "volume_ratio_20": 0.6344,
+      "market_proxy_symbol": null,
+      "market_range_pos_60": null,
+      "same_theme_best_symbol": null,
+      "same_theme_peer_evidence_passed": null,
+      "qualification_flags": [
+        "score_meets_watch_threshold",
+        "price_above_ma20",
+        "price_above_ma60",
+        "ma20_above_ma60",
+        "constructive_range_position",
+        "score_meets_action_threshold",
+        "diagnostic_candidate",
+        "diagnostic_candidate"
+      ],
+      "disqualifiers": [
+        "symbol_risk_veto"
+      ],
+      "action_disqualifiers": [],
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "monitoring_rules": [
+        "Record only; do not change portfolio state from this shadow log.",
+        "Flag if daily close return is <= -4.0% from shadow entry close.",
+        "Evaluate 14-day return and benchmark alpha after the planned horizon."
+      ]
+    },
+    {
+      "symbol": "0728.HK",
+      "name": "China Telecom / \u4e2d\u56fd\u7535\u4fe1",
+      "market_family": "hk",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "source_layer": "diagnostic_candidates",
+      "score": 64.76,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "latest_close": 5.29,
+      "stop_loss_pct": -4.0,
+      "daily_close_stop_price": 5.0784,
+      "planned_horizon_days": 14,
+      "benchmark_symbol": "2800.HK",
+      "expected_edge_bps": null,
+      "net_expected_edge_bps": null,
+      "cost_gate_passed": null,
+      "range_pos_60": 0.7969,
+      "pct_change_1d": 2.32,
+      "volume_ratio_20": 0.8306,
+      "market_proxy_symbol": null,
+      "market_range_pos_60": null,
+      "same_theme_best_symbol": null,
+      "same_theme_peer_evidence_passed": null,
+      "qualification_flags": [
+        "score_meets_watch_threshold",
+        "price_above_ma20",
+        "price_above_ma60",
+        "constructive_range_position",
+        "below_action_score",
+        "diagnostic_candidate",
+        "diagnostic_candidate"
+      ],
+      "disqualifiers": [],
+      "action_disqualifiers": [],
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "monitoring_rules": [
+        "Record only; do not change portfolio state from this shadow log.",
+        "Flag if daily close return is <= -4.0% from shadow entry close.",
+        "Evaluate 14-day return and benchmark alpha after the planned horizon."
+      ]
+    }
+  ],
+  "downgraded_by_shadow_filter": []
+}

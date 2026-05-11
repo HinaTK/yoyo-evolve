@@ -21,6 +21,9 @@ DEFAULT_SAFETY_INVARIANTS = {
     "forbid_edge_gate_reduction": True,
     "forbid_history_tampering": True,
 }
+DEFAULT_MARKET_PROXY_SYMBOL = "2800.HK"
+DEFAULT_CN_MARKET_PROXY_SYMBOL = "510300.SH"
+DEFAULT_MAX_MARKET_RANGE_FOR_ACTION = 0.70
 
 
 def load_json(path: pathlib.Path) -> dict[str, Any]:
@@ -65,6 +68,15 @@ def load_strategy_config(path: pathlib.Path | None) -> dict[str, Any]:
 
 def clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
+
+
+def market_family_for_symbol(symbol: str) -> str:
+    normalized = symbol.upper()
+    if normalized.endswith(".HK"):
+        return "hk"
+    if normalized.endswith((".SH", ".SZ", ".BJ")):
+        return "cn"
+    return "unknown"
 
 
 def trend_score(item: dict[str, Any]) -> float:
@@ -196,6 +208,40 @@ def apply_edge_cost_fields(ranked: list[dict[str, Any]], round_trip_bps: float, 
             row.setdefault("qualification_flags", []).append("cost_gate_failed")
 
 
+def market_proxy_item(snapshot: dict[str, Any], market_proxy_symbol: str) -> dict[str, Any] | None:
+    for item in snapshot.get("items", []):
+        if item.get("symbol") == market_proxy_symbol:
+            return item
+    return None
+
+
+def proxy_symbol_for_row(row: dict[str, Any], snapshot: dict[str, Any], default_market_proxy_symbol: str) -> str:
+    symbol = str(row.get("symbol") or "")
+    if market_family_for_symbol(symbol) == "cn":
+        return DEFAULT_CN_MARKET_PROXY_SYMBOL
+    return default_market_proxy_symbol
+
+
+def apply_market_context(
+    ranked: list[dict[str, Any]],
+    snapshot: dict[str, Any],
+    market_proxy_symbol: str = DEFAULT_MARKET_PROXY_SYMBOL,
+    max_market_range_for_action: float = DEFAULT_MAX_MARKET_RANGE_FOR_ACTION,
+) -> None:
+    for row in ranked:
+        row_proxy_symbol = proxy_symbol_for_row(row, snapshot, market_proxy_symbol)
+        proxy = market_proxy_item(snapshot, row_proxy_symbol)
+        fields = {
+            "market_proxy_symbol": row_proxy_symbol,
+            "market_range_pos_60": proxy.get("range_pos_60") if proxy else None,
+            "market_pct_change_1d": proxy.get("pct_change_1d") if proxy else None,
+            "market_volume_ratio_20": proxy.get("volume_ratio_20") if proxy else None,
+            "market_proxy_available": proxy is not None,
+            "max_market_range_for_action": max_market_range_for_action,
+        }
+        row.update(fields)
+
+
 def item_score(item: dict[str, Any], weights: dict[str, float] | None = None, min_watch_score: float = 45.0) -> dict[str, Any]:
     weights = weights or DEFAULT_STRATEGY_WEIGHTS
     t_score = trend_score(item)
@@ -217,6 +263,8 @@ def item_score(item: dict[str, Any], weights: dict[str, float] | None = None, mi
         "name": item.get("name"),
         "kind": item.get("kind"),
         "theme": item.get("theme"),
+        "currency": item.get("currency"),
+        "exchange": item.get("exchange"),
         "score": rounded_total,
         "trend_score": round(t_score, 2),
         "momentum_score": round(m_score, 2),
@@ -245,12 +293,32 @@ def annotate_theme_positions(scored: list[dict[str, Any]]) -> list[dict[str, Any
     for theme_items in groups.values():
         ordered = sorted(theme_items, key=lambda row: row["score"], reverse=True)
         leader = str(ordered[0].get("symbol")) if ordered else None
+        leader_score = float(ordered[0].get("score") or 0.0) if ordered else 0.0
+        peer_scores = [
+            {"symbol": row.get("symbol"), "score": row.get("score"), "rank": index}
+            for index, row in enumerate(ordered[:3], start=1)
+        ]
         for index, row in enumerate(ordered, start=1):
+            score = float(row.get("score") or 0.0)
+            is_leader = index == 1
+            next_best = ordered[1] if is_leader and len(ordered) > 1 else None
             row["theme_rank"] = index
             row["theme_peer_count"] = len(ordered)
             row["theme_leader"] = leader
-            row["is_theme_leader"] = index == 1
-            if index != 1:
+            row["theme_leader_score"] = round(leader_score, 2)
+            row["theme_score_gap_to_leader"] = round(leader_score - score, 2)
+            row["theme_top_peer_scores"] = peer_scores
+            row["same_theme_best_symbol"] = leader
+            row["same_theme_best_score"] = round(leader_score, 2)
+            row["same_theme_selected_vs_best_score_gap"] = round(score - leader_score, 2)
+            row["same_theme_next_best_symbol"] = next_best.get("symbol") if next_best else None
+            row["same_theme_selected_vs_next_best_score_gap"] = round(score - float(next_best.get("score") or 0.0), 2) if next_best else None
+            row["is_theme_leader"] = is_leader
+            row["same_theme_peer_evidence_passed"] = bool(is_leader and leader == row.get("symbol"))
+            row["peer_relative_decision"] = "theme_leader" if is_leader else "blocked_by_same_theme_leader"
+            if len(ordered) == 1:
+                row["peer_relative_decision"] = "sole_theme_candidate"
+            if not is_leader:
                 row.setdefault("qualification_flags", []).append("same_theme_non_leader")
                 row.setdefault("disqualifiers", []).append("not_theme_score_leader")
                 row["qualified_for_watch"] = False
@@ -289,6 +357,7 @@ def apply_action_qualification(ranked: list[dict[str, Any]], min_action_score: f
             "reasons": reasons,
             "tags": risk.get("tags", []),
         }
+        risk_tags = {str(tag) for tag in row["symbol_risk"].get("tags", [])}
         if row["symbol_risk"]["action_veto"]:
             row.setdefault("disqualifiers", []).append("symbol_risk_veto")
             row["diagnostic_only"] = True
@@ -307,11 +376,37 @@ def apply_action_qualification(ranked: list[dict[str, Any]], min_action_score: f
         else:
             row.setdefault("qualification_flags", []).append("below_action_volume_ratio")
             row.setdefault("action_disqualifiers", []).append("volume_ratio_20_below_1_0")
+        market_range = row.get("market_range_pos_60")
+        market_limit = float(row.get("max_market_range_for_action") or DEFAULT_MAX_MARKET_RANGE_FOR_ACTION)
+        market_proxy_available = row.get("market_proxy_available", True) is not False
+        market_range_ok = market_proxy_available and (market_range is None or float(market_range) <= market_limit)
+        if market_range_ok:
+            row.setdefault("qualification_flags", []).append("market_range_not_overextended")
+        elif not market_proxy_available:
+            row.setdefault("qualification_flags", []).append("market_proxy_missing")
+            row.setdefault("action_disqualifiers", []).append("market_proxy_missing")
+        else:
+            row.setdefault("qualification_flags", []).append("market_range_overextended")
+            row.setdefault("action_disqualifiers", []).append("market_range_pos_60_above_action_limit")
+        symbol_action_risk_ok = "recent_symbol_adverse_breach" not in risk_tags
+        if symbol_action_risk_ok:
+            row.setdefault("qualification_flags", []).append("symbol_recent_adverse_breach_clear")
+        else:
+            row.setdefault("qualification_flags", []).append("symbol_recent_adverse_breach_present")
+            row.setdefault("action_disqualifiers", []).append("symbol_recent_adverse_breach")
+        peer_evidence_ok = row.get("same_theme_peer_evidence_passed") is True
+        if peer_evidence_ok:
+            row.setdefault("qualification_flags", []).append("same_theme_best_peer_evidence_passed")
+        else:
+            row.setdefault("qualification_flags", []).append("same_theme_best_peer_evidence_failed")
+            row.setdefault("action_disqualifiers", []).append("same_theme_best_peer_evidence_missing_or_failed")
         row["qualified_for_action"] = bool(
             row.get("qualified_for_watch")
             and score_ok
             and volume_action_ok
-            and row.get("is_theme_leader")
+            and market_range_ok
+            and symbol_action_risk_ok
+            and peer_evidence_ok
             and row.get("cost_gate_passed")
             and not row["symbol_risk"]["action_veto"]
         )
@@ -362,6 +457,8 @@ def main() -> int:
     parser.add_argument("--min-action-score", type=float, default=65)
     parser.add_argument("--round-trip-bps", type=float, default=35)
     parser.add_argument("--minimum-edge-bps", type=float, default=100)
+    parser.add_argument("--market-proxy-symbol", default=DEFAULT_MARKET_PROXY_SYMBOL)
+    parser.add_argument("--max-market-range-for-action", type=float, default=DEFAULT_MAX_MARKET_RANGE_FOR_ACTION)
     parser.add_argument("--strategy-config", default=None, help="Optional active strategy TOML with ranking weights and safety invariants.")
     parser.add_argument("--symbol-risk-json", default=None, help="Optional symbol risk memory JSON with action_veto tags.")
     args = parser.parse_args()
@@ -372,6 +469,7 @@ def main() -> int:
     symbol_risk = load_symbol_risk(pathlib.Path(args.symbol_risk_json) if args.symbol_risk_json else None)
     diagnostic_top_n = args.diagnostic_top_n if args.diagnostic_top_n is not None else (args.top_n if args.top_n is not None else 3)
     scored = annotate_theme_positions([item_score(item, strategy["weights"], args.min_watch_score) for item in snapshot.get("items", [])])
+    apply_market_context(scored, snapshot, args.market_proxy_symbol, args.max_market_range_for_action)
     apply_edge_cost_fields(scored, args.round_trip_bps, args.minimum_edge_bps)
     ranked = sorted(scored, key=lambda row: row["score"], reverse=True)
     apply_action_qualification(ranked, args.min_action_score, symbol_risk)
@@ -390,12 +488,18 @@ def main() -> int:
             "estimated_round_trip_bps": args.round_trip_bps,
             "minimum_edge_bps": args.minimum_edge_bps,
             "action_rule": "Do not upgrade unless expected swing edge exceeds both cost and minimum edge gates.",
+            "same_theme_peer_rule": "Do not upgrade unless same-theme best-peer evidence passes.",
+            "market_regime_rule": "Do not upgrade when the market proxy is above the action range limit.",
+            "symbol_adverse_rule": "Do not upgrade symbols with a recent adverse-breach risk tag; keep them watch-only until evidence improves.",
         },
         "thresholds": {
             "min_watch_score": args.min_watch_score,
             "min_action_score": args.min_action_score,
             "actionable_top_n": args.actionable_top_n,
             "diagnostic_top_n": diagnostic_top_n,
+            "market_proxy_symbol": args.market_proxy_symbol,
+            "cn_market_proxy_symbol": DEFAULT_CN_MARKET_PROXY_SYMBOL,
+            "max_market_range_for_action": args.max_market_range_for_action,
         },
         "theme_summary": theme_summary(scored),
         "actionable_candidates": actionable_candidates,

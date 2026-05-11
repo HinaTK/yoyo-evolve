@@ -97,7 +97,23 @@ opt = tomllib.load(open(path, 'rb')) if path.exists() else {}
 args = [
     '--actionable-top-n', str(opt.get('actionable_top_n', opt.get('top_n', 1))),
     '--diagnostic-top-n', str(opt.get('diagnostic_top_n', opt.get('top_n', 3))),
+    '--horizon-days', str(opt.get('horizon_days', 3)),
+    '--round-trip-bps', str(opt.get('round_trip_bps', 35)),
+    '--minimum-edge-bps', str(opt.get('minimum_edge_bps', 100)),
+    '--benchmark-symbol', str(opt.get('benchmark_symbol', '2800.HK')),
+    '--min-watch-score', str(opt.get('min_watch_score', 45)),
+    '--min-action-score', str(opt.get('min_action_score', 65)),
+    '--candidate-policy', str(opt.get('candidate_policy', 'strict')),
+    '--min-samples', str(opt.get('min_samples', 12)),
+    '--max-adverse-limit-pct', str(opt.get('max_adverse_limit_pct', -8.0)),
+    '--max-market-range-for-action', str(opt.get('max_market_range_for_action', 0.70)),
 ]
+symbol_risk_mode = str(opt.get('symbol_risk_mode', 'full'))
+args.extend(['--symbol-risk-mode', symbol_risk_mode])
+if symbol_risk_mode == 'point_in_time':
+    args.extend(['--symbol-risk-records-json', str(opt.get('symbol_risk_records', 'research/evaluations/latest_records.json'))])
+elif pathlib.Path(str(opt.get('symbol_risk_memory', 'research/experiments/symbol_risk_memory.json'))).exists():
+    args.extend(['--symbol-risk-json', str(opt.get('symbol_risk_memory', 'research/experiments/symbol_risk_memory.json'))])
 print(' '.join(shlex.quote(arg) for arg in args))
 PY
 )

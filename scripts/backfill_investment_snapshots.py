@@ -8,10 +8,23 @@ import pathlib
 import statistics
 from typing import Any
 
-from fetch_investment_data import ensure_dir, fetch_tencent_bundle, read_toml, summarize_market
+from fetch_investment_data import currency_for_symbol, ensure_dir, exchange_for_symbol, fetch_tencent_bundle, read_toml, summarize_market
 
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+
+
+def parse_date(value: str) -> dt.date:
+    return dt.date.fromisoformat(value)
+
+
+def selected_dates_for_backfill(available_dates: set[str], days: int, start_date: str | None = None, end_date: str | None = None) -> list[str]:
+    dates = sorted(available_dates)
+    if start_date or end_date:
+        start = parse_date(start_date) if start_date else dt.date.min
+        end = parse_date(end_date) if end_date else dt.date.max
+        return [date_str for date_str in dates if start <= parse_date(date_str) <= end]
+    return dates[-days:]
 
 
 def build_historical_metric(symbol: str, name: str, kind: str, theme: str, series: list[list[Any]], index: int) -> dict[str, Any]:
@@ -61,8 +74,8 @@ def build_historical_metric(symbol: str, name: str, kind: str, theme: str, serie
         "name": name,
         "kind": kind,
         "theme": theme,
-        "currency": "HKD",
-        "exchange": "HKEX",
+        "currency": currency_for_symbol(symbol),
+        "exchange": exchange_for_symbol(symbol),
         "latest_close": round(latest["close"], 4),
         "prev_close": round(prev["close"], 4),
         "pct_change_1d": round(pct_change_1d, 3),
@@ -81,9 +94,12 @@ def build_historical_metric(symbol: str, name: str, kind: str, theme: str, serie
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Backfill historical daily snapshots for the investment loop.")
-    parser.add_argument("--watchlist", default=str(ROOT / "config" / "watchlist.toml"))
+    parser.add_argument("--watchlist", default=str(ROOT / "config" / "trade_universe.toml"))
     parser.add_argument("--output-dir", default=str(ROOT / "data" / "snapshots"))
     parser.add_argument("--days", type=int, default=30)
+    parser.add_argument("--history-days", type=int, default=120, help="Number of daily kline rows to request per symbol.")
+    parser.add_argument("--start-date", default=None, help="Optional inclusive historical start date to rebuild instead of the last N days.")
+    parser.add_argument("--end-date", default=None, help="Optional inclusive historical end date to rebuild instead of the last N days.")
     args = parser.parse_args()
 
     watchlist = read_toml(pathlib.Path(args.watchlist))
@@ -91,26 +107,27 @@ def main() -> int:
     ensure_dir(output_dir)
 
     per_symbol: dict[str, dict[str, Any]] = {}
-    common_dates: set[str] | None = None
+    available_dates: set[str] = set()
 
     for entry in watchlist.get("symbols", []):
         symbol = entry["symbol"]
-        _quote, kline = fetch_tencent_bundle(symbol)
+        _quote, kline = fetch_tencent_bundle(symbol, args.history_days)
         series = kline
         date_to_metric = {}
         for index in range(19, len(series)):
             metric = build_historical_metric(symbol, entry.get("name", symbol), entry.get("kind", "unknown"), entry.get("theme", "unknown"), series, index)
             date_to_metric[metric["as_of"]] = metric
         per_symbol[symbol] = date_to_metric
-        symbol_dates = set(date_to_metric.keys())
-        common_dates = symbol_dates if common_dates is None else common_dates & symbol_dates
+        available_dates.update(date_to_metric.keys())
 
-    if not common_dates:
-        raise SystemExit("No common historical dates available across watchlist")
+    if not available_dates:
+        raise SystemExit("No historical dates available across watchlist")
 
-    selected_dates = sorted(common_dates)[-args.days :]
+    selected_dates = selected_dates_for_backfill(available_dates, args.days, args.start_date, args.end_date)
+    if not selected_dates:
+        raise SystemExit("No historical dates matched the requested backfill window")
     for date_str in selected_dates:
-        items = [per_symbol[entry["symbol"]][date_str] for entry in watchlist.get("symbols", [])]
+        items = [per_symbol[entry["symbol"]][date_str] for entry in watchlist.get("symbols", []) if date_str in per_symbol[entry["symbol"]]]
         snapshot = {
             "generated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
             "as_of_date": date_str,

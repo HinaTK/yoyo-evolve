@@ -1,0 +1,129 @@
+{
+  "generated_at": "2026-05-11T01:35:18Z",
+  "shadow_dir": "D:\\Code\\yoyo\\research\\shadow",
+  "registry": "D:\\Code\\yoyo\\data\\snapshots\\registry.json",
+  "evaluation_mode": "historical_replay_diagnostic",
+  "counts_toward_forward_evidence": false,
+  "thresholds": {
+    "min_forward_shadow_days": 20,
+    "max_forward_adverse_breach_rate": 0.0,
+    "max_adverse_limit_pct": -8.0,
+    "round_trip_bps": 35.0
+  },
+  "summary": {
+    "total_shadow_log_count": 21,
+    "forward_shadow_log_count": 1,
+    "historical_replay_log_count": 20,
+    "evaluated_log_count": 21,
+    "matured_forward_shadow_days": 0,
+    "no_action_log_count": 18,
+    "pending_sample_count": 0,
+    "sample_count": 3,
+    "win_rate": 0.0,
+    "avg_net_return_pct": -14.622,
+    "median_net_return_pct": -14.693,
+    "avg_alpha_pct": -14.453,
+    "max_adverse_pct": -14.484,
+    "adverse_breach_rate": 1.0,
+    "stop_triggered_rate": 1.0
+  },
+  "gate": {
+    "passed": false,
+    "findings": [
+      {
+        "metric": "forward_shadow_days",
+        "actual": 1,
+        "expected": ">= 20"
+      },
+      {
+        "metric": "matured_forward_shadow_days",
+        "actual": 0,
+        "expected": ">= 20"
+      },
+      {
+        "metric": "forward_adverse_breach_rate",
+        "actual": 1.0,
+        "expected": "<= 0.0"
+      }
+    ]
+  },
+  "records": [
+    {
+      "base_date": "2026-01-07",
+      "future_date": "2026-01-08",
+      "planned_future_date": "2026-01-21",
+      "symbol": "0005.HK",
+      "market_family": "hk",
+      "theme": "financials-bank",
+      "entry_price": 141.0,
+      "exit_price": 120.777,
+      "net_return_pct": -14.693,
+      "benchmark_symbol": "2800.HK",
+      "benchmark_return_pct": -1.623,
+      "alpha_pct": -13.069,
+      "max_adverse_pct": -14.343,
+      "unmanaged_max_adverse_pct": -14.484,
+      "adverse_breach": true,
+      "exit_triggered": true,
+      "exit_reason": "daily_close_stop_loss",
+      "stop_loss_pct": -4.0,
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "shadow_log": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-07-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false
+    },
+    {
+      "base_date": "2026-01-08",
+      "future_date": "2026-01-09",
+      "planned_future_date": "2026-01-22",
+      "symbol": "0005.HK",
+      "market_family": "hk",
+      "theme": "financials-bank",
+      "entry_price": 141.0,
+      "exit_price": 121.277,
+      "net_return_pct": -14.338,
+      "benchmark_symbol": "2800.HK",
+      "benchmark_return_pct": -0.048,
+      "alpha_pct": -14.29,
+      "max_adverse_pct": -13.988,
+      "unmanaged_max_adverse_pct": -14.484,
+      "adverse_breach": true,
+      "exit_triggered": true,
+      "exit_reason": "daily_close_stop_loss",
+      "stop_loss_pct": -4.0,
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "shadow_log": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-08-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false
+    },
+    {
+      "base_date": "2026-01-09",
+      "future_date": "2026-01-12",
+      "planned_future_date": "2026-01-23",
+      "symbol": "0005.HK",
+      "market_family": "hk",
+      "theme": "financials-bank",
+      "entry_price": 141.0,
+      "exit_price": 120.577,
+      "net_return_pct": -14.834,
+      "benchmark_symbol": "2800.HK",
+      "benchmark_return_pct": 1.165,
+      "alpha_pct": -15.999,
+      "max_adverse_pct": -14.484,
+      "unmanaged_max_adverse_pct": -14.484,
+      "adverse_breach": true,
+      "exit_triggered": true,
+      "exit_reason": "daily_close_stop_loss",
+      "stop_loss_pct": -4.0,
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "shadow_log": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-09-close-shadow.json",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false
+    }
+  ],
+  "pending_records": [],
+  "skipped_logs": []
+}

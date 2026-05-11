@@ -70,6 +70,7 @@ def base_tags(row: dict[str, Any] | None, risk_row: dict[str, Any] | None) -> li
     tags: list[str] = []
     if row:
         tags.extend(str(item) for item in row.get("disqualifiers", []) if item)
+        tags.extend(str(item) for item in row.get("action_disqualifiers", []) if item)
         if row.get("diagnostic_only") is True:
             tags.append("diagnostic_only")
         if row.get("qualified_for_watch") is False:
@@ -78,6 +79,8 @@ def base_tags(row: dict[str, Any] | None, risk_row: dict[str, Any] | None) -> li
             tags.append("not_qualified_for_action")
         if row.get("cost_gate_passed") is False:
             tags.append("cost_gate_failed")
+        if row.get("same_theme_peer_evidence_passed") is not True:
+            tags.append("same_theme_best_peer_evidence_missing_or_failed")
         if as_float(row.get("volume_ratio_20"), 0.0) < 1.0:
             tags.append("volume_ratio_20_below_1_0")
         if has_downtrend(row):
@@ -105,10 +108,15 @@ def confirmations_for(tags: list[str], final_state_cap: str) -> list[str]:
         confirmations.append("expected edge must pass the cost gate")
     if "volume_ratio_20_below_1_0" in tags:
         confirmations.append("volume_ratio_20 must be at least 1.0")
+    if "same_theme_best_peer_evidence_missing_or_failed" in tags:
+        confirmations.append("same-theme best-peer evidence must pass")
+    if "market_range_pos_60_above_action_limit" in tags:
+        confirmations.append("market proxy range_pos_60 must fall below the action limit")
     if "downtrend_regime" in tags:
         confirmations.append("downtrend regime must clear")
     if final_state_cap == "buy_candidate" and not confirmations:
         confirmations.append("maintain qualified_for_action=true, cost_gate_passed=true, volume_ratio_20>=1.0, and no downtrend_regime")
+        confirmations.append("maintain same_theme_peer_evidence_passed=true")
     return unique(confirmations)
 
 
@@ -140,13 +148,18 @@ def make_verdict(draft: dict[str, Any], row: dict[str, Any] | None, risk_row: di
         severe = row is None or any(tag in SEVERE_DISQUALIFIERS for tag in tags)
         qualifies = bool(row and row.get("qualified_for_action") is True)
         cost_passed = bool(row and row.get("cost_gate_passed") is True)
+        peer_evidence_ok = bool(row and row.get("same_theme_peer_evidence_passed") is True)
+        action_checks_clear = bool(row and not row.get("action_disqualifiers"))
         volume_ok = bool(row and as_float(row.get("volume_ratio_20"), 0.0) >= 1.0)
+        # Fold peer evidence into the existing action gate so missing evidence cannot pass.
+        volume_ok = volume_ok and peer_evidence_ok and action_checks_clear
         trend_ok = bool(row and not has_downtrend(row))
         if qualifies and cost_passed and volume_ok and trend_ok:
             decision = "pass"
             cap = "buy_candidate"
             max_position = max_single_position_pct
             reasons.append("buy_candidate passes action, cost, volume, and trend gates")
+            reasons.append("buy_candidate passes same-theme peer evidence gate")
         elif severe:
             decision = "veto"
             cap = "avoid"
@@ -193,6 +206,7 @@ def build_review(draft_calls: dict[str, Any], ranking: dict[str, Any], profile: 
         "policy": {
             "max_single_position_pct": max_single_position_pct,
             "buy_candidate_pass_rule": "qualified_for_action=true, cost_gate_passed=true, volume_ratio_20>=1.0, and no downtrend_regime",
+            "same_theme_peer_rule": "same_theme_peer_evidence_passed=true",
         },
         "verdicts": verdicts,
     }

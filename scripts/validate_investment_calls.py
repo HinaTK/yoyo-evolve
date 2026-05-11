@@ -140,6 +140,15 @@ def validate(
                 errors.append(f"{prefix} draft state {draft_state!r} is not valid")
             elif not state_allowed_under_cap(str(state), str(draft_state)):
                 errors.append(f"{prefix}.{state} state upgrades beyond deterministic draft state {draft_state}")
+            draft_confidence = draft.get("confidence")
+            if (
+                isinstance(confidence, (int, float))
+                and not isinstance(confidence, bool)
+                and isinstance(draft_confidence, (int, float))
+                and not isinstance(draft_confidence, bool)
+                and confidence > draft_confidence + 0.001
+            ):
+                errors.append(f"{prefix}.confidence exceeds deterministic draft confidence cap {draft_confidence}")
         elif draft_calls is not None and state in NON_DIAGNOSTIC_STATES:
             errors.append(f"{prefix}.{state} state requires matching deterministic draft call")
         if risk_review is not None:
@@ -180,6 +189,41 @@ def validate(
                 errors.append(f"{prefix} actionable state requires numeric expected_edge_bps")
             if not isinstance(row.get("net_expected_edge_bps"), (int, float)) or isinstance(row.get("net_expected_edge_bps"), bool):
                 errors.append(f"{prefix} actionable state requires numeric net_expected_edge_bps")
+            for field in (
+                "same_theme_peer_evidence_passed",
+                "same_theme_best_symbol",
+                "same_theme_best_score",
+                "same_theme_selected_vs_best_score_gap",
+                "peer_relative_decision",
+            ):
+                if field not in row:
+                    errors.append(f"{prefix} actionable state requires ranking field {field}")
+            if row.get("same_theme_peer_evidence_passed") is not True:
+                errors.append(f"{prefix} actionable state requires same_theme_peer_evidence_passed=true")
+            if row.get("is_theme_leader") is not True:
+                errors.append(f"{prefix} actionable state requires is_theme_leader=true")
+            if row.get("theme_rank") != 1:
+                errors.append(f"{prefix} actionable state requires theme_rank=1")
+            if row.get("theme_leader") != str(symbol):
+                errors.append(f"{prefix} actionable state requires theme_leader to match symbol")
+            if row.get("same_theme_best_symbol") != str(symbol):
+                errors.append(f"{prefix} actionable state requires same_theme_best_symbol to match symbol")
+            if row.get("peer_relative_decision") not in {"theme_leader", "sole_theme_candidate"}:
+                errors.append(f"{prefix} actionable state requires peer_relative_decision=theme_leader or sole_theme_candidate")
+            selected_vs_best = row.get("same_theme_selected_vs_best_score_gap")
+            if not isinstance(selected_vs_best, (int, float)) or isinstance(selected_vs_best, bool):
+                errors.append(f"{prefix} actionable state requires numeric same_theme_selected_vs_best_score_gap")
+            elif selected_vs_best < 0:
+                errors.append(f"{prefix} actionable state requires selected score to be at least same-theme best score")
+            market_range = row.get("market_range_pos_60")
+            market_limit = row.get("max_market_range_for_action")
+            if market_range is not None and market_limit is not None:
+                if not isinstance(market_range, (int, float)) or isinstance(market_range, bool):
+                    errors.append(f"{prefix} actionable state requires numeric market_range_pos_60")
+                elif not isinstance(market_limit, (int, float)) or isinstance(market_limit, bool):
+                    errors.append(f"{prefix} actionable state requires numeric max_market_range_for_action")
+                elif market_range > market_limit:
+                    errors.append(f"{prefix} actionable state requires market_range_pos_60 <= max_market_range_for_action")
 
     return errors
 

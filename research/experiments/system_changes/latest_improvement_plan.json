@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-06T11:03:12Z",
+  "generated_at": "2026-05-07T02:03:15Z",
   "task_count": 3,
   "attribution_summary": {
     "record_count": 772,
@@ -69,16 +69,15 @@
     },
     {
       "id": "investment_task_03",
-      "title": "Improve ranking selection attribution and peer checks",
+      "title": "Reconcile calls evaluation and backtest metrics",
       "evidence": [
-        "attribution_tag=ranking_selection_error",
-        "count=114",
-        "record_count=772"
+        "calls pass_rate=0.276",
+        "backtest win_rate=0.75"
       ],
-      "objective": "Make ranking or recommendation evidence prefer same-theme leaders when posterior attribution repeatedly shows selected symbols lagged better-ranked peers.",
+      "objective": "Document and reduce metric-definition drift between posterior calls evaluation and ranking backtests.",
       "validation": [
-        "python scripts/attribute_investment_outcomes.py",
-        "python -m unittest tests/test_investment_level5_level6.py"
+        "python scripts/evaluate_investment_calls.py",
+        "python scripts/backtest_investment_strategy.py"
       ]
     }
   ]

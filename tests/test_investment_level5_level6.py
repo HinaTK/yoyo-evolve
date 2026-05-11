@@ -17,11 +17,18 @@ import optimize_investment_params as optimizer  # noqa: E402
 import plan_investment_system_improvements as planner  # noqa: E402
 import rank_investment_universe as ranker  # noqa: E402
 import backtest_investment_strategy as backtester  # noqa: E402
+import backfill_investment_snapshots as backfill_snapshots  # noqa: E402
+import build_snapshot_registry as snapshot_registry  # noqa: E402
 import build_symbol_risk_memory as symbol_risk  # noqa: E402
 import create_investment_run_manifest as run_manifest  # noqa: E402
 import generate_investment_draft_calls as draft_calls  # noqa: E402
 import generate_investment_risk_review as risk_review  # noqa: E402
 import validate_investment_calls as calls_validator  # noqa: E402
+import check_investment_readiness as readiness  # noqa: E402
+import fetch_investment_data as fetch_data  # noqa: E402
+import log_investment_shadow as shadow_log  # noqa: E402
+import backfill_investment_shadow as shadow_backfill  # noqa: E402
+import evaluate_investment_shadow as shadow_eval  # noqa: E402
 
 
 class InvestmentLevel5Level6Tests(unittest.TestCase):
@@ -111,6 +118,24 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
             "selection_reason": "test selection reason",
         }
 
+    def test_tencent_symbol_mapping_supports_hk_and_a_shares(self):
+        self.assertEqual(fetch_data.to_tencent_symbol("0700.HK"), "hk00700")
+        self.assertEqual(fetch_data.to_tencent_symbol("600519.SH"), "sh600519")
+        self.assertEqual(fetch_data.to_tencent_symbol("000333.SZ"), "sz000333")
+        self.assertEqual(fetch_data.exchange_for_symbol("510300.SH"), "SSE")
+        self.assertEqual(fetch_data.currency_for_symbol("159915.SZ"), "CNY")
+
+    def test_backfill_metric_uses_symbol_market_metadata(self):
+        series = []
+        for index in range(20):
+            price = 10.0 + index
+            series.append([f"2026-01-{index + 1:02d}", price, price + 0.5, price + 1.0, price - 1.0, 1000 + index])
+
+        metric = backfill_snapshots.build_historical_metric("600519.SH", "Kweichow Moutai", "stock", "consumer-staples", series, 19)
+
+        self.assertEqual(metric["exchange"], "SSE")
+        self.assertEqual(metric["currency"], "CNY")
+
     def ranking_with_row(self, row):
         defaults = {
             "expected_edge_bps": 160.0,
@@ -118,6 +143,16 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
             "cost_gate_passed": True,
             "edge_method": "technical_snapshot_score_v1",
             "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+            "theme_rank": 1,
+            "theme_leader": row.get("symbol"),
+            "theme_leader_score": row.get("score", 80),
+            "theme_score_gap_to_leader": 0.0,
+            "is_theme_leader": True,
+            "same_theme_peer_evidence_passed": True,
+            "same_theme_best_symbol": row.get("symbol"),
+            "same_theme_best_score": row.get("score", 80),
+            "same_theme_selected_vs_best_score_gap": 0.0,
+            "peer_relative_decision": "theme_leader",
         }
         row = {**defaults, **row}
         return {
@@ -366,6 +401,42 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertTrue(any("expected_edge_bps" in error for error in errors))
         self.assertTrue(any("net_expected_edge_bps" in error for error in errors))
 
+    def test_snapshot_registry_flags_quote_date_leakage(self):
+        quality = snapshot_registry.quality_for(
+            {
+                "as_of_date": "2026-01-07",
+                "items": [
+                    {"symbol": "AAA.HK", "latest_close": 10.0, "quote_trade_date": "2026-04-29"},
+                    {"symbol": "BBB.HK", "latest_close": 11.0, "quote_trade_date": "2026-01-07"},
+                    {"symbol": "CCC.HK", "latest_close": 12.0, "quote_trade_date": "bad-date"},
+                ],
+            },
+            "2026-01-07",
+        )
+
+        self.assertEqual(quality["quote_date_mismatch_count"], 2)
+        self.assertEqual(quality["future_quote_date_count"], 1)
+        self.assertEqual(quality["invalid_quote_date_count"], 1)
+        self.assertEqual(quality["max_quote_trade_date"], "2026-04-29")
+
+    def test_backfill_selects_requested_date_range(self):
+        selected = backfill_snapshots.selected_dates_for_backfill(
+            {"2026-01-02", "2026-01-03", "2026-01-06", "2026-02-01"},
+            days=2,
+            start_date="2026-01-03",
+            end_date="2026-01-31",
+        )
+
+        self.assertEqual(selected, ["2026-01-03", "2026-01-06"])
+
+    def test_backfill_defaults_to_last_n_dates(self):
+        selected = backfill_snapshots.selected_dates_for_backfill(
+            {"2026-01-02", "2026-01-03", "2026-01-06"},
+            days=2,
+        )
+
+        self.assertEqual(selected, ["2026-01-03", "2026-01-06"])
+
     def test_backtest_skips_registry_entries_with_payload_date_mismatch(self):
         registry = {
             "entries": [
@@ -389,6 +460,67 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         }
         entries = backtester.registry_entries(registry, "trade")
         self.assertEqual([entry["date"] for entry in entries], ["2026-04-02"])
+
+    def test_backtest_skips_registry_entries_with_quote_date_leakage(self):
+        registry = {
+            "entries": [
+                {
+                    "path": "a.json",
+                    "date": "2026-04-01",
+                    "session": "close",
+                    "snapshot_type": "trade",
+                    "as_of_date": "2026-04-01",
+                    "quality": {"missing_latest_close": 0, "date_mismatch": False, "quote_date_mismatch_count": 1, "future_quote_date_count": 1},
+                },
+                {
+                    "path": "b.json",
+                    "date": "2026-04-02",
+                    "session": "close",
+                    "snapshot_type": "trade",
+                    "as_of_date": "2026-04-02",
+                    "quality": {"missing_latest_close": 0, "date_mismatch": False, "quote_date_mismatch_count": 0, "future_quote_date_count": 0},
+                },
+            ]
+        }
+
+        entries = backtester.registry_entries(registry, "trade")
+        quality = backtester.registry_quality_summary(registry, "trade")
+
+        self.assertEqual([entry["date"] for entry in entries], ["2026-04-02"])
+        self.assertEqual(quality["skipped_quote_date_mismatch_count"], 1)
+        self.assertEqual(quality["skipped_future_quote_date_count"], 1)
+        self.assertEqual(quality["quote_date_mismatch_item_count"], 1)
+        self.assertEqual(quality["future_quote_date_item_count"], 1)
+
+    def test_backtest_summary_includes_registry_quality_skips(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 10.0)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-02.json", "2026-04-02", 10.5, 10.2)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-03.json", "2026-04-03", 11.0, 10.4)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-02", "2026-04-03"])
+            registry_payload = json.loads(registry.read_text(encoding="utf-8"))
+            registry_payload["entries"][1]["quality"]["quote_date_mismatch_count"] = 1
+            registry_payload["entries"][1]["quality"]["future_quote_date_count"] = 1
+            registry.write_text(json.dumps(registry_payload), encoding="utf-8")
+
+            result = backtester.backtest(
+                registry,
+                "test_strategy",
+                ranker.DEFAULT_STRATEGY_WEIGHTS,
+                top_n=1,
+                horizon_days=1,
+                round_trip_bps=0,
+                benchmark_symbol="2800.HK",
+                min_samples=1,
+                minimum_edge_bps=0,
+            )
+
+            self.assertEqual(result["summary"]["registry_entry_count"], 3)
+            self.assertEqual(result["summary"]["usable_registry_entry_count"], 2)
+            self.assertEqual(result["summary"]["skipped_registry_entry_count"], 1)
+            self.assertEqual(result["summary"]["skipped_quote_date_mismatch_count"], 1)
+            self.assertEqual(result["summary"]["skipped_future_quote_date_count"], 1)
 
     def test_backtest_relaxed_fallback_marks_below_watch_score_and_quality(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -451,6 +583,90 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
 
             self.assertIn("adverse_breach_rate", result["summary"])
             self.assertEqual(result["summary"]["adverse_breach_rate"], 0.5)
+
+    def test_backtest_daily_close_stop_uses_first_stop_close_as_outcome(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 10.0)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-02.json", "2026-04-02", 9.3, 10.2)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-15.json", "2026-04-15", 8.0, 10.4)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-02", "2026-04-15"])
+
+            result = backtester.backtest(
+                registry,
+                "test_strategy",
+                ranker.DEFAULT_STRATEGY_WEIGHTS,
+                top_n=1,
+                horizon_days=14,
+                round_trip_bps=0,
+                benchmark_symbol="2800.HK",
+                min_watch_score=0,
+                min_action_score=0,
+                candidate_policy="strict",
+                min_samples=1,
+                max_adverse_limit_pct=-8.0,
+                minimum_edge_bps=0,
+                experimental_exit_rule="daily_close_stop",
+                stop_loss_pct=-6.0,
+            )
+
+            self.assertEqual(result["summary"]["experimental_exit_rule"], "daily_close_stop")
+            self.assertEqual(result["summary"]["exit_triggered_count"], 1)
+            self.assertEqual(result["summary"]["exit_triggered_rate"], 1.0)
+            record = result["records"][0]
+            self.assertTrue(record["exit_triggered"])
+            self.assertEqual(record["exit_reason"], "daily_close_stop_loss")
+            self.assertEqual(record["future_date"], "2026-04-02")
+            self.assertEqual(record["planned_future_date"], "2026-04-15")
+            self.assertEqual(record["net_return_pct"], -7.0)
+            self.assertEqual(record["unmanaged_net_return_pct"], -20.0)
+            self.assertEqual(record["max_adverse_pct"], -7.0)
+            self.assertEqual(record["unmanaged_max_adverse_pct"], -20.0)
+
+    def test_backtest_risk_diagnostics_group_market_and_adverse_drivers(self):
+        records = [
+            {
+                "base_date": "2026-01-02",
+                "future_date": "2026-01-16",
+                "symbol": "0700.HK",
+                "market_family": "hk",
+                "theme": "internet",
+                "net_return_pct": 1.2,
+                "alpha_pct": 0.4,
+                "max_adverse_pct": -2.0,
+                "adverse_breach": False,
+                "score": 70,
+                "range_pos_60": 0.5,
+                "volume_ratio_20": 1.1,
+                "pct_change_1d": 1.0,
+                "market_range_pos_60": 0.4,
+            },
+            {
+                "base_date": "2026-01-03",
+                "future_date": "2026-01-17",
+                "symbol": "600519.SH",
+                "market_family": "cn",
+                "theme": "consumer",
+                "net_return_pct": -3.5,
+                "alpha_pct": -1.0,
+                "max_adverse_pct": -9.2,
+                "adverse_breach": True,
+                "score": 82,
+                "range_pos_60": 0.92,
+                "volume_ratio_20": 2.8,
+                "pct_change_1d": 5.2,
+                "market_range_pos_60": 0.68,
+            },
+        ]
+
+        diagnostics = backtester.build_risk_diagnostics(records, -8.0)
+
+        market_rows = {row["market_family"]: row for row in diagnostics["by_market_family"]}
+        self.assertEqual(market_rows["hk"]["sample_count"], 1)
+        self.assertEqual(market_rows["cn"]["adverse_breach_rate"], 1.0)
+        self.assertEqual(diagnostics["worst_adverse_records"][0]["symbol"], "600519.SH")
+        volume_buckets = {row["bucket"]: row for row in diagnostics["driver_buckets"]["volume_ratio_20"]}
+        self.assertEqual(volume_buckets["gte_2_50"]["adverse_breach_count"], 1)
 
     def test_backtest_strict_excludes_disqualified_candidate(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -517,6 +733,68 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
                 max_adverse_limit_pct=-8.0,
                 minimum_edge_bps=0,
                 symbol_risk={"AAA.HK": {"action_veto": True, "reasons": ["test veto"], "tags": ["backtest_adverse_breach"]}},
+            )
+
+            self.assertNotIn("AAA.HK", {record["symbol"] for record in result["records"]})
+
+    def test_backtest_point_in_time_symbol_risk_ignores_future_records(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 10.0)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-02.json", "2026-04-02", 11.0, 10.2)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-02"])
+            first = json.loads((tmp_path / "trade-2026-04-01.json").read_text(encoding="utf-8"))
+            first["items"][0].update({"latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8})
+            (tmp_path / "trade-2026-04-01.json").write_text(json.dumps(first), encoding="utf-8")
+
+            result = backtester.backtest(
+                registry,
+                "test_strategy",
+                ranker.DEFAULT_STRATEGY_WEIGHTS,
+                top_n=1,
+                horizon_days=1,
+                round_trip_bps=0,
+                benchmark_symbol="2800.HK",
+                min_watch_score=0,
+                min_action_score=0,
+                candidate_policy="strict",
+                min_samples=1,
+                max_adverse_limit_pct=-8.0,
+                minimum_edge_bps=0,
+                symbol_risk={"AAA.HK": {"action_veto": True, "reasons": ["future full-memory veto"], "tags": ["recent_symbol_adverse_breach"]}},
+                symbol_risk_mode="point_in_time",
+                symbol_risk_records=[{"call_date": "2026-04-02", "symbol": "AAA.HK", "return_pct": -9.0, "verdict": "fail"}],
+            )
+
+            self.assertIn("AAA.HK", {record["symbol"] for record in result["records"]})
+            self.assertTrue(result["summary"]["symbol_risk_point_in_time"])
+
+    def test_backtest_point_in_time_symbol_risk_blocks_past_adverse_records(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 10.0)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-02.json", "2026-04-02", 11.0, 10.2)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-02"])
+            first = json.loads((tmp_path / "trade-2026-04-01.json").read_text(encoding="utf-8"))
+            first["items"][0].update({"latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8})
+            (tmp_path / "trade-2026-04-01.json").write_text(json.dumps(first), encoding="utf-8")
+
+            result = backtester.backtest(
+                registry,
+                "test_strategy",
+                ranker.DEFAULT_STRATEGY_WEIGHTS,
+                top_n=1,
+                horizon_days=1,
+                round_trip_bps=0,
+                benchmark_symbol="2800.HK",
+                min_watch_score=0,
+                min_action_score=0,
+                candidate_policy="strict",
+                min_samples=1,
+                max_adverse_limit_pct=-8.0,
+                minimum_edge_bps=0,
+                symbol_risk_mode="point_in_time",
+                symbol_risk_records=[{"call_date": "2026-03-31", "symbol": "AAA.HK", "return_pct": -9.0, "verdict": "fail"}],
             )
 
             self.assertNotIn("AAA.HK", {record["symbol"] for record in result["records"]})
@@ -713,8 +991,13 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         annotated = sorted(ranker.annotate_theme_positions([leader, laggard]), key=lambda row: row["theme_rank"])
 
         self.assertTrue(annotated[0]["is_theme_leader"])
+        self.assertTrue(annotated[0]["same_theme_peer_evidence_passed"])
+        self.assertEqual(annotated[0]["same_theme_best_symbol"], "AAA.HK")
+        self.assertEqual(annotated[0]["peer_relative_decision"], "theme_leader")
         self.assertFalse(annotated[1]["qualified_for_watch"])
         self.assertTrue(annotated[1]["diagnostic_only"])
+        self.assertFalse(annotated[1]["same_theme_peer_evidence_passed"])
+        self.assertEqual(annotated[1]["peer_relative_decision"], "blocked_by_same_theme_leader")
         self.assertIn("not_theme_score_leader", annotated[1]["disqualifiers"])
 
     def test_symbol_risk_veto_blocks_action_qualification(self):
@@ -729,6 +1012,23 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
 
         self.assertFalse(ranked[0]["qualified_for_action"])
         self.assertIn("symbol_risk_veto", ranked[0]["disqualifiers"])
+        self.assertTrue(ranked[0]["diagnostic_only"])
+
+    def test_recent_symbol_adverse_breach_blocks_action_but_not_watch(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, 0, {"0700.HK": {"action_veto": False, "reasons": ["test adverse"], "tags": ["recent_symbol_adverse_breach"]}})
+
+        self.assertTrue(ranked[0]["qualified_for_watch"])
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertIn("symbol_recent_adverse_breach", ranked[0]["action_disqualifiers"])
+        self.assertNotIn("symbol_recent_adverse_breach", ranked[0]["disqualifiers"])
         self.assertTrue(ranked[0]["diagnostic_only"])
 
     def test_ranker_adds_edge_fields_and_cost_gate_blocks_action(self):
@@ -764,6 +1064,7 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
 
         self.assertTrue(ranked[0]["cost_gate_passed"])
         self.assertTrue(ranked[0]["qualified_for_action"])
+        self.assertIn("same_theme_best_peer_evidence_passed", ranked[0]["qualification_flags"])
 
     def test_ranker_requires_volume_confirmation_for_action_not_watch(self):
         item = ranker.item_score(
@@ -780,6 +1081,285 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertFalse(ranked[0]["qualified_for_action"])
         self.assertIn("volume_ratio_20_below_1_0", ranked[0]["action_disqualifiers"])
         self.assertNotIn("volume_ratio_20_below_1_0", ranked[0]["disqualifiers"])
+
+    def test_ranker_blocks_action_when_market_proxy_is_overextended(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        snapshot = {"items": [{"symbol": "2800.HK", "range_pos_60": 0.85, "pct_change_1d": 1.0, "volume_ratio_20": 1.2}]}
+        ranked = ranker.annotate_theme_positions([item])
+
+        ranker.apply_market_context(ranked, snapshot, max_market_range_for_action=0.7)
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertEqual(ranked[0]["market_proxy_symbol"], "2800.HK")
+        self.assertIn("market_range_pos_60_above_action_limit", ranked[0]["action_disqualifiers"])
+
+    def test_ranker_uses_cn_market_proxy_for_a_share_candidates(self):
+        item = ranker.item_score(
+            {"symbol": "600519.SH", "theme": "consumer-staples", "latest_close": 1400.0, "ma20": 1300.0, "ma60": 1250.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        snapshot = {
+            "items": [
+                {"symbol": "2800.HK", "range_pos_60": 0.2, "pct_change_1d": 0.0, "volume_ratio_20": 1.0},
+                {"symbol": "510300.SH", "range_pos_60": 0.85, "pct_change_1d": 1.0, "volume_ratio_20": 1.2},
+            ]
+        }
+        ranked = ranker.annotate_theme_positions([item])
+
+        ranker.apply_market_context(ranked, snapshot, max_market_range_for_action=0.7)
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertEqual(ranked[0]["market_proxy_symbol"], "510300.SH")
+        self.assertIn("market_range_pos_60_above_action_limit", ranked[0]["action_disqualifiers"])
+
+    def test_backtest_experimental_risk_filter_downgrades_overheated_action_row(self):
+        item = ranker.item_score(
+            {"symbol": "600519.SH", "theme": "consumer-staples", "latest_close": 1400.0, "ma20": 1300.0, "ma60": 1250.0, "range_pos_60": 0.9, "pct_change_1d": 6.0, "volume_ratio_20": 2.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranker.apply_market_context(ranked, {"items": [{"symbol": "510300.SH", "range_pos_60": 0.6, "pct_change_1d": 0.5, "volume_ratio_20": 1.2}]})
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertTrue(ranked[0]["qualified_for_action"])
+
+        backtester.apply_experimental_risk_filter(ranked, "combined_heat")
+
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertTrue(ranked[0]["diagnostic_only"])
+        self.assertEqual(ranked[0]["experimental_risk_filter_profile"], "combined_heat")
+        self.assertIn("experimental_pct_change_1d_gte_5", ranked[0]["action_disqualifiers"])
+        self.assertIn("experimental_volume_ratio_20_gte_2_5_and_range_pos_60_gte_0_85", ranked[0]["action_disqualifiers"])
+
+    def test_backtest_experimental_risk_filter_downgrades_high_range_market_stall(self):
+        item = ranker.item_score(
+            {"symbol": "600519.SH", "theme": "consumer-staples", "latest_close": 1400.0, "ma20": 1300.0, "ma60": 1250.0, "range_pos_60": 0.95, "pct_change_1d": 1.0, "volume_ratio_20": 1.4, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranker.apply_market_context(ranked, {"items": [{"symbol": "510300.SH", "range_pos_60": 0.6, "pct_change_1d": 0.5, "volume_ratio_20": 1.2}]})
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertTrue(ranked[0]["qualified_for_action"])
+
+        backtester.apply_experimental_risk_filter(ranked, "market_stall")
+
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertTrue(ranked[0]["diagnostic_only"])
+        self.assertIn("experimental_range_pos_60_gte_0_88_market_range_pos_60_gte_0_55_pct_change_1d_lte_1_5", ranked[0]["action_disqualifiers"])
+
+    def test_shadow_log_downgrades_candidate_without_mutating_production_ranking(self):
+        row = {
+            "symbol": "600519.SH",
+            "name": "Kweichow Moutai",
+            "kind": "stock",
+            "theme": "consumer-staples",
+            "score": 80.0,
+            "qualified_for_watch": True,
+            "qualified_for_action": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "latest_close": 100.0,
+            "range_pos_60": 0.95,
+            "pct_change_1d": 1.0,
+            "volume_ratio_20": 1.4,
+            "market_proxy_symbol": "510300.SH",
+            "market_range_pos_60": 0.6,
+            "max_market_range_for_action": 0.7,
+            "same_theme_peer_evidence_passed": True,
+            "qualification_flags": [],
+            "disqualifiers": [],
+            "action_disqualifiers": [],
+        }
+        ranking = {
+            "snapshot": "data/snapshots/test.json",
+            "as_of_date": "2026-04-01",
+            "session": "close",
+            "strategy_id": "test_strategy",
+            "strategy_version": "test_strategy",
+            "strategy_status": "active",
+            "thresholds": {"actionable_top_n": 1, "diagnostic_top_n": 1},
+            "actionable_candidates": [row],
+            "diagnostic_candidates": [row],
+            "all_ranked": [row],
+        }
+
+        result = shadow_log.build_shadow_log(ranking, risk_filter="market_stall", stop_loss_pct=-4.0, horizon_days=14)
+
+        self.assertTrue(result["shadow_policy"]["no_execution"])
+        self.assertTrue(result["shadow_policy"]["production_ranking_unchanged"])
+        self.assertEqual(result["summary"]["production_actionable_count"], 1)
+        self.assertEqual(result["summary"]["shadow_actionable_count"], 0)
+        self.assertEqual(result["summary"]["downgraded_by_shadow_filter_count"], 1)
+        self.assertTrue(ranking["all_ranked"][0]["qualified_for_action"])
+        self.assertIn("experimental_range_pos_60_gte_0_88_market_range_pos_60_gte_0_55_pct_change_1d_lte_1_5", result["downgraded_by_shadow_filter"][0]["action_disqualifiers"])
+
+    def test_shadow_log_keeps_monitoring_fields_for_actionable_candidate(self):
+        row = {
+            "symbol": "0700.HK",
+            "name": "Tencent",
+            "kind": "stock",
+            "theme": "internet-platform",
+            "score": 82.0,
+            "qualified_for_watch": True,
+            "qualified_for_action": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "latest_close": 10.0,
+            "range_pos_60": 0.72,
+            "pct_change_1d": 1.2,
+            "volume_ratio_20": 1.6,
+            "market_proxy_symbol": "2800.HK",
+            "market_range_pos_60": 0.3,
+            "same_theme_peer_evidence_passed": True,
+            "qualification_flags": [],
+            "disqualifiers": [],
+            "action_disqualifiers": [],
+        }
+        ranking = {
+            "snapshot": "data/snapshots/test.json",
+            "as_of_date": "2026-04-01",
+            "session": "close",
+            "thresholds": {"actionable_top_n": 1, "diagnostic_top_n": 1},
+            "actionable_candidates": [row],
+            "diagnostic_candidates": [row],
+            "all_ranked": [row],
+        }
+
+        result = shadow_log.build_shadow_log(ranking, risk_filter="off", stop_loss_pct=-4.0, horizon_days=14)
+
+        self.assertEqual(result["summary"]["shadow_actionable_count"], 1)
+        candidate = result["shadow_actionable_candidates"][0]
+        self.assertEqual(candidate["symbol"], "0700.HK")
+        self.assertEqual(candidate["daily_close_stop_price"], 9.6)
+        self.assertEqual(candidate["benchmark_symbol"], "2800.HK")
+        self.assertEqual(candidate["planned_horizon_days"], 14)
+
+    def test_shadow_log_marks_historical_replay_as_not_forward_evidence(self):
+        ranking = {
+            "snapshot": "data/snapshots/test.json",
+            "as_of_date": "2026-04-01",
+            "session": "historical",
+            "thresholds": {"actionable_top_n": 1, "diagnostic_top_n": 1},
+            "actionable_candidates": [],
+            "diagnostic_candidates": [],
+            "all_ranked": [],
+        }
+
+        result = shadow_log.build_shadow_log(ranking, evidence_mode="historical_replay")
+
+        self.assertEqual(result["evidence_mode"], "historical_replay")
+        self.assertFalse(result["counts_toward_forward_evidence"])
+        self.assertFalse(result["shadow_policy"]["counts_toward_forward_evidence"])
+
+    def test_shadow_backfill_writes_historical_replay_logs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            rankings_dir = tmp_path / "rankings"
+            output_dir = tmp_path / "shadow"
+            rankings_dir.mkdir()
+            ranking = {
+                "snapshot": str(tmp_path / "snapshot.json"),
+                "as_of_date": "2026-04-01",
+                "session": "close",
+                "thresholds": {"actionable_top_n": 1, "diagnostic_top_n": 1},
+                "actionable_candidates": [],
+                "diagnostic_candidates": [],
+                "all_ranked": [],
+            }
+            (rankings_dir / "2026-04-01-close-ranking.json").write_text(json.dumps(ranking), encoding="utf-8")
+            (rankings_dir / "2026-04-02-close-ranking.json").write_text(json.dumps({**ranking, "as_of_date": "2026-04-02"}), encoding="utf-8")
+
+            rows = shadow_backfill.discover_rankings(rankings_dir, limit=1)
+            result = shadow_backfill.build_replay_logs(rows, output_dir, "off", "daily_close_stop", -4.0, 14, overwrite=False)
+
+            self.assertEqual(result["written_count"], 1)
+            payload = json.loads(pathlib.Path(result["written"][0]).read_text(encoding="utf-8"))
+            self.assertEqual(payload["evidence_mode"], "historical_replay")
+            self.assertFalse(payload["counts_toward_forward_evidence"])
+            self.assertEqual(payload["date"], "2026-04-02")
+
+    def test_shadow_forward_evaluator_ignores_replay_by_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            shadow_dir = tmp_path / "shadow"
+            shadow_dir.mkdir()
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 25.0)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-02.json", "2026-04-02", 9.5, 25.2)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-15.json", "2026-04-15", 12.0, 26.0)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-02", "2026-04-15"])
+            candidate = {
+                "symbol": "AAA.HK",
+                "market_family": "hk",
+                "theme": "growth",
+                "latest_close": 10.0,
+                "stop_loss_pct": -4.0,
+                "benchmark_symbol": "2800.HK",
+            }
+            base_log = {
+                "date": "2026-04-01",
+                "session": "close",
+                "mode": "shadow_logging",
+                "shadow_policy": {"horizon_days": 14},
+                "shadow_actionable_candidates": [candidate],
+            }
+            (shadow_dir / "2026-04-01-close-shadow.json").write_text(
+                json.dumps({**base_log, "evidence_mode": "forward_shadow", "counts_toward_forward_evidence": True}),
+                encoding="utf-8",
+            )
+            (shadow_dir / "2026-04-01-historical-shadow.json").write_text(
+                json.dumps({**base_log, "evidence_mode": "historical_replay", "counts_toward_forward_evidence": False}),
+                encoding="utf-8",
+            )
+
+            result = shadow_eval.build_evaluation(shadow_dir, registry, include_replay=False, round_trip_bps=0, min_forward_shadow_days=1)
+
+            self.assertEqual(result["summary"]["forward_shadow_log_count"], 1)
+            self.assertEqual(result["summary"]["historical_replay_log_count"], 1)
+            self.assertEqual(result["summary"]["sample_count"], 1)
+            self.assertEqual(result["records"][0]["future_date"], "2026-04-02")
+            self.assertTrue(result["records"][0]["exit_triggered"])
+            self.assertEqual(result["records"][0]["net_return_pct"], -5.0)
+            self.assertTrue(result["records"][0]["counts_toward_forward_evidence"])
+
+    def test_shadow_forward_evaluator_blocks_until_twenty_forward_days(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            shadow_dir = tmp_path / "shadow"
+            shadow_dir.mkdir()
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 25.0)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-15.json", "2026-04-15", 11.0, 26.0)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-15"])
+            log = {
+                "date": "2026-04-01",
+                "session": "close",
+                "mode": "shadow_logging",
+                "evidence_mode": "forward_shadow",
+                "counts_toward_forward_evidence": True,
+                "shadow_policy": {"horizon_days": 14},
+                "shadow_actionable_candidates": [{"symbol": "AAA.HK", "market_family": "hk", "theme": "growth", "latest_close": 10.0, "stop_loss_pct": -4.0}],
+            }
+            (shadow_dir / "2026-04-01-close-shadow.json").write_text(json.dumps(log), encoding="utf-8")
+
+            result = shadow_eval.build_evaluation(shadow_dir, registry, include_replay=False, round_trip_bps=0, min_forward_shadow_days=20)
+
+            metrics = {finding["metric"] for finding in result["gate"]["findings"]}
+            self.assertFalse(result["gate"]["passed"])
+            self.assertIn("forward_shadow_days", metrics)
+            self.assertIn("matured_forward_shadow_days", metrics)
 
     def test_ranker_emits_actionable_and_diagnostic_layers(self):
         strong = ranker.item_score(
@@ -859,6 +1439,13 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
                     "theme_leader": "AAA.HK",
                     "is_theme_leader": True,
                     "theme_peer_count": 2,
+                    "same_theme_peer_evidence_passed": True,
+                    "same_theme_best_symbol": "AAA.HK",
+                    "same_theme_best_score": 80,
+                    "same_theme_selected_vs_best_score_gap": 0.0,
+                    "same_theme_next_best_symbol": "BBB.HK",
+                    "same_theme_selected_vs_next_best_score_gap": 10.0,
+                    "peer_relative_decision": "theme_leader",
                     "edge_method": "technical_snapshot_score_v1",
                     "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
                 }
@@ -901,6 +1488,7 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertEqual(states["BBB.HK"], "watch_only")
         self.assertEqual(states["CCC.HK"], "avoid")
         self.assertTrue(any("same_theme_peer_check" in item for item in calls["recommendations"][0]["evidence"]))
+        self.assertTrue(any("same_theme_best_peer_evidence" in item for item in calls["recommendations"][0]["evidence"]))
         self.assertEqual(calls["recommendations"][0]["horizon_days_min"], 14)
         self.assertEqual(calls["recommendations"][0]["horizon_days_max"], 90)
         self.assertEqual(calls_validator.validate(calls, {**ranking, "all_ranked": ranking["actionable_candidates"] + ranking["diagnostic_candidates"]}, {"AAA.HK", "BBB.HK", "CCC.HK"}), [])
@@ -933,6 +1521,101 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
 
         self.assertEqual(calls["recommendations"][0]["state"], "watch_only")
         self.assertIn("source_layer=diagnostic_candidates", calls["recommendations"][0]["selection_reason"])
+
+    def test_draft_calls_require_same_theme_peer_evidence_for_buy_candidate(self):
+        ranking = {
+            "as_of_date": "2026-04-27",
+            "actionable_candidates": [
+                {
+                    "symbol": "AAA.HK",
+                    "theme": "growth",
+                    "kind": "stock",
+                    "score": 80,
+                    "trend_score": 90,
+                    "momentum_score": 70,
+                    "qualified_for_action": True,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": False,
+                    "cost_gate_passed": True,
+                    "expected_edge_bps": 160,
+                    "net_expected_edge_bps": 125,
+                    "same_theme_peer_evidence_passed": False,
+                    "peer_relative_decision": "blocked_by_same_theme_leader",
+                }
+            ],
+            "diagnostic_candidates": [],
+        }
+
+        calls = draft_calls.build_calls(ranking, include_diagnostics=False)
+
+        self.assertEqual(calls["recommendations"][0]["state"], "watch_only")
+        self.assertIn("same_theme_best_peer_evidence_missing_or_failed", calls["recommendations"][0]["risks"])
+
+    def test_draft_calls_surface_market_overextension_risk(self):
+        ranking = {
+            "as_of_date": "2026-04-27",
+            "actionable_candidates": [
+                {
+                    "symbol": "AAA.HK",
+                    "theme": "growth",
+                    "kind": "stock",
+                    "score": 80,
+                    "trend_score": 90,
+                    "momentum_score": 70,
+                    "qualified_for_action": False,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": True,
+                    "cost_gate_passed": True,
+                    "expected_edge_bps": 160,
+                    "net_expected_edge_bps": 125,
+                    "same_theme_peer_evidence_passed": True,
+                    "market_proxy_symbol": "2800.HK",
+                    "market_range_pos_60": 0.85,
+                    "max_market_range_for_action": 0.7,
+                }
+            ],
+            "diagnostic_candidates": [],
+        }
+
+        calls = draft_calls.build_calls(ranking, include_diagnostics=False)
+
+        self.assertEqual(calls["recommendations"][0]["state"], "watch_only")
+        self.assertIn("market_range_pos_60_above_action_limit", calls["recommendations"][0]["risks"])
+        self.assertTrue(any("market_context" in item for item in calls["recommendations"][0]["evidence"]))
+
+    def test_draft_calls_calibrate_confidence_for_symbol_risk(self):
+        clean = {
+            "symbol": "AAA.HK",
+            "theme": "growth",
+            "kind": "stock",
+            "score": 80,
+            "trend_score": 90,
+            "momentum_score": 70,
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "expected_edge_bps": 160,
+            "net_expected_edge_bps": 125,
+            "same_theme_peer_evidence_passed": True,
+            "same_theme_best_symbol": "AAA.HK",
+            "same_theme_best_score": 80,
+            "same_theme_selected_vs_best_score_gap": 0.0,
+            "peer_relative_decision": "theme_leader",
+        }
+        risky = {
+            **clean,
+            "symbol": "BBB.HK",
+            "same_theme_best_symbol": "BBB.HK",
+            "symbol_risk": {"tags": ["low_symbol_pass_rate", "negative_symbol_avg_return", "repeated_symbol_selection_error"]},
+        }
+        ranking = {"as_of_date": "2026-04-27", "actionable_candidates": [clean, risky], "diagnostic_candidates": []}
+
+        calls = draft_calls.build_calls(ranking, include_diagnostics=False)
+        confidences = {rec["symbol"]: rec["confidence"] for rec in calls["recommendations"]}
+
+        self.assertLess(confidences["BBB.HK"], confidences["AAA.HK"])
+        self.assertTrue(any("confidence_calibration" in item for item in calls["recommendations"][1]["evidence"]))
 
     def test_calls_validator_rejects_final_state_upgrade_beyond_draft(self):
         row = {
@@ -978,6 +1661,59 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft)
 
         self.assertTrue(any("matching deterministic draft call" in error for error in errors))
+
+    def test_calls_validator_rejects_actionable_without_same_theme_peer_evidence(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "same_theme_peer_evidence_passed": False,
+            "same_theme_best_symbol": "BBB.HK",
+            "same_theme_selected_vs_best_score_gap": -5.0,
+            "theme_rank": 2,
+            "theme_leader": "BBB.HK",
+            "is_theme_leader": False,
+            "peer_relative_decision": "blocked_by_same_theme_leader",
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call()]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"})
+
+        self.assertTrue(any("same_theme_peer_evidence_passed=true" in error for error in errors))
+        self.assertTrue(any("theme_rank=1" in error for error in errors))
+
+    def test_calls_validator_rejects_actionable_when_market_proxy_is_overextended(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "market_range_pos_60": 0.85,
+            "max_market_range_for_action": 0.7,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call()]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"})
+
+        self.assertTrue(any("market_range_pos_60 <= max_market_range_for_action" in error for error in errors))
+
+    def test_calls_validator_rejects_confidence_above_draft_cap(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [{**self.valid_call(), "confidence": 0.72}]}
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [{**self.valid_call(), "confidence": 0.58}]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft)
+
+        self.assertTrue(any("confidence exceeds deterministic draft confidence cap" in error for error in errors))
 
     def test_calls_validator_rejects_sell_state_without_matching_draft(self):
         row = {
@@ -1032,6 +1768,47 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         self.assertEqual(verdict["final_state_cap"], "watch_only")
         self.assertLess(verdict["max_position_pct"], 10)
         self.assertIn("volume_ratio_20_below_1_0", verdict["risk_tags"])
+
+    def test_risk_review_downgrades_buy_candidate_without_same_theme_peer_evidence(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "volume_ratio_20": 1.4,
+            "regime_flags": [],
+            "same_theme_peer_evidence_passed": False,
+        }
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="buy_candidate")]}
+
+        review = risk_review.build_review(draft, self.ranking_with_row(row), {"risk": {"max_single_position_pct": 10}})
+        verdict = review["verdicts"][0]
+
+        self.assertEqual(verdict["risk_decision"], "downgrade")
+        self.assertEqual(verdict["final_state_cap"], "watch_only")
+        self.assertIn("same_theme_best_peer_evidence_missing_or_failed", verdict["risk_tags"])
+
+    def test_risk_review_downgrades_buy_candidate_on_market_overextension(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "volume_ratio_20": 1.4,
+            "regime_flags": [],
+            "same_theme_peer_evidence_passed": True,
+            "action_disqualifiers": ["market_range_pos_60_above_action_limit"],
+        }
+        draft = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call(state="buy_candidate")]}
+
+        review = risk_review.build_review(draft, self.ranking_with_row(row), {"risk": {"max_single_position_pct": 10}})
+        verdict = review["verdicts"][0]
+
+        self.assertEqual(verdict["risk_decision"], "downgrade")
+        self.assertEqual(verdict["final_state_cap"], "watch_only")
+        self.assertIn("market_range_pos_60_above_action_limit", verdict["risk_tags"])
 
     def test_risk_review_vetoes_symbol_risk_memory(self):
         row = {
@@ -1350,6 +2127,252 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         )
 
         self.assertFalse(any(task["title"] == "Calibrate risk veto strictness after saved-opportunity evidence" for task in tasks))
+
+    def test_planner_uses_baseline_when_optimizer_does_not_promote_champion(self):
+        optimization = {
+            "updated_active_strategy": False,
+            "baseline": {"summary": {"sample_count": 61, "sample_quality": "sufficient", "win_rate": 0.459, "avg_net_return_pct": 0.129, "max_adverse_pct": -6.5, "adverse_breach_rate": 0.0}},
+            "champion": {"summary": {"sample_count": 52, "sample_quality": "sufficient", "win_rate": 0.404, "avg_net_return_pct": 0.179, "max_adverse_pct": -5.1, "adverse_breach_rate": 0.0}},
+        }
+        tasks = planner.plan_tasks({}, {}, optimization, "", {})
+
+        self.assertFalse(any(task["title"] == "Reduce low win-rate candidate selection" for task in tasks))
+
+    def test_readiness_allows_shadow_but_blocks_paper_on_weak_median_and_win_rate(self):
+        backtest = {
+            "summary": {
+                "sample_count": 61,
+                "production_sample_count": 61,
+                "sample_quality": "sufficient",
+                "avg_net_return_pct": 0.129,
+                "avg_alpha_pct": 0.747,
+                "median_net_return_pct": -0.178,
+                "win_rate": 0.459,
+                "max_adverse_pct": -6.557,
+                "adverse_breach_rate": 0.0,
+                "symbol_risk_mode": "point_in_time",
+                "symbol_risk_point_in_time": True,
+            },
+            "records": [
+                {"base_date": "2026-01-02", "net_return_pct": -0.2},
+                {"base_date": "2026-01-03", "net_return_pct": -0.1},
+                {"base_date": "2026-01-04", "net_return_pct": -0.3},
+                {"base_date": "2026-01-05", "net_return_pct": -0.4},
+                {"base_date": "2026-01-06", "net_return_pct": 0.1},
+                {"base_date": "2026-02-02", "net_return_pct": 0.2},
+                {"base_date": "2026-02-03", "net_return_pct": 0.1},
+                {"base_date": "2026-02-04", "net_return_pct": 0.3},
+                {"base_date": "2026-02-05", "net_return_pct": -0.1},
+                {"base_date": "2026-02-06", "net_return_pct": 0.2},
+                {"base_date": "2026-03-02", "net_return_pct": 0.2},
+                {"base_date": "2026-03-03", "net_return_pct": 0.1},
+                {"base_date": "2026-03-04", "net_return_pct": 0.3},
+                {"base_date": "2026-03-05", "net_return_pct": -0.1},
+                {"base_date": "2026-03-06", "net_return_pct": 0.2},
+            ],
+        }
+
+        result = readiness.build_readiness(backtest, {}, {})
+
+        self.assertTrue(result["tiers"]["shadow_logging"]["passed"])
+        self.assertFalse(result["tiers"]["paper_trading"]["passed"])
+        self.assertEqual(result["current_allowed_stage"], "shadow_logging")
+        paper_findings = {finding["metric"] for finding in result["tiers"]["paper_trading"]["findings"]}
+        self.assertIn("sample_count", paper_findings)
+        self.assertIn("win_rate", paper_findings)
+        self.assertIn("median_net_return_pct", paper_findings)
+        self.assertIn("max_adverse_pct", paper_findings)
+
+    def test_readiness_blocks_all_stages_on_registry_quote_date_leakage(self):
+        backtest = {
+            "summary": {
+                "sample_count": 100,
+                "production_sample_count": 100,
+                "sample_quality": "sufficient",
+                "avg_net_return_pct": 0.5,
+                "avg_alpha_pct": 1.0,
+                "median_net_return_pct": 0.2,
+                "win_rate": 0.6,
+                "max_adverse_pct": -3.0,
+                "adverse_breach_rate": 0.0,
+                "symbol_risk_mode": "point_in_time",
+                "symbol_risk_point_in_time": True,
+                "skipped_quote_date_mismatch_count": 1,
+                "skipped_future_quote_date_count": 1,
+            },
+            "records": [],
+        }
+
+        result = readiness.build_readiness(backtest, {}, {})
+
+        self.assertEqual(result["current_allowed_stage"], "research_only")
+        self.assertFalse(result["tiers"]["shadow_logging"]["passed"])
+        finding_metrics = {finding["metric"] for finding in result["data_quality_findings"]}
+        self.assertIn("data_quality.skipped_quote_date_mismatch_count", finding_metrics)
+        self.assertIn("data_quality.skipped_future_quote_date_count", finding_metrics)
+
+    def test_readiness_blocks_non_point_in_time_symbol_risk(self):
+        backtest = {
+            "summary": {
+                "sample_count": 100,
+                "production_sample_count": 100,
+                "sample_quality": "sufficient",
+                "avg_net_return_pct": 0.5,
+                "avg_alpha_pct": 1.0,
+                "median_net_return_pct": 0.2,
+                "win_rate": 0.6,
+                "max_adverse_pct": -3.0,
+                "adverse_breach_rate": 0.0,
+                "symbol_risk_mode": "full",
+                "symbol_risk_point_in_time": False,
+            },
+            "records": [],
+        }
+
+        result = readiness.build_readiness(backtest, {}, {})
+
+        self.assertEqual(result["current_allowed_stage"], "research_only")
+        finding_metrics = {finding["metric"] for finding in result["data_quality_findings"]}
+        self.assertIn("data_quality.symbol_risk_point_in_time", finding_metrics)
+
+    def test_readiness_allows_paper_when_metrics_and_month_balance_pass(self):
+        records = []
+        for month in ("2026-01", "2026-02", "2026-03", "2026-04"):
+            records.extend(
+                [
+                    {"base_date": f"{month}-02", "net_return_pct": 0.2},
+                    {"base_date": f"{month}-03", "net_return_pct": 0.1},
+                    {"base_date": f"{month}-04", "net_return_pct": 0.3},
+                    {"base_date": f"{month}-05", "net_return_pct": -0.1},
+                    {"base_date": f"{month}-06", "net_return_pct": 0.0},
+                ]
+            )
+        backtest = {
+            "summary": {
+                "sample_count": 75,
+                "production_sample_count": 75,
+                "sample_quality": "sufficient",
+                "avg_net_return_pct": 0.16,
+                "avg_alpha_pct": 0.60,
+                "median_net_return_pct": 0.02,
+                "win_rate": 0.50,
+                "max_adverse_pct": -5.5,
+                "adverse_breach_rate": 0.0,
+                "symbol_risk_mode": "point_in_time",
+                "symbol_risk_point_in_time": True,
+            },
+            "records": records,
+        }
+
+        result = readiness.build_readiness(backtest, {}, {})
+
+        self.assertTrue(result["tiers"]["paper_trading"]["passed"])
+        self.assertEqual(result["current_allowed_stage"], "paper_trading")
+
+    def test_readiness_blocks_stage_when_market_segment_risk_fails(self):
+        records = []
+        for month in ("2026-01", "2026-02", "2026-03", "2026-04"):
+            records.extend(
+                [
+                    {"base_date": f"{month}-02", "net_return_pct": 0.2},
+                    {"base_date": f"{month}-03", "net_return_pct": 0.1},
+                    {"base_date": f"{month}-04", "net_return_pct": 0.3},
+                    {"base_date": f"{month}-05", "net_return_pct": -0.1},
+                    {"base_date": f"{month}-06", "net_return_pct": 0.0},
+                ]
+            )
+        backtest = {
+            "summary": {
+                "sample_count": 160,
+                "production_sample_count": 160,
+                "sample_quality": "sufficient",
+                "avg_net_return_pct": 0.3,
+                "avg_alpha_pct": 0.70,
+                "median_net_return_pct": 0.08,
+                "win_rate": 0.56,
+                "max_adverse_pct": -5.5,
+                "adverse_breach_rate": 0.0,
+                "symbol_risk_mode": "point_in_time",
+                "symbol_risk_point_in_time": True,
+            },
+            "records": records,
+            "risk_diagnostics": {
+                "by_market_family": [
+                    {"market_family": "hk", "sample_count": 80, "win_rate": 0.6, "avg_net_return_pct": 0.4, "median_net_return_pct": 0.1, "avg_alpha_pct": 0.8, "max_adverse_pct": -4.0, "adverse_breach_rate": 0.0},
+                    {"market_family": "cn", "sample_count": 80, "win_rate": 0.52, "avg_net_return_pct": 0.2, "median_net_return_pct": 0.05, "avg_alpha_pct": 0.6, "max_adverse_pct": -9.0, "adverse_breach_rate": 0.1},
+                ]
+            },
+        }
+
+        result = readiness.build_readiness(backtest, {}, {})
+
+        self.assertEqual(result["current_allowed_stage"], "research_only")
+        self.assertEqual(result["market_stats"][1]["market_family"], "cn")
+        paper_findings = {finding["metric"] for finding in result["tiers"]["paper_trading"]["findings"]}
+        self.assertIn("market[cn].max_adverse_pct", paper_findings)
+        self.assertIn("market[cn].adverse_breach_rate", paper_findings)
+
+    def test_readiness_small_live_requires_forward_paper_days(self):
+        backtest = {
+            "summary": {
+                "sample_count": 90,
+                "production_sample_count": 90,
+                "sample_quality": "sufficient",
+                "avg_net_return_pct": 0.25,
+                "avg_alpha_pct": 0.80,
+                "median_net_return_pct": 0.05,
+                "win_rate": 0.55,
+                "max_adverse_pct": -3.5,
+                "adverse_breach_rate": 0.0,
+                "symbol_risk_mode": "point_in_time",
+                "symbol_risk_point_in_time": True,
+            },
+            "records": [],
+        }
+
+        result = readiness.build_readiness(backtest, {}, {}, paper_days=0)
+
+        self.assertFalse(result["tiers"]["small_live_observation"]["passed"])
+        findings = {finding["metric"] for finding in result["tiers"]["small_live_observation"]["findings"]}
+        self.assertIn("forward_paper_days", findings)
+
+    def test_readiness_exit_rule_still_requires_forward_paper_for_small_live(self):
+        records = []
+        for month in ("2026-01", "2026-02", "2026-03", "2026-04"):
+            records.extend(
+                [
+                    {"base_date": f"{month}-02", "net_return_pct": 0.5},
+                    {"base_date": f"{month}-03", "net_return_pct": 0.4},
+                    {"base_date": f"{month}-04", "net_return_pct": 0.3},
+                    {"base_date": f"{month}-05", "net_return_pct": -0.1},
+                    {"base_date": f"{month}-06", "net_return_pct": 0.2},
+                ]
+            )
+        backtest = {
+            "summary": {
+                "sample_count": 120,
+                "production_sample_count": 120,
+                "sample_quality": "sufficient",
+                "avg_net_return_pct": 0.35,
+                "avg_alpha_pct": 0.80,
+                "median_net_return_pct": 0.15,
+                "win_rate": 0.57,
+                "max_adverse_pct": -3.5,
+                "adverse_breach_rate": 0.0,
+                "symbol_risk_mode": "point_in_time",
+                "symbol_risk_point_in_time": True,
+                "experimental_exit_rule": "daily_close_stop",
+            },
+            "records": records,
+        }
+
+        result = readiness.build_readiness(backtest, {}, {}, paper_days=0)
+
+        self.assertTrue(result["tiers"]["paper_trading"]["passed"])
+        self.assertFalse(result["tiers"]["small_live_observation"]["passed"])
+        self.assertEqual(result["current_allowed_stage"], "paper_trading")
+        findings = {finding["metric"] for finding in result["tiers"]["small_live_observation"]["findings"]}
+        self.assertIn("forward_paper_days", findings)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,168 @@
+{
+  "date": "2026-04-27",
+  "session": "morning",
+  "generated_at": "2026-05-11T01:34:49Z",
+  "mode": "shadow_logging",
+  "evidence_mode": "forward_shadow",
+  "counts_toward_forward_evidence": true,
+  "shadow_policy": {
+    "status": "experimental_shadow_only",
+    "production_ranking_unchanged": true,
+    "no_execution": true,
+    "no_portfolio_mutation": true,
+    "risk_filter": "combined_heat_mid_range_market_stall",
+    "exit_rule": "daily_close_stop",
+    "stop_loss_pct": -4.0,
+    "horizon_days": 14,
+    "evidence_mode": "forward_shadow",
+    "counts_toward_forward_evidence": true
+  },
+  "source": {
+    "ranking": {
+      "path": "D:\\Code\\yoyo\\research\\rankings\\2026-04-27-morning-ranking.json",
+      "exists": true,
+      "sha256": "09016f86b95a0b37164a40b8da91c40078c0133141ad5e11f67d71efe2c1b470",
+      "size_bytes": 5597
+    },
+    "snapshot": {
+      "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-04-27-morning.json",
+      "exists": true,
+      "sha256": "49c4c985680807b187f7b1c849d0c1a86e90a370878d46c9cc3684b521a1c46e",
+      "size_bytes": 7783
+    },
+    "as_of_date": "2026-04-27",
+    "ranking_generated_at": "2026-04-27T06:26:31Z",
+    "strategy_id": null,
+    "strategy_version": null,
+    "strategy_status": null
+  },
+  "summary": {
+    "production_actionable_count": 0,
+    "shadow_actionable_count": 0,
+    "shadow_diagnostic_count": 3,
+    "downgraded_by_shadow_filter_count": 0
+  },
+  "production_actionable_symbols": [],
+  "shadow_actionable_symbols": [],
+  "shadow_actionable_candidates": [],
+  "shadow_diagnostic_candidates": [
+    {
+      "symbol": "2800.HK",
+      "name": "Tracker Fund of Hong Kong",
+      "market_family": "hk",
+      "theme": "hong-kong-broad-market",
+      "kind": "etf",
+      "source_layer": "diagnostic_candidates",
+      "score": 51.96,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "diagnostic_only": true,
+      "latest_close": 26.2,
+      "stop_loss_pct": -4.0,
+      "daily_close_stop_price": 25.152,
+      "planned_horizon_days": 14,
+      "benchmark_symbol": "2800.HK",
+      "expected_edge_bps": null,
+      "net_expected_edge_bps": null,
+      "cost_gate_passed": null,
+      "range_pos_60": 0.431,
+      "pct_change_1d": -0.228,
+      "volume_ratio_20": 0.8148,
+      "market_proxy_symbol": null,
+      "market_range_pos_60": null,
+      "same_theme_best_symbol": null,
+      "same_theme_peer_evidence_passed": null,
+      "qualification_flags": [
+        "diagnostic_candidate"
+      ],
+      "disqualifiers": [],
+      "action_disqualifiers": [],
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "monitoring_rules": [
+        "Record only; do not change portfolio state from this shadow log.",
+        "Flag if daily close return is <= -4.0% from shadow entry close.",
+        "Evaluate 14-day return and benchmark alpha after the planned horizon."
+      ]
+    },
+    {
+      "symbol": "3033.HK",
+      "name": "Hang Seng Tech ETF",
+      "market_family": "hk",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "source_layer": "diagnostic_candidates",
+      "score": 45.86,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "diagnostic_only": true,
+      "latest_close": 4.834,
+      "stop_loss_pct": -4.0,
+      "daily_close_stop_price": 4.6406,
+      "planned_horizon_days": 14,
+      "benchmark_symbol": "2800.HK",
+      "expected_edge_bps": null,
+      "net_expected_edge_bps": null,
+      "cost_gate_passed": null,
+      "range_pos_60": 0.2328,
+      "pct_change_1d": 0.708,
+      "volume_ratio_20": 0.8623,
+      "market_proxy_symbol": null,
+      "market_range_pos_60": null,
+      "same_theme_best_symbol": null,
+      "same_theme_peer_evidence_passed": null,
+      "qualification_flags": [
+        "diagnostic_candidate"
+      ],
+      "disqualifiers": [],
+      "action_disqualifiers": [],
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "monitoring_rules": [
+        "Record only; do not change portfolio state from this shadow log.",
+        "Flag if daily close return is <= -4.0% from shadow entry close.",
+        "Evaluate 14-day return and benchmark alpha after the planned horizon."
+      ]
+    },
+    {
+      "symbol": "3067.HK",
+      "name": "iShares Hang Seng TECH ETF",
+      "market_family": "hk",
+      "theme": "hang-seng-tech",
+      "kind": "etf",
+      "source_layer": "diagnostic_candidates",
+      "score": 43.75,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "diagnostic_only": true,
+      "latest_close": 10.37,
+      "stop_loss_pct": -4.0,
+      "daily_close_stop_price": 9.9552,
+      "planned_horizon_days": 14,
+      "benchmark_symbol": "2800.HK",
+      "expected_edge_bps": null,
+      "net_expected_edge_bps": null,
+      "cost_gate_passed": null,
+      "range_pos_60": 0.2275,
+      "pct_change_1d": 0.68,
+      "volume_ratio_20": 0.593,
+      "market_proxy_symbol": null,
+      "market_range_pos_60": null,
+      "same_theme_best_symbol": null,
+      "same_theme_peer_evidence_passed": null,
+      "qualification_flags": [
+        "diagnostic_candidate"
+      ],
+      "disqualifiers": [],
+      "action_disqualifiers": [],
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "monitoring_rules": [
+        "Record only; do not change portfolio state from this shadow log.",
+        "Flag if daily close return is <= -4.0% from shadow entry close.",
+        "Evaluate 14-day return and benchmark alpha after the planned horizon."
+      ]
+    }
+  ],
+  "downgraded_by_shadow_filter": []
+}

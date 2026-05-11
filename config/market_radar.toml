@@ -1,4 +1,4 @@
-# Broad HK market radar used to detect sector/theme strength.
+# Broad HK and mainland A-share market radar used to detect sector/theme strength.
 # This is not the tradeable recommendation list. Actionable recommendations
 # should still come from config/trade_universe.toml unless explicitly promoted later.
 
@@ -91,3 +91,87 @@ symbol = "1177.HK"
 name = "Sino Biopharm / 中国生物制药"
 kind = "stock"
 theme = "healthcare-pharma"
+
+[[symbols]]
+symbol = "510300.SH"
+name = "Huatai-PineBridge CSI 300 ETF / 华泰柏瑞沪深300ETF"
+kind = "etf"
+theme = "china-a-broad-market"
+
+[[symbols]]
+symbol = "510500.SH"
+name = "China Southern CSI 500 ETF / 南方中证500ETF"
+kind = "etf"
+theme = "china-a-midcap-market"
+
+[[symbols]]
+symbol = "159915.SZ"
+name = "E Fund ChiNext ETF / 易方达创业板ETF"
+kind = "etf"
+theme = "china-a-growth-tech"
+
+[[symbols]]
+symbol = "588000.SH"
+name = "ChinaAMC STAR 50 ETF / 华夏上证科创板50ETF"
+kind = "etf"
+theme = "china-a-hard-tech"
+
+[[symbols]]
+symbol = "510880.SH"
+name = "Huatai-PineBridge Dividend ETF / 华泰柏瑞红利ETF"
+kind = "etf"
+theme = "china-a-dividend-value"
+
+[[symbols]]
+symbol = "512480.SH"
+name = "GuolianAn Semiconductor ETF / 国联安半导体ETF"
+kind = "etf"
+theme = "china-a-semiconductors"
+
+[[symbols]]
+symbol = "600519.SH"
+name = "Kweichow Moutai / 贵州茅台"
+kind = "stock"
+theme = "china-a-consumer-staples"
+
+[[symbols]]
+symbol = "300750.SZ"
+name = "CATL / 宁德时代"
+kind = "stock"
+theme = "china-a-battery-ev"
+
+[[symbols]]
+symbol = "600036.SH"
+name = "China Merchants Bank / 招商银行"
+kind = "stock"
+theme = "china-a-financials-bank"
+
+[[symbols]]
+symbol = "600900.SH"
+name = "Yangtze Power / 长江电力"
+kind = "stock"
+theme = "china-a-utilities-defensive"
+
+[[symbols]]
+symbol = "601088.SH"
+name = "China Shenhua / 中国神华"
+kind = "stock"
+theme = "china-a-energy-dividend"
+
+[[symbols]]
+symbol = "600276.SH"
+name = "Hengrui Medicine / 恒瑞医药"
+kind = "stock"
+theme = "china-a-healthcare-pharma"
+
+[[symbols]]
+symbol = "601899.SH"
+name = "Zijin Mining / 紫金矿业"
+kind = "stock"
+theme = "china-a-metals-mining"
+
+[[symbols]]
+symbol = "688981.SH"
+name = "SMIC / 中芯国际"
+kind = "stock"
+theme = "china-a-semiconductors"

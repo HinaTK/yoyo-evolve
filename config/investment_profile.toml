@@ -1,6 +1,6 @@
 [agent]
 name = "yoyo-invest"
-market_focus = ["hk-stocks", "etfs"]
+market_focus = ["hk-stocks", "hk-etfs", "a-shares", "a-share-etfs"]
 time_horizon = "swing"
 time_window_days_min = 14
 time_window_days_max = 90
@@ -36,6 +36,38 @@ primary_use = "recommendation_only"
 recommendation_goal = "Generate ranked swing-trade candidates and conditional triggers without assuming the user's real holdings."
 selection_mode = "dynamic_from_trade_universe"
 selection_goal = "Use the market radar to identify strong themes, then select the best current symbols from the trade universe each session."
+
+[readiness.shadow_logging]
+min_sample_count = 60
+min_avg_net_return_pct = 0.05
+max_adverse_breach_rate = 0.0
+required_sample_quality = "sufficient"
+
+[readiness.paper_trading]
+min_sample_count = 70
+min_win_rate = 0.50
+min_avg_net_return_pct = 0.15
+min_median_net_return_pct = 0.0
+min_avg_alpha_pct = 0.50
+min_max_adverse_pct = -6.0
+max_adverse_breach_rate = 0.0
+required_sample_quality = "sufficient"
+min_mature_months = 4
+min_month_sample_count = 5
+min_mature_month_win_rate = 0.40
+min_mature_month_avg_net_return_pct = -0.30
+
+[readiness.small_live_observation]
+min_sample_count = 100
+min_win_rate = 0.56
+min_avg_net_return_pct = 0.30
+min_median_net_return_pct = 0.10
+min_avg_alpha_pct = 0.75
+min_max_adverse_pct = -4.0
+max_adverse_breach_rate = 0.0
+required_sample_quality = "sufficient"
+min_forward_paper_days = 20
+max_forward_adverse_breach_rate = 0.0
 
 [outputs]
 default_report_dir = "research/daily"
