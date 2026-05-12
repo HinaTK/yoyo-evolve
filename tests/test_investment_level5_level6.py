@@ -29,6 +29,7 @@ import fetch_investment_data as fetch_data  # noqa: E402
 import log_investment_shadow as shadow_log  # noqa: E402
 import backfill_investment_shadow as shadow_backfill  # noqa: E402
 import evaluate_investment_shadow as shadow_eval  # noqa: E402
+import run_investment_daily_shadow as daily_shadow  # noqa: E402
 
 
 class InvestmentLevel5Level6Tests(unittest.TestCase):
@@ -100,6 +101,59 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
         registry = tmp_path / "registry.json"
         registry.write_text(json.dumps({"entries": entries}), encoding="utf-8")
         return registry
+
+    def write_daily_shadow_configs(self, tmp_path):
+        config_dir = tmp_path / "config"
+        config_dir.mkdir(parents=True, exist_ok=True)
+        (config_dir / "investment_profile.toml").write_text(
+            """
+[costs]
+estimated_round_trip_bps = 35
+minimum_edge_bps = 100
+
+[ranking]
+min_action_score = 65
+min_watch_score = 45
+max_candidates = 8
+""".lstrip(),
+            encoding="utf-8",
+        )
+        (config_dir / "optimization.toml").write_text(
+            """
+actionable_top_n = 2
+diagnostic_top_n = 3
+round_trip_bps = 35
+minimum_edge_bps = 100
+symbol_risk_memory = "research/experiments/symbol_risk_memory.json"
+
+[safety_invariants]
+forbid_cost_gate_reduction = true
+forbid_edge_gate_reduction = true
+""".lstrip(),
+            encoding="utf-8",
+        )
+        (config_dir / "active_strategy.toml").write_text(
+            """
+strategy_id = "test_strategy"
+strategy_version = "test_strategy"
+status = "active"
+
+[weights]
+trend_weight = 0.45
+momentum_weight = 0.30
+range_weight = 0.15
+risk_penalty_weight = 1.15
+
+[cost_gate]
+estimated_round_trip_bps = 35
+minimum_edge_bps = 100
+
+[safety_invariants]
+forbid_cost_gate_reduction = true
+forbid_edge_gate_reduction = true
+""".lstrip(),
+            encoding="utf-8",
+        )
 
     def valid_call(self, symbol="AAA.HK", state="buy_candidate"):
         return {
@@ -1360,6 +1414,89 @@ class InvestmentLevel5Level6Tests(unittest.TestCase):
             self.assertFalse(result["gate"]["passed"])
             self.assertIn("forward_shadow_days", metrics)
             self.assertIn("matured_forward_shadow_days", metrics)
+
+    def test_daily_shadow_runner_plans_forward_pipeline_without_bash(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_daily_shadow_configs(tmp_path)
+            snapshot = tmp_path / "data" / "snapshots" / "2026-04-27.json"
+            snapshot.parent.mkdir(parents=True, exist_ok=True)
+            snapshot.write_text(json.dumps({"as_of_date": "2026-04-27", "items": []}), encoding="utf-8")
+            calls = []
+
+            def fake_runner(name, command, cwd, check=True):
+                calls.append((name, [str(part) for part in command], cwd, check))
+                return 0
+
+            summary = daily_shadow.run_pipeline(
+                daily_shadow.DailyShadowOptions(
+                    root=tmp_path,
+                    python_bin="python",
+                    date="2026-04-27",
+                    session="close",
+                    skip_fetch=True,
+                    skip_radar_fetch=True,
+                ),
+                runner=fake_runner,
+            )
+
+            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "rank_universe", "log_shadow", "evaluate_shadow"])
+            self.assertTrue(all(command[0] == "python" for _, command, *_ in calls))
+            self.assertFalse(any("bash" in part.lower() for _, command, *_ in calls for part in command))
+            shadow_command = next(command for name, command, *_ in calls if name == "log_shadow")
+            self.assertEqual(shadow_command[shadow_command.index("--evidence-mode") + 1], "forward_shadow")
+            rank_command = next(command for name, command, *_ in calls if name == "rank_universe")
+            self.assertEqual(rank_command[rank_command.index("--actionable-top-n") + 1], "2")
+            self.assertEqual(rank_command[rank_command.index("--diagnostic-top-n") + 1], "3")
+            self.assertEqual(summary["paths"]["ranking"], str(tmp_path.resolve() / "research" / "rankings" / "2026-04-27-close-ranking.json"))
+
+    def test_daily_shadow_runner_uses_replay_mode_for_historical_session(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_daily_shadow_configs(tmp_path)
+            snapshot = tmp_path / "data" / "snapshots" / "2026-04-27.json"
+            snapshot.parent.mkdir(parents=True, exist_ok=True)
+            snapshot.write_text(json.dumps({"as_of_date": "2026-04-27", "items": []}), encoding="utf-8")
+            calls = []
+
+            def fake_runner(name, command, cwd, check=True):
+                calls.append((name, [str(part) for part in command], cwd, check))
+                return 0
+
+            summary = daily_shadow.run_pipeline(
+                daily_shadow.DailyShadowOptions(
+                    root=tmp_path,
+                    python_bin="python",
+                    date="2026-04-27",
+                    session="historical",
+                    skip_fetch=True,
+                    evaluate_shadow=False,
+                ),
+                runner=fake_runner,
+            )
+
+            shadow_command = next(command for name, command, *_ in calls if name == "log_shadow")
+            self.assertEqual(shadow_command[shadow_command.index("--evidence-mode") + 1], "historical_replay")
+            self.assertEqual(summary["evidence_mode"], "historical_replay")
+            self.assertEqual(summary["paths"]["shadow"], str(tmp_path.resolve() / "research" / "shadow" / "2026-04-27-shadow.json"))
+
+    def test_daily_shadow_runner_requires_existing_snapshot_when_fetch_is_skipped(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_daily_shadow_configs(tmp_path)
+
+            with self.assertRaises(SystemExit) as raised:
+                daily_shadow.run_pipeline(
+                    daily_shadow.DailyShadowOptions(
+                        root=tmp_path,
+                        python_bin="python",
+                        date="2026-04-27",
+                        session="close",
+                        skip_fetch=True,
+                    )
+                )
+
+            self.assertIn("Missing snapshot file", str(raised.exception))
 
     def test_ranker_emits_actionable_and_diagnostic_layers(self):
         strong = ranker.item_score(
