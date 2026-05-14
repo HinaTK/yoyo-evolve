@@ -30,6 +30,8 @@ import log_investment_shadow as shadow_log  # noqa: E402
 import backfill_investment_shadow as shadow_backfill  # noqa: E402
 import evaluate_investment_shadow as shadow_eval  # noqa: E402
 import run_investment_daily_shadow as daily_shadow  # noqa: E402
+import run_investment_shadow_variants as shadow_variants  # noqa: E402
+import build_chinese_daily_close_report as close_report  # noqa: E402
 import build_investment_evidence_ledger as evidence_ledger  # noqa: E402
 import build_investment_calibration_scorecard as calibration_scorecard  # noqa: E402
 
@@ -173,6 +175,92 @@ forbid_edge_gate_reduction = true
             "selection_source_theme": "growth",
             "selection_reason": "test selection reason",
         }
+
+    def shadow_variant_ranking(self, date="2026-04-01", session="close"):
+        row = {
+            "symbol": "AAA.HK",
+            "name": "AAA",
+            "kind": "stock",
+            "theme": "growth",
+            "score": 80.0,
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "latest_close": 10.0,
+            "range_pos_60": 0.5,
+            "pct_change_1d": 1.0,
+            "volume_ratio_20": 1.2,
+            "same_theme_peer_evidence_passed": True,
+            "qualification_flags": [],
+            "disqualifiers": [],
+            "action_disqualifiers": [],
+            "expected_edge_bps": 160.0,
+            "net_expected_edge_bps": 125.0,
+        }
+        return {
+            "snapshot": "data/snapshots/test.json",
+            "as_of_date": date,
+            "as_of_session": session,
+            "session": session,
+            "thresholds": {"actionable_top_n": 1, "diagnostic_top_n": 1},
+            "actionable_candidates": [dict(row)],
+            "diagnostic_candidates": [dict(row)],
+            "top_candidates": [dict(row)],
+            "all_ranked": [dict(row)],
+        }
+
+    def write_close_report_fixture(
+        self,
+        tmp_path,
+        date="2026-04-27",
+        calls_update=None,
+        risk=None,
+        ranking=None,
+        evidence=None,
+        calibration=None,
+        forward=None,
+        variants=None,
+    ):
+        paths = {
+            "calls": tmp_path / "calls.json",
+            "ranking": tmp_path / "ranking.json",
+            "risk": tmp_path / "risk.json",
+            "evidence": tmp_path / "evidence.json",
+            "calibration": tmp_path / "calibration.json",
+            "forward": tmp_path / "forward.json",
+            "variants": tmp_path / "variants.json",
+            "output": tmp_path / "reports",
+        }
+        calls = {"date": date, "session": "close", "recommendations": [self.valid_call("AAA.HK", "buy_candidate")]}
+        if calls_update:
+            calls.update(calls_update)
+        fixtures = {
+            paths["calls"]: calls,
+            paths["ranking"]: ranking if ranking is not None else {"as_of_date": date, "actionable_candidates": [], "diagnostic_candidates": [], "top_candidates": []},
+            paths["risk"]: risk if risk is not None else {"verdicts": [{"symbol": "AAA.HK", "final_state_cap": "buy_candidate", "risk_decision": "pass"}]},
+            paths["evidence"]: evidence if evidence is not None else {"as_of_date": date, "summary": {"forward_shadow_log_count": 1}},
+            paths["calibration"]: calibration if calibration is not None else {"as_of_date": date, "summary": {"combined_record_count": 1}, "scorecard": {}},
+            paths["forward"]: forward if forward is not None else {"thresholds": {"as_of_date": date}, "summary": {"sample_count": 1}},
+            paths["variants"]: variants if variants is not None else {"as_of_date": date, "competition_id": "test_competition", "scoreboard": []},
+        }
+        for path, payload in fixtures.items():
+            path.write_text(json.dumps(payload), encoding="utf-8")
+        return paths
+
+    def build_close_report_from_fixture(self, paths, date="2026-04-27"):
+        return close_report.build_report(
+            date,
+            "close",
+            paths["calls"],
+            paths["ranking"],
+            paths["risk"],
+            paths["evidence"],
+            paths["calibration"],
+            paths["forward"],
+            paths["variants"],
+            paths["output"],
+        )
 
     def test_tencent_symbol_mapping_supports_hk_and_a_shares(self):
         self.assertEqual(fetch_data.to_tencent_symbol("0700.HK"), "hk00700")
@@ -1534,6 +1622,190 @@ forbid_edge_gate_reduction = true
             self.assertEqual(result["summary"]["sample_count"], 0)
             self.assertEqual(result["skipped_logs"][0]["reason"], "shadow_date_after_as_of")
 
+    def test_shadow_variant_config_validates_default_and_rejects_bad_variants(self):
+        default = shadow_variants.load_variant_config(ROOT / "config" / "shadow_variants.toml")
+        self.assertEqual(default["competition_id"], "shadow_gate_variants_v1")
+        self.assertGreaterEqual(len(default["variants"]), 1)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            duplicate = tmp_path / "duplicate.toml"
+            duplicate.write_text(
+                """
+competition_id = "test_competition"
+
+[[variant]]
+id = "dup"
+risk_filter = "off"
+exit_rule = "daily_close_stop"
+stop_loss_pct = -4.0
+
+[[variant]]
+id = "dup"
+risk_filter = "market_stall"
+exit_rule = "daily_close_stop"
+stop_loss_pct = -4.0
+""".lstrip(),
+                encoding="utf-8",
+            )
+            invalid_risk = tmp_path / "invalid-risk.toml"
+            invalid_risk.write_text(
+                """
+[[variant]]
+id = "bad_risk"
+risk_filter = "not_a_filter"
+exit_rule = "daily_close_stop"
+stop_loss_pct = -4.0
+""".lstrip(),
+                encoding="utf-8",
+            )
+            positive_stop = tmp_path / "positive-stop.toml"
+            positive_stop.write_text(
+                """
+[[variant]]
+id = "bad_stop"
+risk_filter = "off"
+exit_rule = "daily_close_stop"
+stop_loss_pct = 1.0
+""".lstrip(),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "duplicate variant ids"):
+                shadow_variants.load_variant_config(duplicate)
+            with self.assertRaisesRegex(ValueError, "invalid risk_filter"):
+                shadow_variants.load_variant_config(invalid_risk)
+            with self.assertRaisesRegex(ValueError, "stop_loss_pct must be negative"):
+                shadow_variants.load_variant_config(positive_stop)
+
+    def test_shadow_variant_competition_writes_logs_without_mutating_ranking(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            config = tmp_path / "shadow_variants.toml"
+            config.write_text(
+                """
+enabled = true
+competition_id = "test_competition"
+
+[[variant]]
+id = "baseline"
+label = "Baseline"
+risk_filter = "off"
+exit_rule = "daily_close_stop"
+stop_loss_pct = -4.0
+horizon_days = 14
+
+[[variant]]
+id = "market_stall"
+label = "Market stall"
+risk_filter = "market_stall"
+exit_rule = "daily_close_stop"
+stop_loss_pct = -4.0
+horizon_days = 14
+""".lstrip(),
+                encoding="utf-8",
+            )
+            ranking_path = tmp_path / "ranking.json"
+            ranking_path.write_text(json.dumps(self.shadow_variant_ranking()), encoding="utf-8")
+            before = ranking_path.read_bytes()
+            snapshot_path = tmp_path / "snapshot.json"
+            snapshot_path.write_text(json.dumps({"as_of_date": "2026-04-01", "items": []}), encoding="utf-8")
+            registry = tmp_path / "registry.json"
+            registry.write_text(json.dumps({"entries": []}), encoding="utf-8")
+            output_dir = tmp_path / "research" / "shadow_variants"
+
+            result = shadow_variants.run_competition(
+                config,
+                ranking_path,
+                snapshot_path,
+                registry,
+                output_dir,
+                None,
+                None,
+                "forward_shadow",
+                call_eval.parse_date("2026-04-01"),
+                0,
+            )
+
+            logs_dir = output_dir / "test_competition" / "logs"
+            log_files = sorted(logs_dir.glob("*-shadow.json"))
+            self.assertEqual(len(log_files), 2)
+            self.assertEqual(len(result["written_logs"]), 2)
+            self.assertEqual(result["policy"]["mode"], "shadow_variant_competition")
+            self.assertTrue(result["policy"]["no_execution"])
+            self.assertTrue(result["policy"]["no_portfolio_mutation"])
+            self.assertTrue(result["policy"]["production_ranking_unchanged"])
+            self.assertFalse(result["policy"]["counts_toward_forward_evidence"])
+            self.assertEqual(ranking_path.read_bytes(), before)
+            for path in log_files:
+                self.assertEqual(path.parent, logs_dir)
+                payload = json.loads(path.read_text(encoding="utf-8"))
+                policy = payload["shadow_policy"]
+                self.assertEqual(payload["mode"], "shadow_variant_competition")
+                self.assertTrue(policy["no_execution"])
+                self.assertTrue(policy["no_portfolio_mutation"])
+                self.assertTrue(policy["production_ranking_unchanged"])
+                self.assertFalse(payload["counts_toward_forward_evidence"])
+                self.assertFalse(policy["counts_toward_forward_evidence"])
+
+    def test_shadow_evaluator_normal_directory_ignores_variant_logs_elsewhere(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            shadow_dir = tmp_path / "research" / "shadow"
+            shadow_dir.mkdir(parents=True)
+            variant_dir = tmp_path / "research" / "shadow_variants" / "competition" / "logs"
+            variant_dir.mkdir(parents=True)
+            normal_log = {"date": "2026-04-01", "session": "close", "mode": "shadow_logging", "shadow_actionable_candidates": []}
+            variant_log = {"date": "2026-04-01", "session": "close", "mode": "shadow_variant_competition", "shadow_actionable_candidates": []}
+            (shadow_dir / "2026-04-01-close-shadow.json").write_text(json.dumps(normal_log), encoding="utf-8")
+            (variant_dir / "2026-04-01-close-v1-shadow.json").write_text(json.dumps(variant_log), encoding="utf-8")
+
+            logs = shadow_eval.load_shadow_logs(shadow_dir)
+
+            self.assertEqual(len(logs), 1)
+            self.assertEqual(logs[0][0].parent, shadow_dir)
+            self.assertEqual(logs[0][1]["mode"], "shadow_logging")
+
+    def test_shadow_variant_scoreboard_respects_as_of_date(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            registry = tmp_path / "registry.json"
+            registry.write_text(json.dumps({"entries": []}), encoding="utf-8")
+
+            def variant_log(date):
+                return {
+                    "date": date,
+                    "session": "close",
+                    "mode": "shadow_variant_competition",
+                    "evidence_mode": "forward_shadow",
+                    "shadow_policy": {
+                        "variant_id": "v1",
+                        "variant_label": "Variant 1",
+                        "competition_id": "test_competition",
+                        "risk_filter": "off",
+                        "exit_rule": "daily_close_stop",
+                        "stop_loss_pct": -4.0,
+                        "horizon_days": 14,
+                        "no_execution": True,
+                        "no_portfolio_mutation": True,
+                        "production_ranking_unchanged": True,
+                    },
+                    "shadow_actionable_candidates": [],
+                }
+
+            logs = [
+                (tmp_path / "2026-04-01-close-v1-shadow.json", variant_log("2026-04-01")),
+                (tmp_path / "2026-05-01-close-v1-shadow.json", variant_log("2026-05-01")),
+            ]
+
+            scoreboard, skipped = shadow_variants.summarize_variant_logs(logs, registry, call_eval.parse_date("2026-04-10"), 0)
+
+            self.assertEqual(len(scoreboard), 1)
+            self.assertEqual(scoreboard[0]["variant_id"], "v1")
+            self.assertEqual(scoreboard[0]["log_count"], 1)
+            self.assertEqual(scoreboard[0]["forward_like_log_count"], 1)
+            self.assertTrue(any(item["reason"] == "shadow_date_after_as_of" for item in skipped))
+
     def test_evidence_ledger_audits_forward_shadow_sources_and_excludes_replay_candidates(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = pathlib.Path(tmp)
@@ -1698,11 +1970,13 @@ forbid_edge_gate_reduction = true
                 runner=fake_runner,
             )
 
-            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "rank_universe", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard"])
+            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "rank_universe", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard", "run_shadow_variants"])
             self.assertTrue(all(command[0] == "python" for _, command, *_ in calls))
             self.assertFalse(any("bash" in part.lower() for _, command, *_ in calls for part in command))
             shadow_command = next(command for name, command, *_ in calls if name == "log_shadow")
             self.assertEqual(shadow_command[shadow_command.index("--evidence-mode") + 1], "forward_shadow")
+            eval_command = next(command for name, command, *_ in calls if name == "evaluate_shadow")
+            self.assertEqual(eval_command[eval_command.index("--as-of-date") + 1], "2026-04-27")
             ledger_command = next(command for name, command, *_ in calls if name == "build_evidence_ledger")
             self.assertEqual(ledger_command[ledger_command.index("--as-of-date") + 1], "2026-04-27")
             scorecard_command = next(command for name, command, *_ in calls if name == "build_calibration_scorecard")
@@ -1711,7 +1985,70 @@ forbid_edge_gate_reduction = true
             rank_command = next(command for name, command, *_ in calls if name == "rank_universe")
             self.assertEqual(rank_command[rank_command.index("--actionable-top-n") + 1], "2")
             self.assertEqual(rank_command[rank_command.index("--diagnostic-top-n") + 1], "3")
+            variant_command = next(command for name, command, *_ in calls if name == "run_shadow_variants")
+            self.assertEqual(variant_command[variant_command.index("--evidence-mode") + 1], "forward_shadow")
+            self.assertEqual(variant_command[variant_command.index("--as-of-date") + 1], "2026-04-27")
             self.assertEqual(summary["paths"]["ranking"], str(tmp_path.resolve() / "research" / "rankings" / "2026-04-27-close-ranking.json"))
+
+    def test_daily_shadow_runner_plans_close_report_for_close_dry_run(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_daily_shadow_configs(tmp_path)
+            (tmp_path / "config" / "shadow_variants.toml").write_text('competition_id = "custom_competition"\n', encoding="utf-8")
+            calls = []
+
+            def fake_runner(name, command, cwd, check=True):
+                calls.append((name, [str(part) for part in command], cwd, check))
+                return 0
+
+            summary = daily_shadow.run_pipeline(
+                daily_shadow.DailyShadowOptions(
+                    root=tmp_path,
+                    python_bin="python",
+                    date="2026-04-27",
+                    session="close",
+                    dry_run=True,
+                ),
+                runner=fake_runner,
+            )
+
+            names = [step["name"] for step in summary["steps"]]
+            self.assertIn("run_shadow_variants", names)
+            self.assertIn("build_chinese_close_report", names)
+            report_command = next(step["command"] for step in summary["steps"] if step["name"] == "build_chinese_close_report")
+            self.assertEqual(report_command[report_command.index("--session") + 1], "close")
+            variant_path = report_command[report_command.index("--variant-competition") + 1]
+            self.assertEqual(variant_path, str(tmp_path.resolve() / "research" / "shadow_variants" / "custom_competition" / "latest_variant_competition.json"))
+            self.assertNotIn("shadow_gate_variants_v1", variant_path)
+            self.assertEqual(calls, [])
+
+    def test_daily_shadow_runner_skip_options_omit_variants_and_close_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_daily_shadow_configs(tmp_path)
+            calls = []
+
+            def fake_runner(name, command, cwd, check=True):
+                calls.append((name, [str(part) for part in command], cwd, check))
+                return 0
+
+            summary = daily_shadow.run_pipeline(
+                daily_shadow.DailyShadowOptions(
+                    root=tmp_path,
+                    python_bin="python",
+                    date="2026-04-27",
+                    session="close",
+                    run_variant_competition=False,
+                    build_close_report=False,
+                    dry_run=True,
+                ),
+                runner=fake_runner,
+            )
+
+            names = [step["name"] for step in summary["steps"]]
+            self.assertNotIn("run_shadow_variants", names)
+            self.assertNotIn("build_chinese_close_report", names)
+            self.assertEqual(calls, [])
 
     def test_daily_shadow_runner_uses_replay_mode_for_historical_session(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2348,6 +2685,141 @@ forbid_edge_gate_reduction = true
         errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"}, draft, {"verdicts": []})
 
         self.assertTrue(any("requires matching deterministic risk verdict" in error for error in errors))
+
+    def test_close_report_requires_close_session_and_renders_chinese_sections(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            calls_path = tmp_path / "calls.json"
+            ranking_path = tmp_path / "ranking.json"
+            risk_path = tmp_path / "risk.json"
+            evidence_path = tmp_path / "evidence.json"
+            calibration_path = tmp_path / "calibration.json"
+            forward_path = tmp_path / "forward.json"
+            variants_path = tmp_path / "variants.json"
+            output_dir = tmp_path / "reports"
+            calls = {
+                "date": "2026-04-27",
+                "session": "close",
+                "recommendations": [
+                    {
+                        **self.valid_call("AAA.HK", "buy_candidate"),
+                        "confidence": 0.72,
+                        "rationale": "量价结构改善",
+                        "risks": ["成交不足", "大市转弱"],
+                        "invalidation": "跌破关键位",
+                    },
+                    {**self.valid_call("BBB.HK", "watch_only"), "theme": "defensive", "confidence": 0.41},
+                    {**self.valid_call("CCC.HK", "avoid"), "theme": "weak", "confidence": 0.2},
+                ],
+            }
+            ranking = {
+                "actionable_candidates": [{"symbol": "ZZZ.HK"}],
+                "diagnostic_candidates": [{"symbol": "AAA.HK"}],
+                "top_candidates": [
+                    {"symbol": "AAA.HK", "score": 80, "qualified_for_action": True, "qualified_for_watch": True, "disqualifiers": []},
+                    {"symbol": "DDD.HK", "score": 40, "qualified_for_action": False, "qualified_for_watch": True, "disqualifiers": ["cost_gate_failed"]},
+                ],
+            }
+            risk = {
+                "verdicts": [
+                    {"symbol": "AAA.HK", "final_state_cap": "buy_candidate", "risk_decision": "pass"},
+                    {"symbol": "BBB.HK", "final_state_cap": "watch_only", "risk_decision": "pass"},
+                    {"symbol": "CCC.HK", "final_state_cap": "avoid", "risk_decision": "pass"},
+                ]
+            }
+            evidence = {"summary": {"forward_shadow_log_count": 3}, "shadow_evaluation_summary": {"matured_forward_shadow_days": 2}, "audit_passed": True}
+            calibration = {"summary": {"combined_record_count": 5}, "scorecard": {"scored_sample_count": 4, "hit_rate": 0.5, "brier_score": 0.2, "calibration_error": 0.1}}
+            forward = {"summary": {"sample_count": 4}}
+            variants = {"competition_id": "test_competition", "scoreboard": [{"diagnostic_rank": 1, "variant_id": "baseline", "sample_count": 2, "avg_net_return_pct": 1.2, "avg_alpha_pct": 0.5, "no_execution_audit_passed": True}]}
+            fixtures = [
+                (calls_path, calls),
+                (ranking_path, ranking),
+                (risk_path, risk),
+                (evidence_path, evidence),
+                (calibration_path, calibration),
+                (forward_path, forward),
+                (variants_path, variants),
+            ]
+            for path, payload in fixtures:
+                path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+            result = close_report.build_report(
+                "2026-04-27",
+                "close",
+                calls_path,
+                ranking_path,
+                risk_path,
+                evidence_path,
+                calibration_path,
+                forward_path,
+                variants_path,
+                output_dir,
+            )
+
+            payload = result["payload"]
+            markdown = pathlib.Path(result["markdown"]).read_text(encoding="utf-8")
+            for section in ["今日结论", "重点标的表", "Gate 拒绝与观察重点", "影子证据与校准", "Shadow 变体竞赛", "研究声明"]:
+                self.assertIn(section, markdown)
+            self.assertTrue(payload["research_only"])
+            self.assertTrue(payload["no_execution"])
+            self.assertEqual(payload["source_of_truth"], "calls_json_with_risk_review_caps")
+            self.assertEqual([row["symbol"] for row in payload["recommendations"]], ["AAA.HK", "BBB.HK", "CCC.HK"])
+            self.assertNotEqual([row["symbol"] for row in payload["recommendations"]], ["ZZZ.HK"])
+            self.assertEqual(payload["variants"]["scoreboard"][0]["variant_id"], "baseline")
+
+            morning_calls = tmp_path / "morning-calls.json"
+            morning_calls.write_text(json.dumps({**calls, "session": "morning"}, ensure_ascii=False), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "requires session=close"):
+                close_report.build_report(
+                    "2026-04-27",
+                    "morning",
+                    morning_calls,
+                    ranking_path,
+                    risk_path,
+                    evidence_path,
+                    calibration_path,
+                    forward_path,
+                    variants_path,
+                    output_dir,
+                )
+
+    def test_close_report_rejects_calls_date_mismatch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = self.write_close_report_fixture(pathlib.Path(tmp), calls_update={"date": "2026-04-28"})
+
+            with self.assertRaisesRegex(ValueError, "calls date must match report date"):
+                self.build_close_report_from_fixture(paths)
+
+    def test_close_report_rejects_future_artifacts(self):
+        cases = [
+            {"evidence": {"as_of_date": "2026-04-28", "summary": {}}},
+            {"calibration": {"as_of_date": "2026-04-28", "summary": {}, "scorecard": {}}},
+            {"forward": {"thresholds": {"as_of_date": "2026-04-28"}, "summary": {}}},
+            {"variants": {"as_of_date": "2026-04-28", "competition_id": "test_competition", "scoreboard": []}},
+            {"variants": {"date": "2026-04-28", "competition_id": "test_competition", "scoreboard": []}},
+        ]
+
+        for overrides in cases:
+            with self.subTest(overrides=overrides):
+                with tempfile.TemporaryDirectory() as tmp:
+                    paths = self.write_close_report_fixture(pathlib.Path(tmp), **overrides)
+
+                    with self.assertRaisesRegex(ValueError, "after report date"):
+                        self.build_close_report_from_fixture(paths)
+
+    def test_close_report_enforces_risk_review_verdict_caps(self):
+        cases = [
+            ({"verdicts": [{"symbol": "AAA.HK", "final_state_cap": "watch_only", "risk_decision": "cap"}]}, "exceeds risk review cap"),
+            ({"verdicts": []}, "missing risk review verdict"),
+        ]
+
+        for risk, message in cases:
+            with self.subTest(message=message):
+                with tempfile.TemporaryDirectory() as tmp:
+                    paths = self.write_close_report_fixture(pathlib.Path(tmp), risk=risk)
+
+                    with self.assertRaisesRegex(ValueError, message):
+                        self.build_close_report_from_fixture(paths)
 
     def test_calls_validator_rejects_watch_state_above_avoid_risk_cap(self):
         row = {

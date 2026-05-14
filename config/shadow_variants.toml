@@ -1,0 +1,30 @@
+# Shadow-only variant competition. These variants never mutate the active
+# strategy and never count toward production readiness gates.
+
+enabled = true
+competition_id = "shadow_gate_variants_v1"
+min_forward_shadow_days = 20
+
+[[variant]]
+id = "baseline_shadow"
+label = "Baseline shadow policy"
+risk_filter = "combined_heat_mid_range_market_stall"
+exit_rule = "daily_close_stop"
+stop_loss_pct = -4.0
+horizon_days = 14
+
+[[variant]]
+id = "no_heat_filter"
+label = "No heat filter diagnostic"
+risk_filter = "off"
+exit_rule = "daily_close_stop"
+stop_loss_pct = -4.0
+horizon_days = 14
+
+[[variant]]
+id = "tighter_stop"
+label = "Tighter daily stop diagnostic"
+risk_filter = "combined_heat_mid_range_market_stall"
+exit_rule = "daily_close_stop"
+stop_loss_pct = -3.0
+horizon_days = 14

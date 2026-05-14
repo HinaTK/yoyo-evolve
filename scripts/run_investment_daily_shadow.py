@@ -27,6 +27,11 @@ def read_toml(path: pathlib.Path) -> dict[str, Any]:
         return tomllib.load(fh)
 
 
+def shadow_variant_competition_id(root: pathlib.Path) -> str:
+    config = read_toml(root / "config" / "shadow_variants.toml")
+    return str(config.get("competition_id") or "shadow_variants")
+
+
 def resolve_path(root: pathlib.Path, value: str | pathlib.Path | None) -> pathlib.Path | None:
     if value is None or str(value) == "":
         return None
@@ -36,6 +41,10 @@ def resolve_path(root: pathlib.Path, value: str | pathlib.Path | None) -> pathli
 
 def output_stem(date: str, session: str) -> str:
     return date if session == "historical" else f"{date}-{session}"
+
+
+def close_report_stem(date: str, session: str) -> str:
+    return date if session in {"close", "historical"} else f"{date}-{session}"
 
 
 def default_snapshot_file(root: pathlib.Path, date: str, session: str) -> pathlib.Path:
@@ -146,6 +155,10 @@ class DailyShadowOptions:
     evaluate_shadow: bool = True
     build_evidence_ledger: bool = True
     build_calibration_scorecard: bool = True
+    run_variant_competition: bool = True
+    build_close_report: bool = True
+    calls_file: pathlib.Path | None = None
+    risk_review_file: pathlib.Path | None = None
     include_replay: bool = False
     min_forward_shadow_days: int = 20
     summary_output: pathlib.Path | None = None
@@ -158,6 +171,8 @@ def ensure_directories(root: pathlib.Path) -> None:
         "research/rankings",
         "research/experiments",
         "research/shadow",
+        "research/shadow_variants",
+        "research/products/daily_close",
     ]:
         (root / relative).mkdir(parents=True, exist_ok=True)
 
@@ -173,6 +188,8 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
     radar_snapshot_file = resolve_path(root, options.radar_snapshot_file) or default_radar_snapshot_file(root, options.date, options.session, snapshot_file)
     ranking_file = resolve_path(root, options.ranking_file) or root / "research" / "rankings" / f"{stem}-ranking.json"
     shadow_file = resolve_path(root, options.shadow_file) or root / "research" / "shadow" / f"{stem}-shadow.json"
+    calls_file = resolve_path(root, options.calls_file) or root / "research" / "calls" / f"{stem}-calls.json"
+    risk_review_file = resolve_path(root, options.risk_review_file) or root / "research" / "risk" / f"{stem}-risk-review.json"
     evidence_mode = options.evidence_mode or default_evidence_mode(options.session)
     if evidence_mode not in {"forward_shadow", "historical_replay"}:
         raise SystemExit("evidence_mode must be forward_shadow or historical_replay")
@@ -308,6 +325,8 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             str(round_trip_bps),
             "--min-forward-shadow-days",
             str(options.min_forward_shadow_days),
+            "--as-of-date",
+            options.date,
         ]
         if options.include_replay:
             eval_command.append("--include-replay")
@@ -353,6 +372,66 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             ],
         )
 
+    variant_competition_id = shadow_variant_competition_id(root)
+    variant_competition_file = root / "research" / "shadow_variants" / variant_competition_id / "latest_variant_competition.json"
+    if options.run_variant_competition:
+        call(
+            "run_shadow_variants",
+            [
+                options.python_bin,
+                script_path(root, "run_investment_shadow_variants.py"),
+                "--config",
+                root / "config" / "shadow_variants.toml",
+                "--ranking",
+                ranking_file,
+                "--snapshot",
+                snapshot_file,
+                "--registry",
+                registry_file,
+                "--output-dir",
+                root / "research" / "shadow_variants",
+                "--date",
+                options.date,
+                "--session",
+                options.session,
+                "--evidence-mode",
+                evidence_mode,
+                "--as-of-date",
+                options.date,
+                "--round-trip-bps",
+                str(round_trip_bps),
+            ],
+        )
+
+    if options.build_close_report and options.session == "close" and (options.dry_run or calls_file.exists()):
+        call(
+            "build_chinese_close_report",
+            [
+                options.python_bin,
+                script_path(root, "build_chinese_daily_close_report.py"),
+                "--date",
+                options.date,
+                "--session",
+                options.session,
+                "--calls",
+                calls_file,
+                "--ranking",
+                ranking_file,
+                "--risk-review",
+                risk_review_file,
+                "--evidence-ledger",
+                root / "research" / "shadow" / "latest_evidence_ledger.json",
+                "--calibration-scorecard",
+                root / "research" / "evaluations" / "latest_calibration_scorecard.json",
+                "--forward-evaluation",
+                root / "research" / "shadow" / "latest_forward_evaluation.json",
+                "--variant-competition",
+                variant_competition_file,
+                "--output-dir",
+                root / "research" / "products" / "daily_close",
+            ],
+        )
+
     summary = {
         "generated_at": utc_now(),
         "date": options.date,
@@ -365,6 +444,8 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             "registry": str(registry_file),
             "ranking": str(ranking_file),
             "shadow": str(shadow_file),
+            "shadow_variants": str(root / "research" / "shadow_variants"),
+            "close_report": str(root / "research" / "products" / "daily_close" / f"{close_report_stem(options.date, options.session)}-close-report.md"),
             "symbol_risk_memory": str(symbol_risk_file),
         },
         "steps": steps,
@@ -395,6 +476,10 @@ def parse_args() -> DailyShadowOptions:
     parser.add_argument("--skip-evaluation", action="store_true")
     parser.add_argument("--skip-evidence-ledger", action="store_true")
     parser.add_argument("--skip-calibration-scorecard", action="store_true")
+    parser.add_argument("--skip-variant-competition", action="store_true")
+    parser.add_argument("--skip-close-report", action="store_true")
+    parser.add_argument("--calls-file", default=None)
+    parser.add_argument("--risk-review-file", default=None)
     parser.add_argument("--include-replay", action="store_true", help="Diagnostic only: include historical replay logs in the shadow evaluation output.")
     parser.add_argument("--min-forward-shadow-days", type=int, default=20)
     parser.add_argument("--summary-output", default=None)
@@ -420,6 +505,10 @@ def parse_args() -> DailyShadowOptions:
         evaluate_shadow=not args.skip_evaluation,
         build_evidence_ledger=not args.skip_evidence_ledger,
         build_calibration_scorecard=not args.skip_calibration_scorecard,
+        run_variant_competition=not args.skip_variant_competition,
+        build_close_report=not args.skip_close_report,
+        calls_file=resolve_path(root, args.calls_file),
+        risk_review_file=resolve_path(root, args.risk_review_file),
         include_replay=args.include_replay,
         min_forward_shadow_days=args.min_forward_shadow_days,
         summary_output=resolve_path(root, args.summary_output),
