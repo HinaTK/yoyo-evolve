@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "generated_at": "2026-05-06T10:53:30Z",
-    "as_of_date": "2026-05-06",
+    "generated_at": "2026-05-13T09:10:31Z",
+    "as_of_date": "2026-05-13",
     "as_of_limited": false,
     "source_count": 3,
     "method": "records_plus_summary_backtest_mvp"
@@ -19,17 +19,28 @@
       ],
       "action_veto": false
     },
+    "000333.SZ": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 2 of 17 promotable samples"
+      ],
+      "action_veto": true
+    },
     "0005.HK": {
       "tags": [
         "low_symbol_pass_rate",
-        "negative_symbol_avg_return"
+        "negative_symbol_avg_return",
+        "backtest_adverse_breach"
       ],
       "reasons": [
         "pass_rate=0.000 over 6 evaluated calls",
         "avg_return_pct=-1.649 over 6 evaluated calls",
-        "records_avg_return_pct=-1.649 over 6 records"
+        "records_avg_return_pct=-1.649 over 6 records",
+        "backtest_max_adverse_pct<=-8.0% in 4 of 34 promotable samples"
       ],
-      "action_veto": false
+      "action_veto": true
     },
     "0006.HK": {
       "tags": [
@@ -44,14 +55,34 @@
       ],
       "action_veto": false
     },
-    "0388.HK": {
+    "002594.SZ": {
       "tags": [
-        "low_symbol_pass_rate"
+        "backtest_adverse_breach"
       ],
       "reasons": [
-        "pass_rate=0.000 over 4 evaluated calls"
+        "backtest_max_adverse_pct<=-8.0% in 3 of 27 promotable samples"
       ],
-      "action_veto": false
+      "action_veto": true
+    },
+    "0386.HK": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 2 of 17 promotable samples"
+      ],
+      "action_veto": true
+    },
+    "0388.HK": {
+      "tags": [
+        "low_symbol_pass_rate",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "pass_rate=0.000 over 4 evaluated calls",
+        "backtest_max_adverse_pct<=-8.0% in 2 of 4 promotable samples"
+      ],
+      "action_veto": true
     },
     "0700.HK": {
       "tags": [
@@ -71,13 +102,15 @@
     "0728.HK": {
       "tags": [
         "low_symbol_pass_rate",
-        "negative_symbol_avg_return"
+        "negative_symbol_avg_return",
+        "backtest_adverse_breach"
       ],
       "reasons": [
         "pass_rate=0.000 over 2 evaluated calls",
-        "avg_return_pct=-0.378 over 2 evaluated calls"
+        "avg_return_pct=-0.378 over 2 evaluated calls",
+        "backtest_max_adverse_pct<=-8.0% in 2 of 26 promotable samples"
       ],
-      "action_veto": false
+      "action_veto": true
     },
     "0857.HK": {
       "tags": [
@@ -94,15 +127,17 @@
       "tags": [
         "low_symbol_pass_rate",
         "negative_symbol_avg_return",
-        "repeated_symbol_selection_error"
+        "repeated_symbol_selection_error",
+        "backtest_adverse_breach"
       ],
       "reasons": [
         "pass_rate=0.000 over 5 evaluated calls",
         "avg_return_pct=-0.352 over 5 evaluated calls",
         "records_avg_return_pct=-0.352 over 5 records",
-        "records include symbol_selection_error"
+        "records include symbol_selection_error",
+        "backtest_max_adverse_pct<=-8.0% in 2 of 30 promotable samples"
       ],
-      "action_veto": false
+      "action_veto": true
     },
     "0941.HK": {
       "tags": [
@@ -128,14 +163,16 @@
     "1093.HK": {
       "tags": [
         "low_symbol_pass_rate",
-        "negative_symbol_avg_return"
+        "negative_symbol_avg_return",
+        "backtest_adverse_breach"
       ],
       "reasons": [
         "pass_rate=0.000 over 6 evaluated calls",
         "avg_return_pct=-0.179 over 6 evaluated calls",
-        "records_avg_return_pct=-0.179 over 6 records"
+        "records_avg_return_pct=-0.179 over 6 records",
+        "backtest_max_adverse_pct<=-8.0% in 6 of 15 promotable samples"
       ],
-      "action_veto": false
+      "action_veto": true
     },
     "1177.HK": {
       "tags": [
@@ -151,23 +188,27 @@
     },
     "1299.HK": {
       "tags": [
-        "low_symbol_pass_rate"
+        "low_symbol_pass_rate",
+        "backtest_adverse_breach"
       ],
       "reasons": [
-        "pass_rate=0.000 over 2 evaluated calls"
+        "pass_rate=0.000 over 2 evaluated calls",
+        "backtest_max_adverse_pct<=-8.0% in 2 of 10 promotable samples"
       ],
-      "action_veto": false
+      "action_veto": true
     },
     "1810.HK": {
       "tags": [
         "low_symbol_pass_rate",
-        "recent_symbol_adverse_breach"
+        "recent_symbol_adverse_breach",
+        "backtest_adverse_breach"
       ],
       "reasons": [
         "pass_rate=0.211 over 109 evaluated calls",
-        "record return breached -8.0% adverse threshold"
+        "record return breached -8.0% adverse threshold",
+        "backtest_max_adverse_pct<=-8.0% in 2 of 18 promotable samples"
       ],
-      "action_veto": false
+      "action_veto": true
     },
     "2020.HK": {
       "tags": [
@@ -181,6 +222,24 @@
         "records include symbol_selection_error"
       ],
       "action_veto": false
+    },
+    "2269.HK": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 2 of 8 promotable samples"
+      ],
+      "action_veto": true
+    },
+    "2331.HK": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 2 of 8 promotable samples"
+      ],
+      "action_veto": true
     },
     "2800.HK": {
       "tags": [
@@ -205,14 +264,88 @@
     "3067.HK": {
       "tags": [
         "low_symbol_pass_rate",
-        "repeated_symbol_selection_error"
+        "repeated_symbol_selection_error",
+        "backtest_adverse_breach"
       ],
       "reasons": [
         "pass_rate=0.102 over 108 evaluated calls",
         "records_pass_rate=0.224 over 49 decisive records",
-        "records include symbol_selection_error"
+        "records include symbol_selection_error",
+        "backtest_max_adverse_pct<=-8.0% in 1 of 4 promotable samples"
       ],
-      "action_veto": false
+      "action_veto": true
+    },
+    "3690.HK": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 2 of 4 promotable samples"
+      ],
+      "action_veto": true
+    },
+    "512480.SH": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 1 of 8 promotable samples"
+      ],
+      "action_veto": true
+    },
+    "600030.SH": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 1 of 7 promotable samples"
+      ],
+      "action_veto": true
+    },
+    "600276.SH": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 1 of 14 promotable samples"
+      ],
+      "action_veto": true
+    },
+    "601088.SH": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 2 of 27 promotable samples"
+      ],
+      "action_veto": true
+    },
+    "601899.SH": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 4 of 25 promotable samples"
+      ],
+      "action_veto": true
+    },
+    "6862.HK": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 2 of 13 promotable samples"
+      ],
+      "action_veto": true
+    },
+    "688981.SH": {
+      "tags": [
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 6 of 19 promotable samples"
+      ],
+      "action_veto": true
     },
     "9618.HK": {
       "tags": [
@@ -244,7 +377,7 @@
         "backtest_adverse_breach"
       ],
       "reasons": [
-        "backtest_max_adverse_pct<=-8.0% in 2 of 3 promotable samples"
+        "backtest_max_adverse_pct<=-8.0% in 8 of 30 promotable samples"
       ],
       "action_veto": true
     }

@@ -1,0 +1,1027 @@
+{
+  "generated_at": "2026-05-14T02:02:24Z",
+  "shadow_dir": "D:\\Code\\yoyo\\research\\shadow",
+  "registry": "D:\\Code\\yoyo\\data\\snapshots\\registry.json",
+  "include_replay": false,
+  "as_of_date": "2026-05-13",
+  "audit_passed": true,
+  "summary": {
+    "shadow_log_count": 23,
+    "forward_shadow_log_count": 3,
+    "historical_replay_log_count": 20,
+    "no_action_log_count": 20,
+    "candidate_entry_count": 0,
+    "matured_candidate_count": 0,
+    "pending_candidate_count": 0,
+    "unmatched_candidate_count": 0,
+    "audit_finding_count": 0,
+    "critical_audit_finding_count": 0
+  },
+  "shadow_evaluation_summary": {
+    "total_shadow_log_count": 23,
+    "forward_shadow_log_count": 3,
+    "historical_replay_log_count": 20,
+    "evaluated_log_count": 3,
+    "matured_forward_shadow_days": 1,
+    "no_action_log_count": 3,
+    "pending_sample_count": 0,
+    "sample_count": 0,
+    "win_rate": null,
+    "avg_net_return_pct": null,
+    "median_net_return_pct": null,
+    "avg_alpha_pct": null,
+    "max_adverse_pct": null,
+    "adverse_breach_rate": null,
+    "stop_triggered_rate": null
+  },
+  "shadow_evaluation_gate": {
+    "passed": false,
+    "findings": [
+      {
+        "metric": "forward_shadow_days",
+        "actual": 3,
+        "expected": ">= 20"
+      },
+      {
+        "metric": "matured_forward_shadow_days",
+        "actual": 1,
+        "expected": ">= 20"
+      },
+      {
+        "metric": "forward_sample_count",
+        "actual": 0,
+        "expected": "> 0"
+      }
+    ]
+  },
+  "audit_findings": [],
+  "logs": [
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\2026-04-27-morning-shadow.json",
+      "date": "2026-04-27",
+      "session": "morning",
+      "generated_at": "2026-05-11T01:34:49Z",
+      "evidence_mode": "forward_shadow",
+      "counts_toward_forward_evidence": true,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "forward_shadow",
+        "counts_toward_forward_evidence": true
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-04-27-morning-ranking.json",
+          "exists": true,
+          "sha256": "09016f86b95a0b37164a40b8da91c40078c0133141ad5e11f67d71efe2c1b470",
+          "size_bytes": 5597
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-04-27-morning.json",
+          "exists": true,
+          "sha256": "49c4c985680807b187f7b1c849d0c1a86e90a370878d46c9cc3684b521a1c46e",
+          "size_bytes": 7783
+        },
+        "as_of_date": "2026-04-27",
+        "ranking_generated_at": "2026-04-27T06:26:31Z",
+        "strategy_id": null,
+        "strategy_version": null,
+        "strategy_status": null
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\2026-05-12-close-shadow.json",
+      "date": "2026-05-12",
+      "session": "close",
+      "generated_at": "2026-05-12T12:21:11Z",
+      "evidence_mode": "forward_shadow",
+      "counts_toward_forward_evidence": true,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "forward_shadow",
+        "counts_toward_forward_evidence": true
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-12-close-ranking.json",
+          "exists": true,
+          "sha256": "a7be3674475bdc3853541902e455d11ee3d0161c43183946630ca4785ce7e76a",
+          "size_bytes": 161824
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-12.json",
+          "exists": true,
+          "sha256": "0afe2fd9def04032fa04551be66cf51f3b1b61a49ca051f0193df23b0a16d198",
+          "size_bytes": 66661
+        },
+        "as_of_date": "2026-05-12",
+        "ranking_generated_at": "2026-05-12T12:20:59Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\2026-05-13-close-shadow.json",
+      "date": "2026-05-13",
+      "session": "close",
+      "generated_at": "2026-05-13T09:10:31Z",
+      "evidence_mode": "forward_shadow",
+      "counts_toward_forward_evidence": true,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "forward_shadow",
+        "counts_toward_forward_evidence": true
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-13-close-ranking.json",
+          "exists": true,
+          "sha256": "eec3b684e6c69817e3f5ed9717e4ef87dbedb5f3b14a36c9cfda4daa2d58ea3d",
+          "size_bytes": 161681
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-13.json",
+          "exists": true,
+          "sha256": "71850ae649e446910344c5d6a4a523b0afda76c7738d03125bd68e8548329c49",
+          "size_bytes": 66755
+        },
+        "as_of_date": "2026-05-13",
+        "ranking_generated_at": "2026-05-13T09:10:18Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-02-close-shadow.json",
+      "date": "2026-01-02",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-02-ranking.json",
+          "exists": true,
+          "sha256": "acb0907326e783875d53876185b1205a3bfd730b63edefddeea000956ffc6dc1",
+          "size_bytes": 49520
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-02.json",
+          "exists": true,
+          "sha256": "0091efa8f4cb253564cf2926f2f4a8f0eb8f54b4240e72142567a95a1aeb5ce3",
+          "size_bytes": 25174
+        },
+        "as_of_date": "2026-01-02",
+        "ranking_generated_at": "2026-04-29T05:09:32Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-05-close-shadow.json",
+      "date": "2026-01-05",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-05-ranking.json",
+          "exists": true,
+          "sha256": "70f835d0716fdcd6abe114cfc55d3227bed327e4bbbfd099bb8c1eab945e3882",
+          "size_bytes": 49430
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-05.json",
+          "exists": true,
+          "sha256": "fdddd8fc4f1f07164b28f1a8d9f75a59b023c1f0c5596fd5e085e55cb9148329",
+          "size_bytes": 48104
+        },
+        "as_of_date": "2026-01-05",
+        "ranking_generated_at": "2026-04-29T05:31:34Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-06-close-shadow.json",
+      "date": "2026-01-06",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-06-ranking.json",
+          "exists": true,
+          "sha256": "465ad303e1110d4fe2b2f8d6ccba28eab2a3d77a19208f999700a913b51173f8",
+          "size_bytes": 50205
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-06.json",
+          "exists": true,
+          "sha256": "e11b567d7f9714d809b6c820d2300235682d7aa93f12661a9442e5d7d77ef354",
+          "size_bytes": 48004
+        },
+        "as_of_date": "2026-01-06",
+        "ranking_generated_at": "2026-04-29T05:57:23Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-07-close-shadow.json",
+      "date": "2026-01-07",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 1,
+      "status": "has_candidates",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-07-ranking.json",
+          "exists": true,
+          "sha256": "59d907510d65b572eacc8f9bf9eaffff37f76ec24cfa75082c8933d39074a201",
+          "size_bytes": 53651
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-07.json",
+          "exists": true,
+          "sha256": "a63fc8e82c0a750e88f77f7a10d3df80410b62b3796a5aadb1e861528c099959",
+          "size_bytes": 48233
+        },
+        "as_of_date": "2026-01-07",
+        "ranking_generated_at": "2026-04-29T10:10:12Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-08-close-shadow.json",
+      "date": "2026-01-08",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 1,
+      "status": "has_candidates",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-08-ranking.json",
+          "exists": true,
+          "sha256": "4a2fda4232e46df8d85d51ed87d2e6651d2748c4f31c7dbd06739e55de5f8bf6",
+          "size_bytes": 53995
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-08.json",
+          "exists": true,
+          "sha256": "ddf11907f2b4d9d9589138d5b981c0a14e2e2d7a4e7b487d5420313127fc05bc",
+          "size_bytes": 47821
+        },
+        "as_of_date": "2026-01-08",
+        "ranking_generated_at": "2026-04-29T10:37:32Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-09-close-shadow.json",
+      "date": "2026-01-09",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 1,
+      "status": "has_candidates",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-09-ranking.json",
+          "exists": true,
+          "sha256": "38c894c0df20f6df62a479c60a9eff30fc1dcde5b5a3e4407c080a9b000eeda0",
+          "size_bytes": 54939
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-09.json",
+          "exists": true,
+          "sha256": "9407fc5fab8d8baee2802a04cf76fccb9c7d5a2a4540891f73f189010b5ac5c1",
+          "size_bytes": 47827
+        },
+        "as_of_date": "2026-01-09",
+        "ranking_generated_at": "2026-04-29T11:07:46Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-12-close-shadow.json",
+      "date": "2026-01-12",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-12-ranking.json",
+          "exists": true,
+          "sha256": "494d66d6cb2ef7a11b881e5ebe88d7eb440ce3adacad275f31e1d0f05a7ee382",
+          "size_bytes": 52593
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-12.json",
+          "exists": true,
+          "sha256": "5331ce75c1a6dd1dc93b9d0f725d324daa090eb1fc4ed37a4d3fbb8efa8818ef",
+          "size_bytes": 48251
+        },
+        "as_of_date": "2026-01-12",
+        "ranking_generated_at": "2026-04-29T13:25:11Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-13-close-shadow.json",
+      "date": "2026-01-13",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-13-ranking.json",
+          "exists": true,
+          "sha256": "f707a6cdb6fa07569ac047d49cb2e19f2355fa2767ce2e39a7951be581c955cd",
+          "size_bytes": 52467
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-13.json",
+          "exists": true,
+          "sha256": "7658f4bd97c1ef35b8b6c502515aa6d479621a6405fff198570f8af366adbeb6",
+          "size_bytes": 48238
+        },
+        "as_of_date": "2026-01-13",
+        "ranking_generated_at": "2026-04-29T13:55:49Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-14-close-shadow.json",
+      "date": "2026-01-14",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-14-ranking.json",
+          "exists": true,
+          "sha256": "31f24353f13df82aab2081cd27b8fe8f4f57263d736e51d85b9f687a4f19b883",
+          "size_bytes": 52530
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-14.json",
+          "exists": true,
+          "sha256": "e59a5fd498c2cd371b7d5adcb83744408ee58c47cfffff0b9cd86b9df39b6454",
+          "size_bytes": 48471
+        },
+        "as_of_date": "2026-01-14",
+        "ranking_generated_at": "2026-04-29T14:27:10Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-15-close-shadow.json",
+      "date": "2026-01-15",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-15-ranking.json",
+          "exists": true,
+          "sha256": "4956aa96a8c0558f5cdc54825df35b17a079decda1e2b7845b976c8bc6047475",
+          "size_bytes": 52530
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-15.json",
+          "exists": true,
+          "sha256": "81a60bcae32ef0fd7c7643c0b93a21a5cee06a5f97951bde9ce01c39fcf0ee29",
+          "size_bytes": 47607
+        },
+        "as_of_date": "2026-01-15",
+        "ranking_generated_at": "2026-04-29T14:59:08Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-16-close-shadow.json",
+      "date": "2026-01-16",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-16-ranking.json",
+          "exists": true,
+          "sha256": "2712371c542bb71c9dd9a1f72687b37a3b78034df7b8f8ca59fc45595823cec9",
+          "size_bytes": 52592
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-16.json",
+          "exists": true,
+          "sha256": "8f3adb62cab9c0fef5bf3626b0bf876f87d9354d758c9f0ee58d84a77ef73b36",
+          "size_bytes": 47849
+        },
+        "as_of_date": "2026-01-16",
+        "ranking_generated_at": "2026-04-29T15:29:27Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-19-close-shadow.json",
+      "date": "2026-01-19",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-19-ranking.json",
+          "exists": true,
+          "sha256": "3a6873d65d52c084e981fc27abd0edf6d98c4bd7c0cdfa88792aa6ed118c2d70",
+          "size_bytes": 52653
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-19.json",
+          "exists": true,
+          "sha256": "0f4930dde28cf2f51cb3feaa5eb882ed4163ecc1e8cc3df424544bbb68e8fd6e",
+          "size_bytes": 47566
+        },
+        "as_of_date": "2026-01-19",
+        "ranking_generated_at": "2026-04-29T16:00:51Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-20-close-shadow.json",
+      "date": "2026-01-20",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-20-ranking.json",
+          "exists": true,
+          "sha256": "01f98498113e52e94095840b2df1489b07f7d81e4c1bee581b13690c1fc349c4",
+          "size_bytes": 52549
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-20.json",
+          "exists": true,
+          "sha256": "53d0c9e69be8f98eda801f977d8f0362c020fb52385009f25d353e9e386f95c1",
+          "size_bytes": 47668
+        },
+        "as_of_date": "2026-01-20",
+        "ranking_generated_at": "2026-04-29T16:31:16Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-21-close-shadow.json",
+      "date": "2026-01-21",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:29Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-21-ranking.json",
+          "exists": true,
+          "sha256": "61e7643089e994fa9610b0d026672a31933244804c427d303631483fbccb65b3",
+          "size_bytes": 52549
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-21.json",
+          "exists": true,
+          "sha256": "fae9dddd559450f08ab3978f4e8fdb7928283d85561f6fb763002aadb8414bc4",
+          "size_bytes": 47833
+        },
+        "as_of_date": "2026-01-21",
+        "ranking_generated_at": "2026-04-29T17:01:47Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-22-close-shadow.json",
+      "date": "2026-01-22",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:28Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-22-ranking.json",
+          "exists": true,
+          "sha256": "4ff9ff15ccaccc1e20ae4087e0d27414fb3b42f5a80c14721e050e8fcd5179b2",
+          "size_bytes": 52549
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-22.json",
+          "exists": true,
+          "sha256": "783beaf9670d3b603a47416739489ffde5cd8cb8c85489afbe7cd56ebe957006",
+          "size_bytes": 47662
+        },
+        "as_of_date": "2026-01-22",
+        "ranking_generated_at": "2026-04-29T17:31:41Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-23-close-shadow.json",
+      "date": "2026-01-23",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:28Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-23-ranking.json",
+          "exists": true,
+          "sha256": "997dc255e346657d4741b698d2961188405225f19eb731440322c4f5d3a70ad5",
+          "size_bytes": 52349
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-23.json",
+          "exists": true,
+          "sha256": "0d3070f45a814a67b06cf24a59539bf001e6f33332aeb7c18fa20f5b2b41e5ff",
+          "size_bytes": 47692
+        },
+        "as_of_date": "2026-01-23",
+        "ranking_generated_at": "2026-04-29T18:02:28Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-26-close-shadow.json",
+      "date": "2026-01-26",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:28Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-26-ranking.json",
+          "exists": true,
+          "sha256": "cc1221459d7b7a0e351032a3d4a23002c30adf94e288eff2df2b7ae72d230242",
+          "size_bytes": 51132
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-26.json",
+          "exists": true,
+          "sha256": "0f612f1acd75fc77622efa48bde57d4235519e2b5147decf1225f43b17e95dec",
+          "size_bytes": 48081
+        },
+        "as_of_date": "2026-01-26",
+        "ranking_generated_at": "2026-04-30T02:44:28Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-27-close-shadow.json",
+      "date": "2026-01-27",
+      "session": "close",
+      "generated_at": "2026-05-10T15:54:28Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-27-ranking.json",
+          "exists": true,
+          "sha256": "8268541ccef195c0aa5f22f5f40ea98574ac5962b012dd4f181f22c19af3d11b",
+          "size_bytes": 50721
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-01-27.json",
+          "exists": true,
+          "sha256": "c4ed2b0d3edd28447fbe902c111e4e102582a2321a55afdc806cc4ce936bae1d",
+          "size_bytes": 47595
+        },
+        "as_of_date": "2026-01-27",
+        "ranking_generated_at": "2026-04-30T02:50:45Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-01-27-historical-shadow.json",
+      "date": "2026-01-27",
+      "session": "historical",
+      "generated_at": "2026-05-10T15:54:28Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-01-27-historical-ranking.json",
+          "exists": true,
+          "sha256": "42ec2fd9dcf0396b63063e7e0c4c1cf198303ce3e6c9c6f2c8f1083e65a7335e",
+          "size_bytes": 51105
+        },
+        "snapshot": {
+          "path": "data\\snapshots\\2026-01-27.json",
+          "exists": true,
+          "sha256": "c4ed2b0d3edd28447fbe902c111e4e102582a2321a55afdc806cc4ce936bae1d",
+          "size_bytes": 47595
+        },
+        "as_of_date": "2026-01-27",
+        "ranking_generated_at": "2026-04-30T02:46:51Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\replay\\2026-04-27-morning-shadow.json",
+      "date": "2026-04-27",
+      "session": "morning",
+      "generated_at": "2026-05-10T15:54:28Z",
+      "evidence_mode": "historical_replay",
+      "counts_toward_forward_evidence": false,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "historical_replay",
+        "counts_toward_forward_evidence": false
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-04-27-morning-ranking.json",
+          "exists": true,
+          "sha256": "09016f86b95a0b37164a40b8da91c40078c0133141ad5e11f67d71efe2c1b470",
+          "size_bytes": 5597
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-04-27-morning.json",
+          "exists": true,
+          "sha256": "49c4c985680807b187f7b1c849d0c1a86e90a370878d46c9cc3684b521a1c46e",
+          "size_bytes": 7783
+        },
+        "as_of_date": "2026-04-27",
+        "ranking_generated_at": "2026-04-27T06:26:31Z",
+        "strategy_id": null,
+        "strategy_version": null,
+        "strategy_status": null
+      },
+      "audit_findings": []
+    }
+  ],
+  "candidate_entries": []
+}

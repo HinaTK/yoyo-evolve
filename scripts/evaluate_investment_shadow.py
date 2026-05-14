@@ -159,9 +159,12 @@ def build_evaluation(
     round_trip_bps: float = 35.0,
     max_adverse_limit_pct: float = -8.0,
     min_forward_shadow_days: int = 20,
+    as_of_date: dt.date | None = None,
 ) -> dict[str, Any]:
     registry = load_json(registry_path)
     entries = registry_entries(registry, "trade")
+    if as_of_date is not None:
+        entries = [entry for entry in entries if entry.get("_date") <= as_of_date]
     logs = load_shadow_logs(shadow_dir)
     records = []
     pending_records = []
@@ -173,6 +176,16 @@ def build_evaluation(
     matured_log_dates: set[str] = set()
 
     for path, log in logs:
+        date_text = str(log.get("date") or "")
+        try:
+            base_date = parse_date(date_text)
+        except ValueError:
+            skipped_logs.append({"path": str(path), "evidence_mode": log.get("evidence_mode"), "reason": "invalid_shadow_date"})
+            continue
+        if as_of_date is not None and base_date > as_of_date:
+            skipped_logs.append({"path": str(path), "evidence_mode": log.get("evidence_mode"), "reason": "shadow_date_after_as_of"})
+            continue
+
         is_forward = log.get("evidence_mode") == "forward_shadow" and log.get("counts_toward_forward_evidence") is True
         is_replay = log.get("evidence_mode") == "historical_replay"
         if is_forward:
@@ -181,13 +194,6 @@ def build_evaluation(
             replay_log_count += 1
         if not is_forward and not include_replay:
             skipped_logs.append({"path": str(path), "evidence_mode": log.get("evidence_mode"), "reason": "not_forward_shadow"})
-            continue
-
-        date_text = str(log.get("date") or "")
-        try:
-            base_date = parse_date(date_text)
-        except ValueError:
-            skipped_logs.append({"path": str(path), "evidence_mode": log.get("evidence_mode"), "reason": "invalid_shadow_date"})
             continue
         candidates = shadow_candidates(log)
         if not candidates:
@@ -230,6 +236,7 @@ def build_evaluation(
             "max_forward_adverse_breach_rate": 0.0,
             "max_adverse_limit_pct": max_adverse_limit_pct,
             "round_trip_bps": round_trip_bps,
+            "as_of_date": as_of_date.isoformat() if as_of_date else None,
         },
         "summary": {
             "total_shadow_log_count": len(logs),
@@ -296,6 +303,7 @@ def main() -> int:
     parser.add_argument("--round-trip-bps", type=float, default=35.0)
     parser.add_argument("--max-adverse-limit-pct", type=float, default=-8.0)
     parser.add_argument("--min-forward-shadow-days", type=int, default=20)
+    parser.add_argument("--as-of-date", default=None, help="Only use registry snapshots whose date is visible by this date.")
     args = parser.parse_args()
 
     result = build_evaluation(
@@ -305,6 +313,7 @@ def main() -> int:
         args.round_trip_bps,
         args.max_adverse_limit_pct,
         args.min_forward_shadow_days,
+        parse_date(args.as_of_date) if args.as_of_date else None,
     )
     output_json = pathlib.Path(args.output_json)
     output_md = pathlib.Path(args.output_md)

@@ -112,6 +112,12 @@ def confirmations_for(tags: list[str], final_state_cap: str) -> list[str]:
         confirmations.append("same-theme best-peer evidence must pass")
     if "market_range_pos_60_above_action_limit" in tags:
         confirmations.append("market proxy range_pos_60 must fall below the action limit")
+    if "quote_trade_date_mismatch" in tags or "quote_trade_date_missing" in tags:
+        confirmations.append("quote freshness must match the ranking snapshot date")
+    if "hk_halt_or_no_turnover_suspected" in tags:
+        confirmations.append("HK turnover and quote activity must confirm the instrument is trading normally")
+    if "cn_limit_up_chase_block" in tags or "cn_limit_down_liquidity_block" in tags:
+        confirmations.append("A-share limit-board condition must clear before action upgrade")
     if "downtrend_regime" in tags:
         confirmations.append("downtrend regime must clear")
     if final_state_cap == "buy_candidate" and not confirmations:
@@ -182,6 +188,8 @@ def make_verdict(draft: dict[str, Any], row: dict[str, Any] | None, risk_row: di
         "risk_decision": decision,
         "final_state_cap": cap,
         "max_position_pct": min(round(max_position, 4), max_single_position_pct),
+        "position_policy": "recommendation_cap_only",
+        "execution_allowed": False,
         "risk_tags": tags,
         "reasons": unique(reasons),
         "required_confirmations": confirmations_for(tags, cap),
@@ -204,6 +212,9 @@ def build_review(draft_calls: dict[str, Any], ranking: dict[str, Any], profile: 
         "generated_at": utc_now(),
         "source": "deterministic_level6_risk_review",
         "policy": {
+            "primary_use": "recommendation_only",
+            "execution_allowed": False,
+            "position_policy": "max_position_pct is a recommendation cap only; this system never executes orders or mutates a portfolio.",
             "max_single_position_pct": max_single_position_pct,
             "buy_candidate_pass_rule": "qualified_for_action=true, cost_gate_passed=true, volume_ratio_20>=1.0, and no downtrend_regime",
             "same_theme_peer_rule": "same_theme_peer_evidence_passed=true",

@@ -26,6 +26,7 @@ def recommendation_state(row: dict[str, Any], source_layer: str) -> str:
         and bool(row.get("qualified_for_action"))
         and bool(row.get("cost_gate_passed"))
         and row.get("same_theme_peer_evidence_passed") is True
+        and not row.get("action_disqualifiers")
     ):
         return "buy_candidate"
     if bool(row.get("qualified_for_watch")) and not row.get("disqualifiers"):
@@ -81,6 +82,7 @@ def evidence(row: dict[str, Any], state: str) -> list[str]:
 
 def risks(row: dict[str, Any], horizon_days_min: int, horizon_days_max: int) -> list[str]:
     values = [str(item) for item in row.get("disqualifiers", [])]
+    values.extend(str(item) for item in row.get("action_disqualifiers", []))
     if row.get("eligible_for_action_from_layer") is False:
         values.append("diagnostic_layer_action_cap_watch_only")
     if row.get("is_theme_leader") is False:
@@ -95,7 +97,7 @@ def risks(row: dict[str, Any], horizon_days_min: int, horizon_days_max: int) -> 
         values.append("cost_or_minimum_edge_gate_not_met")
     if not values:
         values.append(f"technical signal may fail before the {horizon_days_min}-{horizon_days_max} day horizon")
-    return values
+    return list(dict.fromkeys(values))
 
 
 def make_recommendation(row: dict[str, Any], horizon_days_min: int, horizon_days_max: int, source_layer: str) -> dict[str, Any]:

@@ -185,6 +185,8 @@ def validate(
                     errors.append(f"{prefix} actionable state requires ranking field {field}")
             if row.get("cost_gate_passed") is not True:
                 errors.append(f"{prefix} actionable state requires cost_gate_passed=true")
+            if row.get("action_disqualifiers"):
+                errors.append(f"{prefix} actionable state requires empty action_disqualifiers")
             if not isinstance(row.get("expected_edge_bps"), (int, float)) or isinstance(row.get("expected_edge_bps"), bool):
                 errors.append(f"{prefix} actionable state requires numeric expected_edge_bps")
             if not isinstance(row.get("net_expected_edge_bps"), (int, float)) or isinstance(row.get("net_expected_edge_bps"), bool):

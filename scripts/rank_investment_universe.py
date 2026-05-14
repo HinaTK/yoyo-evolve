@@ -24,6 +24,8 @@ DEFAULT_SAFETY_INVARIANTS = {
 DEFAULT_MARKET_PROXY_SYMBOL = "2800.HK"
 DEFAULT_CN_MARKET_PROXY_SYMBOL = "510300.SH"
 DEFAULT_MAX_MARKET_RANGE_FOR_ACTION = 0.70
+DEFAULT_BASE_CURRENCY = "HKD"
+CN_LIMIT_MOVE_PCT = 9.5
 
 
 def load_json(path: pathlib.Path) -> dict[str, Any]:
@@ -68,6 +70,32 @@ def load_strategy_config(path: pathlib.Path | None) -> dict[str, Any]:
 
 def clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
+
+
+def as_float(value: Any, default: float | None = 0.0) -> float | None:
+    if isinstance(value, bool):
+        return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def date_token(value: Any) -> str | None:
+    text = str(value or "").strip()
+    if len(text) >= 10 and text[4] == "-" and text[7] == "-":
+        return text[:10]
+    if len(text) >= 8 and text[:8].isdigit():
+        return f"{text[:4]}-{text[4:6]}-{text[6:8]}"
+    return None
+
+
+def append_unique(target: list[str], values: list[str]) -> None:
+    seen = set(target)
+    for value in values:
+        if value not in seen:
+            target.append(value)
+            seen.add(value)
 
 
 def market_family_for_symbol(symbol: str) -> str:
@@ -281,7 +309,20 @@ def item_score(item: dict[str, Any], weights: dict[str, float] | None = None, mi
         "volume_ratio_20": item.get("volume_ratio_20"),
         "regime_flags": item.get("regime_flags", []),
         "price_source": item.get("price_source"),
+        "prev_close": item.get("prev_close"),
+        "latest_open": item.get("latest_open"),
+        "latest_high": item.get("latest_high"),
+        "latest_low": item.get("latest_low"),
+        "latest_volume": item.get("latest_volume"),
+        "as_of": item.get("as_of"),
         "quote_trade_time": item.get("quote_trade_time"),
+        "quote_trade_date": item.get("quote_trade_date"),
+        "quote_last": item.get("quote_last"),
+        "quote_volume": item.get("quote_volume"),
+        "ah_pair": item.get("ah_pair"),
+        "ah_premium_pct": item.get("ah_premium_pct"),
+        "fx_reference": item.get("fx_reference"),
+        "hkd_cny_reference": item.get("hkd_cny_reference"),
     }
 
 
@@ -347,7 +388,61 @@ def theme_summary(scored: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(summaries, key=lambda row: row["avg_score"], reverse=True)
 
 
-def apply_action_qualification(ranked: list[dict[str, Any]], min_action_score: float, symbol_risk: dict[str, dict[str, Any]]) -> None:
+def market_specific_risk_signals(row: dict[str, Any], base_currency: str = DEFAULT_BASE_CURRENCY) -> tuple[list[str], list[str]]:
+    symbol = str(row.get("symbol") or "")
+    family = market_family_for_symbol(symbol)
+    kind = str(row.get("kind") or "").lower()
+    flags: list[str] = []
+    action_disqualifiers: list[str] = []
+
+    snapshot_date = date_token(row.get("snapshot_as_of_date") or row.get("as_of_date"))
+    quote_date = date_token(row.get("quote_trade_date") or row.get("as_of"))
+    price_source = str(row.get("price_source") or "")
+    if snapshot_date and quote_date and quote_date != snapshot_date:
+        flags.append("quote_trade_date_mismatch")
+        action_disqualifiers.append("quote_trade_date_mismatch")
+    elif price_source == "quote" and snapshot_date and not quote_date:
+        flags.append("quote_trade_date_missing")
+        action_disqualifiers.append("quote_trade_date_missing")
+
+    pct_change = as_float(row.get("pct_change_1d"), 0.0) or 0.0
+    if family == "hk" and kind == "stock" and price_source == "quote":
+        quote_volume = as_float(row.get("quote_volume"), None)
+        latest_volume = as_float(row.get("latest_volume"), None)
+        prev_close = as_float(row.get("prev_close"), None)
+        latest_close = as_float(row.get("latest_close"), None)
+        no_turnover = (quote_volume is not None and quote_volume <= 0) or (latest_volume is not None and latest_volume <= 0)
+        unchanged = prev_close is not None and latest_close is not None and prev_close > 0 and abs((latest_close / prev_close) - 1.0) < 0.0001
+        if no_turnover and (unchanged or abs(pct_change) < 0.01):
+            flags.append("hk_halt_or_no_turnover_suspected")
+            action_disqualifiers.append("hk_halt_or_no_turnover_suspected")
+
+    if family == "cn" and kind == "stock":
+        if pct_change >= CN_LIMIT_MOVE_PCT:
+            flags.append("cn_limit_up_chase_block")
+            action_disqualifiers.append("cn_limit_up_chase_block")
+        elif pct_change <= -CN_LIMIT_MOVE_PCT:
+            flags.append("cn_limit_down_liquidity_block")
+            action_disqualifiers.append("cn_limit_down_liquidity_block")
+
+    currency = str(row.get("currency") or "").upper()
+    if family == "cn" and currency == "CNY" and base_currency.upper() == "HKD":
+        flags.append("hkd_cny_cross_currency_exposure")
+        if row.get("fx_reference") is None and row.get("hkd_cny_reference") is None:
+            flags.append("hkd_cny_fx_reference_missing")
+
+    if row.get("ah_pair") and row.get("ah_premium_pct") is None:
+        flags.append("ah_premium_discount_unavailable")
+
+    return flags, action_disqualifiers
+
+
+def apply_action_qualification(
+    ranked: list[dict[str, Any]],
+    min_action_score: float,
+    symbol_risk: dict[str, dict[str, Any]],
+    base_currency: str = DEFAULT_BASE_CURRENCY,
+) -> None:
     for row in ranked:
         symbol = str(row.get("symbol") or "")
         risk = symbol_risk.get(symbol, {})
@@ -363,6 +458,15 @@ def apply_action_qualification(ranked: list[dict[str, Any]], min_action_score: f
             row["diagnostic_only"] = True
         if not bool(row.get("cost_gate_passed")):
             row.setdefault("disqualifiers", []).append("cost_gate_failed")
+            row["diagnostic_only"] = True
+        market_risk_flags, market_action_disqualifiers = market_specific_risk_signals(row, base_currency)
+        append_unique(row.setdefault("market_specific_risk_flags", []), market_risk_flags)
+        append_unique(row.setdefault("action_disqualifiers", []), market_action_disqualifiers)
+        market_specific_action_ok = not market_action_disqualifiers
+        if market_specific_action_ok:
+            row.setdefault("qualification_flags", []).append("market_specific_risk_gate_clear")
+        else:
+            row.setdefault("qualification_flags", []).append("market_specific_risk_gate_blocked")
             row["diagnostic_only"] = True
         score_ok = float(row.get("score") or 0.0) >= min_action_score
         if score_ok:
@@ -405,6 +509,7 @@ def apply_action_qualification(ranked: list[dict[str, Any]], min_action_score: f
             and score_ok
             and volume_action_ok
             and market_range_ok
+            and market_specific_action_ok
             and symbol_action_risk_ok
             and peer_evidence_ok
             and row.get("cost_gate_passed")
@@ -459,6 +564,7 @@ def main() -> int:
     parser.add_argument("--minimum-edge-bps", type=float, default=100)
     parser.add_argument("--market-proxy-symbol", default=DEFAULT_MARKET_PROXY_SYMBOL)
     parser.add_argument("--max-market-range-for-action", type=float, default=DEFAULT_MAX_MARKET_RANGE_FOR_ACTION)
+    parser.add_argument("--base-currency", default=DEFAULT_BASE_CURRENCY)
     parser.add_argument("--strategy-config", default=None, help="Optional active strategy TOML with ranking weights and safety invariants.")
     parser.add_argument("--symbol-risk-json", default=None, help="Optional symbol risk memory JSON with action_veto tags.")
     args = parser.parse_args()
@@ -469,10 +575,12 @@ def main() -> int:
     symbol_risk = load_symbol_risk(pathlib.Path(args.symbol_risk_json) if args.symbol_risk_json else None)
     diagnostic_top_n = args.diagnostic_top_n if args.diagnostic_top_n is not None else (args.top_n if args.top_n is not None else 3)
     scored = annotate_theme_positions([item_score(item, strategy["weights"], args.min_watch_score) for item in snapshot.get("items", [])])
+    for row in scored:
+        row["snapshot_as_of_date"] = snapshot.get("as_of_date")
     apply_market_context(scored, snapshot, args.market_proxy_symbol, args.max_market_range_for_action)
     apply_edge_cost_fields(scored, args.round_trip_bps, args.minimum_edge_bps)
     ranked = sorted(scored, key=lambda row: row["score"], reverse=True)
-    apply_action_qualification(ranked, args.min_action_score, symbol_risk)
+    apply_action_qualification(ranked, args.min_action_score, symbol_risk, args.base_currency)
     actionable_candidates, diagnostic_candidates, top_candidates = candidate_layers(ranked, args.actionable_top_n, diagnostic_top_n)
 
     output = {
@@ -490,6 +598,7 @@ def main() -> int:
             "action_rule": "Do not upgrade unless expected swing edge exceeds both cost and minimum edge gates.",
             "same_theme_peer_rule": "Do not upgrade unless same-theme best-peer evidence passes.",
             "market_regime_rule": "Do not upgrade when the market proxy is above the action range limit.",
+            "market_specific_risk_rule": "Do not upgrade when deterministic HK/A-share quote, halt, or limit-board gates are blocked.",
             "symbol_adverse_rule": "Do not upgrade symbols with a recent adverse-breach risk tag; keep them watch-only until evidence improves.",
         },
         "thresholds": {
@@ -500,6 +609,7 @@ def main() -> int:
             "market_proxy_symbol": args.market_proxy_symbol,
             "cn_market_proxy_symbol": DEFAULT_CN_MARKET_PROXY_SYMBOL,
             "max_market_range_for_action": args.max_market_range_for_action,
+            "base_currency": args.base_currency,
         },
         "theme_summary": theme_summary(scored),
         "actionable_candidates": actionable_candidates,

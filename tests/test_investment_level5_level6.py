@@ -30,6 +30,8 @@ import log_investment_shadow as shadow_log  # noqa: E402
 import backfill_investment_shadow as shadow_backfill  # noqa: E402
 import evaluate_investment_shadow as shadow_eval  # noqa: E402
 import run_investment_daily_shadow as daily_shadow  # noqa: E402
+import build_investment_evidence_ledger as evidence_ledger  # noqa: E402
+import build_investment_calibration_scorecard as calibration_scorecard  # noqa: E402
 
 
 class InvestmentLevel5Level6Tests(unittest.TestCase):
@@ -1175,6 +1177,72 @@ forbid_edge_gate_reduction = true
         self.assertEqual(ranked[0]["market_proxy_symbol"], "510300.SH")
         self.assertIn("market_range_pos_60_above_action_limit", ranked[0]["action_disqualifiers"])
 
+    def test_hk_quote_trade_date_mismatch_blocks_action_not_watch(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "kind": "stock", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": [], "price_source": "quote", "quote_trade_date": "2026-05-13"},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-14"
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertTrue(ranked[0]["qualified_for_watch"])
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertIn("quote_trade_date_mismatch", ranked[0]["action_disqualifiers"])
+        self.assertNotIn("quote_trade_date_mismatch", ranked[0]["disqualifiers"])
+
+    def test_hk_zero_volume_unchanged_quote_blocks_action(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "kind": "stock", "latest_close": 14.0, "prev_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 0.0, "volume_ratio_20": 1.8, "regime_flags": [], "price_source": "quote", "quote_volume": 0, "latest_volume": 0},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertTrue(ranked[0]["qualified_for_watch"])
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertIn("hk_halt_or_no_turnover_suspected", ranked[0]["action_disqualifiers"])
+
+    def test_cn_limit_board_moves_block_action(self):
+        cases = [
+            (9.5, "cn_limit_up_chase_block"),
+            (-9.5, "cn_limit_down_liquidity_block"),
+        ]
+        for pct_change, expected_disqualifier in cases:
+            item = ranker.item_score(
+                {"symbol": "600519.SH", "theme": "consumer-staples", "kind": "stock", "latest_close": 1400.0, "ma20": 1300.0, "ma60": 1250.0, "range_pos_60": 0.7, "pct_change_1d": pct_change, "volume_ratio_20": 1.8, "regime_flags": []},
+                ranker.DEFAULT_STRATEGY_WEIGHTS,
+                min_watch_score=0,
+            )
+            ranked = ranker.annotate_theme_positions([item])
+
+            ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+            ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+            self.assertTrue(ranked[0]["qualified_for_watch"])
+            self.assertFalse(ranked[0]["qualified_for_action"])
+            self.assertIn(expected_disqualifier, ranked[0]["action_disqualifiers"])
+
+    def test_cn_limit_board_gate_does_not_block_etfs(self):
+        item = ranker.item_score(
+            {"symbol": "510300.SH", "theme": "broad", "kind": "etf", "latest_close": 5.0, "ma20": 4.7, "ma60": 4.5, "range_pos_60": 0.7, "pct_change_1d": 9.5, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertTrue(ranked[0]["qualified_for_action"])
+        self.assertNotIn("cn_limit_up_chase_block", ranked[0]["action_disqualifiers"])
+
     def test_backtest_experimental_risk_filter_downgrades_overheated_action_row(self):
         item = ranker.item_score(
             {"symbol": "600519.SH", "theme": "consumer-staples", "latest_close": 1400.0, "ma20": 1300.0, "ma60": 1250.0, "range_pos_60": 0.9, "pct_change_1d": 6.0, "volume_ratio_20": 2.8, "regime_flags": []},
@@ -1415,6 +1483,196 @@ forbid_edge_gate_reduction = true
             self.assertIn("forward_shadow_days", metrics)
             self.assertIn("matured_forward_shadow_days", metrics)
 
+    def test_shadow_forward_evaluator_respects_as_of_date(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            shadow_dir = tmp_path / "shadow"
+            shadow_dir.mkdir()
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 25.0)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-15.json", "2026-04-15", 11.0, 26.0)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-15"])
+            log = {
+                "date": "2026-04-01",
+                "session": "close",
+                "mode": "shadow_logging",
+                "evidence_mode": "forward_shadow",
+                "counts_toward_forward_evidence": True,
+                "shadow_policy": {"horizon_days": 14},
+                "shadow_actionable_candidates": [{"symbol": "AAA.HK", "market_family": "hk", "theme": "growth", "latest_close": 10.0, "stop_loss_pct": -4.0}],
+            }
+            (shadow_dir / "2026-04-01-close-shadow.json").write_text(json.dumps(log), encoding="utf-8")
+
+            result = shadow_eval.build_evaluation(shadow_dir, registry, include_replay=False, round_trip_bps=0, min_forward_shadow_days=1, as_of_date=call_eval.parse_date("2026-04-10"))
+
+            self.assertEqual(result["summary"]["sample_count"], 0)
+            self.assertEqual(result["summary"]["pending_sample_count"], 1)
+            self.assertEqual(result["pending_records"][0]["reason"], "future_horizon_not_available")
+
+    def test_shadow_forward_evaluator_skips_shadow_logs_after_as_of_date(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            shadow_dir = tmp_path / "shadow"
+            shadow_dir.mkdir()
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 25.0)
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-15.json", "2026-04-15", 11.0, 26.0)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-15"])
+            future_log = {
+                "date": "2026-04-15",
+                "session": "close",
+                "mode": "shadow_logging",
+                "evidence_mode": "forward_shadow",
+                "counts_toward_forward_evidence": True,
+                "shadow_policy": {"horizon_days": 14},
+                "shadow_actionable_candidates": [{"symbol": "AAA.HK", "market_family": "hk", "theme": "growth", "latest_close": 11.0, "stop_loss_pct": -4.0}],
+            }
+            (shadow_dir / "2026-04-15-close-shadow.json").write_text(json.dumps(future_log), encoding="utf-8")
+
+            result = shadow_eval.build_evaluation(shadow_dir, registry, include_replay=False, round_trip_bps=0, min_forward_shadow_days=1, as_of_date=call_eval.parse_date("2026-04-10"))
+
+            self.assertEqual(result["summary"]["forward_shadow_log_count"], 0)
+            self.assertEqual(result["summary"]["evaluated_log_count"], 0)
+            self.assertEqual(result["summary"]["sample_count"], 0)
+            self.assertEqual(result["skipped_logs"][0]["reason"], "shadow_date_after_as_of")
+
+    def test_evidence_ledger_audits_forward_shadow_sources_and_excludes_replay_candidates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            shadow_dir = tmp_path / "shadow"
+            shadow_dir.mkdir()
+            snapshot_path = tmp_path / "trade-2026-04-01.json"
+            future_path = tmp_path / "trade-2026-04-15.json"
+            self.write_trade_snapshot(snapshot_path, "2026-04-01", 10.0, 25.0)
+            self.write_trade_snapshot(future_path, "2026-04-15", 11.0, 26.0)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-15"])
+            ranking_path = tmp_path / "ranking.json"
+            ranking_path.write_text("{}", encoding="utf-8")
+            candidate = {"symbol": "AAA.HK", "market_family": "hk", "theme": "growth", "latest_close": 10.0, "stop_loss_pct": -4.0, "benchmark_symbol": "2800.HK", "score": 70.0, "planned_horizon_days": 14}
+            source = {
+                "ranking": {"path": str(ranking_path), "exists": True, "sha256": "rankhash", "size_bytes": 2},
+                "snapshot": {"path": str(snapshot_path), "exists": True, "sha256": "snaphash", "size_bytes": 2},
+            }
+            base_log = {
+                "date": "2026-04-01",
+                "session": "close",
+                "generated_at": "2026-04-01T00:00:00Z",
+                "mode": "shadow_logging",
+                "shadow_policy": {"no_execution": True, "no_portfolio_mutation": True, "production_ranking_unchanged": True, "horizon_days": 14},
+                "source": source,
+                "shadow_actionable_candidates": [candidate],
+            }
+            (shadow_dir / "2026-04-01-close-shadow.json").write_text(json.dumps({**base_log, "evidence_mode": "forward_shadow", "counts_toward_forward_evidence": True}), encoding="utf-8")
+            (shadow_dir / "2026-04-01-historical-shadow.json").write_text(json.dumps({**base_log, "evidence_mode": "historical_replay", "counts_toward_forward_evidence": False}), encoding="utf-8")
+
+            result = evidence_ledger.build_ledger(shadow_dir, registry, include_replay=False, round_trip_bps=0, min_forward_shadow_days=1)
+
+            self.assertTrue(result["audit_passed"])
+            self.assertEqual(result["summary"]["forward_shadow_log_count"], 1)
+            self.assertEqual(result["summary"]["historical_replay_log_count"], 1)
+            self.assertEqual(result["summary"]["candidate_entry_count"], 1)
+            self.assertEqual(result["candidate_entries"][0]["symbol"], "AAA.HK")
+            self.assertEqual(result["candidate_entries"][0]["outcome_status"], "matured")
+
+    def test_evidence_ledger_flags_replay_counting_as_forward(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            shadow_dir = tmp_path / "shadow"
+            shadow_dir.mkdir()
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 25.0)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01"])
+            log = {
+                "date": "2026-04-01",
+                "session": "historical",
+                "generated_at": "2026-04-01T00:00:00Z",
+                "mode": "shadow_logging",
+                "evidence_mode": "historical_replay",
+                "counts_toward_forward_evidence": True,
+                "shadow_policy": {"no_execution": True, "no_portfolio_mutation": True, "production_ranking_unchanged": True},
+                "source": {},
+                "shadow_actionable_candidates": [],
+            }
+            (shadow_dir / "2026-04-01-historical-shadow.json").write_text(json.dumps(log), encoding="utf-8")
+
+            result = evidence_ledger.build_ledger(shadow_dir, registry)
+
+            self.assertFalse(result["audit_passed"])
+            fields = {finding["field"] for finding in result["audit_findings"]}
+            self.assertIn("counts_toward_forward_evidence", fields)
+
+    def test_evidence_ledger_flags_historical_session_marked_forward(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            shadow_dir = tmp_path / "shadow"
+            shadow_dir.mkdir()
+            self.write_trade_snapshot(tmp_path / "trade-2026-04-01.json", "2026-04-01", 10.0, 25.0)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01"])
+            log = {
+                "date": "2026-04-01",
+                "session": "historical",
+                "generated_at": "2026-04-01T00:00:00Z",
+                "mode": "shadow_logging",
+                "evidence_mode": "forward_shadow",
+                "counts_toward_forward_evidence": True,
+                "shadow_policy": {"no_execution": True, "no_portfolio_mutation": True, "production_ranking_unchanged": True},
+                "source": {
+                    "as_of_date": "2026-04-01",
+                    "ranking": {"exists": True, "sha256": "rankhash"},
+                    "snapshot": {"exists": True, "sha256": "snaphash"},
+                },
+                "shadow_actionable_candidates": [],
+            }
+            (shadow_dir / "2026-04-01-historical-shadow.json").write_text(json.dumps(log), encoding="utf-8")
+
+            result = evidence_ledger.build_ledger(shadow_dir, registry)
+
+            self.assertFalse(result["audit_passed"])
+            fields = {finding["field"] for finding in result["audit_findings"]}
+            self.assertIn("session", fields)
+
+    def test_calibration_scorecard_reports_confidence_buckets_and_low_sample(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            calls_dir = tmp_path / "calls"
+            snapshot_dir = tmp_path / "snapshots"
+            shadow_dir = tmp_path / "shadow"
+            calls_dir.mkdir()
+            snapshot_dir.mkdir()
+            shadow_dir.mkdir()
+            self.write_trade_snapshot(snapshot_dir / "2026-04-01.json", "2026-04-01", 10.0, 25.0)
+            self.write_trade_snapshot(snapshot_dir / "2026-04-04.json", "2026-04-04", 11.0, 25.0)
+            registry = self.write_trade_registry(tmp_path, ["2026-04-01", "2026-04-04"])
+            call = self.valid_call("AAA.HK", "buy_candidate")
+            call["confidence"] = 0.75
+            (calls_dir / "2026-04-01-close-calls.json").write_text(json.dumps({"date": "2026-04-01", "session": "close", "recommendations": [call]}), encoding="utf-8")
+
+            result = calibration_scorecard.build_scorecard(
+                calls_dir,
+                snapshot_dir,
+                shadow_dir,
+                registry,
+                close_windows=[3],
+                intraday_windows=[0],
+                min_total_samples=2,
+                min_bucket_samples=2,
+            )
+
+            self.assertEqual(result["overall"]["scored_sample_count"], 1)
+            self.assertTrue(result["overall"]["low_sample"])
+            bucket = next(item for item in result["confidence_buckets"] if item["bucket"] == "0.70-0.85")
+            self.assertEqual(bucket["scored_sample_count"], 1)
+            self.assertEqual(bucket["hit_rate"], 1.0)
+            self.assertTrue(bucket["low_sample"])
+            self.assertTrue(any(finding["metric"] == "scored_sample_count" for finding in result["findings"]))
+
+    def test_calibration_scorecard_ignores_success_without_confidence_for_scored_samples(self):
+        rows = [{"success": 1.0, "confidence": None, "return_pct": 2.0}]
+
+        result = calibration_scorecard.overall_stats(rows, min_total_samples=1)
+
+        self.assertEqual(result["sample_count"], 1)
+        self.assertEqual(result["scored_sample_count"], 0)
+        self.assertIsNone(result["hit_rate"])
+        self.assertTrue(result["low_sample"])
+
     def test_daily_shadow_runner_plans_forward_pipeline_without_bash(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = pathlib.Path(tmp)
@@ -1440,11 +1698,16 @@ forbid_edge_gate_reduction = true
                 runner=fake_runner,
             )
 
-            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "rank_universe", "log_shadow", "evaluate_shadow"])
+            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "rank_universe", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard"])
             self.assertTrue(all(command[0] == "python" for _, command, *_ in calls))
             self.assertFalse(any("bash" in part.lower() for _, command, *_ in calls for part in command))
             shadow_command = next(command for name, command, *_ in calls if name == "log_shadow")
             self.assertEqual(shadow_command[shadow_command.index("--evidence-mode") + 1], "forward_shadow")
+            ledger_command = next(command for name, command, *_ in calls if name == "build_evidence_ledger")
+            self.assertEqual(ledger_command[ledger_command.index("--as-of-date") + 1], "2026-04-27")
+            scorecard_command = next(command for name, command, *_ in calls if name == "build_calibration_scorecard")
+            self.assertEqual(scorecard_command[scorecard_command.index("--as-of-date") + 1], "2026-04-27")
+            self.assertEqual(scorecard_command[scorecard_command.index("--as-of-session") + 1], "close")
             rank_command = next(command for name, command, *_ in calls if name == "rank_universe")
             self.assertEqual(rank_command[rank_command.index("--actionable-top-n") + 1], "2")
             self.assertEqual(rank_command[rank_command.index("--diagnostic-top-n") + 1], "3")
@@ -1720,6 +1983,59 @@ forbid_edge_gate_reduction = true
         self.assertIn("market_range_pos_60_above_action_limit", calls["recommendations"][0]["risks"])
         self.assertTrue(any("market_context" in item for item in calls["recommendations"][0]["evidence"]))
 
+    def test_draft_calls_surface_action_disqualifiers_in_risks(self):
+        ranking = {
+            "as_of_date": "2026-04-27",
+            "actionable_candidates": [
+                {
+                    "symbol": "AAA.HK",
+                    "theme": "growth",
+                    "kind": "stock",
+                    "score": 80,
+                    "trend_score": 90,
+                    "momentum_score": 70,
+                    "qualified_for_action": False,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": True,
+                    "cost_gate_passed": True,
+                    "expected_edge_bps": 160,
+                    "net_expected_edge_bps": 125,
+                    "same_theme_peer_evidence_passed": True,
+                    "action_disqualifiers": ["hk_halt_or_no_turnover_suspected"],
+                }
+            ],
+            "diagnostic_candidates": [],
+        }
+
+        calls = draft_calls.build_calls(ranking, include_diagnostics=False)
+
+        self.assertEqual(calls["recommendations"][0]["state"], "watch_only")
+        self.assertIn("hk_halt_or_no_turnover_suspected", calls["recommendations"][0]["risks"])
+
+    def test_draft_calls_fail_closed_when_action_disqualifiers_conflict_with_actionable_row(self):
+        row = {
+            "symbol": "AAA.HK",
+            "theme": "growth",
+            "kind": "stock",
+            "score": 80,
+            "trend_score": 90,
+            "momentum_score": 70,
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "expected_edge_bps": 160,
+            "net_expected_edge_bps": 125,
+            "same_theme_peer_evidence_passed": True,
+            "action_disqualifiers": ["quote_trade_date_mismatch"],
+        }
+        ranking = {"as_of_date": "2026-04-27", "actionable_candidates": [row], "diagnostic_candidates": []}
+
+        calls = draft_calls.build_calls(ranking, include_diagnostics=False)
+
+        self.assertEqual(calls["recommendations"][0]["state"], "watch_only")
+        self.assertIn("quote_trade_date_mismatch", calls["recommendations"][0]["risks"])
+
     def test_draft_calls_calibrate_confidence_for_symbol_risk(self):
         clean = {
             "symbol": "AAA.HK",
@@ -1837,6 +2153,21 @@ forbid_edge_gate_reduction = true
 
         self.assertTrue(any("market_range_pos_60 <= max_market_range_for_action" in error for error in errors))
 
+    def test_calls_validator_rejects_actionable_with_action_disqualifiers(self):
+        row = {
+            "symbol": "AAA.HK",
+            "qualified_for_action": True,
+            "qualified_for_watch": True,
+            "diagnostic_only": False,
+            "cost_gate_passed": True,
+            "action_disqualifiers": ["quote_trade_date_mismatch"],
+        }
+        calls = {"date": "2026-04-01", "session": "close", "recommendations": [self.valid_call()]}
+
+        errors = calls_validator.validate(calls, self.ranking_with_row(row), {"AAA.HK"})
+
+        self.assertTrue(any("actionable state requires empty action_disqualifiers" in error for error in errors))
+
     def test_calls_validator_rejects_confidence_above_draft_cap(self):
         row = {
             "symbol": "AAA.HK",
@@ -1882,6 +2213,9 @@ forbid_edge_gate_reduction = true
         review = risk_review.build_review(draft, self.ranking_with_row(row), {"risk": {"max_single_position_pct": 10}})
         verdict = review["verdicts"][0]
 
+        self.assertFalse(review["policy"]["execution_allowed"])
+        self.assertFalse(verdict["execution_allowed"])
+        self.assertEqual(verdict["position_policy"], "recommendation_cap_only")
         self.assertEqual(verdict["risk_decision"], "pass")
         self.assertEqual(verdict["final_state_cap"], "buy_candidate")
         self.assertEqual(verdict["max_position_pct"], 10)

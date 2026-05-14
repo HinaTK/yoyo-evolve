@@ -144,6 +144,8 @@ class DailyShadowOptions:
     skip_symbol_risk: bool = False
     run_optimization: bool = False
     evaluate_shadow: bool = True
+    build_evidence_ledger: bool = True
+    build_calibration_scorecard: bool = True
     include_replay: bool = False
     min_forward_shadow_days: int = 20
     summary_output: pathlib.Path | None = None
@@ -311,6 +313,46 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             eval_command.append("--include-replay")
         call("evaluate_shadow", eval_command)
 
+    if options.build_evidence_ledger:
+        call(
+            "build_evidence_ledger",
+            [
+                options.python_bin,
+                script_path(root, "build_investment_evidence_ledger.py"),
+                "--shadow-dir",
+                root / "research" / "shadow",
+                "--registry",
+                registry_file,
+                "--round-trip-bps",
+                str(round_trip_bps),
+                "--min-forward-shadow-days",
+                str(options.min_forward_shadow_days),
+                "--as-of-date",
+                options.date,
+            ],
+        )
+
+    if options.build_calibration_scorecard:
+        call(
+            "build_calibration_scorecard",
+            [
+                options.python_bin,
+                script_path(root, "build_investment_calibration_scorecard.py"),
+                "--calls-dir",
+                root / "research" / "calls",
+                "--snapshot-dir",
+                root / "data" / "snapshots",
+                "--shadow-dir",
+                root / "research" / "shadow",
+                "--registry",
+                registry_file,
+                "--as-of-date",
+                options.date,
+                "--as-of-session",
+                options.session,
+            ],
+        )
+
     summary = {
         "generated_at": utc_now(),
         "date": options.date,
@@ -351,6 +393,8 @@ def parse_args() -> DailyShadowOptions:
     parser.add_argument("--skip-symbol-risk", action="store_true")
     parser.add_argument("--run-optimization", action="store_true", help="Opt in to active-strategy optimization before ranking.")
     parser.add_argument("--skip-evaluation", action="store_true")
+    parser.add_argument("--skip-evidence-ledger", action="store_true")
+    parser.add_argument("--skip-calibration-scorecard", action="store_true")
     parser.add_argument("--include-replay", action="store_true", help="Diagnostic only: include historical replay logs in the shadow evaluation output.")
     parser.add_argument("--min-forward-shadow-days", type=int, default=20)
     parser.add_argument("--summary-output", default=None)
@@ -374,6 +418,8 @@ def parse_args() -> DailyShadowOptions:
         skip_symbol_risk=args.skip_symbol_risk,
         run_optimization=args.run_optimization,
         evaluate_shadow=not args.skip_evaluation,
+        build_evidence_ledger=not args.skip_evidence_ledger,
+        build_calibration_scorecard=not args.skip_calibration_scorecard,
         include_replay=args.include_replay,
         min_forward_shadow_days=args.min_forward_shadow_days,
         summary_output=resolve_path(root, args.summary_output),

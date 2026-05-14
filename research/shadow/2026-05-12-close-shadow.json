@@ -1,0 +1,217 @@
+{
+  "date": "2026-05-12",
+  "session": "close",
+  "generated_at": "2026-05-12T12:21:11Z",
+  "mode": "shadow_logging",
+  "evidence_mode": "forward_shadow",
+  "counts_toward_forward_evidence": true,
+  "shadow_policy": {
+    "status": "experimental_shadow_only",
+    "production_ranking_unchanged": true,
+    "no_execution": true,
+    "no_portfolio_mutation": true,
+    "risk_filter": "combined_heat_mid_range_market_stall",
+    "exit_rule": "daily_close_stop",
+    "stop_loss_pct": -4.0,
+    "horizon_days": 14,
+    "evidence_mode": "forward_shadow",
+    "counts_toward_forward_evidence": true
+  },
+  "source": {
+    "ranking": {
+      "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-12-close-ranking.json",
+      "exists": true,
+      "sha256": "a7be3674475bdc3853541902e455d11ee3d0161c43183946630ca4785ce7e76a",
+      "size_bytes": 161824
+    },
+    "snapshot": {
+      "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-12.json",
+      "exists": true,
+      "sha256": "0afe2fd9def04032fa04551be66cf51f3b1b61a49ca051f0193df23b0a16d198",
+      "size_bytes": 66661
+    },
+    "as_of_date": "2026-05-12",
+    "ranking_generated_at": "2026-05-12T12:20:59Z",
+    "strategy_id": "l5_mvp_conservative_v1",
+    "strategy_version": "l5_mvp_conservative_v1",
+    "strategy_status": "active"
+  },
+  "summary": {
+    "production_actionable_count": 0,
+    "shadow_actionable_count": 0,
+    "shadow_diagnostic_count": 3,
+    "downgraded_by_shadow_filter_count": 0
+  },
+  "production_actionable_symbols": [],
+  "shadow_actionable_symbols": [],
+  "shadow_actionable_candidates": [],
+  "shadow_diagnostic_candidates": [
+    {
+      "symbol": "512480.SH",
+      "name": "GuolianAn Semiconductor ETF / \u56fd\u8054\u5b89\u534a\u5bfc\u4f53ETF",
+      "market_family": "cn",
+      "theme": "china-a-semiconductors",
+      "kind": "etf",
+      "source_layer": "diagnostic_candidates",
+      "score": 76.29,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "latest_close": 2.025,
+      "stop_loss_pct": -4.0,
+      "daily_close_stop_price": 1.944,
+      "planned_horizon_days": 14,
+      "benchmark_symbol": "510300.SH",
+      "expected_edge_bps": 181.63,
+      "net_expected_edge_bps": 146.63,
+      "cost_gate_passed": true,
+      "range_pos_60": 1.0116,
+      "pct_change_1d": 0.35,
+      "volume_ratio_20": 1.0452,
+      "market_proxy_symbol": "510300.SH",
+      "market_range_pos_60": 0.9944,
+      "same_theme_best_symbol": "512480.SH",
+      "same_theme_peer_evidence_passed": true,
+      "qualification_flags": [
+        "score_meets_watch_threshold",
+        "price_above_ma20",
+        "price_above_ma60",
+        "ma20_above_ma60",
+        "volume_confirmed",
+        "constructive_range_position",
+        "cost_gate_passed",
+        "score_meets_action_threshold",
+        "volume_meets_action_threshold",
+        "market_range_overextended",
+        "symbol_recent_adverse_breach_clear",
+        "same_theme_best_peer_evidence_passed",
+        "diagnostic_candidate",
+        "diagnostic_candidate"
+      ],
+      "disqualifiers": [
+        "symbol_risk_veto"
+      ],
+      "action_disqualifiers": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "monitoring_rules": [
+        "Record only; do not change portfolio state from this shadow log.",
+        "Flag if daily close return is <= -4.0% from shadow entry close.",
+        "Evaluate 14-day return and benchmark alpha after the planned horizon."
+      ]
+    },
+    {
+      "symbol": "588000.SH",
+      "name": "ChinaAMC STAR 50 ETF / \u534e\u590f\u4e0a\u8bc1\u79d1\u521b\u677f50ETF",
+      "market_family": "cn",
+      "theme": "china-a-hard-tech",
+      "kind": "etf",
+      "source_layer": "diagnostic_candidates",
+      "score": 75.94,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "latest_close": 1.816,
+      "stop_loss_pct": -4.0,
+      "daily_close_stop_price": 1.7434,
+      "planned_horizon_days": 14,
+      "benchmark_symbol": "510300.SH",
+      "expected_edge_bps": 178.84,
+      "net_expected_edge_bps": 143.84,
+      "cost_gate_passed": true,
+      "range_pos_60": 1.0103,
+      "pct_change_1d": 0.28,
+      "volume_ratio_20": 1.019,
+      "market_proxy_symbol": "510300.SH",
+      "market_range_pos_60": 0.9944,
+      "same_theme_best_symbol": "588000.SH",
+      "same_theme_peer_evidence_passed": true,
+      "qualification_flags": [
+        "score_meets_watch_threshold",
+        "price_above_ma20",
+        "price_above_ma60",
+        "ma20_above_ma60",
+        "volume_confirmed",
+        "constructive_range_position",
+        "cost_gate_passed",
+        "score_meets_action_threshold",
+        "volume_meets_action_threshold",
+        "market_range_overextended",
+        "symbol_recent_adverse_breach_clear",
+        "same_theme_best_peer_evidence_passed",
+        "diagnostic_candidate",
+        "diagnostic_candidate"
+      ],
+      "disqualifiers": [],
+      "action_disqualifiers": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "monitoring_rules": [
+        "Record only; do not change portfolio state from this shadow log.",
+        "Flag if daily close return is <= -4.0% from shadow entry close.",
+        "Evaluate 14-day return and benchmark alpha after the planned horizon."
+      ]
+    },
+    {
+      "symbol": "0728.HK",
+      "name": "China Telecom / \u4e2d\u56fd\u7535\u4fe1",
+      "market_family": "hk",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "source_layer": "diagnostic_candidates",
+      "score": 75.67,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "latest_close": 5.46,
+      "stop_loss_pct": -4.0,
+      "daily_close_stop_price": 5.2416,
+      "planned_horizon_days": 14,
+      "benchmark_symbol": "2800.HK",
+      "expected_edge_bps": 184.85,
+      "net_expected_edge_bps": 149.85,
+      "cost_gate_passed": true,
+      "range_pos_60": 0.9577,
+      "pct_change_1d": -0.55,
+      "volume_ratio_20": 1.5333,
+      "market_proxy_symbol": "2800.HK",
+      "market_range_pos_60": 0.7105,
+      "same_theme_best_symbol": "0728.HK",
+      "same_theme_peer_evidence_passed": true,
+      "qualification_flags": [
+        "score_meets_watch_threshold",
+        "price_above_ma20",
+        "price_above_ma60",
+        "ma20_above_ma60",
+        "volume_confirmed",
+        "constructive_range_position",
+        "cost_gate_passed",
+        "score_meets_action_threshold",
+        "volume_meets_action_threshold",
+        "market_range_overextended",
+        "symbol_recent_adverse_breach_clear",
+        "same_theme_best_peer_evidence_passed",
+        "diagnostic_candidate",
+        "diagnostic_candidate"
+      ],
+      "disqualifiers": [
+        "symbol_risk_veto"
+      ],
+      "action_disqualifiers": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "shadow_filter_profile": null,
+      "shadow_filter_reasons": [],
+      "monitoring_rules": [
+        "Record only; do not change portfolio state from this shadow log.",
+        "Flag if daily close return is <= -4.0% from shadow entry close.",
+        "Evaluate 14-day return and benchmark alpha after the planned horizon."
+      ]
+    }
+  ],
+  "downgraded_by_shadow_filter": []
+}
