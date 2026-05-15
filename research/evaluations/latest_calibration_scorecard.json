@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-14T13:45:48Z",
-  "as_of_date": "2026-05-14",
+  "generated_at": "2026-05-15T09:10:32Z",
+  "as_of_date": "2026-05-15",
   "as_of_session": "close",
   "inputs": {
     "calls_dir": "D:\\Code\\yoyo\\research\\calls",
@@ -28,8 +28,8 @@
     "shadow_record_count": 0,
     "combined_record_count": 854,
     "call_summary": {
-      "generated_at": "2026-05-14T13:45:48Z",
-      "as_of_date": "2026-05-14",
+      "generated_at": "2026-05-15T09:10:32Z",
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "evaluations": 854,
       "verdict_counts": {
@@ -213,12 +213,12 @@
       ]
     },
     "shadow_summary": {
-      "total_shadow_log_count": 24,
-      "forward_shadow_log_count": 4,
+      "total_shadow_log_count": 25,
+      "forward_shadow_log_count": 5,
       "historical_replay_log_count": 20,
-      "evaluated_log_count": 4,
+      "evaluated_log_count": 5,
       "matured_forward_shadow_days": 1,
-      "no_action_log_count": 4,
+      "no_action_log_count": 5,
       "pending_sample_count": 0,
       "sample_count": 0,
       "win_rate": null,

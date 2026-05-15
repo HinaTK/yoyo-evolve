@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-05-14T13:45:47Z",
-  "as_of_date": "2026-05-14",
+  "generated_at": "2026-05-15T09:10:31Z",
+  "as_of_date": "2026-05-15",
   "as_of_session": "close",
   "research_only": true,
   "no_execution": true,
-  "evidence_mode": "point_in_time_curated_or_missing_fail_closed",
+  "evidence_mode": "point_in_time_curated_proxy_or_missing_fail_closed",
   "policy": {
     "require_for_action": true,
     "max_staleness_days": 30,
@@ -21,12 +21,16 @@
   "summary": {
     "symbol_count": 46,
     "available_count": 0,
-    "missing_count": 46,
+    "curated_available_count": 0,
+    "automatic_proxy_count": 46,
+    "proxy_only_count": 46,
+    "proxy_coverage_ratio": 1.0,
+    "missing_count": 0,
     "coverage_ratio": 0.0,
     "actionable_evidence_count": 0,
-    "finding_count": 276,
+    "finding_count": 211,
     "critical_finding_count": 0,
-    "blocking_finding_count": 276
+    "blocking_finding_count": 120
   },
   "symbols": {
     "0002.HK": {
@@ -34,908 +38,1768 @@
       "name": "CLP Holdings / 中电控股",
       "kind": "stock",
       "theme": "utilities-defensive",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=utilities-defensive, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.56,
+      "valuation_score": 0.38,
+      "catalyst_score": 0.44,
+      "flow_score": 0.53,
+      "macro_score": 0.42,
+      "total_score": 0.476,
+      "age_days": 0
     },
     "000333.SZ": {
       "symbol": "000333.SZ",
       "name": "Midea Group / 美的集团",
       "kind": "stock",
       "theme": "china-a-home-appliances",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-home-appliances, quote_fresh=True, risk_state=neutral"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.38,
+      "catalyst_score": 0.5,
+      "flow_score": 0.57,
+      "macro_score": 0.5,
+      "total_score": 0.486,
+      "age_days": 0
     },
     "0005.HK": {
       "symbol": "0005.HK",
       "name": "HSBC / 汇丰控股",
       "kind": "stock",
       "theme": "financials-bank",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=financials-bank, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.491,
+      "age_days": 0
     },
     "0006.HK": {
       "symbol": "0006.HK",
       "name": "Power Assets / 电能实业",
       "kind": "stock",
       "theme": "utilities-defensive",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=utilities-defensive, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.56,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.44,
+      "flow_score": 0.47,
+      "macro_score": 0.42,
+      "total_score": 0.492,
+      "age_days": 0
     },
     "000858.SZ": {
       "symbol": "000858.SZ",
       "name": "Wuliangye / 五粮液",
       "kind": "stock",
       "theme": "china-a-consumer-staples",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-consumer-staples, quote_fresh=True, risk_state=neutral"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.56,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.5,
+      "flow_score": 0.57,
+      "macro_score": 0.5,
+      "total_score": 0.535,
+      "age_days": 0
     },
     "002594.SZ": {
       "symbol": "002594.SZ",
       "name": "BYD / 比亚迪",
       "kind": "stock",
       "theme": "china-a-auto-ev",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-auto-ev, quote_fresh=True, risk_state=neutral"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.5,
+      "flow_score": 0.53,
+      "macro_score": 0.5,
+      "total_score": 0.521,
+      "age_days": 0
     },
     "0386.HK": {
       "symbol": "0386.HK",
       "name": "Sinopec / 中国石油化工股份",
       "kind": "stock",
       "theme": "energy",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=energy, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.44,
+      "flow_score": 0.56,
+      "macro_score": 0.42,
+      "total_score": 0.492,
+      "age_days": 0
     },
     "0388.HK": {
       "symbol": "0388.HK",
       "name": "HKEX / 香港交易所",
       "kind": "stock",
       "theme": "financials-exchange",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=financials-exchange, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.491,
+      "age_days": 0
     },
     "0700.HK": {
       "symbol": "0700.HK",
       "name": "Tencent / 腾讯控股",
       "kind": "stock",
       "theme": "internet-platform",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "policy",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.42,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.471,
+      "age_days": 0
     },
     "0728.HK": {
       "symbol": "0728.HK",
       "name": "China Telecom / 中国电信",
       "kind": "stock",
       "theme": "telecom-dividend",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=telecom-dividend, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.56,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.44,
+      "flow_score": 0.6,
+      "macro_score": 0.42,
+      "total_score": 0.512,
+      "age_days": 0
     },
     "0857.HK": {
       "symbol": "0857.HK",
       "name": "PetroChina / 中国石油股份",
       "kind": "stock",
       "theme": "energy",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=energy, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.5,
+      "macro_score": 0.42,
+      "total_score": 0.493,
+      "age_days": 0
     },
     "0883.HK": {
       "symbol": "0883.HK",
       "name": "CNOOC / 中国海洋石油",
       "kind": "stock",
       "theme": "energy",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=energy, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.52,
+      "macro_score": 0.42,
+      "total_score": 0.496,
+      "age_days": 0
     },
     "0941.HK": {
       "symbol": "0941.HK",
       "name": "China Mobile / 中国移动",
       "kind": "stock",
       "theme": "telecom-dividend",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=telecom-dividend, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.56,
+      "valuation_score": 0.38,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.483,
+      "age_days": 0
     },
     "1024.HK": {
       "symbol": "1024.HK",
       "name": "Kuaishou / 快手-W",
       "kind": "stock",
       "theme": "internet-platform",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "policy",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.42,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.481,
+      "age_days": 0
     },
     "1093.HK": {
       "symbol": "1093.HK",
       "name": "CSPC Pharma / 石药集团",
       "kind": "stock",
       "theme": "healthcare-pharma",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=healthcare-pharma, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.44,
+      "flow_score": 0.56,
+      "macro_score": 0.42,
+      "total_score": 0.492,
+      "age_days": 0
     },
     "1177.HK": {
       "symbol": "1177.HK",
       "name": "Sino Biopharm / 中国生物制药",
       "kind": "stock",
       "theme": "healthcare-pharma",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=healthcare-pharma, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.44,
+      "flow_score": 0.6,
+      "macro_score": 0.42,
+      "total_score": 0.498,
+      "age_days": 0
     },
     "1299.HK": {
       "symbol": "1299.HK",
       "name": "AIA / 友邦保险",
       "kind": "stock",
       "theme": "financials-insurance",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=financials-insurance, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.491,
+      "age_days": 0
     },
     "159915.SZ": {
       "symbol": "159915.SZ",
       "name": "E Fund ChiNext ETF / 易方达创业板ETF",
       "kind": "etf",
       "theme": "china-a-growth-tech",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=etf, theme=china-a-growth-tech, quote_fresh=True, risk_state=neutral"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.58,
+      "valuation_score": 0.38,
+      "catalyst_score": 0.53,
+      "flow_score": 0.6,
+      "macro_score": 0.53,
+      "total_score": 0.526,
+      "age_days": 0
     },
     "1810.HK": {
       "symbol": "1810.HK",
       "name": "Xiaomi / 小米集团-W",
       "kind": "stock",
       "theme": "consumer-tech",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=consumer-tech, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.505,
+      "age_days": 0
     },
     "2020.HK": {
       "symbol": "2020.HK",
       "name": "ANTA Sports / 安踏体育",
       "kind": "stock",
       "theme": "consumer-discretionary",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=consumer-discretionary, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.57,
+      "macro_score": 0.42,
+      "total_score": 0.504,
+      "age_days": 0
     },
     "2269.HK": {
       "symbol": "2269.HK",
       "name": "WuXi Biologics / 药明生物",
       "kind": "stock",
       "theme": "healthcare-biotech",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "policy",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=healthcare-biotech, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.42,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.62,
+      "macro_score": 0.42,
+      "total_score": 0.487,
+      "age_days": 0
     },
     "2331.HK": {
       "symbol": "2331.HK",
       "name": "Li Ning / 李宁",
       "kind": "stock",
       "theme": "consumer-discretionary",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=consumer-discretionary, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.44,
+      "flow_score": 0.56,
+      "macro_score": 0.42,
+      "total_score": 0.492,
+      "age_days": 0
     },
     "2800.HK": {
       "symbol": "2800.HK",
       "name": "Tracker Fund of Hong Kong / 盈富基金",
       "kind": "etf",
       "theme": "hong-kong-broad-market",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=etf, theme=hong-kong-broad-market, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.62,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.62,
+      "macro_score": 0.45,
+      "total_score": 0.55,
+      "age_days": 0
     },
     "300750.SZ": {
       "symbol": "300750.SZ",
       "name": "CATL / 宁德时代",
       "kind": "stock",
       "theme": "china-a-battery-ev",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-battery-ev, quote_fresh=True, risk_state=neutral"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.5,
+      "flow_score": 0.53,
+      "macro_score": 0.5,
+      "total_score": 0.507,
+      "age_days": 0
     },
     "3033.HK": {
       "symbol": "3033.HK",
       "name": "CSOP Hang Seng TECH Index ETF / 南方东英恒生科技指数ETF",
       "kind": "etf",
       "theme": "hang-seng-tech",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=etf, theme=hang-seng-tech, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.58,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.62,
+      "macro_score": 0.45,
+      "total_score": 0.538,
+      "age_days": 0
     },
     "3067.HK": {
       "symbol": "3067.HK",
       "name": "iShares Hang Seng TECH ETF / 安硕恒生科技ETF",
       "kind": "etf",
       "theme": "hang-seng-tech",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=etf, theme=hang-seng-tech, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.58,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.6,
+      "macro_score": 0.45,
+      "total_score": 0.535,
+      "age_days": 0
     },
     "3690.HK": {
       "symbol": "3690.HK",
       "name": "Meituan / 美团-W",
       "kind": "stock",
       "theme": "internet-platform",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "policy",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.42,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.481,
+      "age_days": 0
     },
     "510300.SH": {
       "symbol": "510300.SH",
       "name": "Huatai-PineBridge CSI 300 ETF / 华泰柏瑞沪深300ETF",
       "kind": "etf",
       "theme": "china-a-broad-market",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=etf, theme=china-a-broad-market, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.62,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.44,
+      "flow_score": 0.56,
+      "macro_score": 0.45,
+      "total_score": 0.527,
+      "age_days": 0
     },
     "510500.SH": {
       "symbol": "510500.SH",
       "name": "China Southern CSI 500 ETF / 南方中证500ETF",
       "kind": "etf",
       "theme": "china-a-midcap-market",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=etf, theme=china-a-midcap-market, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.58,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.44,
+      "flow_score": 0.6,
+      "macro_score": 0.45,
+      "total_score": 0.521,
+      "age_days": 0
     },
     "510880.SH": {
       "symbol": "510880.SH",
       "name": "Huatai-PineBridge Dividend ETF / 华泰柏瑞红利ETF",
       "kind": "etf",
       "theme": "china-a-dividend-value",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=etf, theme=china-a-dividend-value, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.62,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.53,
+      "macro_score": 0.45,
+      "total_score": 0.536,
+      "age_days": 0
     },
     "512480.SH": {
       "symbol": "512480.SH",
       "name": "GuolianAn Semiconductor ETF / 国联安半导体ETF",
       "kind": "etf",
       "theme": "china-a-semiconductors",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=etf, theme=china-a-semiconductors, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.38,
+      "catalyst_score": 0.44,
+      "flow_score": 0.6,
+      "macro_score": 0.45,
+      "total_score": 0.471,
+      "age_days": 0
     },
     "515790.SH": {
       "symbol": "515790.SH",
       "name": "Huatai-PineBridge Photovoltaic ETF / 华泰柏瑞光伏ETF",
       "kind": "etf",
       "theme": "china-a-renewable-energy",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=etf, theme=china-a-renewable-energy, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.57,
+      "macro_score": 0.45,
+      "total_score": 0.507,
+      "age_days": 0
     },
     "588000.SH": {
       "symbol": "588000.SH",
       "name": "ChinaAMC STAR 50 ETF / 华夏上证科创板50ETF",
       "kind": "etf",
       "theme": "china-a-hard-tech",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=etf, theme=china-a-hard-tech, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.38,
+      "catalyst_score": 0.44,
+      "flow_score": 0.6,
+      "macro_score": 0.45,
+      "total_score": 0.471,
+      "age_days": 0
     },
     "600030.SH": {
       "symbol": "600030.SH",
       "name": "CITIC Securities / 中信证券",
       "kind": "stock",
       "theme": "china-a-capital-markets",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-capital-markets, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.53,
+      "macro_score": 0.42,
+      "total_score": 0.497,
+      "age_days": 0
     },
     "600036.SH": {
       "symbol": "600036.SH",
       "name": "China Merchants Bank / 招商银行",
       "kind": "stock",
       "theme": "china-a-financials-bank",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-financials-bank, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.44,
+      "flow_score": 0.53,
+      "macro_score": 0.42,
+      "total_score": 0.487,
+      "age_days": 0
     },
     "600276.SH": {
       "symbol": "600276.SH",
       "name": "Hengrui Medicine / 恒瑞医药",
       "kind": "stock",
       "theme": "china-a-healthcare-pharma",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-healthcare-pharma, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.53,
+      "macro_score": 0.42,
+      "total_score": 0.497,
+      "age_days": 0
     },
     "600519.SH": {
       "symbol": "600519.SH",
       "name": "Kweichow Moutai / 贵州茅台",
       "kind": "stock",
       "theme": "china-a-consumer-staples",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-consumer-staples, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.56,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.44,
+      "flow_score": 0.57,
+      "macro_score": 0.42,
+      "total_score": 0.512,
+      "age_days": 0
     },
     "600900.SH": {
       "symbol": "600900.SH",
       "name": "Yangtze Power / 长江电力",
       "kind": "stock",
       "theme": "china-a-utilities-defensive",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-utilities-defensive, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.56,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.44,
+      "flow_score": 0.57,
+      "macro_score": 0.42,
+      "total_score": 0.508,
+      "age_days": 0
     },
     "601088.SH": {
       "symbol": "601088.SH",
       "name": "China Shenhua / 中国神华",
       "kind": "stock",
       "theme": "china-a-energy-dividend",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "none",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-energy-dividend, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.56,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.57,
+      "macro_score": 0.42,
+      "total_score": 0.522,
+      "age_days": 0
     },
     "601318.SH": {
       "symbol": "601318.SH",
       "name": "Ping An Insurance / 中国平安",
       "kind": "stock",
       "theme": "china-a-financials-insurance",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-financials-insurance, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.44,
+      "flow_score": 0.57,
+      "macro_score": 0.42,
+      "total_score": 0.493,
+      "age_days": 0
     },
     "601899.SH": {
       "symbol": "601899.SH",
       "name": "Zijin Mining / 紫金矿业",
       "kind": "stock",
       "theme": "china-a-metals-mining",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-metals-mining, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.44,
+      "flow_score": 0.57,
+      "macro_score": 0.42,
+      "total_score": 0.493,
+      "age_days": 0
     },
     "6862.HK": {
       "symbol": "6862.HK",
       "name": "Haidilao / 海底捞",
       "kind": "stock",
       "theme": "consumer-discretionary",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=consumer-discretionary, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.56,
+      "macro_score": 0.42,
+      "total_score": 0.502,
+      "age_days": 0
     },
     "688981.SH": {
       "symbol": "688981.SH",
       "name": "SMIC / 中芯国际",
       "kind": "stock",
       "theme": "china-a-semiconductors",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "policy",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-semiconductors, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.42,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.44,
+      "flow_score": 0.6,
+      "macro_score": 0.42,
+      "total_score": 0.47,
+      "age_days": 0
     },
     "9618.HK": {
       "symbol": "9618.HK",
       "name": "JD.com / 京东集团-SW",
       "kind": "stock",
       "theme": "internet-platform",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "policy",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.42,
+      "valuation_score": 0.38,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.441,
+      "age_days": 0
     },
     "9988.HK": {
       "symbol": "9988.HK",
       "name": "Alibaba / 阿里巴巴-W",
       "kind": "stock",
       "theme": "internet-platform",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
-      "event_risk": "unknown",
+      "event_risk": "policy",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.42,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.481,
+      "age_days": 0
     },
     "9992.HK": {
       "symbol": "9992.HK",
       "name": "Pop Mart / 泡泡玛特",
       "kind": "stock",
       "theme": "consumer-discretionary",
-      "as_of_date": null,
+      "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "unknown",
       "source_count": 0,
-      "sources": [],
-      "notes": [],
-      "evidence_mode": "missing_fail_closed",
-      "fundamental_score": null,
-      "valuation_score": null,
-      "catalyst_score": null,
-      "flow_score": null,
-      "macro_score": null,
-      "total_score": null
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=consumer-discretionary, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.44,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.495,
+      "age_days": 0
     }
   },
   "findings": [
     {
       "symbol": "0002.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "0002.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "0002.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "0002.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "0002.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.476
     },
     {
       "symbol": "0002.HK",
@@ -944,30 +1808,21 @@
     },
     {
       "symbol": "000333.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "000333.SZ",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "000333.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "000333.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.486
     },
     {
       "symbol": "000333.SZ",
@@ -981,30 +1836,21 @@
     },
     {
       "symbol": "0005.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "0005.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "0005.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "0005.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.491
     },
     {
       "symbol": "0005.HK",
@@ -1018,35 +1864,21 @@
     },
     {
       "symbol": "0006.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "0006.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "0006.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "0006.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "0006.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.492
     },
     {
       "symbol": "0006.HK",
@@ -1055,35 +1887,21 @@
     },
     {
       "symbol": "000858.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "000858.SZ",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "000858.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "000858.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "000858.SZ",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.535
     },
     {
       "symbol": "000858.SZ",
@@ -1092,30 +1910,21 @@
     },
     {
       "symbol": "002594.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "002594.SZ",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "002594.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "002594.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.521
     },
     {
       "symbol": "002594.SZ",
@@ -1129,30 +1938,21 @@
     },
     {
       "symbol": "0386.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "0386.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "0386.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "0386.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.492
     },
     {
       "symbol": "0386.HK",
@@ -1166,30 +1966,21 @@
     },
     {
       "symbol": "0388.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "0388.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "0388.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "0388.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.491
     },
     {
       "symbol": "0388.HK",
@@ -1203,35 +1994,26 @@
     },
     {
       "symbol": "0700.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "0700.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.471
     },
     {
       "symbol": "0700.HK",
       "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "0700.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "0700.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "reason": "event_risk_policy"
     },
     {
       "symbol": "0700.HK",
@@ -1240,35 +2022,21 @@
     },
     {
       "symbol": "0728.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "0728.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "0728.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "0728.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "0728.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.512
     },
     {
       "symbol": "0728.HK",
@@ -1277,30 +2045,21 @@
     },
     {
       "symbol": "0857.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "0857.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "0857.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "0857.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.493
     },
     {
       "symbol": "0857.HK",
@@ -1314,30 +2073,21 @@
     },
     {
       "symbol": "0883.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "0883.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "0883.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "0883.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.496
     },
     {
       "symbol": "0883.HK",
@@ -1351,35 +2101,21 @@
     },
     {
       "symbol": "0941.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "0941.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "0941.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "0941.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "0941.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.483
     },
     {
       "symbol": "0941.HK",
@@ -1388,35 +2124,26 @@
     },
     {
       "symbol": "1024.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "1024.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.481
     },
     {
       "symbol": "1024.HK",
       "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "1024.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "1024.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "reason": "event_risk_policy"
     },
     {
       "symbol": "1024.HK",
@@ -1425,30 +2152,21 @@
     },
     {
       "symbol": "1093.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "1093.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "1093.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "1093.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.492
     },
     {
       "symbol": "1093.HK",
@@ -1462,30 +2180,21 @@
     },
     {
       "symbol": "1177.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "1177.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "1177.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "1177.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.498
     },
     {
       "symbol": "1177.HK",
@@ -1499,30 +2208,21 @@
     },
     {
       "symbol": "1299.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "1299.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "1299.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "1299.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.491
     },
     {
       "symbol": "1299.HK",
@@ -1536,35 +2236,21 @@
     },
     {
       "symbol": "159915.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "159915.SZ",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "159915.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "159915.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "159915.SZ",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.526
     },
     {
       "symbol": "159915.SZ",
@@ -1573,30 +2259,21 @@
     },
     {
       "symbol": "1810.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "1810.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "1810.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "1810.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.505
     },
     {
       "symbol": "1810.HK",
@@ -1610,30 +2287,21 @@
     },
     {
       "symbol": "2020.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "2020.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "2020.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "2020.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.504
     },
     {
       "symbol": "2020.HK",
@@ -1647,35 +2315,26 @@
     },
     {
       "symbol": "2269.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "2269.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.487
     },
     {
       "symbol": "2269.HK",
       "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "2269.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "2269.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "reason": "event_risk_policy"
     },
     {
       "symbol": "2269.HK",
@@ -1684,30 +2343,21 @@
     },
     {
       "symbol": "2331.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "2331.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "2331.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "2331.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.492
     },
     {
       "symbol": "2331.HK",
@@ -1721,35 +2371,15 @@
     },
     {
       "symbol": "2800.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "2800.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
-    },
-    {
-      "symbol": "2800.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "2800.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "2800.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "2800.HK",
@@ -1758,30 +2388,21 @@
     },
     {
       "symbol": "300750.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "300750.SZ",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "300750.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "300750.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.507
     },
     {
       "symbol": "300750.SZ",
@@ -1795,35 +2416,21 @@
     },
     {
       "symbol": "3033.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "3033.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "3033.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "3033.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "3033.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.538
     },
     {
       "symbol": "3033.HK",
@@ -1832,35 +2439,21 @@
     },
     {
       "symbol": "3067.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "3067.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "3067.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "3067.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "3067.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.535
     },
     {
       "symbol": "3067.HK",
@@ -1869,35 +2462,26 @@
     },
     {
       "symbol": "3690.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "3690.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.481
     },
     {
       "symbol": "3690.HK",
       "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "3690.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "3690.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "reason": "event_risk_policy"
     },
     {
       "symbol": "3690.HK",
@@ -1906,35 +2490,21 @@
     },
     {
       "symbol": "510300.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "510300.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "510300.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "510300.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "510300.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.527
     },
     {
       "symbol": "510300.SH",
@@ -1943,35 +2513,21 @@
     },
     {
       "symbol": "510500.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "510500.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "510500.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "510500.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "510500.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.521
     },
     {
       "symbol": "510500.SH",
@@ -1980,35 +2536,21 @@
     },
     {
       "symbol": "510880.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "510880.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "510880.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "510880.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "510880.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.536
     },
     {
       "symbol": "510880.SH",
@@ -2017,35 +2559,21 @@
     },
     {
       "symbol": "512480.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "512480.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "512480.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "512480.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "512480.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.471
     },
     {
       "symbol": "512480.SH",
@@ -2054,35 +2582,21 @@
     },
     {
       "symbol": "515790.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "515790.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "515790.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "515790.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "515790.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.507
     },
     {
       "symbol": "515790.SH",
@@ -2091,35 +2605,21 @@
     },
     {
       "symbol": "588000.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "588000.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "588000.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "588000.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "588000.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.471
     },
     {
       "symbol": "588000.SH",
@@ -2128,30 +2628,21 @@
     },
     {
       "symbol": "600030.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "600030.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "600030.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "600030.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.497
     },
     {
       "symbol": "600030.SH",
@@ -2165,30 +2656,21 @@
     },
     {
       "symbol": "600036.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "600036.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "600036.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "600036.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.487
     },
     {
       "symbol": "600036.SH",
@@ -2202,30 +2684,21 @@
     },
     {
       "symbol": "600276.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "600276.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "600276.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "600276.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.497
     },
     {
       "symbol": "600276.SH",
@@ -2239,35 +2712,21 @@
     },
     {
       "symbol": "600519.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "600519.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "600519.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "600519.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "600519.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.512
     },
     {
       "symbol": "600519.SH",
@@ -2276,35 +2735,21 @@
     },
     {
       "symbol": "600900.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "600900.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "600900.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "600900.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "600900.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.508
     },
     {
       "symbol": "600900.SH",
@@ -2313,35 +2758,21 @@
     },
     {
       "symbol": "601088.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "601088.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "601088.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "601088.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "601088.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.522
     },
     {
       "symbol": "601088.SH",
@@ -2350,30 +2781,21 @@
     },
     {
       "symbol": "601318.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "601318.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "601318.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "601318.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.493
     },
     {
       "symbol": "601318.SH",
@@ -2387,30 +2809,21 @@
     },
     {
       "symbol": "601899.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "601899.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "601899.SH",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "601899.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.493
     },
     {
       "symbol": "601899.SH",
@@ -2424,30 +2837,21 @@
     },
     {
       "symbol": "6862.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "6862.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "6862.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "6862.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.502
     },
     {
       "symbol": "6862.HK",
@@ -2461,35 +2865,26 @@
     },
     {
       "symbol": "688981.SH",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "688981.SH",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "688981.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.47
     },
     {
       "symbol": "688981.SH",
       "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "688981.SH",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "688981.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "reason": "event_risk_policy"
     },
     {
       "symbol": "688981.SH",
@@ -2498,35 +2893,26 @@
     },
     {
       "symbol": "9618.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "9618.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "9618.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.441
     },
     {
       "symbol": "9618.HK",
       "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "9618.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "9618.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "reason": "event_risk_policy"
     },
     {
       "symbol": "9618.HK",
@@ -2535,35 +2921,26 @@
     },
     {
       "symbol": "9988.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "9988.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.481
     },
     {
       "symbol": "9988.HK",
       "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "9988.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
-    },
-    {
-      "symbol": "9988.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
+      "reason": "event_risk_policy"
     },
     {
       "symbol": "9988.HK",
@@ -2572,30 +2949,21 @@
     },
     {
       "symbol": "9992.HK",
-      "severity": "warning",
-      "reason": "nontechnical_evidence_missing"
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
     },
     {
       "symbol": "9992.HK",
       "severity": "warning",
-      "reason": "nontechnical_evidence_date_missing"
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "9992.HK",
-      "severity": "warning",
-      "reason": "nontechnical_component_missing",
-      "components": [
-        "fundamental_score",
-        "valuation_score",
-        "catalyst_score",
-        "flow_score",
-        "macro_score"
-      ]
-    },
-    {
-      "symbol": "9992.HK",
-      "severity": "warning",
-      "reason": "nontechnical_score_missing"
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.495
     },
     {
       "symbol": "9992.HK",
@@ -2611,7 +2979,7 @@
   "sources": {
     "config": "D:\\Code\\yoyo\\config\\nontechnical_evidence.toml",
     "trade_universe": "D:\\Code\\yoyo\\config\\trade_universe.toml",
-    "snapshot": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-14.json",
+    "snapshot": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-15.json",
     "ranking": null
   }
 }

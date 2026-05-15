@@ -1401,6 +1401,118 @@ theme = "defensive"
             self.assertEqual(payload["summary"]["missing_count"], 1)
             self.assertGreater(payload["summary"]["blocking_finding_count"], 0)
 
+    def test_nontechnical_evidence_builder_can_auto_generate_proxy_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            config = tmp_path / "nontechnical.toml"
+            config.write_text(
+                """
+[policy]
+require_for_action = true
+max_staleness_days = 30
+min_total_score_for_action = 0.55
+block_unknown_event_risk = true
+
+[automatic_proxy]
+enabled = true
+max_total_score = 0.62
+min_source_count = 3
+allow_action_for_etfs = true
+allow_action_for_defensive_liquid_stocks = true
+""".lstrip(),
+                encoding="utf-8",
+            )
+            universe = tmp_path / "universe.toml"
+            universe.write_text(
+                """
+[[symbols]]
+symbol = "2800.HK"
+name = "ETF"
+kind = "etf"
+theme = "hong-kong-broad-market"
+""".lstrip(),
+                encoding="utf-8",
+            )
+            snapshot = tmp_path / "snapshot.json"
+            snapshot.write_text(
+                json.dumps(
+                    {
+                        "as_of_date": "2026-04-27",
+                        "market_summary": {"risk_state": "neutral", "avg_stock_move_1d": 0.1, "avg_etf_move_1d": 0.2},
+                        "items": [
+                            {
+                                "symbol": "2800.HK",
+                                "name": "ETF",
+                                "kind": "etf",
+                                "theme": "hong-kong-broad-market",
+                                "quote_trade_date": "2026-04-27",
+                                "range_pos_60": 0.5,
+                                "volume_ratio_20": 1.3,
+                                "turnover": 2_000_000_000,
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            payload = nontechnical_builder.build_evidence(config, "2026-04-27", universe, snapshot, as_of_session="close")
+
+            row = payload["symbols"]["2800.HK"]
+            self.assertEqual(row["evidence_mode"], "automatic_local_proxy")
+            self.assertTrue(row["proxy_only"])
+            self.assertEqual(row["event_risk"], "none")
+            self.assertEqual(row["source_count"], 0)
+            self.assertGreaterEqual(row["proxy_source_count"], 3)
+            self.assertGreaterEqual(row["total_score"], 0.55)
+            self.assertEqual(payload["summary"]["automatic_proxy_count"], 1)
+            self.assertEqual(payload["summary"]["proxy_only_count"], 1)
+            self.assertEqual(payload["summary"]["available_count"], 0)
+            self.assertEqual(payload["summary"]["curated_available_count"], 0)
+            self.assertEqual(payload["summary"]["actionable_evidence_count"], 0)
+            self.assertEqual(payload["summary"]["coverage_ratio"], 0.0)
+            self.assertEqual(payload["summary"]["proxy_coverage_ratio"], 1.0)
+            reasons = {finding["reason"] for finding in payload["findings"]}
+            self.assertIn("nontechnical_proxy_only", reasons)
+
+    def test_ranker_blocks_action_for_proxy_only_nontechnical_evidence(self):
+        item = ranker.item_score(
+            {"symbol": "2800.HK", "theme": "broad-market", "kind": "etf", "latest_close": 28.0, "ma20": 25.0, "ma60": 24.0, "range_pos_60": 0.6, "pct_change_1d": 1.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-13"
+        evidence = {
+            "policy": {"require_for_action": True, "max_staleness_days": 30, "min_total_score_for_action": 0.55, "block_unknown_event_risk": True},
+            "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS,
+            "symbols": {
+                "2800.HK": {
+                    "evidence_mode": "automatic_local_proxy",
+                    "proxy_only": True,
+                    "as_of_date": "2026-05-13",
+                    "fundamental_score": 0.9,
+                    "valuation_score": 0.9,
+                    "catalyst_score": 0.9,
+                    "flow_score": 0.9,
+                    "macro_score": 0.9,
+                    "event_risk": "none",
+                    "source_count": 3,
+                    "sources": [{"label": "proxy"}, {"label": "metadata"}, {"label": "snapshot"}],
+                }
+            },
+        }
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={}, nontechnical_evidence=evidence)
+
+        self.assertTrue(ranked[0]["qualified_for_watch"])
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertEqual(ranked[0]["nontechnical_evidence"]["status"], "proxy_only")
+        self.assertEqual(ranked[0]["nontechnical_evidence"]["source_count"], 0)
+        self.assertIn("nontechnical_proxy_only", ranked[0]["action_disqualifiers"])
+        self.assertIn("nontechnical_evidence_gate_blocked", ranked[0]["qualification_flags"])
+
     def test_ranker_treats_generated_missing_nontechnical_row_as_missing(self):
         item = ranker.item_score(
             {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
@@ -3023,7 +3135,7 @@ horizon_days = 14
             calibration = {"summary": {"combined_record_count": 5}, "scorecard": {"scored_sample_count": 4, "hit_rate": 0.5, "brier_score": 0.2, "calibration_error": 0.1}}
             forward = {"summary": {"sample_count": 4}}
             variants = {"competition_id": "test_competition", "scoreboard": [{"diagnostic_rank": 1, "variant_id": "baseline", "sample_count": 2, "avg_net_return_pct": 1.2, "avg_alpha_pct": 0.5, "no_execution_audit_passed": True}]}
-            nontechnical = {"as_of_date": "2026-04-27", "summary": {"symbol_count": 3, "available_count": 1, "missing_count": 2, "critical_finding_count": 0}}
+            nontechnical = {"as_of_date": "2026-04-27", "summary": {"symbol_count": 3, "available_count": 1, "curated_available_count": 1, "automatic_proxy_count": 1, "proxy_only_count": 1, "missing_count": 1, "critical_finding_count": 0}}
             attribution_data = {"as_of_date": "2026-04-27", "summary": {"attributed_sample_count": 1, "hit_rate": 1.0, "avg_return_pct": 2.0}, "buckets": {"total_score": [{"score_bucket": "0.55-0.70", "scored_sample_count": 1, "hit_rate": 1.0, "avg_return_pct": 2.0}]}}
             fixtures = [
                 (calls_path, calls),
@@ -3056,7 +3168,7 @@ horizon_days = 14
 
             payload = result["payload"]
             markdown = pathlib.Path(result["markdown"]).read_text(encoding="utf-8")
-            for section in ["今日结论", "重点标的表", "Gate 拒绝与观察重点", "影子证据与校准", "非技术面证据与归因", "Shadow 变体竞赛", "研究声明"]:
+            for section in ["最终结果", "今日结论", "重点标的表", "Gate 拒绝与观察重点", "影子证据与校准", "非技术面证据与归因", "Shadow 变体竞赛", "研究声明"]:
                 self.assertIn(section, markdown)
             self.assertTrue(payload["research_only"])
             self.assertTrue(payload["no_execution"])
@@ -3065,6 +3177,8 @@ horizon_days = 14
             self.assertNotEqual([row["symbol"] for row in payload["recommendations"]], ["ZZZ.HK"])
             self.assertEqual(payload["variants"]["scoreboard"][0]["variant_id"], "baseline")
             self.assertEqual(payload["nontechnical"]["evidence_summary"]["available_count"], 1)
+            self.assertIn("proxy-only", markdown)
+            self.assertIn("audited fundamentals", markdown)
             self.assertIn("非技术面分桶", markdown)
 
             morning_calls = tmp_path / "morning-calls.json"

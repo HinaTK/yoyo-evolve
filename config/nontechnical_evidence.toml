@@ -17,6 +17,14 @@ catalyst_score = 0.25
 flow_score = 0.15
 macro_score = 0.10
 
+[automatic_proxy]
+enabled = true
+provider_id = "automatic_local_proxy_v1"
+max_total_score = 0.62
+min_source_count = 3
+allow_action_for_etfs = true
+allow_action_for_defensive_liquid_stocks = true
+
 # Evidence rows are intentionally absent until populated by a trusted data or
 # research process. Missing evidence is a deliberate action gate, not a data error.
 #

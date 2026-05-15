@@ -1,60 +1,60 @@
 {
-  "date": "2026-05-14",
+  "date": "2026-05-15",
   "session": "close",
   "source_of_truth": "calls_json_with_risk_review_caps",
   "research_only": true,
   "no_execution": true,
   "recommendations": [
     {
-      "symbol": "9618.HK",
-      "state": "watch_only",
-      "effective_state": "watch_only",
-      "theme": "internet-platform",
-      "confidence": 0.36,
-      "risk_cap": "watch_only",
-      "risk_decision": "pass",
-      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 9618.HK.",
-      "risks": [
-        "nontechnical_proxy_only",
-        "nontechnical_score_below_action_min",
-        "event_risk_policy"
-      ],
-      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
-      "nontechnical_evidence": "nontechnical_evidence status=proxy_only, total_score=0.47, event_risk=policy, flags=['nontechnical_proxy_only', 'nontechnical_score_below_action_min', 'event_risk_policy', 'nontechnical_source_missing']"
-    },
-    {
-      "symbol": "0002.HK",
-      "state": "watch_only",
-      "effective_state": "watch_only",
-      "theme": "utilities-defensive",
-      "confidence": 0.36,
-      "risk_cap": "watch_only",
-      "risk_decision": "pass",
-      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 0002.HK.",
-      "risks": [
-        "nontechnical_proxy_only",
-        "nontechnical_score_below_action_min",
-        "nontechnical_source_missing"
-      ],
-      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
-      "nontechnical_evidence": "nontechnical_evidence status=proxy_only, total_score=0.505, event_risk=none, flags=['nontechnical_proxy_only', 'nontechnical_score_below_action_min', 'nontechnical_source_missing']"
-    },
-    {
-      "symbol": "0728.HK",
+      "symbol": "000333.SZ",
       "state": "avoid",
       "effective_state": "avoid",
-      "theme": "telecom-dividend",
-      "confidence": 0.27,
+      "theme": "china-a-home-appliances",
+      "confidence": 0.26,
       "risk_cap": "avoid",
       "risk_decision": "veto",
-      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 0728.HK.",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 000333.SZ.",
       "risks": [
         "symbol_risk_veto",
         "nontechnical_proxy_only",
         "nontechnical_score_below_action_min"
       ],
       "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
-      "nontechnical_evidence": "nontechnical_evidence status=proxy_only, total_score=0.509, event_risk=none, flags=['nontechnical_proxy_only', 'nontechnical_score_below_action_min', 'nontechnical_source_missing']"
+      "nontechnical_evidence": "nontechnical_evidence status=proxy_only, total_score=0.486, event_risk=unknown, flags=['nontechnical_proxy_only', 'nontechnical_score_below_action_min', 'event_risk_unknown', 'nontechnical_source_missing']"
+    },
+    {
+      "symbol": "688981.SH",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "china-a-semiconductors",
+      "confidence": 0.25,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 688981.SH.",
+      "risks": [
+        "symbol_risk_veto",
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=proxy_only, total_score=0.47, event_risk=policy, flags=['nontechnical_proxy_only', 'nontechnical_score_below_action_min', 'event_risk_policy', 'nontechnical_source_missing']"
+    },
+    {
+      "symbol": "159915.SZ",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "china-a-growth-tech",
+      "confidence": 0.43,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 159915.SZ.",
+      "risks": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "nontechnical_source_missing"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=proxy_only, total_score=0.526, event_risk=none, flags=['nontechnical_proxy_only', 'nontechnical_score_below_action_min', 'nontechnical_source_missing']"
     }
   ],
   "ranking": {
@@ -62,315 +62,15 @@
     "diagnostic_count": 3,
     "top_watch": [
       {
-        "symbol": "9618.HK",
-        "name": "JD.com / 京东集团-SW",
+        "symbol": "000333.SZ",
+        "name": "Midea Group / 美的集团",
         "kind": "stock",
-        "theme": "internet-platform",
-        "currency": "HKD",
-        "exchange": "HKEX",
-        "score": 85.31,
+        "theme": "china-a-home-appliances",
+        "currency": "CNY",
+        "exchange": "SZSE",
+        "score": 80.88,
         "trend_score": 100,
-        "momentum_score": 81.67,
-        "risk_penalty": 0.0,
-        "qualification_flags": [
-          "score_meets_watch_threshold",
-          "price_above_ma20",
-          "price_above_ma60",
-          "ma20_above_ma60",
-          "volume_confirmed",
-          "constructive_range_position",
-          "cost_gate_passed",
-          "market_specific_risk_gate_clear",
-          "nontechnical_evidence_gate_blocked",
-          "score_meets_action_threshold",
-          "volume_meets_action_threshold",
-          "market_range_overextended",
-          "symbol_recent_adverse_breach_clear",
-          "same_theme_best_peer_evidence_passed",
-          "diagnostic_candidate"
-        ],
-        "disqualifiers": [],
-        "qualified_for_watch": true,
-        "diagnostic_only": true,
-        "latest_close": 130.1,
-        "pct_change_1d": 1.48,
-        "ma20": 119.4,
-        "ma60": 109.8473,
-        "range_pos_60": 1.054,
-        "volume_ratio_20": 1.9916,
-        "regime_flags": [
-          "uptrend",
-          "volume-expansion"
-        ],
-        "price_source": "quote",
-        "prev_close": 128.2,
-        "latest_open": 132.4,
-        "latest_high": 132.5,
-        "latest_low": 130.0,
-        "latest_volume": 20375443,
-        "as_of": "2026-05-14",
-        "quote_trade_time": "2026/05/14 16:09:18",
-        "quote_trade_date": "2026-05-14",
-        "quote_last": 130.1,
-        "quote_volume": 20375443,
-        "ah_pair": null,
-        "ah_premium_pct": null,
-        "fx_reference": null,
-        "hkd_cny_reference": null,
-        "theme_rank": 1,
-        "theme_peer_count": 5,
-        "theme_leader": "9618.HK",
-        "theme_leader_score": 85.31,
-        "theme_score_gap_to_leader": 0.0,
-        "theme_top_peer_scores": [
-          {
-            "symbol": "9618.HK",
-            "score": 85.31,
-            "rank": 1
-          },
-          {
-            "symbol": "9988.HK",
-            "score": 65.66,
-            "rank": 2
-          },
-          {
-            "symbol": "3690.HK",
-            "score": 65.59,
-            "rank": 3
-          }
-        ],
-        "same_theme_best_symbol": "9618.HK",
-        "same_theme_best_score": 85.31,
-        "same_theme_selected_vs_best_score_gap": 0.0,
-        "same_theme_next_best_symbol": "9988.HK",
-        "same_theme_selected_vs_next_best_score_gap": 19.65,
-        "is_theme_leader": true,
-        "same_theme_peer_evidence_passed": true,
-        "peer_relative_decision": "theme_leader",
-        "snapshot_as_of_date": "2026-05-14",
-        "snapshot_as_of_session": "close",
-        "market_proxy_symbol": "2800.HK",
-        "market_range_pos_60": 0.7395,
-        "market_pct_change_1d": 0.15,
-        "market_volume_ratio_20": 1.0695,
-        "market_proxy_available": true,
-        "max_market_range_for_action": 0.7,
-        "expected_edge_bps": 256.23,
-        "net_expected_edge_bps": 221.23,
-        "cost_gate_passed": true,
-        "edge_method": "technical_snapshot_score_v1",
-        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
-        "symbol_risk": {
-          "action_veto": false,
-          "reasons": [
-            "pass_rate=0.000 over 2 evaluated calls",
-            "records include symbol_selection_error"
-          ],
-          "tags": [
-            "low_symbol_pass_rate",
-            "repeated_symbol_selection_error"
-          ]
-        },
-        "market_specific_risk_flags": [],
-        "action_disqualifiers": [
-          "nontechnical_proxy_only",
-          "nontechnical_score_below_action_min",
-          "event_risk_policy",
-          "nontechnical_source_missing",
-          "market_range_pos_60_above_action_limit"
-        ],
-        "nontechnical_evidence": {
-          "status": "proxy_only",
-          "required_for_action": true,
-          "evidence_mode": "automatic_local_proxy",
-          "proxy_only": true,
-          "total_score": 0.47,
-          "min_total_score_for_action": 0.55,
-          "as_of_date": "2026-05-14",
-          "as_of_session": "close",
-          "source_count": 0,
-          "proxy_source_count": 3,
-          "components": {
-            "fundamental_score": 0.42,
-            "valuation_score": 0.38,
-            "catalyst_score": 0.5,
-            "flow_score": 0.62,
-            "macro_score": 0.5
-          },
-          "event_risk": "policy",
-          "notes": [
-            "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-            "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=neutral"
-          ]
-        },
-        "nontechnical_evidence_flags": [
-          "nontechnical_proxy_only",
-          "nontechnical_score_below_action_min",
-          "event_risk_policy",
-          "nontechnical_source_missing"
-        ],
-        "qualified_for_action": false,
-        "source_layer": "diagnostic_candidates",
-        "eligible_for_action_from_layer": false,
-        "layer_action_cap": "watch_only"
-      },
-      {
-        "symbol": "0002.HK",
-        "name": "CLP Holdings / 中电控股",
-        "kind": "stock",
-        "theme": "utilities-defensive",
-        "currency": "HKD",
-        "exchange": "HKEX",
-        "score": 83.29,
-        "trend_score": 100,
-        "momentum_score": 70.27,
-        "risk_penalty": 0.0,
-        "qualification_flags": [
-          "score_meets_watch_threshold",
-          "price_above_ma20",
-          "price_above_ma60",
-          "ma20_above_ma60",
-          "volume_confirmed",
-          "constructive_range_position",
-          "cost_gate_passed",
-          "market_specific_risk_gate_clear",
-          "nontechnical_evidence_gate_blocked",
-          "score_meets_action_threshold",
-          "volume_meets_action_threshold",
-          "market_range_overextended",
-          "symbol_recent_adverse_breach_clear",
-          "same_theme_best_peer_evidence_passed",
-          "diagnostic_candidate"
-        ],
-        "disqualifiers": [],
-        "qualified_for_watch": true,
-        "diagnostic_only": true,
-        "latest_close": 77.1,
-        "pct_change_1d": 1.11,
-        "ma20": 75.36,
-        "ma60": 74.3587,
-        "range_pos_60": 1.1474,
-        "volume_ratio_20": 1.5696,
-        "regime_flags": [
-          "uptrend",
-          "volume-expansion"
-        ],
-        "price_source": "quote",
-        "prev_close": 76.25,
-        "latest_open": 76.8,
-        "latest_high": 77.2,
-        "latest_low": 76.45,
-        "latest_volume": 3873376,
-        "as_of": "2026-05-14",
-        "quote_trade_time": "2026/05/14 16:09:18",
-        "quote_trade_date": "2026-05-14",
-        "quote_last": 77.1,
-        "quote_volume": 3873376,
-        "ah_pair": null,
-        "ah_premium_pct": null,
-        "fx_reference": null,
-        "hkd_cny_reference": null,
-        "theme_rank": 1,
-        "theme_peer_count": 2,
-        "theme_leader": "0002.HK",
-        "theme_leader_score": 83.29,
-        "theme_score_gap_to_leader": 0.0,
-        "theme_top_peer_scores": [
-          {
-            "symbol": "0002.HK",
-            "score": 83.29,
-            "rank": 1
-          },
-          {
-            "symbol": "0006.HK",
-            "score": 75.34,
-            "rank": 2
-          }
-        ],
-        "same_theme_best_symbol": "0002.HK",
-        "same_theme_best_score": 83.29,
-        "same_theme_selected_vs_best_score_gap": 0.0,
-        "same_theme_next_best_symbol": "0006.HK",
-        "same_theme_selected_vs_next_best_score_gap": 7.95,
-        "is_theme_leader": true,
-        "same_theme_peer_evidence_passed": true,
-        "peer_relative_decision": "theme_leader",
-        "snapshot_as_of_date": "2026-05-14",
-        "snapshot_as_of_session": "close",
-        "market_proxy_symbol": "2800.HK",
-        "market_range_pos_60": 0.7395,
-        "market_pct_change_1d": 0.15,
-        "market_volume_ratio_20": 1.0695,
-        "market_proxy_available": true,
-        "max_market_range_for_action": 0.7,
-        "expected_edge_bps": 233.78,
-        "net_expected_edge_bps": 198.78,
-        "cost_gate_passed": true,
-        "edge_method": "technical_snapshot_score_v1",
-        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
-        "symbol_risk": {
-          "action_veto": false,
-          "reasons": [
-            "pass_rate=0.000 over 3 evaluated calls",
-            "avg_return_pct=-0.242 over 3 evaluated calls",
-            "records_avg_return_pct=-0.242 over 3 records"
-          ],
-          "tags": [
-            "low_symbol_pass_rate",
-            "negative_symbol_avg_return"
-          ]
-        },
-        "market_specific_risk_flags": [],
-        "action_disqualifiers": [
-          "nontechnical_proxy_only",
-          "nontechnical_score_below_action_min",
-          "nontechnical_source_missing",
-          "market_range_pos_60_above_action_limit"
-        ],
-        "nontechnical_evidence": {
-          "status": "proxy_only",
-          "required_for_action": true,
-          "evidence_mode": "automatic_local_proxy",
-          "proxy_only": true,
-          "total_score": 0.505,
-          "min_total_score_for_action": 0.55,
-          "as_of_date": "2026-05-14",
-          "as_of_session": "close",
-          "source_count": 0,
-          "proxy_source_count": 3,
-          "components": {
-            "fundamental_score": 0.56,
-            "valuation_score": 0.38,
-            "catalyst_score": 0.5,
-            "flow_score": 0.57,
-            "macro_score": 0.5
-          },
-          "event_risk": "none",
-          "notes": [
-            "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-            "kind=stock, theme=utilities-defensive, quote_fresh=True, risk_state=neutral"
-          ]
-        },
-        "nontechnical_evidence_flags": [
-          "nontechnical_proxy_only",
-          "nontechnical_score_below_action_min",
-          "nontechnical_source_missing"
-        ],
-        "qualified_for_action": false,
-        "source_layer": "diagnostic_candidates",
-        "eligible_for_action_from_layer": false,
-        "layer_action_cap": "watch_only"
-      },
-      {
-        "symbol": "0728.HK",
-        "name": "China Telecom / 中国电信",
-        "kind": "stock",
-        "theme": "telecom-dividend",
-        "currency": "HKD",
-        "exchange": "HKEX",
-        "score": 82.87,
-        "trend_score": 100,
-        "momentum_score": 74.81,
+        "momentum_score": 65.69,
         "risk_penalty": 0.0,
         "qualification_flags": [
           "score_meets_watch_threshold",
@@ -394,83 +94,366 @@
         ],
         "qualified_for_watch": true,
         "diagnostic_only": true,
-        "latest_close": 5.51,
-        "pct_change_1d": 1.1,
-        "ma20": 5.163,
-        "ma60": 5.0328,
-        "range_pos_60": 1.0282,
-        "volume_ratio_20": 1.8007,
+        "latest_close": 82.57,
+        "pct_change_1d": 0.93,
+        "ma20": 79.722,
+        "ma60": 77.8182,
+        "range_pos_60": 1.0783,
+        "volume_ratio_20": 1.4124,
         "regime_flags": [
-          "uptrend",
-          "volume-expansion"
+          "uptrend"
         ],
         "price_source": "quote",
-        "prev_close": 5.45,
-        "latest_open": 5.46,
-        "latest_high": 5.61,
-        "latest_low": 5.42,
-        "latest_volume": 131081325,
-        "as_of": "2026-05-14",
-        "quote_trade_time": "2026/05/14 16:09:17",
-        "quote_trade_date": "2026-05-14",
-        "quote_last": 5.51,
-        "quote_volume": 131081325,
+        "prev_close": 81.81,
+        "latest_open": 81.45,
+        "latest_high": 83.3,
+        "latest_low": 80.75,
+        "latest_volume": 426609,
+        "as_of": "2026-05-15",
+        "quote_trade_time": "20260515161415",
+        "quote_trade_date": "2026-05-15",
+        "quote_last": 82.57,
+        "quote_volume": 426609,
         "ah_pair": null,
         "ah_premium_pct": null,
         "fx_reference": null,
         "hkd_cny_reference": null,
         "theme_rank": 1,
-        "theme_peer_count": 2,
-        "theme_leader": "0728.HK",
-        "theme_leader_score": 82.87,
+        "theme_peer_count": 1,
+        "theme_leader": "000333.SZ",
+        "theme_leader_score": 80.88,
         "theme_score_gap_to_leader": 0.0,
         "theme_top_peer_scores": [
           {
-            "symbol": "0728.HK",
-            "score": 82.87,
+            "symbol": "000333.SZ",
+            "score": 80.88,
             "rank": 1
-          },
-          {
-            "symbol": "0941.HK",
-            "score": 78.28,
-            "rank": 2
           }
         ],
-        "same_theme_best_symbol": "0728.HK",
-        "same_theme_best_score": 82.87,
+        "same_theme_best_symbol": "000333.SZ",
+        "same_theme_best_score": 80.88,
         "same_theme_selected_vs_best_score_gap": 0.0,
-        "same_theme_next_best_symbol": "0941.HK",
-        "same_theme_selected_vs_next_best_score_gap": 4.59,
+        "same_theme_next_best_symbol": null,
+        "same_theme_selected_vs_next_best_score_gap": null,
         "is_theme_leader": true,
         "same_theme_peer_evidence_passed": true,
-        "peer_relative_decision": "theme_leader",
-        "snapshot_as_of_date": "2026-05-14",
+        "peer_relative_decision": "sole_theme_candidate",
+        "snapshot_as_of_date": "2026-05-15",
         "snapshot_as_of_session": "close",
-        "market_proxy_symbol": "2800.HK",
-        "market_range_pos_60": 0.7395,
-        "market_pct_change_1d": 0.15,
-        "market_volume_ratio_20": 1.0695,
+        "market_proxy_symbol": "510300.SH",
+        "market_range_pos_60": 0.7632,
+        "market_pct_change_1d": -1.28,
+        "market_volume_ratio_20": 0.9444,
         "market_proxy_available": true,
         "max_market_range_for_action": 0.7,
-        "expected_edge_bps": 237.17,
-        "net_expected_edge_bps": 202.17,
+        "expected_edge_bps": 216.88,
+        "net_expected_edge_bps": 181.88,
         "cost_gate_passed": true,
         "edge_method": "technical_snapshot_score_v1",
         "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
         "symbol_risk": {
           "action_veto": true,
           "reasons": [
-            "pass_rate=0.000 over 2 evaluated calls",
-            "avg_return_pct=-0.378 over 2 evaluated calls",
-            "backtest_max_adverse_pct<=-8.0% in 2 of 26 promotable samples"
+            "backtest_max_adverse_pct<=-8.0% in 2 of 17 promotable samples"
           ],
           "tags": [
-            "low_symbol_pass_rate",
-            "negative_symbol_avg_return",
             "backtest_adverse_breach"
           ]
         },
-        "market_specific_risk_flags": [],
+        "market_specific_risk_flags": [
+          "hkd_cny_cross_currency_exposure",
+          "hkd_cny_fx_reference_missing"
+        ],
+        "action_disqualifiers": [
+          "nontechnical_proxy_only",
+          "nontechnical_score_below_action_min",
+          "event_risk_unknown",
+          "nontechnical_source_missing",
+          "market_range_pos_60_above_action_limit"
+        ],
+        "nontechnical_evidence": {
+          "status": "proxy_only",
+          "required_for_action": true,
+          "evidence_mode": "automatic_local_proxy",
+          "proxy_only": true,
+          "total_score": 0.486,
+          "min_total_score_for_action": 0.55,
+          "as_of_date": "2026-05-15",
+          "as_of_session": "close",
+          "source_count": 0,
+          "proxy_source_count": 3,
+          "components": {
+            "fundamental_score": 0.5,
+            "valuation_score": 0.38,
+            "catalyst_score": 0.5,
+            "flow_score": 0.57,
+            "macro_score": 0.5
+          },
+          "event_risk": "unknown",
+          "notes": [
+            "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+            "kind=stock, theme=china-a-home-appliances, quote_fresh=True, risk_state=neutral"
+          ]
+        },
+        "nontechnical_evidence_flags": [
+          "nontechnical_proxy_only",
+          "nontechnical_score_below_action_min",
+          "event_risk_unknown",
+          "nontechnical_source_missing"
+        ],
+        "qualified_for_action": false,
+        "source_layer": "diagnostic_candidates",
+        "eligible_for_action_from_layer": false,
+        "layer_action_cap": "watch_only"
+      },
+      {
+        "symbol": "688981.SH",
+        "name": "SMIC / 中芯国际",
+        "kind": "stock",
+        "theme": "china-a-semiconductors",
+        "currency": "CNY",
+        "exchange": "SSE",
+        "score": 77.32,
+        "trend_score": 94.35,
+        "momentum_score": 75.62,
+        "risk_penalty": 0.0,
+        "qualification_flags": [
+          "score_meets_watch_threshold",
+          "price_above_ma20",
+          "price_above_ma60",
+          "ma20_above_ma60",
+          "volume_confirmed",
+          "constructive_range_position",
+          "cost_gate_passed",
+          "market_specific_risk_gate_clear",
+          "nontechnical_evidence_gate_blocked",
+          "score_meets_action_threshold",
+          "volume_meets_action_threshold",
+          "market_range_overextended",
+          "symbol_recent_adverse_breach_clear",
+          "same_theme_best_peer_evidence_passed",
+          "diagnostic_candidate"
+        ],
+        "disqualifiers": [
+          "symbol_risk_veto"
+        ],
+        "qualified_for_watch": true,
+        "diagnostic_only": true,
+        "latest_close": 119.02,
+        "pct_change_1d": 0.95,
+        "ma20": 113.493,
+        "ma60": 108.1618,
+        "range_pos_60": 0.8117,
+        "volume_ratio_20": 1.9011,
+        "regime_flags": [
+          "uptrend",
+          "volume-expansion"
+        ],
+        "price_source": "quote",
+        "prev_close": 117.9,
+        "latest_open": 121.0,
+        "latest_high": 125.0,
+        "latest_low": 118.48,
+        "latest_volume": 132810054,
+        "as_of": "2026-05-15",
+        "quote_trade_time": "20260515161434",
+        "quote_trade_date": "2026-05-15",
+        "quote_last": 119.02,
+        "quote_volume": 132810054,
+        "ah_pair": null,
+        "ah_premium_pct": null,
+        "fx_reference": null,
+        "hkd_cny_reference": null,
+        "theme_rank": 1,
+        "theme_peer_count": 2,
+        "theme_leader": "688981.SH",
+        "theme_leader_score": 77.32,
+        "theme_score_gap_to_leader": 0.0,
+        "theme_top_peer_scores": [
+          {
+            "symbol": "688981.SH",
+            "score": 77.32,
+            "rank": 1
+          },
+          {
+            "symbol": "512480.SH",
+            "score": 74.92,
+            "rank": 2
+          }
+        ],
+        "same_theme_best_symbol": "688981.SH",
+        "same_theme_best_score": 77.32,
+        "same_theme_selected_vs_best_score_gap": 0.0,
+        "same_theme_next_best_symbol": "512480.SH",
+        "same_theme_selected_vs_next_best_score_gap": 2.4,
+        "is_theme_leader": true,
+        "same_theme_peer_evidence_passed": true,
+        "peer_relative_decision": "theme_leader",
+        "snapshot_as_of_date": "2026-05-15",
+        "snapshot_as_of_session": "close",
+        "market_proxy_symbol": "510300.SH",
+        "market_range_pos_60": 0.7632,
+        "market_pct_change_1d": -1.28,
+        "market_volume_ratio_20": 0.9444,
+        "market_proxy_available": true,
+        "max_market_range_for_action": 0.7,
+        "expected_edge_bps": 210.93,
+        "net_expected_edge_bps": 175.93,
+        "cost_gate_passed": true,
+        "edge_method": "technical_snapshot_score_v1",
+        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+        "symbol_risk": {
+          "action_veto": true,
+          "reasons": [
+            "backtest_max_adverse_pct<=-8.0% in 6 of 19 promotable samples"
+          ],
+          "tags": [
+            "backtest_adverse_breach"
+          ]
+        },
+        "market_specific_risk_flags": [
+          "hkd_cny_cross_currency_exposure",
+          "hkd_cny_fx_reference_missing"
+        ],
+        "action_disqualifiers": [
+          "nontechnical_proxy_only",
+          "nontechnical_score_below_action_min",
+          "event_risk_policy",
+          "nontechnical_source_missing",
+          "market_range_pos_60_above_action_limit"
+        ],
+        "nontechnical_evidence": {
+          "status": "proxy_only",
+          "required_for_action": true,
+          "evidence_mode": "automatic_local_proxy",
+          "proxy_only": true,
+          "total_score": 0.47,
+          "min_total_score_for_action": 0.55,
+          "as_of_date": "2026-05-15",
+          "as_of_session": "close",
+          "source_count": 0,
+          "proxy_source_count": 3,
+          "components": {
+            "fundamental_score": 0.42,
+            "valuation_score": 0.51,
+            "catalyst_score": 0.44,
+            "flow_score": 0.6,
+            "macro_score": 0.42
+          },
+          "event_risk": "policy",
+          "notes": [
+            "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+            "kind=stock, theme=china-a-semiconductors, quote_fresh=True, risk_state=risk_off"
+          ]
+        },
+        "nontechnical_evidence_flags": [
+          "nontechnical_proxy_only",
+          "nontechnical_score_below_action_min",
+          "event_risk_policy",
+          "nontechnical_source_missing"
+        ],
+        "qualified_for_action": false,
+        "source_layer": "diagnostic_candidates",
+        "eligible_for_action_from_layer": false,
+        "layer_action_cap": "watch_only"
+      },
+      {
+        "symbol": "159915.SZ",
+        "name": "E Fund ChiNext ETF / 易方达创业板ETF",
+        "kind": "etf",
+        "theme": "china-a-growth-tech",
+        "currency": "CNY",
+        "exchange": "SZSE",
+        "score": 75.71,
+        "trend_score": 97.42,
+        "momentum_score": 60.52,
+        "risk_penalty": 0.0,
+        "qualification_flags": [
+          "score_meets_watch_threshold",
+          "price_above_ma20",
+          "price_above_ma60",
+          "ma20_above_ma60",
+          "volume_confirmed",
+          "constructive_range_position",
+          "cost_gate_passed",
+          "market_specific_risk_gate_clear",
+          "nontechnical_evidence_gate_blocked",
+          "score_meets_action_threshold",
+          "volume_meets_action_threshold",
+          "market_range_overextended",
+          "symbol_recent_adverse_breach_clear",
+          "same_theme_best_peer_evidence_passed",
+          "diagnostic_candidate"
+        ],
+        "disqualifiers": [],
+        "qualified_for_watch": true,
+        "diagnostic_only": true,
+        "latest_close": 3.97,
+        "pct_change_1d": 0.23,
+        "ma20": 3.7419,
+        "ma60": 3.433,
+        "range_pos_60": 0.914,
+        "volume_ratio_20": 1.4342,
+        "regime_flags": [
+          "uptrend"
+        ],
+        "price_source": "quote",
+        "prev_close": 3.961,
+        "latest_open": 3.961,
+        "latest_high": 4.015,
+        "latest_low": 3.88,
+        "latest_volume": 19036007,
+        "as_of": "2026-05-15",
+        "quote_trade_time": "20260515161403",
+        "quote_trade_date": "2026-05-15",
+        "quote_last": 3.97,
+        "quote_volume": 19036007,
+        "ah_pair": null,
+        "ah_premium_pct": null,
+        "fx_reference": null,
+        "hkd_cny_reference": null,
+        "theme_rank": 1,
+        "theme_peer_count": 1,
+        "theme_leader": "159915.SZ",
+        "theme_leader_score": 75.71,
+        "theme_score_gap_to_leader": 0.0,
+        "theme_top_peer_scores": [
+          {
+            "symbol": "159915.SZ",
+            "score": 75.71,
+            "rank": 1
+          }
+        ],
+        "same_theme_best_symbol": "159915.SZ",
+        "same_theme_best_score": 75.71,
+        "same_theme_selected_vs_best_score_gap": 0.0,
+        "same_theme_next_best_symbol": null,
+        "same_theme_selected_vs_next_best_score_gap": null,
+        "is_theme_leader": true,
+        "same_theme_peer_evidence_passed": true,
+        "peer_relative_decision": "sole_theme_candidate",
+        "snapshot_as_of_date": "2026-05-15",
+        "snapshot_as_of_session": "close",
+        "market_proxy_symbol": "510300.SH",
+        "market_range_pos_60": 0.7632,
+        "market_pct_change_1d": -1.28,
+        "market_volume_ratio_20": 0.9444,
+        "market_proxy_available": true,
+        "max_market_range_for_action": 0.7,
+        "expected_edge_bps": 187.35,
+        "net_expected_edge_bps": 152.35,
+        "cost_gate_passed": true,
+        "edge_method": "technical_snapshot_score_v1",
+        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+        "symbol_risk": {
+          "action_veto": false,
+          "reasons": [],
+          "tags": []
+        },
+        "market_specific_risk_flags": [
+          "hkd_cny_cross_currency_exposure",
+          "hkd_cny_fx_reference_missing"
+        ],
         "action_disqualifiers": [
           "nontechnical_proxy_only",
           "nontechnical_score_below_action_min",
@@ -482,23 +465,23 @@
           "required_for_action": true,
           "evidence_mode": "automatic_local_proxy",
           "proxy_only": true,
-          "total_score": 0.509,
+          "total_score": 0.526,
           "min_total_score_for_action": 0.55,
-          "as_of_date": "2026-05-14",
+          "as_of_date": "2026-05-15",
           "as_of_session": "close",
           "source_count": 0,
           "proxy_source_count": 3,
           "components": {
-            "fundamental_score": 0.56,
+            "fundamental_score": 0.58,
             "valuation_score": 0.38,
-            "catalyst_score": 0.5,
+            "catalyst_score": 0.53,
             "flow_score": 0.6,
-            "macro_score": 0.5
+            "macro_score": 0.53
           },
           "event_risk": "none",
           "notes": [
             "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-            "kind=stock, theme=telecom-dividend, quote_fresh=True, risk_state=neutral"
+            "kind=etf, theme=china-a-growth-tech, quote_fresh=True, risk_state=neutral"
           ]
         },
         "nontechnical_evidence_flags": [
@@ -514,7 +497,7 @@
     ]
   },
   "evidence": {
-    "forward_shadow_logs": 4,
+    "forward_shadow_logs": 5,
     "matured_forward_days": 1,
     "forward_sample_count": 0,
     "audit_passed": true
@@ -538,8 +521,8 @@
         "stop_loss_pct": -4.0,
         "horizon_days": 14,
         "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
-        "log_count": 2,
-        "forward_like_log_count": 2,
+        "log_count": 3,
+        "forward_like_log_count": 3,
         "matured_forward_days": 0,
         "no_execution_audit_passed": true,
         "sample_count": 0,
@@ -562,8 +545,8 @@
         "stop_loss_pct": -4.0,
         "horizon_days": 14,
         "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
-        "log_count": 2,
-        "forward_like_log_count": 2,
+        "log_count": 3,
+        "forward_like_log_count": 3,
         "matured_forward_days": 0,
         "no_execution_audit_passed": true,
         "sample_count": 0,
@@ -586,8 +569,8 @@
         "stop_loss_pct": -3.0,
         "horizon_days": 14,
         "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
-        "log_count": 2,
-        "forward_like_log_count": 2,
+        "log_count": 3,
+        "forward_like_log_count": 3,
         "matured_forward_days": 0,
         "no_execution_audit_passed": true,
         "sample_count": 0,
@@ -614,7 +597,7 @@
       "missing_count": 0,
       "coverage_ratio": 0.0,
       "actionable_evidence_count": 0,
-      "finding_count": 209,
+      "finding_count": 211,
       "critical_finding_count": 0,
       "blocking_finding_count": 120
     },
@@ -632,15 +615,15 @@
   },
   "sources": {
     "calls": {
-      "path": "D:\\Code\\yoyo\\research\\calls\\2026-05-14-close-draft-policy.json",
+      "path": "D:\\Code\\yoyo\\research\\calls\\2026-05-15-close-draft-policy.json",
       "exists": true
     },
     "ranking": {
-      "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-14-close-ranking.json",
+      "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-15-close-ranking.json",
       "exists": true
     },
     "risk_review": {
-      "path": "D:\\Code\\yoyo\\research\\risk\\2026-05-14-close-risk-review.json",
+      "path": "D:\\Code\\yoyo\\research\\risk\\2026-05-15-close-risk-review.json",
       "exists": true
     },
     "evidence_ledger": {

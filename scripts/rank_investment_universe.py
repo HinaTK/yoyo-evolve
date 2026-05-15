@@ -40,7 +40,7 @@ DEFAULT_NONTECHNICAL_WEIGHTS = {
     "flow_score": 0.15,
     "macro_score": 0.10,
 }
-NONTECHNICAL_HARD_EVENT_RISKS = {"elevated", "earnings_gap", "regulatory", "policy", "suspension", "accounting"}
+NONTECHNICAL_HARD_EVENT_RISKS = {"elevated", "earnings_gap", "regulatory", "policy", "suspension", "accounting", "quote_stale"}
 
 
 def load_json(path: pathlib.Path) -> dict[str, Any]:
@@ -150,6 +150,10 @@ def append_unique(target: list[str], values: list[str]) -> None:
         if value not in seen:
             target.append(value)
             seen.add(value)
+
+
+def explicit_true(value: Any) -> bool:
+    return value is True or (isinstance(value, str) and value.strip().lower() == "true")
 
 
 def market_family_for_symbol(symbol: str) -> str:
@@ -519,6 +523,12 @@ def nontechnical_evidence_signals(
             "notes": [],
         }, flags, action_disqualifiers
 
+    evidence_mode = str(raw.get("evidence_mode") or "").strip()
+    proxy_only = evidence_mode == "automatic_local_proxy" or explicit_true(raw.get("proxy_only"))
+    if proxy_only:
+        flags.append("nontechnical_proxy_only")
+        action_disqualifiers.append("nontechnical_proxy_only")
+
     as_of_date = parse_date_token(raw.get("as_of_date") or evidence.get("as_of_date"))
     evidence_session = str(raw.get("as_of_session") or evidence.get("as_of_session") or "").lower() or None
     report_date = parse_date_token(snapshot_date or row.get("snapshot_as_of_date") or row.get("as_of_date"))
@@ -575,7 +585,10 @@ def nontechnical_evidence_signals(
         flags.append(f"event_risk_{event_risk}")
         action_disqualifiers.append(f"event_risk_{event_risk}")
 
-    if raw.get("source_count") is not None:
+    proxy_source_count = len(raw.get("sources", [])) if isinstance(raw.get("sources"), list) else 0
+    if proxy_only:
+        source_count = 0
+    elif raw.get("source_count") is not None:
         source_count = int(raw.get("source_count") or 0)
     elif isinstance(raw.get("sources"), list):
         source_count = len(raw.get("sources", []))
@@ -587,13 +600,16 @@ def nontechnical_evidence_signals(
             action_disqualifiers.append("nontechnical_source_missing")
 
     return {
-        "status": "available",
+        "status": "proxy_only" if proxy_only else "available",
         "required_for_action": require_for_action,
+        "evidence_mode": evidence_mode or None,
+        "proxy_only": proxy_only,
         "total_score": total_score,
         "min_total_score_for_action": min_score,
         "as_of_date": as_of_date.isoformat() if as_of_date else raw.get("as_of_date"),
         "as_of_session": evidence_session,
         "source_count": source_count,
+        "proxy_source_count": proxy_source_count if proxy_only else None,
         "components": components,
         "event_risk": event_risk,
         "notes": raw.get("notes", []),

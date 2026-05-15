@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-05-14T13:45:48Z",
+  "generated_at": "2026-05-15T09:10:31Z",
   "shadow_dir": "D:\\Code\\yoyo\\research\\shadow",
   "registry": "D:\\Code\\yoyo\\data\\snapshots\\registry.json",
   "include_replay": false,
-  "as_of_date": "2026-05-14",
+  "as_of_date": "2026-05-15",
   "audit_passed": true,
   "summary": {
-    "shadow_log_count": 24,
-    "forward_shadow_log_count": 4,
+    "shadow_log_count": 25,
+    "forward_shadow_log_count": 5,
     "historical_replay_log_count": 20,
-    "no_action_log_count": 21,
+    "no_action_log_count": 22,
     "candidate_entry_count": 0,
     "matured_candidate_count": 0,
     "pending_candidate_count": 0,
@@ -18,12 +18,12 @@
     "critical_audit_finding_count": 0
   },
   "shadow_evaluation_summary": {
-    "total_shadow_log_count": 24,
-    "forward_shadow_log_count": 4,
+    "total_shadow_log_count": 25,
+    "forward_shadow_log_count": 5,
     "historical_replay_log_count": 20,
-    "evaluated_log_count": 4,
+    "evaluated_log_count": 5,
     "matured_forward_shadow_days": 1,
-    "no_action_log_count": 4,
+    "no_action_log_count": 5,
     "pending_sample_count": 0,
     "sample_count": 0,
     "win_rate": null,
@@ -39,7 +39,7 @@
     "findings": [
       {
         "metric": "forward_shadow_days",
-        "actual": 4,
+        "actual": 5,
         "expected": ">= 20"
       },
       {
@@ -186,7 +186,7 @@
       "path": "D:\\Code\\yoyo\\research\\shadow\\2026-05-14-close-shadow.json",
       "date": "2026-05-14",
       "session": "close",
-      "generated_at": "2026-05-14T13:45:48Z",
+      "generated_at": "2026-05-15T07:33:27Z",
       "evidence_mode": "forward_shadow",
       "counts_toward_forward_evidence": true,
       "candidate_count": 0,
@@ -207,8 +207,8 @@
         "ranking": {
           "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-14-close-ranking.json",
           "exists": true,
-          "sha256": "7371dae38d55afe9c4c459b986a9ec9350a391b922d52850b311e69d8d081346",
-          "size_bytes": 215673
+          "sha256": "78e5419fc7b40ff17e2fe04055276f059f579ef2213d755bcc70b5c71b7f5880",
+          "size_bytes": 261232
         },
         "snapshot": {
           "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-14.json",
@@ -218,6 +218,48 @@
         },
         "as_of_date": "2026-05-14",
         "ranking_generated_at": "2026-05-14T09:10:20Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\2026-05-15-close-shadow.json",
+      "date": "2026-05-15",
+      "session": "close",
+      "generated_at": "2026-05-15T09:10:31Z",
+      "evidence_mode": "forward_shadow",
+      "counts_toward_forward_evidence": true,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "forward_shadow",
+        "counts_toward_forward_evidence": true
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-15-close-ranking.json",
+          "exists": true,
+          "sha256": "10f2ce75cd380d6f67b73927c7b39bcc7ab097d01941d5ff7b9669bf569c1672",
+          "size_bytes": 259292
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-15.json",
+          "exists": true,
+          "sha256": "f7b043fe6785a7f9517d4815d9385f73941354922f6639bd6b8c718434997733",
+          "size_bytes": 66721
+        },
+        "as_of_date": "2026-05-15",
+        "ranking_generated_at": "2026-05-15T09:10:20Z",
         "strategy_id": "l5_mvp_conservative_v1",
         "strategy_version": "l5_mvp_conservative_v1",
         "strategy_status": "active"

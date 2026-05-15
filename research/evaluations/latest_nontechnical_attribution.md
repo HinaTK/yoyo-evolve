@@ -1,7 +1,7 @@
 # Nontechnical Evidence Attribution
 
-Generated: `2026-05-14T13:45:49Z`
-As-of: date=`2026-05-14`, session=`close`
+Generated: `2026-05-15T09:10:33Z`
+As-of: date=`2026-05-15`, session=`close`
 Research only: `True`; no execution: `True`
 
 ## Summary

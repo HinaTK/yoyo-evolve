@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-14T13:45:49Z",
+  "generated_at": "2026-05-15T09:10:33Z",
   "competition_id": "shadow_gate_variants_v1",
   "config": {
     "path": "D:\\Code\\yoyo\\config\\shadow_variants.toml",
@@ -9,26 +9,26 @@
   },
   "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
   "ranking": {
-    "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-14-close-ranking.json",
+    "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-15-close-ranking.json",
     "exists": true,
-    "sha256": "7371dae38d55afe9c4c459b986a9ec9350a391b922d52850b311e69d8d081346",
-    "size_bytes": 215673
+    "sha256": "10f2ce75cd380d6f67b73927c7b39bcc7ab097d01941d5ff7b9669bf569c1672",
+    "size_bytes": 259292
   },
   "snapshot": {
-    "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-14.json",
+    "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-15.json",
     "exists": true,
-    "sha256": "97b0ce44d68ff6b77a0562a01d1ea3e7e12f1544f12f1a9800c79ae024aa61c7",
-    "size_bytes": 66734
+    "sha256": "f7b043fe6785a7f9517d4815d9385f73941354922f6639bd6b8c718434997733",
+    "size_bytes": 66721
   },
   "registry": {
     "path": "D:\\Code\\yoyo\\data\\snapshots\\registry.json",
     "exists": true,
-    "sha256": "5c7f2bdb611c8a26db9250e8090ffd8d2ed3e24fa2d01ee6891d3ad89295e9bc",
-    "size_bytes": 380111
+    "sha256": "2912b038ff5fba9662ca13cd908c11212ab532a1ac99c791a3c13b4b915c740e",
+    "size_bytes": 381405
   },
-  "date": "2026-05-14",
+  "date": "2026-05-15",
   "session": "close",
-  "as_of_date": "2026-05-14",
+  "as_of_date": "2026-05-15",
   "evidence_mode": "forward_shadow",
   "dry_run": false,
   "policy": {
@@ -42,17 +42,17 @@
   "written_logs": [
     {
       "variant_id": "baseline_shadow",
-      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-14-close-baseline_shadow-shadow.json",
+      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-15-close-baseline_shadow-shadow.json",
       "dry_run": false
     },
     {
       "variant_id": "no_heat_filter",
-      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-14-close-no_heat_filter-shadow.json",
+      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-15-close-no_heat_filter-shadow.json",
       "dry_run": false
     },
     {
       "variant_id": "tighter_stop",
-      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-14-close-tighter_stop-shadow.json",
+      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-15-close-tighter_stop-shadow.json",
       "dry_run": false
     }
   ],
@@ -66,8 +66,8 @@
       "stop_loss_pct": -4.0,
       "horizon_days": 14,
       "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
-      "log_count": 2,
-      "forward_like_log_count": 2,
+      "log_count": 3,
+      "forward_like_log_count": 3,
       "matured_forward_days": 0,
       "no_execution_audit_passed": true,
       "sample_count": 0,
@@ -90,8 +90,8 @@
       "stop_loss_pct": -4.0,
       "horizon_days": 14,
       "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
-      "log_count": 2,
-      "forward_like_log_count": 2,
+      "log_count": 3,
+      "forward_like_log_count": 3,
       "matured_forward_days": 0,
       "no_execution_audit_passed": true,
       "sample_count": 0,
@@ -114,8 +114,8 @@
       "stop_loss_pct": -3.0,
       "horizon_days": 14,
       "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
-      "log_count": 2,
-      "forward_like_log_count": 2,
+      "log_count": 3,
+      "forward_like_log_count": 3,
       "matured_forward_days": 0,
       "no_execution_audit_passed": true,
       "sample_count": 0,

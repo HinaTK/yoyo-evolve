@@ -224,8 +224,17 @@ def render_markdown(payload: dict[str, Any]) -> str:
     buy_like = [row for row in recs if row.get("state") == "buy_candidate"]
     watch = [row for row in recs if row.get("state") == "watch_only"]
     avoid = [row for row in recs if row.get("state") == "avoid"]
+    nontechnical_summary = payload["nontechnical"]["evidence_summary"]
+    curated_available = nontechnical_summary.get("curated_available_count", nontechnical_summary.get("available_count"))
+    proxy_only_count = nontechnical_summary.get("proxy_only_count", nontechnical_summary.get("automatic_proxy_count", 0)) or 0
+    final_result = "今日无行动候选；仅保留观察名单。" if not buy_like else "今日行动候选：" + "、".join(f"{row['symbol']}({row.get('confidence')})" for row in buy_like[:3])
     lines = [
         f"# {payload['date']} 收盘研究报告",
+        "",
+        "## 最终结果",
+        f"- {final_result}",
+        f"- 首要观察：{ '、'.join(row['symbol'] for row in watch[:3]) if watch else '无' }。",
+        "- 执行状态：research-only，不下单、不改组合。",
         "",
         "## 今日结论",
         f"- 研究模式：仅推荐研究；不执行交易、不修改组合。",
@@ -255,13 +264,15 @@ def render_markdown(payload: dict[str, Any]) -> str:
             "",
             "## 影子证据与校准",
             f"- Evidence audit passed：{payload['evidence']['audit_passed']}。",
-            f"- Calibration samples：{payload['calibration']['sample_count']}；hit_rate={payload['calibration']['hit_rate']}；Brier={payload['calibration']['brier_score']}；calibration_error={payload['calibration']['calibration_error']}。",
+            f"- Calibration samples（historical/posterior diagnostics，不计入 forward readiness）：{payload['calibration']['sample_count']}；hit_rate={payload['calibration']['hit_rate']}；Brier={payload['calibration']['brier_score']}；calibration_error={payload['calibration']['calibration_error']}。",
             "",
             "## 非技术面证据与归因",
-            f"- Evidence coverage：available={payload['nontechnical']['evidence_summary'].get('available_count')} / symbols={payload['nontechnical']['evidence_summary'].get('symbol_count')}；missing={payload['nontechnical']['evidence_summary'].get('missing_count')}；blocking_findings={payload['nontechnical']['evidence_summary'].get('blocking_finding_count')}；critical_findings={payload['nontechnical']['evidence_summary'].get('critical_finding_count')}。",
+            f"- Evidence coverage：curated_available={curated_available} / symbols={nontechnical_summary.get('symbol_count')}；proxy_only={proxy_only_count}；missing={nontechnical_summary.get('missing_count')}；blocking_findings={nontechnical_summary.get('blocking_finding_count')}；critical_findings={nontechnical_summary.get('critical_finding_count')}。",
             f"- Attribution samples：{payload['nontechnical']['attribution_summary'].get('attributed_sample_count')}；hit_rate={payload['nontechnical']['attribution_summary'].get('hit_rate')}；avg_return={payload['nontechnical']['attribution_summary'].get('avg_return_pct')}。",
         ]
     )
+    if proxy_only_count:
+        lines.append(f"- proxy-only 覆盖仅来自本地元数据/行情代理，不是 audited fundamentals；这些行只作观察和诊断，不清除行动门槛。")
     for row in payload["nontechnical"].get("score_buckets") or []:
         lines.append(f"- 非技术面分桶 `{row.get('score_bucket')}` samples={row.get('scored_sample_count')} hit_rate={row.get('hit_rate')} avg_return={row.get('avg_return_pct')}")
     lines.extend(["", "## Shadow 变体竞赛"])
