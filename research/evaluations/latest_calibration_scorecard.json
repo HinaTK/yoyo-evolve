@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-14T02:02:24Z",
-  "as_of_date": "2026-05-13",
+  "generated_at": "2026-05-14T13:45:48Z",
+  "as_of_date": "2026-05-14",
   "as_of_session": "close",
   "inputs": {
     "calls_dir": "D:\\Code\\yoyo\\research\\calls",
@@ -24,31 +24,31 @@
     "min_bucket_samples": 5
   },
   "summary": {
-    "call_record_count": 848,
+    "call_record_count": 854,
     "shadow_record_count": 0,
-    "combined_record_count": 848,
+    "combined_record_count": 854,
     "call_summary": {
-      "generated_at": "2026-05-14T02:02:24Z",
-      "as_of_date": "2026-05-13",
+      "generated_at": "2026-05-14T13:45:48Z",
+      "as_of_date": "2026-05-14",
       "as_of_session": "close",
-      "evaluations": 848,
+      "evaluations": 854,
       "verdict_counts": {
-        "fail": 218,
-        "pass": 203,
+        "fail": 219,
+        "pass": 206,
         "mixed": 61,
-        "informational": 366
+        "informational": 368
       },
       "learning_counts": {
-        "symbol_selection_error": 221,
+        "symbol_selection_error": 223,
         "theme_error": 102,
         "timing_unclear": 45,
-        "defensive_misread": 25,
+        "defensive_misread": 26,
         "overconfidence": 18,
         "underconfidence": 1,
         "bullish_misread": 15
       },
       "session_counts": {
-        "historical": 830,
+        "historical": 836,
         "morning": 18
       },
       "symbol_stats": {
@@ -68,34 +68,34 @@
           "pass_rate": 0.158
         },
         "0700.HK": {
-          "samples": 121,
-          "avg_return_pct": -2.081,
-          "pass_rate": 0.24
+          "samples": 122,
+          "avg_return_pct": -2.119,
+          "pass_rate": 0.238
         },
         "9988.HK": {
-          "samples": 117,
-          "avg_return_pct": 0.542,
-          "pass_rate": 0.265
+          "samples": 118,
+          "avg_return_pct": 0.576,
+          "pass_rate": 0.271
         },
         "1810.HK": {
-          "samples": 121,
-          "avg_return_pct": -2.561,
-          "pass_rate": 0.529
+          "samples": 122,
+          "avg_return_pct": -2.526,
+          "pass_rate": 0.525
         },
         "2800.HK": {
-          "samples": 123,
-          "avg_return_pct": 0.648,
-          "pass_rate": 0.106
+          "samples": 124,
+          "avg_return_pct": 0.658,
+          "pass_rate": 0.113
         },
         "3033.HK": {
-          "samples": 121,
-          "avg_return_pct": -0.284,
-          "pass_rate": 0.24
+          "samples": 122,
+          "avg_return_pct": -0.254,
+          "pass_rate": 0.246
         },
         "3067.HK": {
-          "samples": 121,
-          "avg_return_pct": -0.252,
-          "pass_rate": 0.182
+          "samples": 122,
+          "avg_return_pct": -0.222,
+          "pass_rate": 0.18
         },
         "9618.HK": {
           "samples": 2,
@@ -213,12 +213,12 @@
       ]
     },
     "shadow_summary": {
-      "total_shadow_log_count": 23,
-      "forward_shadow_log_count": 3,
+      "total_shadow_log_count": 24,
+      "forward_shadow_log_count": 4,
       "historical_replay_log_count": 20,
-      "evaluated_log_count": 3,
+      "evaluated_log_count": 4,
       "matured_forward_shadow_days": 1,
-      "no_action_log_count": 3,
+      "no_action_log_count": 4,
       "pending_sample_count": 0,
       "sample_count": 0,
       "win_rate": null,
@@ -230,29 +230,29 @@
       "stop_triggered_rate": null
     },
     "source_counts": {
-      "calls": 848
+      "calls": 854
     },
     "learning_counts": {
       "bullish_misread": 15,
-      "defensive_misread": 25,
+      "defensive_misread": 26,
       "overconfidence": 18,
-      "symbol_selection_error": 221,
+      "symbol_selection_error": 223,
       "theme_error": 102,
       "timing_unclear": 45,
       "underconfidence": 1
     }
   },
   "overall": {
-    "sample_count": 848,
-    "scored_sample_count": 482,
+    "sample_count": 854,
+    "scored_sample_count": 486,
     "low_sample": false,
-    "avg_confidence": 0.664,
-    "hit_rate": 0.484,
-    "calibration_error": 0.179,
+    "avg_confidence": 0.663,
+    "hit_rate": 0.487,
+    "calibration_error": 0.176,
     "brier_score": 0.263,
     "return_stats": {
-      "avg": -0.335,
-      "median": -0.239,
+      "avg": -0.323,
+      "median": -0.228,
       "min": -13.072,
       "max": 21.132
     }
@@ -276,32 +276,32 @@
     },
     {
       "bucket": "0.40-0.55",
-      "sample_count": 181,
-      "scored_sample_count": 30,
+      "sample_count": 185,
+      "scored_sample_count": 32,
       "low_sample": false,
-      "avg_confidence": 0.523,
-      "hit_rate": 0.8,
-      "calibration_error": 0.277,
-      "brier_score": 0.171,
+      "avg_confidence": 0.524,
+      "hit_rate": 0.812,
+      "calibration_error": 0.289,
+      "brier_score": 0.174,
       "return_stats": {
-        "avg": -0.121,
-        "median": -0.307,
+        "avg": -0.108,
+        "median": -0.267,
         "min": -10.022,
         "max": 11.084
       }
     },
     {
       "bucket": "0.55-0.70",
-      "sample_count": 421,
-      "scored_sample_count": 259,
+      "sample_count": 423,
+      "scored_sample_count": 261,
       "low_sample": false,
-      "avg_confidence": 0.626,
-      "hit_rate": 0.465,
+      "avg_confidence": 0.625,
+      "hit_rate": 0.466,
       "calibration_error": 0.16,
       "brier_score": 0.255,
       "return_stats": {
-        "avg": -0.704,
-        "median": -0.61,
+        "avg": -0.686,
+        "median": -0.602,
         "min": -13.072,
         "max": 15.126
       }
@@ -370,96 +370,6 @@
     }
   ],
   "recent_records": [
-    {
-      "source": "calls",
-      "date": "2026-04-22",
-      "session": "historical",
-      "symbol": "3067.HK",
-      "state": "watch_only",
-      "theme": "hang-seng-tech",
-      "window_days": 5,
-      "confidence": 0.57,
-      "confidence_bucket": "0.55-0.70",
-      "success": null,
-      "return_pct": -0.478,
-      "verdict": "informational",
-      "learning_tag": null
-    },
-    {
-      "source": "calls",
-      "date": "2026-04-22",
-      "session": "historical",
-      "symbol": "3067.HK",
-      "state": "watch_only",
-      "theme": "hang-seng-tech",
-      "window_days": 20,
-      "confidence": 0.57,
-      "confidence_bucket": "0.55-0.70",
-      "success": null,
-      "return_pct": 2.01,
-      "verdict": "informational",
-      "learning_tag": null
-    },
-    {
-      "source": "calls",
-      "date": "2026-04-23",
-      "session": "historical",
-      "symbol": "0700.HK",
-      "state": "watch_only",
-      "theme": "internet-platform",
-      "window_days": 5,
-      "confidence": 0.58,
-      "confidence_bucket": "0.55-0.70",
-      "success": null,
-      "return_pct": -4.321,
-      "verdict": "informational",
-      "learning_tag": "symbol_selection_error"
-    },
-    {
-      "source": "calls",
-      "date": "2026-04-23",
-      "session": "historical",
-      "symbol": "0700.HK",
-      "state": "watch_only",
-      "theme": "internet-platform",
-      "window_days": 20,
-      "confidence": 0.58,
-      "confidence_bucket": "0.55-0.70",
-      "success": null,
-      "return_pct": -6.583,
-      "verdict": "informational",
-      "learning_tag": "symbol_selection_error"
-    },
-    {
-      "source": "calls",
-      "date": "2026-04-23",
-      "session": "historical",
-      "symbol": "9988.HK",
-      "state": "buy_candidate",
-      "theme": "internet-platform",
-      "window_days": 5,
-      "confidence": 0.61,
-      "confidence_bucket": "0.55-0.70",
-      "success": 0.0,
-      "return_pct": -2.991,
-      "verdict": "fail",
-      "learning_tag": "theme_error"
-    },
-    {
-      "source": "calls",
-      "date": "2026-04-23",
-      "session": "historical",
-      "symbol": "9988.HK",
-      "state": "buy_candidate",
-      "theme": "internet-platform",
-      "window_days": 20,
-      "confidence": 0.61,
-      "confidence_bucket": "0.55-0.70",
-      "success": 1.0,
-      "return_pct": 1.84,
-      "verdict": "pass",
-      "learning_tag": "symbol_selection_error"
-    },
     {
       "source": "calls",
       "date": "2026-04-23",
@@ -629,6 +539,21 @@
       "source": "calls",
       "date": "2026-04-24",
       "session": "historical",
+      "symbol": "0700.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "window_days": 20,
+      "confidence": 0.48,
+      "confidence_bucket": "0.40-0.55",
+      "success": null,
+      "return_pct": -6.729,
+      "verdict": "informational",
+      "learning_tag": "symbol_selection_error"
+    },
+    {
+      "source": "calls",
+      "date": "2026-04-24",
+      "session": "historical",
       "symbol": "9988.HK",
       "state": "buy_candidate",
       "theme": "internet-platform",
@@ -668,6 +593,21 @@
       "success": 0.5,
       "return_pct": -0.076,
       "verdict": "mixed",
+      "learning_tag": "symbol_selection_error"
+    },
+    {
+      "source": "calls",
+      "date": "2026-04-24",
+      "session": "historical",
+      "symbol": "9988.HK",
+      "state": "buy_candidate",
+      "theme": "internet-platform",
+      "window_days": 20,
+      "confidence": 0.56,
+      "confidence_bucket": "0.55-0.70",
+      "success": 1.0,
+      "return_pct": 4.628,
+      "verdict": "pass",
       "learning_tag": "symbol_selection_error"
     },
     {
@@ -719,6 +659,21 @@
       "source": "calls",
       "date": "2026-04-24",
       "session": "historical",
+      "symbol": "1810.HK",
+      "state": "avoid",
+      "theme": "consumer-tech",
+      "window_days": 20,
+      "confidence": 0.57,
+      "confidence_bucket": "0.55-0.70",
+      "success": 0.0,
+      "return_pct": 1.667,
+      "verdict": "fail",
+      "learning_tag": "defensive_misread"
+    },
+    {
+      "source": "calls",
+      "date": "2026-04-24",
+      "session": "historical",
       "symbol": "2800.HK",
       "state": "hold",
       "theme": "hong-kong-broad-market",
@@ -757,6 +712,21 @@
       "confidence_bucket": "0.40-0.55",
       "success": 1.0,
       "return_pct": 0.66,
+      "verdict": "pass",
+      "learning_tag": null
+    },
+    {
+      "source": "calls",
+      "date": "2026-04-24",
+      "session": "historical",
+      "symbol": "2800.HK",
+      "state": "hold",
+      "theme": "hong-kong-broad-market",
+      "window_days": 20,
+      "confidence": 0.54,
+      "confidence_bucket": "0.40-0.55",
+      "success": 1.0,
+      "return_pct": 1.887,
       "verdict": "pass",
       "learning_tag": null
     },
@@ -809,6 +779,21 @@
       "source": "calls",
       "date": "2026-04-24",
       "session": "historical",
+      "symbol": "3033.HK",
+      "state": "buy_candidate",
+      "theme": "hang-seng-tech",
+      "window_days": 20,
+      "confidence": 0.53,
+      "confidence_bucket": "0.40-0.55",
+      "success": 1.0,
+      "return_pct": 3.333,
+      "verdict": "pass",
+      "learning_tag": null
+    },
+    {
+      "source": "calls",
+      "date": "2026-04-24",
+      "session": "historical",
       "symbol": "3067.HK",
       "state": "watch_only",
       "theme": "hang-seng-tech",
@@ -847,6 +832,21 @@
       "confidence_bucket": "0.40-0.55",
       "success": null,
       "return_pct": 1.553,
+      "verdict": "informational",
+      "learning_tag": null
+    },
+    {
+      "source": "calls",
+      "date": "2026-04-24",
+      "session": "historical",
+      "symbol": "3067.HK",
+      "state": "watch_only",
+      "theme": "hang-seng-tech",
+      "window_days": 20,
+      "confidence": 0.5,
+      "confidence_bucket": "0.40-0.55",
+      "success": null,
+      "return_pct": 3.398,
       "verdict": "informational",
       "learning_tag": null
     },

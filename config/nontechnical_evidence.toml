@@ -1,0 +1,34 @@
+# Non-technical evidence policy for investment ranking.
+#
+# Trading workflow encoded here: fundamentals/valuation/catalyst/flow/macro are
+# the filter; technicals are only the trigger. Until a symbol has fresh curated
+# evidence, it may still be watched but cannot be upgraded to an action candidate.
+
+[policy]
+require_for_action = true
+max_staleness_days = 30
+min_total_score_for_action = 0.55
+block_unknown_event_risk = true
+
+[weights]
+fundamental_score = 0.30
+valuation_score = 0.20
+catalyst_score = 0.25
+flow_score = 0.15
+macro_score = 0.10
+
+# Evidence rows are intentionally absent until populated by a trusted data or
+# research process. Missing evidence is a deliberate action gate, not a data error.
+#
+# Example:
+# [[evidence]]
+# symbol = "0700.HK"
+# as_of_date = "2026-05-13"
+# fundamental_score = 0.65
+# valuation_score = 0.55
+# catalyst_score = 0.60
+# flow_score = 0.50
+# macro_score = 0.55
+# event_risk = "none"
+# source_count = 3
+# notes = ["earnings reviewed", "southbound flow checked", "valuation not stretched"]

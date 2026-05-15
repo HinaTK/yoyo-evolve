@@ -118,6 +118,8 @@ def confirmations_for(tags: list[str], final_state_cap: str) -> list[str]:
         confirmations.append("HK turnover and quote activity must confirm the instrument is trading normally")
     if "cn_limit_up_chase_block" in tags or "cn_limit_down_liquidity_block" in tags:
         confirmations.append("A-share limit-board condition must clear before action upgrade")
+    if any(tag.startswith("nontechnical_") or tag.startswith("event_risk_") for tag in tags):
+        confirmations.append("fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade")
     if "downtrend_regime" in tags:
         confirmations.append("downtrend regime must clear")
     if final_state_cap == "buy_candidate" and not confirmations:
@@ -218,6 +220,7 @@ def build_review(draft_calls: dict[str, Any], ranking: dict[str, Any], profile: 
             "max_single_position_pct": max_single_position_pct,
             "buy_candidate_pass_rule": "qualified_for_action=true, cost_gate_passed=true, volume_ratio_20>=1.0, and no downtrend_regime",
             "same_theme_peer_rule": "same_theme_peer_evidence_passed=true",
+            "nontechnical_evidence_rule": "buy_candidate also requires fresh non-technical evidence when the ranking policy requires it",
         },
         "verdicts": verdicts,
     }

@@ -1,0 +1,108 @@
+{
+  "date": "2026-05-14",
+  "session": "close",
+  "generated_at": "2026-05-14T13:45:47Z",
+  "source_ranking": "D:\\Code\\yoyo\\research\\rankings\\2026-05-14-close-ranking.json",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "draft_policy": {
+    "source": "deterministic_ranking_edge_gate",
+    "actionable_rule": "buy_candidate requires qualified_for_action=true, cost_gate_passed=true, and same_theme_peer_evidence_passed=true",
+    "confidence_rule": "confidence is capped by score and reduced for adverse symbol risk, failed peer evidence, disqualifiers, and failed edge/cost gates"
+  },
+  "recommendations": [
+    {
+      "symbol": "9618.HK",
+      "state": "watch_only",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.36,
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 9618.HK.",
+      "evidence": [
+        "score=85.31, trend_score=100, momentum_score=81.67",
+        "expected_edge_bps=256.23, net_expected_edge_bps=221.23, cost_gate_passed=True",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=2800.HK, range_pos_60=0.7395, max_market_range_for_action=0.7, pct_change_1d=0.15",
+        "same_theme_peer_check theme_rank=1, theme_leader=9618.HK, is_theme_leader=True, theme_peer_count=5",
+        "same_theme_best_peer_evidence passed=True, best_symbol=9618.HK, best_score=85.31, selected_vs_best_score_gap=0.0, next_best_symbol=9988.HK, selected_vs_next_best_score_gap=19.65, peer_relative_decision=theme_leader",
+        "confidence_calibration penalty=0.15, symbol_risk_tags=['low_symbol_pass_rate', 'repeated_symbol_selection_error'], action_disqualifiers=['nontechnical_evidence_missing', 'market_range_pos_60_above_action_limit']",
+        "nontechnical_evidence status=missing, total_score=None, event_risk=None, flags=['nontechnical_evidence_missing']",
+        "latest_close=130.1, ma20=119.4, ma60=109.8473, range_pos_60=1.054, volume_ratio_20=1.9916"
+      ],
+      "risks": [
+        "nontechnical_evidence_missing",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_layer_action_cap_watch_only"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "internet-platform",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=85.31 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    },
+    {
+      "symbol": "0002.HK",
+      "state": "watch_only",
+      "theme": "utilities-defensive",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.36,
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 0002.HK.",
+      "evidence": [
+        "score=83.29, trend_score=100, momentum_score=70.27",
+        "expected_edge_bps=233.78, net_expected_edge_bps=198.78, cost_gate_passed=True",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=2800.HK, range_pos_60=0.7395, max_market_range_for_action=0.7, pct_change_1d=0.15",
+        "same_theme_peer_check theme_rank=1, theme_leader=0002.HK, is_theme_leader=True, theme_peer_count=2",
+        "same_theme_best_peer_evidence passed=True, best_symbol=0002.HK, best_score=83.29, selected_vs_best_score_gap=0.0, next_best_symbol=0006.HK, selected_vs_next_best_score_gap=7.95, peer_relative_decision=theme_leader",
+        "confidence_calibration penalty=0.15, symbol_risk_tags=['low_symbol_pass_rate', 'negative_symbol_avg_return'], action_disqualifiers=['nontechnical_evidence_missing', 'market_range_pos_60_above_action_limit']",
+        "nontechnical_evidence status=missing, total_score=None, event_risk=None, flags=['nontechnical_evidence_missing']",
+        "latest_close=77.1, ma20=75.36, ma60=74.3587, range_pos_60=1.1474, volume_ratio_20=1.5696"
+      ],
+      "risks": [
+        "nontechnical_evidence_missing",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_layer_action_cap_watch_only"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "utilities-defensive",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=83.29 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    },
+    {
+      "symbol": "0728.HK",
+      "state": "avoid",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.27,
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 0728.HK.",
+      "evidence": [
+        "score=82.87, trend_score=100, momentum_score=74.81",
+        "expected_edge_bps=237.17, net_expected_edge_bps=202.17, cost_gate_passed=True",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=2800.HK, range_pos_60=0.7395, max_market_range_for_action=0.7, pct_change_1d=0.15",
+        "same_theme_peer_check theme_rank=1, theme_leader=0728.HK, is_theme_leader=True, theme_peer_count=2",
+        "same_theme_best_peer_evidence passed=True, best_symbol=0728.HK, best_score=82.87, selected_vs_best_score_gap=0.0, next_best_symbol=0941.HK, selected_vs_next_best_score_gap=4.59, peer_relative_decision=theme_leader",
+        "confidence_calibration penalty=0.1, symbol_risk_tags=['low_symbol_pass_rate', 'negative_symbol_avg_return', 'backtest_adverse_breach'], action_disqualifiers=['nontechnical_evidence_missing', 'market_range_pos_60_above_action_limit']",
+        "nontechnical_evidence status=missing, total_score=None, event_risk=None, flags=['nontechnical_evidence_missing']",
+        "latest_close=5.51, ma20=5.163, ma60=5.0328, range_pos_60=1.0282, volume_ratio_20=1.8007"
+      ],
+      "risks": [
+        "symbol_risk_veto",
+        "nontechnical_evidence_missing",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_layer_action_cap_watch_only"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "telecom-dividend",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=82.87 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    }
+  ]
+}

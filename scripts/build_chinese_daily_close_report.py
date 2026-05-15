@@ -8,7 +8,15 @@ from typing import Any
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT_DIR = ROOT / "research" / "products" / "daily_close"
-STATE_RANK = {"avoid": 0, "watch_only": 1, "buy_candidate": 2, "hold": 2, "accumulate": 3, "trim": 1, "sell_candidate": 1}
+ALLOWED_FINAL_STATES_BY_CAP = {
+    "avoid": {"avoid"},
+    "watch_only": {"watch_only", "avoid"},
+    "buy_candidate": {"buy_candidate", "watch_only", "avoid"},
+    "accumulate": {"accumulate", "buy_candidate", "watch_only", "avoid"},
+    "hold": {"hold", "watch_only", "avoid"},
+    "trim": {"trim", "watch_only", "avoid"},
+    "sell_candidate": {"sell_candidate", "trim", "watch_only", "avoid"},
+}
 
 
 def load_json(path: pathlib.Path | None) -> dict[str, Any] | None:
@@ -55,15 +63,28 @@ def validate_source_dates(
     date: str,
     calls: dict[str, Any],
     ranking: dict[str, Any] | None,
+    risk_review: dict[str, Any] | None,
     evidence_ledger: dict[str, Any] | None,
     calibration: dict[str, Any] | None,
     forward_eval: dict[str, Any] | None,
     variant_competition: dict[str, Any] | None,
+    nontechnical_evidence: dict[str, Any] | None,
+    nontechnical_attribution: dict[str, Any] | None,
 ) -> None:
     if date_value(calls.get("date")) != date:
         raise ValueError("calls date must match report date")
     if ranking is not None:
         assert_not_future("ranking as_of_date", ranking.get("as_of_date"), date)
+    if risk_review is None:
+        raise ValueError("Chinese daily close product requires risk review verdict caps")
+    assert_not_future("risk review date", risk_review.get("date"), date)
+    risk_review_date = date_value(risk_review.get("date"))
+    if risk_review_date is None:
+        raise ValueError("risk review date must match report date")
+    if risk_review_date != date:
+        raise ValueError("risk review date must match report date")
+    if str(risk_review.get("session") or "") != "close":
+        raise ValueError("risk review session must be close")
     if evidence_ledger is not None:
         assert_not_future("evidence ledger as_of_date", evidence_ledger.get("as_of_date"), date)
     if calibration is not None:
@@ -73,6 +94,10 @@ def validate_source_dates(
         assert_not_future("forward evaluation as_of_date", thresholds.get("as_of_date"), date)
     if variant_competition is not None:
         assert_not_future("variant competition as_of_date", variant_competition.get("as_of_date") or variant_competition.get("date"), date)
+    if nontechnical_evidence is not None:
+        assert_not_future("nontechnical evidence as_of_date", nontechnical_evidence.get("as_of_date"), date)
+    if nontechnical_attribution is not None:
+        assert_not_future("nontechnical attribution as_of_date", nontechnical_attribution.get("as_of_date"), date)
 
 
 def verdicts_by_symbol(risk_review: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
@@ -84,6 +109,8 @@ def verdicts_by_symbol(risk_review: dict[str, Any] | None) -> dict[str, dict[str
 
 
 def summarize_recommendations(calls: dict[str, Any], risk_review: dict[str, Any] | None) -> list[dict[str, Any]]:
+    if risk_review is None:
+        raise ValueError("missing risk review verdict caps")
     verdicts = verdicts_by_symbol(risk_review)
     rows = []
     for rec in calls.get("recommendations", []):
@@ -95,13 +122,19 @@ def summarize_recommendations(calls: dict[str, Any], risk_review: dict[str, Any]
         cap = str(verdict.get("final_state_cap") or state)
         if risk_review is not None and not verdict:
             raise ValueError(f"missing risk review verdict for {symbol}")
-        if STATE_RANK.get(state, 0) > STATE_RANK.get(cap, 0):
+        allowed = ALLOWED_FINAL_STATES_BY_CAP.get(cap, set())
+        if state not in allowed:
             raise ValueError(f"call state {state} exceeds risk review cap {cap} for {symbol}")
+        nontechnical = None
+        for item in rec.get("evidence", []):
+            if isinstance(item, str) and item.startswith("nontechnical_evidence "):
+                nontechnical = item
+                break
         rows.append(
             {
                 "symbol": symbol,
                 "state": state,
-                "effective_state": cap if STATE_RANK.get(cap, 0) < STATE_RANK.get(state, 0) else state,
+                "effective_state": state,
                 "theme": rec.get("theme"),
                 "confidence": rec.get("confidence"),
                 "risk_cap": cap,
@@ -109,6 +142,7 @@ def summarize_recommendations(calls: dict[str, Any], risk_review: dict[str, Any]
                 "rationale": rec.get("rationale"),
                 "risks": rec.get("risks", [])[:3] if isinstance(rec.get("risks"), list) else [],
                 "invalidation": rec.get("invalidation"),
+                "nontechnical_evidence": nontechnical,
             }
         )
     return rows
@@ -138,10 +172,12 @@ def build_payload(
     calibration: dict[str, Any] | None,
     forward_eval: dict[str, Any] | None,
     variant_competition: dict[str, Any] | None,
+    nontechnical_evidence: dict[str, Any] | None,
+    nontechnical_attribution: dict[str, Any] | None,
     sources: dict[str, pathlib.Path | None],
 ) -> dict[str, Any]:
     require_close_session(calls, session)
-    validate_source_dates(date, calls, ranking, evidence_ledger, calibration, forward_eval, variant_competition)
+    validate_source_dates(date, calls, ranking, risk_review, evidence_ledger, calibration, forward_eval, variant_competition, nontechnical_evidence, nontechnical_attribution)
     recommendations = summarize_recommendations(calls, risk_review)
     return {
         "date": date,
@@ -172,6 +208,13 @@ def build_payload(
             "competition_id": (variant_competition or {}).get("competition_id"),
             "scoreboard": (variant_competition or {}).get("scoreboard", [])[:3] if isinstance((variant_competition or {}).get("scoreboard", []), list) else [],
         },
+        "nontechnical": {
+            "evidence_summary": (nontechnical_evidence or {}).get("summary", {}),
+            "attribution_summary": (nontechnical_attribution or {}).get("summary", {}),
+            "score_buckets": summary_get(nontechnical_attribution, ["buckets", "total_score"], [])[:5]
+            if isinstance(summary_get(nontechnical_attribution, ["buckets", "total_score"], []), list)
+            else [],
+        },
         "sources": {name: file_metadata(path) for name, path in sources.items()},
     }
 
@@ -199,6 +242,8 @@ def render_markdown(payload: dict[str, Any]) -> str:
             lines.append(f"  - 理由：{row['rationale']}")
         if row.get("risks"):
             lines.append(f"  - 风险：{'；'.join(str(item) for item in row['risks'])}")
+        if row.get("nontechnical_evidence"):
+            lines.append(f"  - 非技术面：{row['nontechnical_evidence']}")
         if row.get("invalidation"):
             lines.append(f"  - 失效条件：{row['invalidation']}")
     lines.extend(["", "## Gate 拒绝与观察重点"])
@@ -212,9 +257,14 @@ def render_markdown(payload: dict[str, Any]) -> str:
             f"- Evidence audit passed：{payload['evidence']['audit_passed']}。",
             f"- Calibration samples：{payload['calibration']['sample_count']}；hit_rate={payload['calibration']['hit_rate']}；Brier={payload['calibration']['brier_score']}；calibration_error={payload['calibration']['calibration_error']}。",
             "",
-            "## Shadow 变体竞赛",
+            "## 非技术面证据与归因",
+            f"- Evidence coverage：available={payload['nontechnical']['evidence_summary'].get('available_count')} / symbols={payload['nontechnical']['evidence_summary'].get('symbol_count')}；missing={payload['nontechnical']['evidence_summary'].get('missing_count')}；blocking_findings={payload['nontechnical']['evidence_summary'].get('blocking_finding_count')}；critical_findings={payload['nontechnical']['evidence_summary'].get('critical_finding_count')}。",
+            f"- Attribution samples：{payload['nontechnical']['attribution_summary'].get('attributed_sample_count')}；hit_rate={payload['nontechnical']['attribution_summary'].get('hit_rate')}；avg_return={payload['nontechnical']['attribution_summary'].get('avg_return_pct')}。",
         ]
     )
+    for row in payload["nontechnical"].get("score_buckets") or []:
+        lines.append(f"- 非技术面分桶 `{row.get('score_bucket')}` samples={row.get('scored_sample_count')} hit_rate={row.get('hit_rate')} avg_return={row.get('avg_return_pct')}")
+    lines.extend(["", "## Shadow 变体竞赛"])
     variants = payload["variants"].get("scoreboard") or []
     if not variants:
         lines.append("- 暂无可排名的 shadow-only 变体样本；继续累计 forward evidence。")
@@ -224,7 +274,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         [
             "",
             "## 数据与限制",
-            "- 本报告只整理 deterministic ranking、calls、risk review、shadow evidence 和 calibration scorecard。",
+            "- 本报告只整理 deterministic ranking、calls、risk review、shadow evidence、calibration scorecard 和非技术面 evidence/attribution。",
             "- 不把 historical replay 当作 forward evidence；不因 shadow 变体结果自动晋升 active strategy。",
             "- forward 样本不足时，所有结论只能作为研究观察。",
             "",
@@ -246,6 +296,8 @@ def build_report(
     forward_eval_path: pathlib.Path | None,
     variant_competition_path: pathlib.Path | None,
     output_dir: pathlib.Path,
+    nontechnical_evidence_path: pathlib.Path | None = None,
+    nontechnical_attribution_path: pathlib.Path | None = None,
 ) -> dict[str, Any]:
     calls = load_json(calls_path)
     if calls is None:
@@ -260,6 +312,8 @@ def build_report(
         load_json(calibration_path),
         load_json(forward_eval_path),
         load_json(variant_competition_path),
+        load_json(nontechnical_evidence_path),
+        load_json(nontechnical_attribution_path),
         {
             "calls": calls_path,
             "ranking": ranking_path,
@@ -268,6 +322,8 @@ def build_report(
             "calibration_scorecard": calibration_path,
             "forward_evaluation": forward_eval_path,
             "variant_competition": variant_competition_path,
+            "nontechnical_evidence": nontechnical_evidence_path,
+            "nontechnical_attribution": nontechnical_attribution_path,
         },
     )
     stem = output_stem(date, session)
@@ -293,6 +349,8 @@ def main() -> int:
     parser.add_argument("--calibration-scorecard", default=str(ROOT / "research" / "evaluations" / "latest_calibration_scorecard.json"))
     parser.add_argument("--forward-evaluation", default=str(ROOT / "research" / "shadow" / "latest_forward_evaluation.json"))
     parser.add_argument("--variant-competition", default=None)
+    parser.add_argument("--nontechnical-evidence", default=str(ROOT / "research" / "evidence" / "nontechnical" / "latest.json"))
+    parser.add_argument("--nontechnical-attribution", default=str(ROOT / "research" / "evaluations" / "latest_nontechnical_attribution.json"))
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
     args = parser.parse_args()
 
@@ -307,6 +365,8 @@ def main() -> int:
         resolve_path(args.forward_evaluation),
         resolve_path(args.variant_competition),
         resolve_path(args.output_dir) or DEFAULT_OUTPUT_DIR,
+        resolve_path(args.nontechnical_evidence),
+        resolve_path(args.nontechnical_attribution),
     )
     print(json.dumps({key: result[key] for key in ["json", "markdown", "latest"]}, indent=2, ensure_ascii=False))
     return 0

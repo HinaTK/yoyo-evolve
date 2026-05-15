@@ -68,6 +68,7 @@ def confidence(row: dict[str, Any], state: str) -> float:
 
 def evidence(row: dict[str, Any], state: str) -> list[str]:
     risk = row.get("symbol_risk") if isinstance(row.get("symbol_risk"), dict) else {}
+    nontechnical = row.get("nontechnical_evidence") if isinstance(row.get("nontechnical_evidence"), dict) else {}
     return [
         f"score={row.get('score')}, trend_score={row.get('trend_score')}, momentum_score={row.get('momentum_score')}",
         f"expected_edge_bps={row.get('expected_edge_bps')}, net_expected_edge_bps={row.get('net_expected_edge_bps')}, cost_gate_passed={row.get('cost_gate_passed')}",
@@ -76,6 +77,7 @@ def evidence(row: dict[str, Any], state: str) -> list[str]:
         f"same_theme_peer_check theme_rank={row.get('theme_rank')}, theme_leader={row.get('theme_leader')}, is_theme_leader={row.get('is_theme_leader')}, theme_peer_count={row.get('theme_peer_count')}",
         f"same_theme_best_peer_evidence passed={row.get('same_theme_peer_evidence_passed')}, best_symbol={row.get('same_theme_best_symbol')}, best_score={row.get('same_theme_best_score')}, selected_vs_best_score_gap={row.get('same_theme_selected_vs_best_score_gap')}, next_best_symbol={row.get('same_theme_next_best_symbol')}, selected_vs_next_best_score_gap={row.get('same_theme_selected_vs_next_best_score_gap')}, peer_relative_decision={row.get('peer_relative_decision')}",
         f"confidence_calibration penalty={confidence_penalty(row, state)}, symbol_risk_tags={risk.get('tags', [])}, action_disqualifiers={row.get('action_disqualifiers', [])}",
+        f"nontechnical_evidence status={nontechnical.get('status')}, total_score={nontechnical.get('total_score')}, event_risk={nontechnical.get('event_risk')}, flags={row.get('nontechnical_evidence_flags', [])}",
         f"latest_close={row.get('latest_close')}, ma20={row.get('ma20')}, ma60={row.get('ma60')}, range_pos_60={row.get('range_pos_60')}, volume_ratio_20={row.get('volume_ratio_20')}",
     ]
 

@@ -1,0 +1,2617 @@
+{
+  "generated_at": "2026-05-14T13:45:47Z",
+  "as_of_date": "2026-05-14",
+  "as_of_session": "close",
+  "research_only": true,
+  "no_execution": true,
+  "evidence_mode": "point_in_time_curated_or_missing_fail_closed",
+  "policy": {
+    "require_for_action": true,
+    "max_staleness_days": 30,
+    "min_total_score_for_action": 0.55,
+    "block_unknown_event_risk": true
+  },
+  "weights": {
+    "fundamental_score": 0.3,
+    "valuation_score": 0.2,
+    "catalyst_score": 0.25,
+    "flow_score": 0.15,
+    "macro_score": 0.1
+  },
+  "summary": {
+    "symbol_count": 46,
+    "available_count": 0,
+    "missing_count": 46,
+    "coverage_ratio": 0.0,
+    "actionable_evidence_count": 0,
+    "finding_count": 276,
+    "critical_finding_count": 0,
+    "blocking_finding_count": 276
+  },
+  "symbols": {
+    "0002.HK": {
+      "symbol": "0002.HK",
+      "name": "CLP Holdings / 中电控股",
+      "kind": "stock",
+      "theme": "utilities-defensive",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "000333.SZ": {
+      "symbol": "000333.SZ",
+      "name": "Midea Group / 美的集团",
+      "kind": "stock",
+      "theme": "china-a-home-appliances",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "0005.HK": {
+      "symbol": "0005.HK",
+      "name": "HSBC / 汇丰控股",
+      "kind": "stock",
+      "theme": "financials-bank",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "0006.HK": {
+      "symbol": "0006.HK",
+      "name": "Power Assets / 电能实业",
+      "kind": "stock",
+      "theme": "utilities-defensive",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "000858.SZ": {
+      "symbol": "000858.SZ",
+      "name": "Wuliangye / 五粮液",
+      "kind": "stock",
+      "theme": "china-a-consumer-staples",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "002594.SZ": {
+      "symbol": "002594.SZ",
+      "name": "BYD / 比亚迪",
+      "kind": "stock",
+      "theme": "china-a-auto-ev",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "0386.HK": {
+      "symbol": "0386.HK",
+      "name": "Sinopec / 中国石油化工股份",
+      "kind": "stock",
+      "theme": "energy",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "0388.HK": {
+      "symbol": "0388.HK",
+      "name": "HKEX / 香港交易所",
+      "kind": "stock",
+      "theme": "financials-exchange",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "0700.HK": {
+      "symbol": "0700.HK",
+      "name": "Tencent / 腾讯控股",
+      "kind": "stock",
+      "theme": "internet-platform",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "0728.HK": {
+      "symbol": "0728.HK",
+      "name": "China Telecom / 中国电信",
+      "kind": "stock",
+      "theme": "telecom-dividend",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "0857.HK": {
+      "symbol": "0857.HK",
+      "name": "PetroChina / 中国石油股份",
+      "kind": "stock",
+      "theme": "energy",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "0883.HK": {
+      "symbol": "0883.HK",
+      "name": "CNOOC / 中国海洋石油",
+      "kind": "stock",
+      "theme": "energy",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "0941.HK": {
+      "symbol": "0941.HK",
+      "name": "China Mobile / 中国移动",
+      "kind": "stock",
+      "theme": "telecom-dividend",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "1024.HK": {
+      "symbol": "1024.HK",
+      "name": "Kuaishou / 快手-W",
+      "kind": "stock",
+      "theme": "internet-platform",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "1093.HK": {
+      "symbol": "1093.HK",
+      "name": "CSPC Pharma / 石药集团",
+      "kind": "stock",
+      "theme": "healthcare-pharma",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "1177.HK": {
+      "symbol": "1177.HK",
+      "name": "Sino Biopharm / 中国生物制药",
+      "kind": "stock",
+      "theme": "healthcare-pharma",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "1299.HK": {
+      "symbol": "1299.HK",
+      "name": "AIA / 友邦保险",
+      "kind": "stock",
+      "theme": "financials-insurance",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "159915.SZ": {
+      "symbol": "159915.SZ",
+      "name": "E Fund ChiNext ETF / 易方达创业板ETF",
+      "kind": "etf",
+      "theme": "china-a-growth-tech",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "1810.HK": {
+      "symbol": "1810.HK",
+      "name": "Xiaomi / 小米集团-W",
+      "kind": "stock",
+      "theme": "consumer-tech",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "2020.HK": {
+      "symbol": "2020.HK",
+      "name": "ANTA Sports / 安踏体育",
+      "kind": "stock",
+      "theme": "consumer-discretionary",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "2269.HK": {
+      "symbol": "2269.HK",
+      "name": "WuXi Biologics / 药明生物",
+      "kind": "stock",
+      "theme": "healthcare-biotech",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "2331.HK": {
+      "symbol": "2331.HK",
+      "name": "Li Ning / 李宁",
+      "kind": "stock",
+      "theme": "consumer-discretionary",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "2800.HK": {
+      "symbol": "2800.HK",
+      "name": "Tracker Fund of Hong Kong / 盈富基金",
+      "kind": "etf",
+      "theme": "hong-kong-broad-market",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "300750.SZ": {
+      "symbol": "300750.SZ",
+      "name": "CATL / 宁德时代",
+      "kind": "stock",
+      "theme": "china-a-battery-ev",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "3033.HK": {
+      "symbol": "3033.HK",
+      "name": "CSOP Hang Seng TECH Index ETF / 南方东英恒生科技指数ETF",
+      "kind": "etf",
+      "theme": "hang-seng-tech",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "3067.HK": {
+      "symbol": "3067.HK",
+      "name": "iShares Hang Seng TECH ETF / 安硕恒生科技ETF",
+      "kind": "etf",
+      "theme": "hang-seng-tech",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "3690.HK": {
+      "symbol": "3690.HK",
+      "name": "Meituan / 美团-W",
+      "kind": "stock",
+      "theme": "internet-platform",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "510300.SH": {
+      "symbol": "510300.SH",
+      "name": "Huatai-PineBridge CSI 300 ETF / 华泰柏瑞沪深300ETF",
+      "kind": "etf",
+      "theme": "china-a-broad-market",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "510500.SH": {
+      "symbol": "510500.SH",
+      "name": "China Southern CSI 500 ETF / 南方中证500ETF",
+      "kind": "etf",
+      "theme": "china-a-midcap-market",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "510880.SH": {
+      "symbol": "510880.SH",
+      "name": "Huatai-PineBridge Dividend ETF / 华泰柏瑞红利ETF",
+      "kind": "etf",
+      "theme": "china-a-dividend-value",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "512480.SH": {
+      "symbol": "512480.SH",
+      "name": "GuolianAn Semiconductor ETF / 国联安半导体ETF",
+      "kind": "etf",
+      "theme": "china-a-semiconductors",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "515790.SH": {
+      "symbol": "515790.SH",
+      "name": "Huatai-PineBridge Photovoltaic ETF / 华泰柏瑞光伏ETF",
+      "kind": "etf",
+      "theme": "china-a-renewable-energy",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "588000.SH": {
+      "symbol": "588000.SH",
+      "name": "ChinaAMC STAR 50 ETF / 华夏上证科创板50ETF",
+      "kind": "etf",
+      "theme": "china-a-hard-tech",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "600030.SH": {
+      "symbol": "600030.SH",
+      "name": "CITIC Securities / 中信证券",
+      "kind": "stock",
+      "theme": "china-a-capital-markets",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "600036.SH": {
+      "symbol": "600036.SH",
+      "name": "China Merchants Bank / 招商银行",
+      "kind": "stock",
+      "theme": "china-a-financials-bank",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "600276.SH": {
+      "symbol": "600276.SH",
+      "name": "Hengrui Medicine / 恒瑞医药",
+      "kind": "stock",
+      "theme": "china-a-healthcare-pharma",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "600519.SH": {
+      "symbol": "600519.SH",
+      "name": "Kweichow Moutai / 贵州茅台",
+      "kind": "stock",
+      "theme": "china-a-consumer-staples",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "600900.SH": {
+      "symbol": "600900.SH",
+      "name": "Yangtze Power / 长江电力",
+      "kind": "stock",
+      "theme": "china-a-utilities-defensive",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "601088.SH": {
+      "symbol": "601088.SH",
+      "name": "China Shenhua / 中国神华",
+      "kind": "stock",
+      "theme": "china-a-energy-dividend",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "601318.SH": {
+      "symbol": "601318.SH",
+      "name": "Ping An Insurance / 中国平安",
+      "kind": "stock",
+      "theme": "china-a-financials-insurance",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "601899.SH": {
+      "symbol": "601899.SH",
+      "name": "Zijin Mining / 紫金矿业",
+      "kind": "stock",
+      "theme": "china-a-metals-mining",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "6862.HK": {
+      "symbol": "6862.HK",
+      "name": "Haidilao / 海底捞",
+      "kind": "stock",
+      "theme": "consumer-discretionary",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "688981.SH": {
+      "symbol": "688981.SH",
+      "name": "SMIC / 中芯国际",
+      "kind": "stock",
+      "theme": "china-a-semiconductors",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "9618.HK": {
+      "symbol": "9618.HK",
+      "name": "JD.com / 京东集团-SW",
+      "kind": "stock",
+      "theme": "internet-platform",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "9988.HK": {
+      "symbol": "9988.HK",
+      "name": "Alibaba / 阿里巴巴-W",
+      "kind": "stock",
+      "theme": "internet-platform",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    },
+    "9992.HK": {
+      "symbol": "9992.HK",
+      "name": "Pop Mart / 泡泡玛特",
+      "kind": "stock",
+      "theme": "consumer-discretionary",
+      "as_of_date": null,
+      "as_of_session": "close",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "sources": [],
+      "notes": [],
+      "evidence_mode": "missing_fail_closed",
+      "fundamental_score": null,
+      "valuation_score": null,
+      "catalyst_score": null,
+      "flow_score": null,
+      "macro_score": null,
+      "total_score": null
+    }
+  },
+  "findings": [
+    {
+      "symbol": "0002.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "0002.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "0002.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "0002.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "0002.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "0002.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "000333.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "000333.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "000333.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "000333.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "000333.SZ",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "000333.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "0005.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "0005.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "0005.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "0005.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "0005.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "0005.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "000858.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "000858.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "000858.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "000858.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "000858.SZ",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "000858.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "002594.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "002594.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "002594.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "002594.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "002594.SZ",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "002594.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "0386.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "0386.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "0386.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "0386.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "0386.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "0386.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "0388.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "0388.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "0388.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "0388.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "0388.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "0388.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "0728.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "0728.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "0728.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "0728.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "0728.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "0728.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "0857.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "0857.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "0857.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "0857.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "0857.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "0857.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "0883.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "0883.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "0883.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "0883.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "0883.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "0883.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "0941.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "0941.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "0941.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "0941.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "0941.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "0941.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "1093.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "1093.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "1093.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "1093.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "1093.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "1093.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "1299.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "1299.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "1299.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "1299.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "1299.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "1299.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "159915.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "159915.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "159915.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "159915.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "159915.SZ",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "159915.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "1810.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "1810.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "1810.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "1810.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "1810.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "1810.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "300750.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "300750.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "300750.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "300750.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "300750.SZ",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "300750.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "510300.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "510300.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "510300.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "510300.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "510300.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "510300.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "510500.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "510500.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "510500.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "510500.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "510500.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "510500.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "510880.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "510880.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "510880.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "510880.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "510880.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "510880.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "512480.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "512480.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "512480.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "512480.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "512480.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "512480.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "515790.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "515790.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "515790.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "515790.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "515790.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "515790.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "588000.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "588000.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "588000.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "588000.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "588000.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "588000.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "600030.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "600030.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "600030.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "600030.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "600030.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "600030.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "600036.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "600036.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "600036.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "600036.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "600036.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "600036.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "600519.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "600519.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "600519.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "600519.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "600519.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "600519.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "600900.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "600900.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "600900.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "600900.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "600900.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "600900.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "601088.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "601088.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "601088.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "601088.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "601088.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "601088.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "601899.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "601899.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "601899.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "601899.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "601899.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "601899.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "6862.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "6862.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "6862.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "6862.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "6862.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "6862.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "688981.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "688981.SH",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "688981.SH",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "688981.SH",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "688981.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "688981.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "9618.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "9618.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "9618.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "9618.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "9618.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "9618.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "9992.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_missing"
+    },
+    {
+      "symbol": "9992.HK",
+      "severity": "warning",
+      "reason": "nontechnical_evidence_date_missing"
+    },
+    {
+      "symbol": "9992.HK",
+      "severity": "warning",
+      "reason": "nontechnical_component_missing",
+      "components": [
+        "fundamental_score",
+        "valuation_score",
+        "catalyst_score",
+        "flow_score",
+        "macro_score"
+      ]
+    },
+    {
+      "symbol": "9992.HK",
+      "severity": "warning",
+      "reason": "nontechnical_score_missing"
+    },
+    {
+      "symbol": "9992.HK",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "9992.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    }
+  ],
+  "sources": {
+    "config": "D:\\Code\\yoyo\\config\\nontechnical_evidence.toml",
+    "trade_universe": "D:\\Code\\yoyo\\config\\trade_universe.toml",
+    "snapshot": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-14.json",
+    "ranking": null
+  }
+}

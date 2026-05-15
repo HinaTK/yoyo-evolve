@@ -34,6 +34,8 @@ import run_investment_shadow_variants as shadow_variants  # noqa: E402
 import build_chinese_daily_close_report as close_report  # noqa: E402
 import build_investment_evidence_ledger as evidence_ledger  # noqa: E402
 import build_investment_calibration_scorecard as calibration_scorecard  # noqa: E402
+import build_nontechnical_evidence as nontechnical_builder  # noqa: E402
+import evaluate_nontechnical_evidence as nontechnical_eval  # noqa: E402
 
 
 class InvestmentLevel5Level6Tests(unittest.TestCase):
@@ -158,6 +160,23 @@ forbid_edge_gate_reduction = true
 """.lstrip(),
             encoding="utf-8",
         )
+        (config_dir / "nontechnical_evidence.toml").write_text(
+            """
+[policy]
+require_for_action = true
+max_staleness_days = 30
+min_total_score_for_action = 0.55
+block_unknown_event_risk = true
+
+[weights]
+fundamental_score = 0.30
+valuation_score = 0.20
+catalyst_score = 0.25
+flow_score = 0.15
+macro_score = 0.10
+""".lstrip(),
+            encoding="utf-8",
+        )
 
     def valid_call(self, symbol="AAA.HK", state="buy_candidate"):
         return {
@@ -221,6 +240,8 @@ forbid_edge_gate_reduction = true
         calibration=None,
         forward=None,
         variants=None,
+        nontechnical=None,
+        attribution_data=None,
     ):
         paths = {
             "calls": tmp_path / "calls.json",
@@ -230,6 +251,8 @@ forbid_edge_gate_reduction = true
             "calibration": tmp_path / "calibration.json",
             "forward": tmp_path / "forward.json",
             "variants": tmp_path / "variants.json",
+            "nontechnical": tmp_path / "nontechnical.json",
+            "attribution": tmp_path / "nontechnical-attribution.json",
             "output": tmp_path / "reports",
         }
         calls = {"date": date, "session": "close", "recommendations": [self.valid_call("AAA.HK", "buy_candidate")]}
@@ -238,11 +261,13 @@ forbid_edge_gate_reduction = true
         fixtures = {
             paths["calls"]: calls,
             paths["ranking"]: ranking if ranking is not None else {"as_of_date": date, "actionable_candidates": [], "diagnostic_candidates": [], "top_candidates": []},
-            paths["risk"]: risk if risk is not None else {"verdicts": [{"symbol": "AAA.HK", "final_state_cap": "buy_candidate", "risk_decision": "pass"}]},
+            paths["risk"]: risk if risk is not None else {"date": date, "session": "close", "verdicts": [{"symbol": "AAA.HK", "final_state_cap": "buy_candidate", "risk_decision": "pass"}]},
             paths["evidence"]: evidence if evidence is not None else {"as_of_date": date, "summary": {"forward_shadow_log_count": 1}},
             paths["calibration"]: calibration if calibration is not None else {"as_of_date": date, "summary": {"combined_record_count": 1}, "scorecard": {}},
             paths["forward"]: forward if forward is not None else {"thresholds": {"as_of_date": date}, "summary": {"sample_count": 1}},
             paths["variants"]: variants if variants is not None else {"as_of_date": date, "competition_id": "test_competition", "scoreboard": []},
+            paths["nontechnical"]: nontechnical if nontechnical is not None else {"as_of_date": date, "summary": {}},
+            paths["attribution"]: attribution_data if attribution_data is not None else {"as_of_date": date, "summary": {}, "buckets": {"total_score": []}},
         }
         for path, payload in fixtures.items():
             path.write_text(json.dumps(payload), encoding="utf-8")
@@ -260,6 +285,8 @@ forbid_edge_gate_reduction = true
             paths["forward"],
             paths["variants"],
             paths["output"],
+            paths["nontechnical"],
+            paths["attribution"],
         )
 
     def test_tencent_symbol_mapping_supports_hk_and_a_shares(self):
@@ -1210,6 +1237,254 @@ forbid_edge_gate_reduction = true
         self.assertTrue(ranked[0]["qualified_for_action"])
         self.assertIn("same_theme_best_peer_evidence_passed", ranked[0]["qualification_flags"])
 
+    def test_nontechnical_evidence_required_blocks_action_when_missing(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-13"
+        evidence = {"policy": {"require_for_action": True, "max_staleness_days": 30, "min_total_score_for_action": 0.55}, "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS, "symbols": {}}
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={}, nontechnical_evidence=evidence)
+
+        self.assertTrue(ranked[0]["qualified_for_watch"])
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertEqual(ranked[0]["nontechnical_evidence"]["status"], "missing")
+        self.assertIn("nontechnical_evidence_missing", ranked[0]["action_disqualifiers"])
+
+    def test_nontechnical_evidence_allows_action_when_fresh_and_positive(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-13"
+        evidence = {
+            "policy": {"require_for_action": True, "max_staleness_days": 30, "min_total_score_for_action": 0.55, "block_unknown_event_risk": True},
+            "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS,
+            "symbols": {
+                "0700.HK": {
+                    "as_of_date": "2026-05-13",
+                    "fundamental_score": 0.7,
+                    "valuation_score": 0.6,
+                    "catalyst_score": 0.65,
+                    "flow_score": 0.6,
+                    "macro_score": 0.55,
+                    "event_risk": "none",
+                    "source_count": 3,
+                }
+            },
+        }
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={}, nontechnical_evidence=evidence)
+
+        self.assertTrue(ranked[0]["qualified_for_action"])
+        self.assertIn("nontechnical_evidence_gate_clear", ranked[0]["qualification_flags"])
+        self.assertGreaterEqual(ranked[0]["nontechnical_evidence"]["total_score"], 0.55)
+
+    def test_nontechnical_evidence_blocks_stale_or_event_risk(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-13"
+        evidence = {
+            "policy": {"require_for_action": True, "max_staleness_days": 10, "min_total_score_for_action": 0.55},
+            "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS,
+            "symbols": {"0700.HK": {"as_of_date": "2026-04-01", "fundamental_score": 0.9, "valuation_score": 0.9, "catalyst_score": 0.9, "flow_score": 0.9, "macro_score": 0.9, "event_risk": "regulatory", "source_count": 2}},
+        }
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={}, nontechnical_evidence=evidence)
+
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertIn("nontechnical_evidence_stale", ranked[0]["action_disqualifiers"])
+        self.assertIn("event_risk_regulatory", ranked[0]["action_disqualifiers"])
+
+    def test_nontechnical_evidence_blocks_missing_component_and_future_session(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-13"
+        ranked[0]["snapshot_as_of_session"] = "morning"
+        evidence = {
+            "policy": {"require_for_action": True, "max_staleness_days": 30, "min_total_score_for_action": 0.55, "block_unknown_event_risk": True},
+            "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS,
+            "symbols": {
+                "0700.HK": {
+                    "as_of_date": "2026-05-13",
+                    "as_of_session": "close",
+                    "fundamental_score": 0.7,
+                    "valuation_score": 0.6,
+                    "catalyst_score": 0.65,
+                    "flow_score": 0.6,
+                    "event_risk": "none",
+                    "source_count": 3,
+                }
+            },
+        }
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={}, nontechnical_evidence=evidence)
+
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertIn("nontechnical_component_missing", ranked[0]["action_disqualifiers"])
+        self.assertIn("nontechnical_evidence_from_future_session", ranked[0]["action_disqualifiers"])
+
+    def test_nontechnical_evidence_builder_outputs_missing_fail_closed_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            config = tmp_path / "nontechnical.toml"
+            config.write_text(
+                """
+[policy]
+require_for_action = true
+max_staleness_days = 30
+min_total_score_for_action = 0.55
+block_unknown_event_risk = true
+
+[weights]
+fundamental_score = 0.30
+valuation_score = 0.20
+catalyst_score = 0.25
+flow_score = 0.15
+macro_score = 0.10
+
+[[evidence]]
+symbol = "AAA.HK"
+as_of_date = "2026-04-27"
+fundamental_score = 0.70
+valuation_score = 0.60
+catalyst_score = 0.65
+flow_score = 0.60
+macro_score = 0.55
+event_risk = "none"
+source_count = 2
+""".lstrip(),
+                encoding="utf-8",
+            )
+            universe = tmp_path / "universe.toml"
+            universe.write_text(
+                """
+[[symbols]]
+symbol = "AAA.HK"
+name = "AAA"
+kind = "stock"
+theme = "growth"
+
+[[symbols]]
+symbol = "BBB.HK"
+name = "BBB"
+kind = "stock"
+theme = "defensive"
+""".lstrip(),
+                encoding="utf-8",
+            )
+
+            payload = nontechnical_builder.build_evidence(config, "2026-04-27", universe)
+
+            self.assertTrue(payload["research_only"])
+            self.assertTrue(payload["no_execution"])
+            self.assertEqual(payload["symbols"]["AAA.HK"]["evidence_mode"], "curated_point_in_time")
+            self.assertEqual(payload["symbols"]["BBB.HK"]["evidence_mode"], "missing_fail_closed")
+            self.assertEqual(payload["summary"]["available_count"], 1)
+            self.assertEqual(payload["summary"]["missing_count"], 1)
+            self.assertGreater(payload["summary"]["blocking_finding_count"], 0)
+
+    def test_ranker_treats_generated_missing_nontechnical_row_as_missing(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-13"
+        evidence = {
+            "policy": {"require_for_action": True, "max_staleness_days": 30, "min_total_score_for_action": 0.55},
+            "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS,
+            "symbols": {"0700.HK": {"evidence_mode": "missing_fail_closed", "as_of_date": None}},
+        }
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={}, nontechnical_evidence=evidence)
+
+        self.assertEqual(ranked[0]["nontechnical_evidence"]["status"], "missing")
+        self.assertIn("nontechnical_evidence_missing", ranked[0]["action_disqualifiers"])
+
+    def test_nontechnical_attribution_uses_only_point_in_time_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            calls_dir = tmp_path / "calls"
+            snapshot_dir = tmp_path / "snapshots"
+            shadow_dir = tmp_path / "shadow"
+            calls_dir.mkdir()
+            snapshot_dir.mkdir()
+            shadow_dir.mkdir()
+            self.write_trade_snapshot(snapshot_dir / "2026-04-01.json", "2026-04-01", 10.0, 10.0)
+            self.write_trade_snapshot(snapshot_dir / "2026-04-04.json", "2026-04-04", 11.0, 9.0)
+            (calls_dir / "2026-04-01-calls.json").write_text(
+                json.dumps(
+                    {
+                        "date": "2026-04-01",
+                        "session": "close",
+                        "recommendations": [self.valid_call("AAA.HK", "buy_candidate"), self.valid_call("BBB.HK", "buy_candidate")],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            evidence_path = tmp_path / "nontechnical.json"
+            evidence_path.write_text(
+                json.dumps(
+                    {
+                        "as_of_date": "2026-04-01",
+                        "symbols": {
+                            "AAA.HK": {"as_of_date": "2026-04-01", "total_score": 0.7, "fundamental_score": 0.7, "valuation_score": 0.7, "catalyst_score": 0.7, "flow_score": 0.7, "macro_score": 0.7, "event_risk": "none", "source_count": 2},
+                            "BBB.HK": {"as_of_date": "2026-04-02", "total_score": 0.7, "fundamental_score": 0.7, "valuation_score": 0.7, "catalyst_score": 0.7, "flow_score": 0.7, "macro_score": 0.7, "event_risk": "none", "source_count": 2},
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = nontechnical_eval.build_attribution(
+                evidence_path,
+                calls_dir,
+                snapshot_dir,
+                shadow_dir,
+                tmp_path / "missing-registry.json",
+                nontechnical_eval.dt.date(2026, 4, 4),
+                "close",
+                min_bucket_samples=1,
+            )
+
+            self.assertEqual(result["summary"]["outcome_count"], 2)
+            self.assertEqual(result["summary"]["attributed_sample_count"], 1)
+            self.assertEqual(result["records"][0]["symbol"], "AAA.HK")
+            self.assertEqual(result["skipped_records"][0]["symbol"], "BBB.HK")
+
+    def test_nontechnical_attribution_rejects_same_day_future_session_evidence(self):
+        evidence = {
+            "as_of_date": "2026-04-01",
+            "as_of_session": "close",
+            "symbols": {
+                "AAA.HK": {"total_score": 0.7, "event_risk": "none", "source_count": 2, "fundamental_score": 0.7, "valuation_score": 0.7, "catalyst_score": 0.7, "flow_score": 0.7, "macro_score": 0.7}
+            },
+        }
+
+        row = nontechnical_eval.evidence_for_symbol(evidence, "AAA.HK", nontechnical_eval.dt.date(2026, 4, 1), "morning")
+
+        self.assertIsNone(row)
+
     def test_ranker_requires_volume_confirmation_for_action_not_watch(self):
         item = ranker.item_score(
             {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 0.8, "regime_flags": []},
@@ -1970,7 +2245,7 @@ horizon_days = 14
                 runner=fake_runner,
             )
 
-            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "rank_universe", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard", "run_shadow_variants"])
+            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "build_nontechnical_evidence", "rank_universe", "build_draft_calls", "build_risk_review", "validate_draft_calls", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard", "evaluate_nontechnical_attribution", "run_shadow_variants"])
             self.assertTrue(all(command[0] == "python" for _, command, *_ in calls))
             self.assertFalse(any("bash" in part.lower() for _, command, *_ in calls for part in command))
             shadow_command = next(command for name, command, *_ in calls if name == "log_shadow")
@@ -1985,6 +2260,17 @@ horizon_days = 14
             rank_command = next(command for name, command, *_ in calls if name == "rank_universe")
             self.assertEqual(rank_command[rank_command.index("--actionable-top-n") + 1], "2")
             self.assertEqual(rank_command[rank_command.index("--diagnostic-top-n") + 1], "3")
+            self.assertIn("--nontechnical-evidence", rank_command)
+            self.assertTrue(rank_command[rank_command.index("--nontechnical-evidence") + 1].endswith("research\\evidence\\nontechnical\\latest.json") or rank_command[rank_command.index("--nontechnical-evidence") + 1].endswith("research/evidence/nontechnical/latest.json"))
+            nontechnical_command = next(command for name, command, *_ in calls if name == "build_nontechnical_evidence")
+            self.assertEqual(nontechnical_command[nontechnical_command.index("--as-of-date") + 1], "2026-04-27")
+            attribution_command = next(command for name, command, *_ in calls if name == "evaluate_nontechnical_attribution")
+            self.assertEqual(attribution_command[attribution_command.index("--as-of-date") + 1], "2026-04-27")
+            self.assertEqual(attribution_command[attribution_command.index("--as-of-session") + 1], "close")
+            draft_command = next(command for name, command, *_ in calls if name == "build_draft_calls")
+            self.assertIn("--include-diagnostics", draft_command)
+            risk_command = next(command for name, command, *_ in calls if name == "build_risk_review")
+            self.assertTrue(risk_command[risk_command.index("--draft-calls") + 1].endswith("2026-04-27-close-draft-policy.json"))
             variant_command = next(command for name, command, *_ in calls if name == "run_shadow_variants")
             self.assertEqual(variant_command[variant_command.index("--evidence-mode") + 1], "forward_shadow")
             self.assertEqual(variant_command[variant_command.index("--as-of-date") + 1], "2026-04-27")
@@ -2017,6 +2303,8 @@ horizon_days = 14
             self.assertIn("build_chinese_close_report", names)
             report_command = next(step["command"] for step in summary["steps"] if step["name"] == "build_chinese_close_report")
             self.assertEqual(report_command[report_command.index("--session") + 1], "close")
+            self.assertIn("--nontechnical-evidence", report_command)
+            self.assertIn("--nontechnical-attribution", report_command)
             variant_path = report_command[report_command.index("--variant-competition") + 1]
             self.assertEqual(variant_path, str(tmp_path.resolve() / "research" / "shadow_variants" / "custom_competition" / "latest_variant_competition.json"))
             self.assertNotIn("shadow_gate_variants_v1", variant_path)
@@ -2696,6 +2984,8 @@ horizon_days = 14
             calibration_path = tmp_path / "calibration.json"
             forward_path = tmp_path / "forward.json"
             variants_path = tmp_path / "variants.json"
+            nontechnical_path = tmp_path / "nontechnical.json"
+            attribution_path = tmp_path / "nontechnical-attribution.json"
             output_dir = tmp_path / "reports"
             calls = {
                 "date": "2026-04-27",
@@ -2721,6 +3011,8 @@ horizon_days = 14
                 ],
             }
             risk = {
+                "date": "2026-04-27",
+                "session": "close",
                 "verdicts": [
                     {"symbol": "AAA.HK", "final_state_cap": "buy_candidate", "risk_decision": "pass"},
                     {"symbol": "BBB.HK", "final_state_cap": "watch_only", "risk_decision": "pass"},
@@ -2731,6 +3023,8 @@ horizon_days = 14
             calibration = {"summary": {"combined_record_count": 5}, "scorecard": {"scored_sample_count": 4, "hit_rate": 0.5, "brier_score": 0.2, "calibration_error": 0.1}}
             forward = {"summary": {"sample_count": 4}}
             variants = {"competition_id": "test_competition", "scoreboard": [{"diagnostic_rank": 1, "variant_id": "baseline", "sample_count": 2, "avg_net_return_pct": 1.2, "avg_alpha_pct": 0.5, "no_execution_audit_passed": True}]}
+            nontechnical = {"as_of_date": "2026-04-27", "summary": {"symbol_count": 3, "available_count": 1, "missing_count": 2, "critical_finding_count": 0}}
+            attribution_data = {"as_of_date": "2026-04-27", "summary": {"attributed_sample_count": 1, "hit_rate": 1.0, "avg_return_pct": 2.0}, "buckets": {"total_score": [{"score_bucket": "0.55-0.70", "scored_sample_count": 1, "hit_rate": 1.0, "avg_return_pct": 2.0}]}}
             fixtures = [
                 (calls_path, calls),
                 (ranking_path, ranking),
@@ -2739,6 +3033,8 @@ horizon_days = 14
                 (calibration_path, calibration),
                 (forward_path, forward),
                 (variants_path, variants),
+                (nontechnical_path, nontechnical),
+                (attribution_path, attribution_data),
             ]
             for path, payload in fixtures:
                 path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
@@ -2754,11 +3050,13 @@ horizon_days = 14
                 forward_path,
                 variants_path,
                 output_dir,
+                nontechnical_path,
+                attribution_path,
             )
 
             payload = result["payload"]
             markdown = pathlib.Path(result["markdown"]).read_text(encoding="utf-8")
-            for section in ["今日结论", "重点标的表", "Gate 拒绝与观察重点", "影子证据与校准", "Shadow 变体竞赛", "研究声明"]:
+            for section in ["今日结论", "重点标的表", "Gate 拒绝与观察重点", "影子证据与校准", "非技术面证据与归因", "Shadow 变体竞赛", "研究声明"]:
                 self.assertIn(section, markdown)
             self.assertTrue(payload["research_only"])
             self.assertTrue(payload["no_execution"])
@@ -2766,6 +3064,8 @@ horizon_days = 14
             self.assertEqual([row["symbol"] for row in payload["recommendations"]], ["AAA.HK", "BBB.HK", "CCC.HK"])
             self.assertNotEqual([row["symbol"] for row in payload["recommendations"]], ["ZZZ.HK"])
             self.assertEqual(payload["variants"]["scoreboard"][0]["variant_id"], "baseline")
+            self.assertEqual(payload["nontechnical"]["evidence_summary"]["available_count"], 1)
+            self.assertIn("非技术面分桶", markdown)
 
             morning_calls = tmp_path / "morning-calls.json"
             morning_calls.write_text(json.dumps({**calls, "session": "morning"}, ensure_ascii=False), encoding="utf-8")
@@ -2781,6 +3081,8 @@ horizon_days = 14
                     forward_path,
                     variants_path,
                     output_dir,
+                    nontechnical_path,
+                    attribution_path,
                 )
 
     def test_close_report_rejects_calls_date_mismatch(self):
@@ -2797,6 +3099,9 @@ horizon_days = 14
             {"forward": {"thresholds": {"as_of_date": "2026-04-28"}, "summary": {}}},
             {"variants": {"as_of_date": "2026-04-28", "competition_id": "test_competition", "scoreboard": []}},
             {"variants": {"date": "2026-04-28", "competition_id": "test_competition", "scoreboard": []}},
+            {"nontechnical": {"as_of_date": "2026-04-28", "summary": {}}},
+            {"attribution_data": {"as_of_date": "2026-04-28", "summary": {}, "buckets": {"total_score": []}}},
+            {"risk": {"date": "2026-04-28", "session": "close", "verdicts": [{"symbol": "AAA.HK", "final_state_cap": "buy_candidate"}]}},
         ]
 
         for overrides in cases:
@@ -2809,8 +3114,9 @@ horizon_days = 14
 
     def test_close_report_enforces_risk_review_verdict_caps(self):
         cases = [
-            ({"verdicts": [{"symbol": "AAA.HK", "final_state_cap": "watch_only", "risk_decision": "cap"}]}, "exceeds risk review cap"),
-            ({"verdicts": []}, "missing risk review verdict"),
+            ({"date": "2026-04-27", "session": "close", "verdicts": [{"symbol": "AAA.HK", "final_state_cap": "watch_only", "risk_decision": "cap"}]}, "exceeds risk review cap"),
+            ({"date": "2026-04-27", "session": "close", "verdicts": []}, "missing risk review verdict"),
+            ({"date": "2026-04-27", "session": "morning", "verdicts": [{"symbol": "AAA.HK", "final_state_cap": "buy_candidate"}]}, "risk review session must be close"),
         ]
 
         for risk, message in cases:

@@ -207,6 +207,7 @@ def build_evaluation(
             record, pending = outcome_for_candidate(candidate, base_date, entries, log_horizon, round_trip_bps, max_adverse_limit_pct)
             if record is not None:
                 record["shadow_log"] = str(path)
+                record["session"] = log.get("session")
                 record["evidence_mode"] = log.get("evidence_mode")
                 record["counts_toward_forward_evidence"] = is_forward
                 records.append(record)

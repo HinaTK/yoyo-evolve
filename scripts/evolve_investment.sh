@@ -109,6 +109,8 @@ RANKING_REL="research/rankings/$OUTPUT_STEM-ranking.json"
 ACTIVE_STRATEGY_FILE="$ROOT_DIR/config/active_strategy.toml"
 OPTIMIZATION_CONFIG="$ROOT_DIR/config/optimization.toml"
 SYMBOL_RISK_FILE="$ROOT_DIR/research/experiments/symbol_risk_memory.json"
+NONTECHNICAL_EVIDENCE_CONFIG="$ROOT_DIR/config/nontechnical_evidence.toml"
+NONTECHNICAL_EVIDENCE_FILE="$ROOT_DIR/research/evidence/nontechnical/latest.json"
 export RANKING_FILE
 WATCHLIST_CONFIG_PY="$(python_path "$WATCHLIST_CONFIG")"
 TRADE_UNIVERSE_CONFIG_PY="$(python_path "$TRADE_UNIVERSE_CONFIG")"
@@ -218,7 +220,20 @@ SYMBOL_RISK_ARG=()
 if [ -f "$SYMBOL_RISK_FILE" ]; then
     SYMBOL_RISK_ARG=(--symbol-risk-json "$SYMBOL_RISK_FILE")
 fi
-"$PYTHON_BIN" "$ROOT_DIR/scripts/rank_investment_universe.py" --snapshot "$SNAPSHOT_FILE" --output "$RANKING_FILE" --strategy-config "$ACTIVE_STRATEGY_FILE" "${SYMBOL_RISK_ARG[@]}" $RANK_ARGS
+NONTECHNICAL_ARG=()
+if [ -f "$NONTECHNICAL_EVIDENCE_CONFIG" ]; then
+    mkdir -p "$(dirname "$NONTECHNICAL_EVIDENCE_FILE")"
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/build_nontechnical_evidence.py" \
+        --config "$NONTECHNICAL_EVIDENCE_CONFIG" \
+        --trade-universe "$TRADE_UNIVERSE_CONFIG" \
+        --snapshot "$SNAPSHOT_FILE" \
+        --as-of-date "$DATE" \
+        --as-of-session "$SESSION" \
+        --output-json "$NONTECHNICAL_EVIDENCE_FILE" \
+        --output-md "$ROOT_DIR/research/evidence/nontechnical/latest.md"
+    NONTECHNICAL_ARG=(--nontechnical-evidence "$NONTECHNICAL_EVIDENCE_FILE")
+fi
+"$PYTHON_BIN" "$ROOT_DIR/scripts/rank_investment_universe.py" --snapshot "$SNAPSHOT_FILE" --output "$RANKING_FILE" --strategy-config "$ACTIVE_STRATEGY_FILE" --as-of-session "$SESSION" "${SYMBOL_RISK_ARG[@]}" "${NONTECHNICAL_ARG[@]}" $RANK_ARGS
 
 if [ "$ENABLE_SHADOW_LOGGING" = "true" ]; then
     SHADOW_FILE="$ROOT_DIR/research/shadow/$OUTPUT_STEM-shadow.json"

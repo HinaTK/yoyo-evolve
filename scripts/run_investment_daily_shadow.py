@@ -155,6 +155,11 @@ class DailyShadowOptions:
     evaluate_shadow: bool = True
     build_evidence_ledger: bool = True
     build_calibration_scorecard: bool = True
+    build_nontechnical_evidence: bool = True
+    evaluate_nontechnical_attribution: bool = True
+    build_draft_calls: bool = True
+    build_risk_review: bool = True
+    validate_calls: bool = True
     run_variant_competition: bool = True
     build_close_report: bool = True
     calls_file: pathlib.Path | None = None
@@ -169,9 +174,13 @@ def ensure_directories(root: pathlib.Path) -> None:
     for relative in [
         "data/snapshots",
         "research/rankings",
+        "research/calls",
+        "research/risk",
         "research/experiments",
         "research/shadow",
         "research/shadow_variants",
+        "research/evidence/nontechnical",
+        "research/evaluations",
         "research/products/daily_close",
     ]:
         (root / relative).mkdir(parents=True, exist_ok=True)
@@ -189,6 +198,7 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
     ranking_file = resolve_path(root, options.ranking_file) or root / "research" / "rankings" / f"{stem}-ranking.json"
     shadow_file = resolve_path(root, options.shadow_file) or root / "research" / "shadow" / f"{stem}-shadow.json"
     calls_file = resolve_path(root, options.calls_file) or root / "research" / "calls" / f"{stem}-calls.json"
+    draft_calls_file = root / "research" / "calls" / f"{stem}-draft-policy.json"
     risk_review_file = resolve_path(root, options.risk_review_file) or root / "research" / "risk" / f"{stem}-risk-review.json"
     evidence_mode = options.evidence_mode or default_evidence_mode(options.session)
     if evidence_mode not in {"forward_shadow", "historical_replay"}:
@@ -198,6 +208,9 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
     trade_universe_config = root / "config" / "trade_universe.toml"
     radar_config = root / "config" / "market_radar.toml"
     active_strategy_file = root / "config" / "active_strategy.toml"
+    nontechnical_evidence_config = root / "config" / "nontechnical_evidence.toml"
+    nontechnical_evidence_file = root / "research" / "evidence" / "nontechnical" / "latest.json"
+    nontechnical_attribution_file = root / "research" / "evaluations" / "latest_nontechnical_attribution.json"
     optimization = read_toml(optimization_config)
     symbol_risk_file = configured_symbol_risk_file(root, optimization)
     rank_args, round_trip_bps = ranking_cli_args(root)
@@ -272,6 +285,29 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             check=False,
         )
 
+    if options.build_nontechnical_evidence and nontechnical_evidence_config.exists():
+        call(
+            "build_nontechnical_evidence",
+            [
+                options.python_bin,
+                script_path(root, "build_nontechnical_evidence.py"),
+                "--config",
+                nontechnical_evidence_config,
+                "--trade-universe",
+                trade_universe_config,
+                "--snapshot",
+                snapshot_file,
+                "--as-of-date",
+                options.date,
+                "--as-of-session",
+                options.session,
+                "--output-json",
+                nontechnical_evidence_file,
+                "--output-md",
+                root / "research" / "evidence" / "nontechnical" / "latest.md",
+            ],
+        )
+
     rank_command: list[str | pathlib.Path] = [
         options.python_bin,
         script_path(root, "rank_investment_universe.py"),
@@ -281,11 +317,83 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
         ranking_file,
         "--strategy-config",
         active_strategy_file,
+        "--as-of-session",
+        options.session,
         *rank_args,
     ]
     if symbol_risk_file.exists():
         rank_command.extend(["--symbol-risk-json", symbol_risk_file])
+    rank_nontechnical_file = nontechnical_evidence_file if nontechnical_evidence_file.exists() or options.dry_run or options.build_nontechnical_evidence else nontechnical_evidence_config
+    if nontechnical_evidence_config.exists():
+        rank_command.extend(["--nontechnical-evidence", rank_nontechnical_file])
     call("rank_universe", rank_command)
+
+    if options.build_draft_calls:
+        call(
+            "build_draft_calls",
+            [
+                options.python_bin,
+                script_path(root, "generate_investment_draft_calls.py"),
+                "--ranking",
+                ranking_file,
+                "--output",
+                draft_calls_file,
+                "--date",
+                options.date,
+                "--session",
+                options.session,
+                "--include-diagnostics",
+            ],
+        )
+
+    if options.build_risk_review and (draft_calls_file.exists() or options.dry_run or options.build_draft_calls):
+        risk_command: list[str | pathlib.Path] = [
+            options.python_bin,
+            script_path(root, "generate_investment_risk_review.py"),
+            "--draft-calls",
+            draft_calls_file,
+            "--ranking",
+            ranking_file,
+            "--investment-profile",
+            root / "config" / "investment_profile.toml",
+            "--output",
+            risk_review_file,
+        ]
+        if symbol_risk_file.exists():
+            risk_command.extend(["--symbol-risk-json", symbol_risk_file])
+        call("build_risk_review", risk_command)
+
+    if options.validate_calls and (draft_calls_file.exists() or options.dry_run or options.build_draft_calls):
+        call(
+            "validate_draft_calls",
+            [
+                options.python_bin,
+                script_path(root, "validate_investment_calls.py"),
+                "--calls",
+                draft_calls_file,
+                "--ranking",
+                ranking_file,
+                "--trade-universe",
+                trade_universe_config,
+            ],
+        )
+
+    if options.validate_calls and calls_file.exists():
+        validate_final_command: list[str | pathlib.Path] = [
+            options.python_bin,
+            script_path(root, "validate_investment_calls.py"),
+            "--calls",
+            calls_file,
+            "--ranking",
+            ranking_file,
+            "--trade-universe",
+            trade_universe_config,
+        ]
+        if draft_calls_file.exists():
+            validate_final_command.extend(["--draft-calls", draft_calls_file])
+        if risk_review_file.exists():
+            validate_final_command.extend(["--risk-review", risk_review_file])
+        call("validate_final_calls", validate_final_command)
 
     call(
         "log_shadow",
@@ -372,6 +480,33 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             ],
         )
 
+    if options.evaluate_nontechnical_attribution and (nontechnical_evidence_file.exists() or ((options.dry_run or options.build_nontechnical_evidence) and nontechnical_evidence_config.exists())):
+        call(
+            "evaluate_nontechnical_attribution",
+            [
+                options.python_bin,
+                script_path(root, "evaluate_nontechnical_evidence.py"),
+                "--nontechnical-evidence",
+                nontechnical_evidence_file,
+                "--calls-dir",
+                root / "research" / "calls",
+                "--snapshot-dir",
+                root / "data" / "snapshots",
+                "--shadow-dir",
+                root / "research" / "shadow",
+                "--registry",
+                registry_file,
+                "--as-of-date",
+                options.date,
+                "--as-of-session",
+                options.session,
+                "--output-json",
+                nontechnical_attribution_file,
+                "--output-md",
+                root / "research" / "evaluations" / "latest_nontechnical_attribution.md",
+            ],
+        )
+
     variant_competition_id = shadow_variant_competition_id(root)
     variant_competition_file = root / "research" / "shadow_variants" / variant_competition_id / "latest_variant_competition.json"
     if options.run_variant_competition:
@@ -403,7 +538,8 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             ],
         )
 
-    if options.build_close_report and options.session == "close" and (options.dry_run or calls_file.exists()):
+    report_calls_file = calls_file if calls_file.exists() else draft_calls_file
+    if options.build_close_report and options.session == "close" and (options.dry_run or report_calls_file.exists()):
         call(
             "build_chinese_close_report",
             [
@@ -414,7 +550,7 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
                 "--session",
                 options.session,
                 "--calls",
-                calls_file,
+                report_calls_file,
                 "--ranking",
                 ranking_file,
                 "--risk-review",
@@ -427,6 +563,10 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
                 root / "research" / "shadow" / "latest_forward_evaluation.json",
                 "--variant-competition",
                 variant_competition_file,
+                "--nontechnical-evidence",
+                nontechnical_evidence_file,
+                "--nontechnical-attribution",
+                nontechnical_attribution_file,
                 "--output-dir",
                 root / "research" / "products" / "daily_close",
             ],
@@ -443,10 +583,15 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             "radar_snapshot": str(radar_snapshot_file),
             "registry": str(registry_file),
             "ranking": str(ranking_file),
+            "draft_calls": str(draft_calls_file),
+            "calls": str(calls_file),
             "shadow": str(shadow_file),
             "shadow_variants": str(root / "research" / "shadow_variants"),
             "close_report": str(root / "research" / "products" / "daily_close" / f"{close_report_stem(options.date, options.session)}-close-report.md"),
+            "risk_review": str(risk_review_file),
             "symbol_risk_memory": str(symbol_risk_file),
+            "nontechnical_evidence": str(nontechnical_evidence_file),
+            "nontechnical_attribution": str(nontechnical_attribution_file),
         },
         "steps": steps,
     }
@@ -476,6 +621,11 @@ def parse_args() -> DailyShadowOptions:
     parser.add_argument("--skip-evaluation", action="store_true")
     parser.add_argument("--skip-evidence-ledger", action="store_true")
     parser.add_argument("--skip-calibration-scorecard", action="store_true")
+    parser.add_argument("--skip-nontechnical-evidence", action="store_true")
+    parser.add_argument("--skip-nontechnical-attribution", action="store_true")
+    parser.add_argument("--skip-draft-calls", action="store_true")
+    parser.add_argument("--skip-risk-review", action="store_true")
+    parser.add_argument("--skip-call-validation", action="store_true")
     parser.add_argument("--skip-variant-competition", action="store_true")
     parser.add_argument("--skip-close-report", action="store_true")
     parser.add_argument("--calls-file", default=None)
@@ -505,6 +655,11 @@ def parse_args() -> DailyShadowOptions:
         evaluate_shadow=not args.skip_evaluation,
         build_evidence_ledger=not args.skip_evidence_ledger,
         build_calibration_scorecard=not args.skip_calibration_scorecard,
+        build_nontechnical_evidence=not args.skip_nontechnical_evidence,
+        evaluate_nontechnical_attribution=not args.skip_nontechnical_attribution,
+        build_draft_calls=not args.skip_draft_calls,
+        build_risk_review=not args.skip_risk_review,
+        validate_calls=not args.skip_call_validation,
         run_variant_competition=not args.skip_variant_competition,
         build_close_report=not args.skip_close_report,
         calls_file=resolve_path(root, args.calls_file),

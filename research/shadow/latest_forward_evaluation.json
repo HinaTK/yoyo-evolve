@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-13T09:10:31Z",
+  "generated_at": "2026-05-14T13:45:48Z",
   "shadow_dir": "D:\\Code\\yoyo\\research\\shadow",
   "registry": "D:\\Code\\yoyo\\data\\snapshots\\registry.json",
   "evaluation_mode": "forward_shadow_only",
@@ -8,15 +8,16 @@
     "min_forward_shadow_days": 20,
     "max_forward_adverse_breach_rate": 0.0,
     "max_adverse_limit_pct": -8.0,
-    "round_trip_bps": 35.0
+    "round_trip_bps": 35.0,
+    "as_of_date": "2026-05-14"
   },
   "summary": {
-    "total_shadow_log_count": 23,
-    "forward_shadow_log_count": 3,
+    "total_shadow_log_count": 24,
+    "forward_shadow_log_count": 4,
     "historical_replay_log_count": 20,
-    "evaluated_log_count": 3,
+    "evaluated_log_count": 4,
     "matured_forward_shadow_days": 1,
-    "no_action_log_count": 3,
+    "no_action_log_count": 4,
     "pending_sample_count": 0,
     "sample_count": 0,
     "win_rate": null,
@@ -32,7 +33,7 @@
     "findings": [
       {
         "metric": "forward_shadow_days",
-        "actual": 3,
+        "actual": 4,
         "expected": ">= 20"
       },
       {

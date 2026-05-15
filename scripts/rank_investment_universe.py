@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import datetime as dt
 import json
 import pathlib
 import tomllib
@@ -26,6 +27,20 @@ DEFAULT_CN_MARKET_PROXY_SYMBOL = "510300.SH"
 DEFAULT_MAX_MARKET_RANGE_FOR_ACTION = 0.70
 DEFAULT_BASE_CURRENCY = "HKD"
 CN_LIMIT_MOVE_PCT = 9.5
+SESSION_ORDER = {"morning": 0, "midday": 1, "close": 2, "historical": 2}
+DEFAULT_NONTECHNICAL_POLICY = {
+    "require_for_action": False,
+    "max_staleness_days": 30,
+    "min_total_score_for_action": 0.55,
+}
+DEFAULT_NONTECHNICAL_WEIGHTS = {
+    "fundamental_score": 0.30,
+    "valuation_score": 0.20,
+    "catalyst_score": 0.25,
+    "flow_score": 0.15,
+    "macro_score": 0.10,
+}
+NONTECHNICAL_HARD_EVENT_RISKS = {"elevated", "earnings_gap", "regulatory", "policy", "suspension", "accounting"}
 
 
 def load_json(path: pathlib.Path) -> dict[str, Any]:
@@ -68,6 +83,35 @@ def load_strategy_config(path: pathlib.Path | None) -> dict[str, Any]:
     }
 
 
+def load_nontechnical_evidence(path: pathlib.Path | None) -> dict[str, Any]:
+    if path is None or not path.exists():
+        return {
+            "policy": DEFAULT_NONTECHNICAL_POLICY.copy(),
+            "weights": DEFAULT_NONTECHNICAL_WEIGHTS.copy(),
+            "symbols": {},
+            "path": str(path) if path else None,
+        }
+    if path.suffix.lower() == ".json":
+        data = load_json(path)
+    else:
+        with path.open("rb") as fh:
+            data = tomllib.load(fh)
+    policy = DEFAULT_NONTECHNICAL_POLICY.copy()
+    policy.update(data.get("policy", {}))
+    weights = DEFAULT_NONTECHNICAL_WEIGHTS.copy()
+    weights.update({key: float(value) for key, value in data.get("weights", {}).items() if key in weights})
+    symbols = {}
+    raw_symbols = data.get("symbols", {})
+    if isinstance(raw_symbols, dict):
+        for symbol, row in raw_symbols.items():
+            if isinstance(row, dict):
+                symbols[str(symbol)] = {"symbol": str(symbol), **row}
+    for row in data.get("evidence", []):
+        if isinstance(row, dict) and row.get("symbol"):
+            symbols[str(row["symbol"])] = row
+    return {"policy": policy, "weights": weights, "symbols": symbols, "path": str(path), "as_of_date": data.get("as_of_date"), "as_of_session": data.get("as_of_session")}
+
+
 def clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
@@ -88,6 +132,16 @@ def date_token(value: Any) -> str | None:
     if len(text) >= 8 and text[:8].isdigit():
         return f"{text[:4]}-{text[4:6]}-{text[6:8]}"
     return None
+
+
+def parse_date_token(value: Any) -> dt.date | None:
+    token = date_token(value)
+    if token is None:
+        return None
+    try:
+        return dt.date.fromisoformat(token)
+    except ValueError:
+        return None
 
 
 def append_unique(target: list[str], values: list[str]) -> None:
@@ -437,11 +491,121 @@ def market_specific_risk_signals(row: dict[str, Any], base_currency: str = DEFAU
     return flags, action_disqualifiers
 
 
+def nontechnical_evidence_signals(
+    row: dict[str, Any],
+    evidence: dict[str, Any] | None,
+    snapshot_date: str | None = None,
+    snapshot_session: str | None = None,
+) -> tuple[dict[str, Any], list[str], list[str]]:
+    evidence = evidence or {"policy": DEFAULT_NONTECHNICAL_POLICY.copy(), "weights": DEFAULT_NONTECHNICAL_WEIGHTS.copy(), "symbols": {}}
+    policy = evidence.get("policy", DEFAULT_NONTECHNICAL_POLICY) if isinstance(evidence.get("policy"), dict) else DEFAULT_NONTECHNICAL_POLICY
+    weights = evidence.get("weights", DEFAULT_NONTECHNICAL_WEIGHTS) if isinstance(evidence.get("weights"), dict) else DEFAULT_NONTECHNICAL_WEIGHTS
+    symbols = evidence.get("symbols", {}) if isinstance(evidence.get("symbols"), dict) else {}
+    require_for_action = bool(policy.get("require_for_action", False))
+    symbol = str(row.get("symbol") or "")
+    raw = symbols.get(symbol)
+    flags: list[str] = []
+    action_disqualifiers: list[str] = []
+    if not raw or raw.get("evidence_mode") == "missing_fail_closed":
+        flags.append("nontechnical_evidence_missing")
+        if require_for_action:
+            action_disqualifiers.append("nontechnical_evidence_missing")
+        return {
+            "status": "missing",
+            "required_for_action": require_for_action,
+            "total_score": None,
+            "as_of_date": None,
+            "source_count": 0,
+            "notes": [],
+        }, flags, action_disqualifiers
+
+    as_of_date = parse_date_token(raw.get("as_of_date") or evidence.get("as_of_date"))
+    evidence_session = str(raw.get("as_of_session") or evidence.get("as_of_session") or "").lower() or None
+    report_date = parse_date_token(snapshot_date or row.get("snapshot_as_of_date") or row.get("as_of_date"))
+    report_session = str(snapshot_session or row.get("snapshot_as_of_session") or row.get("as_of_session") or "").lower() or None
+    if as_of_date is None:
+        flags.append("nontechnical_evidence_date_missing")
+        if require_for_action:
+            action_disqualifiers.append("nontechnical_evidence_date_missing")
+    elif report_date is not None:
+        age_days = (report_date - as_of_date).days
+        if age_days < 0:
+            flags.append("nontechnical_evidence_from_future")
+            action_disqualifiers.append("nontechnical_evidence_from_future")
+        elif age_days > int(policy.get("max_staleness_days", 30)):
+            flags.append("nontechnical_evidence_stale")
+            if require_for_action:
+                action_disqualifiers.append("nontechnical_evidence_stale")
+        elif age_days == 0 and evidence_session and report_session and SESSION_ORDER.get(evidence_session, 99) > SESSION_ORDER.get(report_session, 99):
+            flags.append("nontechnical_evidence_from_future_session")
+            action_disqualifiers.append("nontechnical_evidence_from_future_session")
+
+    score_sum = 0.0
+    weight_sum = 0.0
+    components: dict[str, float | None] = {}
+    for key, weight in weights.items():
+        value = as_float(raw.get(key), None)
+        components[key] = value
+        if value is None:
+            continue
+        score_sum += clamp(value, 0.0, 1.0) * float(weight)
+        weight_sum += float(weight)
+    missing_components = [key for key in weights if components.get(key) is None]
+    if missing_components:
+        flags.append("nontechnical_component_missing")
+        if require_for_action:
+            action_disqualifiers.append("nontechnical_component_missing")
+    total_score = round(score_sum / weight_sum, 3) if weight_sum else None
+    min_score = float(policy.get("min_total_score_for_action", 0.55))
+    if total_score is None:
+        flags.append("nontechnical_score_missing")
+        if require_for_action:
+            action_disqualifiers.append("nontechnical_score_missing")
+    elif total_score < min_score:
+        flags.append("nontechnical_score_below_action_min")
+        if require_for_action:
+            action_disqualifiers.append("nontechnical_score_below_action_min")
+
+    event_risk = str(raw.get("event_risk") or "unknown").lower()
+    if event_risk == "unknown":
+        flags.append("event_risk_unknown")
+        if require_for_action and bool(policy.get("block_unknown_event_risk", True)):
+            action_disqualifiers.append("event_risk_unknown")
+    elif event_risk in NONTECHNICAL_HARD_EVENT_RISKS:
+        flags.append(f"event_risk_{event_risk}")
+        action_disqualifiers.append(f"event_risk_{event_risk}")
+
+    if raw.get("source_count") is not None:
+        source_count = int(raw.get("source_count") or 0)
+    elif isinstance(raw.get("sources"), list):
+        source_count = len(raw.get("sources", []))
+    else:
+        source_count = 0
+    if source_count <= 0:
+        flags.append("nontechnical_source_missing")
+        if require_for_action:
+            action_disqualifiers.append("nontechnical_source_missing")
+
+    return {
+        "status": "available",
+        "required_for_action": require_for_action,
+        "total_score": total_score,
+        "min_total_score_for_action": min_score,
+        "as_of_date": as_of_date.isoformat() if as_of_date else raw.get("as_of_date"),
+        "as_of_session": evidence_session,
+        "source_count": source_count,
+        "components": components,
+        "event_risk": event_risk,
+        "notes": raw.get("notes", []),
+    }, flags, action_disqualifiers
+
+
 def apply_action_qualification(
     ranked: list[dict[str, Any]],
     min_action_score: float,
     symbol_risk: dict[str, dict[str, Any]],
     base_currency: str = DEFAULT_BASE_CURRENCY,
+    nontechnical_evidence: dict[str, Any] | None = None,
 ) -> None:
     for row in ranked:
         symbol = str(row.get("symbol") or "")
@@ -467,6 +631,16 @@ def apply_action_qualification(
             row.setdefault("qualification_flags", []).append("market_specific_risk_gate_clear")
         else:
             row.setdefault("qualification_flags", []).append("market_specific_risk_gate_blocked")
+            row["diagnostic_only"] = True
+        nontechnical_profile, nontechnical_flags, nontechnical_disqualifiers = nontechnical_evidence_signals(row, nontechnical_evidence, row.get("snapshot_as_of_date"), row.get("snapshot_as_of_session"))
+        row["nontechnical_evidence"] = nontechnical_profile
+        append_unique(row.setdefault("nontechnical_evidence_flags", []), nontechnical_flags)
+        append_unique(row.setdefault("action_disqualifiers", []), nontechnical_disqualifiers)
+        nontechnical_ok = not nontechnical_disqualifiers
+        if nontechnical_ok:
+            row.setdefault("qualification_flags", []).append("nontechnical_evidence_gate_clear")
+        else:
+            row.setdefault("qualification_flags", []).append("nontechnical_evidence_gate_blocked")
             row["diagnostic_only"] = True
         score_ok = float(row.get("score") or 0.0) >= min_action_score
         if score_ok:
@@ -510,6 +684,7 @@ def apply_action_qualification(
             and volume_action_ok
             and market_range_ok
             and market_specific_action_ok
+            and nontechnical_ok
             and symbol_action_risk_ok
             and peer_evidence_ok
             and row.get("cost_gate_passed")
@@ -567,25 +742,32 @@ def main() -> int:
     parser.add_argument("--base-currency", default=DEFAULT_BASE_CURRENCY)
     parser.add_argument("--strategy-config", default=None, help="Optional active strategy TOML with ranking weights and safety invariants.")
     parser.add_argument("--symbol-risk-json", default=None, help="Optional symbol risk memory JSON with action_veto tags.")
+    parser.add_argument("--nontechnical-evidence", default=None, help="Optional TOML evidence file with fundamentals, valuation, catalyst, flow, macro, and event-risk checks.")
+    parser.add_argument("--as-of-session", default=None, choices=sorted(SESSION_ORDER), help="Decision session for point-in-time evidence checks.")
     args = parser.parse_args()
 
     snapshot_path = pathlib.Path(args.snapshot)
     snapshot = load_json(snapshot_path)
     strategy = load_strategy_config(pathlib.Path(args.strategy_config) if args.strategy_config else None)
     symbol_risk = load_symbol_risk(pathlib.Path(args.symbol_risk_json) if args.symbol_risk_json else None)
+    default_nontechnical_path = pathlib.Path("config") / "nontechnical_evidence.toml"
+    nontechnical_path = pathlib.Path(args.nontechnical_evidence) if args.nontechnical_evidence else (default_nontechnical_path if default_nontechnical_path.exists() else None)
+    nontechnical_evidence = load_nontechnical_evidence(nontechnical_path)
     diagnostic_top_n = args.diagnostic_top_n if args.diagnostic_top_n is not None else (args.top_n if args.top_n is not None else 3)
     scored = annotate_theme_positions([item_score(item, strategy["weights"], args.min_watch_score) for item in snapshot.get("items", [])])
     for row in scored:
         row["snapshot_as_of_date"] = snapshot.get("as_of_date")
+        row["snapshot_as_of_session"] = args.as_of_session
     apply_market_context(scored, snapshot, args.market_proxy_symbol, args.max_market_range_for_action)
     apply_edge_cost_fields(scored, args.round_trip_bps, args.minimum_edge_bps)
     ranked = sorted(scored, key=lambda row: row["score"], reverse=True)
-    apply_action_qualification(ranked, args.min_action_score, symbol_risk, args.base_currency)
+    apply_action_qualification(ranked, args.min_action_score, symbol_risk, args.base_currency, nontechnical_evidence)
     actionable_candidates, diagnostic_candidates, top_candidates = candidate_layers(ranked, args.actionable_top_n, diagnostic_top_n)
 
     output = {
         "snapshot": str(snapshot_path),
         "as_of_date": snapshot.get("as_of_date"),
+        "as_of_session": args.as_of_session,
         "generated_at": snapshot.get("generated_at"),
         "strategy_id": strategy["strategy_id"],
         "strategy_version": strategy["strategy_version"],
@@ -599,6 +781,7 @@ def main() -> int:
             "same_theme_peer_rule": "Do not upgrade unless same-theme best-peer evidence passes.",
             "market_regime_rule": "Do not upgrade when the market proxy is above the action range limit.",
             "market_specific_risk_rule": "Do not upgrade when deterministic HK/A-share quote, halt, or limit-board gates are blocked.",
+            "nontechnical_evidence_rule": "Do not upgrade when required fundamentals, valuation, catalyst, flow, macro, and event-risk evidence is missing, stale, or below threshold.",
             "symbol_adverse_rule": "Do not upgrade symbols with a recent adverse-breach risk tag; keep them watch-only until evidence improves.",
         },
         "thresholds": {
@@ -610,6 +793,8 @@ def main() -> int:
             "cn_market_proxy_symbol": DEFAULT_CN_MARKET_PROXY_SYMBOL,
             "max_market_range_for_action": args.max_market_range_for_action,
             "base_currency": args.base_currency,
+            "nontechnical_evidence": nontechnical_evidence.get("path"),
+            "nontechnical_evidence_required_for_action": bool(nontechnical_evidence.get("policy", {}).get("require_for_action", False)),
         },
         "theme_summary": theme_summary(scored),
         "actionable_candidates": actionable_candidates,
