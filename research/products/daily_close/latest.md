@@ -27,6 +27,49 @@
   - 非技术面：nontechnical_evidence status=proxy_only, total_score=0.526, event_risk=none, flags=['nontechnical_proxy_only', 'nontechnical_score_below_action_min', 'nontechnical_source_missing']
   - 失效条件：Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.
 
+## 研究型行动建议
+- 声明：本节仅用于安排后续研究优先级；research-only、非交易、不下单、不改组合；不得把代理证据或 shadow 结果描述为正式可行动。
+- `159915.SZ`：等确认；状态=watch_only；score=75.71；非正式行动候选；仅代理证据，不清除正式行动门槛。
+  - why：Draft watch_only generated from deterministic ranking and edge gate fields for 159915.SZ.
+  - 主要障碍：仅代理证据、非技术分不足、正式证据缺失、市场位置偏高。
+  - 升级条件：阻断项清零、正式门槛通过、事件风险回落且证据不再仅为代理后，可升级为「可考虑研究」。
+  - 失效条件：Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.
+- `0941.HK`：等确认；状态=ranking_only；score=72.51；非正式行动候选；仅代理证据，不清除正式行动门槛。
+  - why：仅有代理证据或存在代理证据阻断，不能视为正式行动候选。
+  - 主要障碍：仅代理证据、非技术分不足、正式证据缺失。
+  - 升级条件：阻断项清零、正式门槛通过、事件风险回落且证据不再仅为代理后，可升级为「可考虑研究」。
+  - 失效条件：若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。
+- `0002.HK`：等确认；状态=ranking_only；score=70.48；非正式行动候选；仅代理证据，不清除正式行动门槛。
+  - why：仅有代理证据或存在代理证据阻断，不能视为正式行动候选。
+  - 主要障碍：仅代理证据、非技术分不足、正式证据缺失、量能不足。
+  - 升级条件：阻断项清零、正式门槛通过、事件风险回落且证据不再仅为代理后，可升级为「可考虑研究」。
+  - 失效条件：若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。
+- `588000.SH`：等确认；状态=ranking_only；score=70.2；非正式行动候选；仅代理证据，不清除正式行动门槛。
+  - why：仅有代理证据或存在代理证据阻断，不能视为正式行动候选。
+  - 主要障碍：仅代理证据、非技术分不足、正式证据缺失、市场位置偏高。
+  - 升级条件：阻断项清零、正式门槛通过、事件风险回落且证据不再仅为代理后，可升级为「可考虑研究」。
+  - 失效条件：若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。
+- `9618.HK`：等确认；状态=ranking_only；score=70.04；非正式行动候选；仅代理证据，不清除正式行动门槛。
+  - why：仅有代理证据或存在代理证据阻断，不能视为正式行动候选。
+  - 主要障碍：仅代理证据、非技术分不足、政策风险、正式证据缺失。
+  - 升级条件：阻断项清零、正式门槛通过、事件风险回落且证据不再仅为代理后，可升级为「可考虑研究」。
+  - 失效条件：若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。
+- `600900.SH`：等确认；状态=ranking_only；score=68.61；非正式行动候选；仅代理证据，不清除正式行动门槛。
+  - why：仅有代理证据或存在代理证据阻断，不能视为正式行动候选。
+  - 主要障碍：仅代理证据、非技术分不足、正式证据缺失、市场位置偏高。
+  - 升级条件：阻断项清零、正式门槛通过、事件风险回落且证据不再仅为代理后，可升级为「可考虑研究」。
+  - 失效条件：若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。
+- `510500.SH`：等确认；状态=ranking_only；score=68.49；非正式行动候选；仅代理证据，不清除正式行动门槛。
+  - why：仅有代理证据或存在代理证据阻断，不能视为正式行动候选。
+  - 主要障碍：仅代理证据、非技术分不足、正式证据缺失、市场位置偏高。
+  - 升级条件：阻断项清零、正式门槛通过、事件风险回落且证据不再仅为代理后，可升级为「可考虑研究」。
+  - 失效条件：若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。
+- `2800.HK`：等确认；状态=ranking_only；score=65.72；非正式行动候选；仅代理证据，不清除正式行动门槛。
+  - why：仅有代理证据或存在代理证据阻断，不能视为正式行动候选。
+  - 主要障碍：仅代理证据、正式证据缺失、成本/边际不足。
+  - 升级条件：阻断项清零、正式门槛通过、事件风险回落且证据不再仅为代理后，可升级为「可考虑研究」。
+  - 失效条件：若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。
+
 ## Gate 拒绝与观察重点
 - `000333.SZ` score=80.88 action=False watch=True gates=['nontechnical_proxy_only', 'nontechnical_score_below_action_min', 'event_risk_unknown']
 - `688981.SH` score=77.32 action=False watch=True gates=['nontechnical_proxy_only', 'nontechnical_score_below_action_min', 'event_risk_policy']

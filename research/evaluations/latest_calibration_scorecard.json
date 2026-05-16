@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T09:10:32Z",
+  "generated_at": "2026-05-16T08:56:23Z",
   "as_of_date": "2026-05-15",
   "as_of_session": "close",
   "inputs": {
@@ -28,7 +28,7 @@
     "shadow_record_count": 0,
     "combined_record_count": 854,
     "call_summary": {
-      "generated_at": "2026-05-15T09:10:32Z",
+      "generated_at": "2026-05-16T08:56:23Z",
       "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "evaluations": 854,

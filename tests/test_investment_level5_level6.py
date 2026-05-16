@@ -32,6 +32,7 @@ import evaluate_investment_shadow as shadow_eval  # noqa: E402
 import run_investment_daily_shadow as daily_shadow  # noqa: E402
 import run_investment_shadow_variants as shadow_variants  # noqa: E402
 import build_chinese_daily_close_report as close_report  # noqa: E402
+import build_investment_dashboard as investment_dashboard  # noqa: E402
 import build_investment_evidence_ledger as evidence_ledger  # noqa: E402
 import build_investment_calibration_scorecard as calibration_scorecard  # noqa: E402
 import build_nontechnical_evidence as nontechnical_builder  # noqa: E402
@@ -2357,7 +2358,7 @@ horizon_days = 14
                 runner=fake_runner,
             )
 
-            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "build_nontechnical_evidence", "rank_universe", "build_draft_calls", "build_risk_review", "validate_draft_calls", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard", "evaluate_nontechnical_attribution", "run_shadow_variants"])
+            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "build_nontechnical_evidence", "rank_universe", "build_draft_calls", "build_risk_review", "validate_draft_calls", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard", "evaluate_nontechnical_attribution", "run_shadow_variants", "build_investment_dashboard"])
             self.assertTrue(all(command[0] == "python" for _, command, *_ in calls))
             self.assertFalse(any("bash" in part.lower() for _, command, *_ in calls for part in command))
             shadow_command = next(command for name, command, *_ in calls if name == "log_shadow")
@@ -2386,7 +2387,174 @@ horizon_days = 14
             variant_command = next(command for name, command, *_ in calls if name == "run_shadow_variants")
             self.assertEqual(variant_command[variant_command.index("--evidence-mode") + 1], "forward_shadow")
             self.assertEqual(variant_command[variant_command.index("--as-of-date") + 1], "2026-04-27")
+            dashboard_command = next(command for name, command, *_ in calls if name == "build_investment_dashboard")
+            self.assertIn("--close-report-json", dashboard_command)
+            self.assertIn("--ranking", dashboard_command)
+            self.assertTrue(dashboard_command[dashboard_command.index("--output") + 1].endswith("research\\dashboard\\index.html") or dashboard_command[dashboard_command.index("--output") + 1].endswith("research/dashboard/index.html"))
             self.assertEqual(summary["paths"]["ranking"], str(tmp_path.resolve() / "research" / "rankings" / "2026-04-27-close-ranking.json"))
+            self.assertEqual(summary["paths"]["dashboard"], str(tmp_path.resolve() / "research" / "dashboard" / "index.html"))
+
+    def test_investment_dashboard_builds_static_html_from_fixture_artifacts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            close_json = tmp_path / "close-report.json"
+            close_md = tmp_path / "close-report.md"
+            ranking_json = tmp_path / "ranking.json"
+            nontechnical_json = tmp_path / "nontechnical.json"
+            forward_json = tmp_path / "forward.json"
+            ledger_json = tmp_path / "ledger.json"
+            output = tmp_path / "dashboard" / "index.html"
+
+            close_json.write_text(
+                json.dumps(
+                    {
+                        "date": "2026-04-27",
+                        "session": "close",
+                        "recommendations": [
+                            {"symbol": "AAA.HK", "state": "buy_candidate", "confidence": 0.71},
+                            {"symbol": "BBB.HK", "state": "watch_only", "confidence": 0.43},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            close_md.write_text("# Report\n\n## Final Result\n- markdown fallback headline\n", encoding="utf-8")
+            ranking_json.write_text(
+                json.dumps(
+                    {
+                        "as_of_date": "2026-04-27",
+                        "session": "close",
+                        "all_ranked": [
+                            {
+                                "symbol": "AAA.HK",
+                                "name": "Alpha Co",
+                                "score": 82.5,
+                                "qualified_for_action": True,
+                                "qualified_for_watch": True,
+                                "action_disqualifiers": [],
+                                "nontechnical_evidence": {"status": "available", "total_score": 0.74, "event_risk": "low", "source_count": 2},
+                            },
+                            {
+                                "symbol": "BBB.HK",
+                                "name": "Beta Co",
+                                "score": 61.0,
+                                "qualified_for_action": False,
+                                "qualified_for_watch": True,
+                                "action_disqualifiers": ["nontechnical_proxy_only"],
+                                "nontechnical_evidence": {"status": "proxy_only", "proxy_only": True, "total_score": 0.58, "event_risk": "unknown", "proxy_source_count": 3},
+                            },
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            nontechnical_json.write_text(
+                json.dumps(
+                    {
+                        "summary": {"curated_available_count": 1, "proxy_only_count": 1, "missing_count": 0},
+                        "symbols": {
+                            "AAA.HK": {"evidence_mode": "curated_point_in_time", "proxy_only": False, "total_score": 0.74, "event_risk": "low", "source_count": 2},
+                            "BBB.HK": {"evidence_mode": "automatic_local_proxy", "proxy_only": True, "total_score": 0.58, "event_risk": "unknown", "proxy_source_count": 3},
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            forward_json.write_text(json.dumps({"summary": {"forward_shadow_log_count": 5, "matured_forward_shadow_days": 3, "sample_count": 2}}), encoding="utf-8")
+            ledger_json.write_text(json.dumps({"summary": {"forward_shadow_log_count": 6}, "shadow_evaluation_summary": {"matured_forward_shadow_days": 4, "sample_count": 3}}), encoding="utf-8")
+
+            result = investment_dashboard.build_dashboard("2026-04-27", "close", close_json, close_md, ranking_json, nontechnical_json, forward_json, ledger_json, output)
+
+            html_text = output.read_text(encoding="utf-8")
+            self.assertEqual(result["payload"]["counts"], {"action": 1, "watch": 1, "avoid": 0})
+            self.assertIn("仅供研究 · 非交易信号 · 不构成投资建议", html_text)
+            self.assertIn("id=\"symbolSearch\"", html_text)
+            self.assertIn("当前前向胜率", html_text)
+            self.assertIn("data-filter=\"consider\"", html_text)
+            self.assertIn("data-filter=\"confirm\"", html_text)
+            self.assertIn("data-filter=\"observe\"", html_text)
+            self.assertIn("data-filter=\"avoid\"", html_text)
+            self.assertIn("成本/边际不足", html_text)
+            self.assertIn("仅代理证据", html_text)
+            self.assertIn("搜索代码、名称、建议或障碍项", html_text)
+            self.assertIn('"symbol": "AAA.HK"', html_text)
+            self.assertIn('"symbol": "BBB.HK"', html_text)
+            self.assertIn("代理证据不是经审计基本面", html_text)
+            self.assertEqual(result["payload"]["symbols"][0]["research_action"]["label"], "可考虑研究")
+            self.assertEqual(result["payload"]["symbols"][1]["research_action"]["label"], "等确认")
+            self.assertIn('"category": "action"', html_text)
+            self.assertIn('"category": "watch"', html_text)
+
+    def test_dashboard_research_actions_do_not_promote_ranking_or_proxy_edges(self):
+        rows = investment_dashboard.normalize_symbols(
+            {
+                "all_ranked": [
+                    {
+                        "symbol": "RANK.HK",
+                        "name": "Ranking Only",
+                        "score": 88,
+                        "qualified_for_action": True,
+                        "qualified_for_watch": True,
+                        "action_disqualifiers": [],
+                        "nontechnical_evidence": {"status": "available", "total_score": 0.8, "event_risk": "low", "source_count": 2},
+                    },
+                    {
+                        "symbol": "PROXY.HK",
+                        "name": "Proxy Text",
+                        "score": 82,
+                        "qualified_for_action": True,
+                        "qualified_for_watch": True,
+                        "action_disqualifiers": [],
+                        "nontechnical_evidence": {"status": "available", "total_score": 0.8, "event_risk": "low", "source_count": 2},
+                    },
+                    {
+                        "symbol": "CAPPED.HK",
+                        "name": "Risk Capped",
+                        "score": 83,
+                        "qualified_for_action": True,
+                        "qualified_for_watch": True,
+                        "action_disqualifiers": [],
+                        "nontechnical_evidence": {"status": "available", "total_score": 0.8, "event_risk": "low", "source_count": 2},
+                    },
+                ]
+            },
+            {
+                "recommendations": [
+                    {
+                        "symbol": "PROXY.HK",
+                        "state": "buy_candidate",
+                        "confidence": 0.7,
+                        "evidence": ["nontechnical_evidence status=proxy_only, flags=['nontechnical_proxy_only']"],
+                    },
+                    {"symbol": "CAPPED.HK", "state": "watch_only", "risk_cap": "watch_only", "confidence": 0.6},
+                ]
+            },
+            {"symbols": {}},
+        )
+
+        labels = {row["symbol"]: row["research_action"]["label"] for row in rows}
+        statuses = {row["symbol"]: row["nontechnical_evidence"]["status"] for row in rows}
+        self.assertNotEqual(labels["RANK.HK"], "可考虑研究")
+        self.assertNotEqual(labels["PROXY.HK"], "可考虑研究")
+        self.assertNotEqual(labels["CAPPED.HK"], "可考虑研究")
+        self.assertEqual(statuses["PROXY.HK"], "proxy_only")
+
+    def test_close_report_research_action_treats_proxy_risk_as_formal_blocker(self):
+        action = close_report.research_action_for(
+            {
+                "symbol": "AAA.HK",
+                "state": "buy_candidate",
+                "score": 86,
+                "qualified_for_action": True,
+                "qualified_for_watch": True,
+                "gate_blockers": [],
+                "blockers": ["nontechnical_proxy_only"],
+                "nontechnical_profile": {"status": "available", "proxy_only": False, "event_risk": "low"},
+            }
+        )
+
+        self.assertEqual(action["label"], "等确认")
+        self.assertFalse(action["formal_actionable"])
 
     def test_daily_shadow_runner_plans_close_report_for_close_dry_run(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2413,6 +2581,7 @@ horizon_days = 14
             names = [step["name"] for step in summary["steps"]]
             self.assertIn("run_shadow_variants", names)
             self.assertIn("build_chinese_close_report", names)
+            self.assertIn("build_investment_dashboard", names)
             report_command = next(step["command"] for step in summary["steps"] if step["name"] == "build_chinese_close_report")
             self.assertEqual(report_command[report_command.index("--session") + 1], "close")
             self.assertIn("--nontechnical-evidence", report_command)
@@ -2420,7 +2589,30 @@ horizon_days = 14
             variant_path = report_command[report_command.index("--variant-competition") + 1]
             self.assertEqual(variant_path, str(tmp_path.resolve() / "research" / "shadow_variants" / "custom_competition" / "latest_variant_competition.json"))
             self.assertNotIn("shadow_gate_variants_v1", variant_path)
+            dashboard_command = next(step["command"] for step in summary["steps"] if step["name"] == "build_investment_dashboard")
+            self.assertEqual(dashboard_command[dashboard_command.index("--session") + 1], "close")
+            self.assertEqual(dashboard_command[dashboard_command.index("--close-report-json") + 1], str(tmp_path.resolve() / "research" / "products" / "daily_close" / "2026-04-27-close-report.json"))
             self.assertEqual(calls, [])
+
+    def test_daily_shadow_runner_skip_dashboard_omits_dashboard_step(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_daily_shadow_configs(tmp_path)
+
+            summary = daily_shadow.run_pipeline(
+                daily_shadow.DailyShadowOptions(
+                    root=tmp_path,
+                    python_bin="python",
+                    date="2026-04-27",
+                    session="close",
+                    build_dashboard=False,
+                    dry_run=True,
+                ),
+                runner=lambda name, command, cwd, check=True: 0,
+            )
+
+            names = [step["name"] for step in summary["steps"]]
+            self.assertNotIn("build_investment_dashboard", names)
 
     def test_daily_shadow_runner_skip_options_omit_variants_and_close_report(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2440,6 +2632,7 @@ horizon_days = 14
                     session="close",
                     run_variant_competition=False,
                     build_close_report=False,
+                    build_dashboard=False,
                     dry_run=True,
                 ),
                 runner=fake_runner,
@@ -2448,6 +2641,7 @@ horizon_days = 14
             names = [step["name"] for step in summary["steps"]]
             self.assertNotIn("run_shadow_variants", names)
             self.assertNotIn("build_chinese_close_report", names)
+            self.assertNotIn("build_investment_dashboard", names)
             self.assertEqual(calls, [])
 
     def test_daily_shadow_runner_uses_replay_mode_for_historical_session(self):
@@ -3110,7 +3304,13 @@ horizon_days = 14
                         "risks": ["成交不足", "大市转弱"],
                         "invalidation": "跌破关键位",
                     },
-                    {**self.valid_call("BBB.HK", "watch_only"), "theme": "defensive", "confidence": 0.41},
+                    {
+                        **self.valid_call("BBB.HK", "watch_only"),
+                        "theme": "defensive",
+                        "confidence": 0.41,
+                        "evidence": ["nontechnical_evidence status=proxy_only, total_score=0.58, event_risk=unknown, flags=['nontechnical_proxy_only']"],
+                        "risks": ["nontechnical_proxy_only"],
+                    },
                     {**self.valid_call("CCC.HK", "avoid"), "theme": "weak", "confidence": 0.2},
                 ],
             }
@@ -3118,8 +3318,16 @@ horizon_days = 14
                 "actionable_candidates": [{"symbol": "ZZZ.HK"}],
                 "diagnostic_candidates": [{"symbol": "AAA.HK"}],
                 "top_candidates": [
-                    {"symbol": "AAA.HK", "score": 80, "qualified_for_action": True, "qualified_for_watch": True, "disqualifiers": []},
-                    {"symbol": "DDD.HK", "score": 40, "qualified_for_action": False, "qualified_for_watch": True, "disqualifiers": ["cost_gate_failed"]},
+                    {"symbol": "AAA.HK", "score": 80, "qualified_for_action": True, "qualified_for_watch": True, "disqualifiers": [], "action_disqualifiers": [], "nontechnical_evidence": {"status": "available", "total_score": 0.7, "event_risk": "none", "source_count": 2}},
+                    {"symbol": "BBB.HK", "score": 74, "qualified_for_action": False, "qualified_for_watch": True, "disqualifiers": [], "action_disqualifiers": ["nontechnical_proxy_only"], "nontechnical_evidence": {"status": "proxy_only", "proxy_only": True, "total_score": 0.58, "event_risk": "unknown", "proxy_source_count": 3}},
+                    {"symbol": "DDD.HK", "score": 50, "qualified_for_action": False, "qualified_for_watch": True, "disqualifiers": ["cost_gate_failed"], "action_disqualifiers": ["cost_gate_failed"]},
+                    {"symbol": "CCC.HK", "score": 10, "qualified_for_action": False, "qualified_for_watch": False, "disqualifiers": ["downtrend_regime"], "action_disqualifiers": ["downtrend_regime"]},
+                ],
+                "all_ranked": [
+                    {"symbol": "AAA.HK", "score": 80, "qualified_for_action": True, "qualified_for_watch": True, "disqualifiers": [], "action_disqualifiers": [], "nontechnical_evidence": {"status": "available", "total_score": 0.7, "event_risk": "none", "source_count": 2}},
+                    {"symbol": "BBB.HK", "score": 74, "qualified_for_action": False, "qualified_for_watch": True, "disqualifiers": [], "action_disqualifiers": ["nontechnical_proxy_only"], "nontechnical_evidence": {"status": "proxy_only", "proxy_only": True, "total_score": 0.58, "event_risk": "unknown", "proxy_source_count": 3}},
+                    {"symbol": "DDD.HK", "score": 50, "qualified_for_action": False, "qualified_for_watch": True, "disqualifiers": ["cost_gate_failed"], "action_disqualifiers": ["cost_gate_failed"]},
+                    {"symbol": "CCC.HK", "score": 10, "qualified_for_action": False, "qualified_for_watch": False, "disqualifiers": ["downtrend_regime"], "action_disqualifiers": ["downtrend_regime"]},
                 ],
             }
             risk = {
@@ -3135,7 +3343,14 @@ horizon_days = 14
             calibration = {"summary": {"combined_record_count": 5}, "scorecard": {"scored_sample_count": 4, "hit_rate": 0.5, "brier_score": 0.2, "calibration_error": 0.1}}
             forward = {"summary": {"sample_count": 4}}
             variants = {"competition_id": "test_competition", "scoreboard": [{"diagnostic_rank": 1, "variant_id": "baseline", "sample_count": 2, "avg_net_return_pct": 1.2, "avg_alpha_pct": 0.5, "no_execution_audit_passed": True}]}
-            nontechnical = {"as_of_date": "2026-04-27", "summary": {"symbol_count": 3, "available_count": 1, "curated_available_count": 1, "automatic_proxy_count": 1, "proxy_only_count": 1, "missing_count": 1, "critical_finding_count": 0}}
+            nontechnical = {
+                "as_of_date": "2026-04-27",
+                "summary": {"symbol_count": 3, "available_count": 1, "curated_available_count": 1, "automatic_proxy_count": 1, "proxy_only_count": 1, "missing_count": 1, "critical_finding_count": 0},
+                "symbols": {
+                    "AAA.HK": {"evidence_mode": "curated_point_in_time", "proxy_only": False, "total_score": 0.7, "event_risk": "none", "source_count": 2},
+                    "BBB.HK": {"evidence_mode": "automatic_local_proxy", "proxy_only": True, "total_score": 0.58, "event_risk": "unknown", "proxy_source_count": 3},
+                },
+            }
             attribution_data = {"as_of_date": "2026-04-27", "summary": {"attributed_sample_count": 1, "hit_rate": 1.0, "avg_return_pct": 2.0}, "buckets": {"total_score": [{"score_bucket": "0.55-0.70", "scored_sample_count": 1, "hit_rate": 1.0, "avg_return_pct": 2.0}]}}
             fixtures = [
                 (calls_path, calls),
@@ -3168,7 +3383,7 @@ horizon_days = 14
 
             payload = result["payload"]
             markdown = pathlib.Path(result["markdown"]).read_text(encoding="utf-8")
-            for section in ["最终结果", "今日结论", "重点标的表", "Gate 拒绝与观察重点", "影子证据与校准", "非技术面证据与归因", "Shadow 变体竞赛", "研究声明"]:
+            for section in ["最终结果", "今日结论", "重点标的表", "研究型行动建议", "Gate 拒绝与观察重点", "影子证据与校准", "非技术面证据与归因", "Shadow 变体竞赛", "研究声明"]:
                 self.assertIn(section, markdown)
             self.assertTrue(payload["research_only"])
             self.assertTrue(payload["no_execution"])
@@ -3180,6 +3395,19 @@ horizon_days = 14
             self.assertIn("proxy-only", markdown)
             self.assertIn("audited fundamentals", markdown)
             self.assertIn("非技术面分桶", markdown)
+            self.assertIn("research-only、非交易、不下单、不改组合", markdown)
+            for label in ["可考虑研究", "等确认", "继续观察", "暂不碰"]:
+                self.assertIn(label, markdown)
+            for label in ["why", "主要障碍", "升级条件", "失效条件"]:
+                self.assertIn(label, markdown)
+            self.assertIn("`BBB.HK`：等确认", markdown)
+            self.assertIn("仅代理证据，不清除正式行动门槛", markdown)
+            self.assertNotIn("`BBB.HK`：可考虑研究", markdown)
+            action_labels = {row["symbol"]: row["research_action"]["label"] for row in payload["research_actions"]}
+            self.assertEqual(action_labels["AAA.HK"], "可考虑研究")
+            self.assertEqual(action_labels["BBB.HK"], "等确认")
+            self.assertEqual(action_labels["DDD.HK"], "继续观察")
+            self.assertEqual(action_labels["CCC.HK"], "暂不碰")
 
             morning_calls = tmp_path / "morning-calls.json"
             morning_calls.write_text(json.dumps({**calls, "session": "morning"}, ensure_ascii=False), encoding="utf-8")

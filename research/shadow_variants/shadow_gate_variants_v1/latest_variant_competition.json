@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T09:10:33Z",
+  "generated_at": "2026-05-16T08:56:23Z",
   "competition_id": "shadow_gate_variants_v1",
   "config": {
     "path": "D:\\Code\\yoyo\\config\\shadow_variants.toml",
@@ -23,7 +23,7 @@
   "registry": {
     "path": "D:\\Code\\yoyo\\data\\snapshots\\registry.json",
     "exists": true,
-    "sha256": "2912b038ff5fba9662ca13cd908c11212ab532a1ac99c791a3c13b4b915c740e",
+    "sha256": "8ec4216538da537aabed298454b11b27554d4e3237cb4b7aad38239570bbdfd1",
     "size_bytes": 381405
   },
   "date": "2026-05-15",

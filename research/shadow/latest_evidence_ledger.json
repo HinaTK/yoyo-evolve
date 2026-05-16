@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T09:10:31Z",
+  "generated_at": "2026-05-16T08:56:22Z",
   "shadow_dir": "D:\\Code\\yoyo\\research\\shadow",
   "registry": "D:\\Code\\yoyo\\data\\snapshots\\registry.json",
   "include_replay": false,
@@ -228,7 +228,7 @@
       "path": "D:\\Code\\yoyo\\research\\shadow\\2026-05-15-close-shadow.json",
       "date": "2026-05-15",
       "session": "close",
-      "generated_at": "2026-05-15T09:10:31Z",
+      "generated_at": "2026-05-16T08:56:22Z",
       "evidence_mode": "forward_shadow",
       "counts_toward_forward_evidence": true,
       "candidate_count": 0,

@@ -162,6 +162,7 @@ class DailyShadowOptions:
     validate_calls: bool = True
     run_variant_competition: bool = True
     build_close_report: bool = True
+    build_dashboard: bool = True
     calls_file: pathlib.Path | None = None
     risk_review_file: pathlib.Path | None = None
     include_replay: bool = False
@@ -182,6 +183,7 @@ def ensure_directories(root: pathlib.Path) -> None:
         "research/evidence/nontechnical",
         "research/evaluations",
         "research/products/daily_close",
+        "research/dashboard",
     ]:
         (root / relative).mkdir(parents=True, exist_ok=True)
 
@@ -538,6 +540,9 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             ],
         )
 
+    close_stem = close_report_stem(options.date, options.session)
+    close_report_json_file = root / "research" / "products" / "daily_close" / f"{close_stem}-close-report.json"
+    close_report_md_file = root / "research" / "products" / "daily_close" / f"{close_stem}-close-report.md"
     report_calls_file = calls_file if calls_file.exists() else draft_calls_file
     if options.build_close_report and options.session == "close" and (options.dry_run or report_calls_file.exists()):
         call(
@@ -572,6 +577,34 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             ],
         )
 
+    dashboard_file = root / "research" / "dashboard" / "index.html"
+    if options.build_dashboard:
+        call(
+            "build_investment_dashboard",
+            [
+                options.python_bin,
+                script_path(root, "build_investment_dashboard.py"),
+                "--date",
+                options.date,
+                "--session",
+                options.session,
+                "--close-report-json",
+                close_report_json_file,
+                "--close-report-md",
+                close_report_md_file,
+                "--ranking",
+                ranking_file,
+                "--nontechnical-evidence",
+                nontechnical_evidence_file,
+                "--forward-evaluation",
+                root / "research" / "shadow" / "latest_forward_evaluation.json",
+                "--evidence-ledger",
+                root / "research" / "shadow" / "latest_evidence_ledger.json",
+                "--output",
+                dashboard_file,
+            ],
+        )
+
     summary = {
         "generated_at": utc_now(),
         "date": options.date,
@@ -587,7 +620,9 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             "calls": str(calls_file),
             "shadow": str(shadow_file),
             "shadow_variants": str(root / "research" / "shadow_variants"),
-            "close_report": str(root / "research" / "products" / "daily_close" / f"{close_report_stem(options.date, options.session)}-close-report.md"),
+            "close_report": str(close_report_md_file),
+            "close_report_json": str(close_report_json_file),
+            "dashboard": str(dashboard_file),
             "risk_review": str(risk_review_file),
             "symbol_risk_memory": str(symbol_risk_file),
             "nontechnical_evidence": str(nontechnical_evidence_file),
@@ -628,6 +663,7 @@ def parse_args() -> DailyShadowOptions:
     parser.add_argument("--skip-call-validation", action="store_true")
     parser.add_argument("--skip-variant-competition", action="store_true")
     parser.add_argument("--skip-close-report", action="store_true")
+    parser.add_argument("--skip-dashboard", action="store_true")
     parser.add_argument("--calls-file", default=None)
     parser.add_argument("--risk-review-file", default=None)
     parser.add_argument("--include-replay", action="store_true", help="Diagnostic only: include historical replay logs in the shadow evaluation output.")
@@ -662,6 +698,7 @@ def parse_args() -> DailyShadowOptions:
         validate_calls=not args.skip_call_validation,
         run_variant_competition=not args.skip_variant_competition,
         build_close_report=not args.skip_close_report,
+        build_dashboard=not args.skip_dashboard,
         calls_file=resolve_path(root, args.calls_file),
         risk_review_file=resolve_path(root, args.risk_review_file),
         include_replay=args.include_replay,
