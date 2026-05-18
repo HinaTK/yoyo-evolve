@@ -1,4 +1,4 @@
-# 2026-05-17 收盘研究报告
+# 2026-05-16 收盘研究报告
 
 ## 最终结果
 - 今日无行动候选；仅保留观察名单。
@@ -8,7 +8,7 @@
 ## 今日结论
 - 研究模式：仅推荐研究；不执行交易、不修改组合。
 - 行动候选：0 个；观察名单：1 个；回避/不行动：2 个。
-- 证据进度：forward logs=7，matured days=1，forward samples=0。
+- 证据进度：forward logs=6，matured days=1，forward samples=0。
 
 ## 重点标的表
 - `000333.SZ`：状态=avoid，主题=china-a-home-appliances，置信度=0.26，风险上限=avoid。

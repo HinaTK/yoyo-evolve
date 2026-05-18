@@ -1476,6 +1476,146 @@ theme = "hong-kong-broad-market"
             reasons = {finding["reason"] for finding in payload["findings"]}
             self.assertIn("nontechnical_proxy_only", reasons)
 
+    def test_nontechnical_evidence_builder_can_generate_formal_provider_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            config = tmp_path / "nontechnical.toml"
+            config.write_text(
+                """
+[policy]
+require_for_action = true
+max_staleness_days = 30
+min_total_score_for_action = 0.55
+block_unknown_event_risk = true
+
+[formal_provider]
+enabled = true
+current_date_only = false
+""".lstrip(),
+                encoding="utf-8",
+            )
+            universe = tmp_path / "universe.toml"
+            universe.write_text(
+                """
+[[symbols]]
+symbol = "600519.SH"
+name = "Kweichow Moutai / 贵州茅台"
+kind = "stock"
+theme = "china-a-consumer-staples"
+""".lstrip(),
+                encoding="utf-8",
+            )
+            snapshot = tmp_path / "snapshot.json"
+            snapshot.write_text(
+                json.dumps(
+                    {
+                        "as_of_date": "2026-05-16",
+                        "market_summary": {"risk_state": "neutral"},
+                        "items": [{"symbol": "600519.SH", "turnover": 2_000_000_000, "volume_ratio_20": 1.3}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            finance_row = {
+                "REPORT_DATE": "2026-03-31 00:00:00",
+                "NOTICE_DATE": "2026-04-25 00:00:00",
+                "TOTALOPERATEREVETZ": 10.0,
+                "PARENTNETPROFITTZ": 12.0,
+                "ROEJQ": 15.0,
+                "ZCFZL": 30.0,
+                "JYXJLYYSR": 0.4,
+                "XSJLL": 30.0,
+            }
+
+            with mock.patch.object(nontechnical_builder, "fetch_json", return_value={"data": [finance_row]}):
+                payload = nontechnical_builder.build_evidence(config, "2026-05-16", universe, snapshot, as_of_session="close")
+
+            row = payload["symbols"]["600519.SH"]
+            self.assertEqual(row["evidence_mode"], "formal_provider_point_in_time")
+            self.assertFalse(row["proxy_only"])
+            self.assertEqual(row["as_of_date"], "2026-04-25")
+            self.assertEqual(row["source_count"], 1)
+            self.assertGreaterEqual(row["total_score"], 0.55)
+            self.assertEqual(payload["summary"]["formal_provider_count"], 1)
+            self.assertEqual(payload["summary"]["available_count"], 1)
+            self.assertEqual(payload["summary"]["proxy_only_count"], 0)
+            reasons = {finding["reason"] for finding in payload["findings"]}
+            self.assertNotIn("nontechnical_proxy_only", reasons)
+
+    def test_nontechnical_evidence_builder_pads_hk_codes_for_formal_provider(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            config = tmp_path / "nontechnical.toml"
+            config.write_text(
+                """
+[formal_provider]
+enabled = true
+current_date_only = false
+""".lstrip(),
+                encoding="utf-8",
+            )
+            universe = tmp_path / "universe.toml"
+            universe.write_text(
+                """
+[[symbols]]
+symbol = "0700.HK"
+name = "Tencent / 腾讯控股"
+kind = "stock"
+theme = "consumer-tech"
+""".lstrip(),
+                encoding="utf-8",
+            )
+            finance_row = {
+                "REPORT_DATE": "2026-03-31 00:00:00",
+                "OPERATE_INCOME_QOQ": 6.0,
+                "HOLDER_PROFIT_QOQ": 8.0,
+                "ROE_AVG": 10.0,
+                "NET_PROFIT_RATIO": 25.0,
+                "PE_TTM": 18.0,
+                "PB_TTM": 3.2,
+                "DIVIDEND_RATE": 2.1,
+            }
+
+            with mock.patch.object(nontechnical_builder, "fetch_json", return_value={"result": {"data": [finance_row]}}) as fetch_json:
+                payload = nontechnical_builder.build_evidence(config, "2026-05-16", universe, as_of_session="close")
+
+            row = payload["symbols"]["0700.HK"]
+            self.assertEqual(row["evidence_mode"], "formal_provider_point_in_time")
+            self.assertFalse(row["proxy_only"])
+            self.assertEqual(row["source_count"], 1)
+            self.assertIn('SECUCODE="00700.HK"', fetch_json.call_args.args[1]["filter"])
+
+    def test_nontechnical_evidence_builder_does_not_live_fetch_historical_dates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            config = tmp_path / "nontechnical.toml"
+            config.write_text(
+                """
+[formal_provider]
+enabled = true
+current_date_only = true
+""".lstrip(),
+                encoding="utf-8",
+            )
+            universe = tmp_path / "universe.toml"
+            universe.write_text(
+                """
+[[symbols]]
+symbol = "600519.SH"
+name = "Kweichow Moutai / 贵州茅台"
+kind = "stock"
+theme = "china-a-consumer-staples"
+""".lstrip(),
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(nontechnical_builder, "fetch_json") as fetch_json:
+                payload = nontechnical_builder.build_evidence(config, "2026-04-27", universe)
+
+            fetch_json.assert_not_called()
+            self.assertEqual(payload["symbols"]["600519.SH"]["evidence_mode"], "missing_fail_closed")
+            self.assertEqual(payload["summary"].get("formal_provider_count"), 0)
+
     def test_ranker_blocks_action_for_proxy_only_nontechnical_evidence(self):
         item = ranker.item_score(
             {"symbol": "2800.HK", "theme": "broad-market", "kind": "etf", "latest_close": 28.0, "ma20": 25.0, "ma60": 24.0, "range_pos_60": 0.6, "pct_change_1d": 1.0, "volume_ratio_20": 1.8, "regime_flags": []},
@@ -2427,7 +2567,7 @@ horizon_days = 14
                         "all_ranked": [
                             {
                                 "symbol": "AAA.HK",
-                                "name": "Alpha Co",
+                                "name": "Alpha Co / 阿尔法",
                                 "score": 82.5,
                                 "qualified_for_action": True,
                                 "qualified_for_watch": True,
@@ -2440,7 +2580,7 @@ horizon_days = 14
                                 "score": 61.0,
                                 "qualified_for_action": False,
                                 "qualified_for_watch": True,
-                                "action_disqualifiers": ["nontechnical_proxy_only"],
+                                "action_disqualifiers": ["quote_trade_date_mismatch", "event_risk_quote_stale", "nontechnical_proxy_only"],
                                 "nontechnical_evidence": {"status": "proxy_only", "proxy_only": True, "total_score": 0.58, "event_risk": "unknown", "proxy_source_count": 3},
                             },
                         ],
@@ -2475,13 +2615,18 @@ horizon_days = 14
             self.assertIn("data-filter=\"observe\"", html_text)
             self.assertIn("data-filter=\"avoid\"", html_text)
             self.assertIn("成本/边际不足", html_text)
-            self.assertIn("仅代理证据", html_text)
+            self.assertIn("正式资料未接入", html_text)
+            self.assertIn("行情日期不匹配", html_text)
+            self.assertIn("行情日期滞后", html_text)
             self.assertIn("搜索代码、名称、建议或障碍项", html_text)
             self.assertIn('"symbol": "AAA.HK"', html_text)
             self.assertIn('"symbol": "BBB.HK"', html_text)
-            self.assertIn("代理证据不是经审计基本面", html_text)
+            self.assertIn("正式资料未接入：尚未取得正式核验过", html_text)
             self.assertEqual(result["payload"]["symbols"][0]["research_action"]["label"], "可考虑研究")
             self.assertEqual(result["payload"]["symbols"][1]["research_action"]["label"], "等确认")
+            self.assertEqual(result["payload"]["symbols"][0]["display_name"], "阿尔法")
+            self.assertIn("行情日期不匹配", result["payload"]["symbols"][1]["blocker_labels"])
+            self.assertIn("行情日期滞后", result["payload"]["symbols"][1]["blocker_labels"])
             self.assertIn('"category": "action"', html_text)
             self.assertIn('"category": "watch"', html_text)
 
@@ -3392,8 +3537,8 @@ horizon_days = 14
             self.assertNotEqual([row["symbol"] for row in payload["recommendations"]], ["ZZZ.HK"])
             self.assertEqual(payload["variants"]["scoreboard"][0]["variant_id"], "baseline")
             self.assertEqual(payload["nontechnical"]["evidence_summary"]["available_count"], 1)
-            self.assertIn("proxy-only", markdown)
-            self.assertIn("audited fundamentals", markdown)
+            self.assertIn("正式资料未接入", markdown)
+            self.assertIn("正式基本面", markdown)
             self.assertIn("非技术面分桶", markdown)
             self.assertIn("research-only、非交易、不下单、不改组合", markdown)
             for label in ["可考虑研究", "等确认", "继续观察", "暂不碰"]:
@@ -3401,7 +3546,7 @@ horizon_days = 14
             for label in ["why", "主要障碍", "升级条件", "失效条件"]:
                 self.assertIn(label, markdown)
             self.assertIn("`BBB.HK`：等确认", markdown)
-            self.assertIn("仅代理证据，不清除正式行动门槛", markdown)
+            self.assertIn("正式资料未接入，不清除正式行动门槛", markdown)
             self.assertNotIn("`BBB.HK`：可考虑研究", markdown)
             action_labels = {row["symbol"]: row["research_action"]["label"] for row in payload["research_actions"]}
             self.assertEqual(action_labels["AAA.HK"], "可考虑研究")

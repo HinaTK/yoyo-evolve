@@ -25,6 +25,13 @@ min_source_count = 3
 allow_action_for_etfs = true
 allow_action_for_defensive_liquid_stocks = true
 
+[formal_provider]
+enabled = true
+provider_id = "eastmoney_public_f10_v1"
+timeout_secs = 5
+# Avoid live-fetching today's formal data into historical replay artifacts.
+current_date_only = true
+
 # Evidence rows are intentionally absent until populated by a trusted data or
 # research process. Missing evidence is a deliberate action gate, not a data error.
 #

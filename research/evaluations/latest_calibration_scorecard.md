@@ -1,7 +1,7 @@
 # Recommendation Calibration Scorecard
 
-Generated: `2026-05-16T08:56:23Z`
-As-of: date=`2026-05-15`, session=`close`
+Generated: `2026-05-17T09:10:42Z`
+As-of: date=`2026-05-17`, session=`close`
 
 ## Overall
 - scored samples: `486`

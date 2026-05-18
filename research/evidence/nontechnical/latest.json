@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-16T08:56:21Z",
-  "as_of_date": "2026-05-15",
+  "generated_at": "2026-05-17T09:10:41Z",
+  "as_of_date": "2026-05-17",
   "as_of_session": "close",
   "research_only": true,
   "no_execution": true,
@@ -20,17 +20,18 @@
   },
   "summary": {
     "symbol_count": 46,
-    "available_count": 0,
-    "curated_available_count": 0,
-    "automatic_proxy_count": 46,
-    "proxy_only_count": 46,
-    "proxy_coverage_ratio": 1.0,
+    "available_count": 43,
+    "curated_available_count": 43,
+    "formal_provider_count": 43,
+    "automatic_proxy_count": 3,
+    "proxy_only_count": 3,
+    "proxy_coverage_ratio": 0.065,
     "missing_count": 0,
-    "coverage_ratio": 0.0,
-    "actionable_evidence_count": 0,
-    "finding_count": 211,
+    "coverage_ratio": 0.935,
+    "actionable_evidence_count": 13,
+    "finding_count": 79,
     "critical_finding_count": 0,
-    "blocking_finding_count": 120
+    "blocking_finding_count": 23
   },
   "symbols": {
     "0002.HK": {
@@ -38,683 +39,557 @@
       "name": "CLP Holdings / 中电控股",
       "kind": "stock",
       "theme": "utilities-defensive",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=utilities-defensive, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.56,
-      "valuation_score": 0.38,
-      "catalyst_score": 0.44,
-      "flow_score": 0.53,
-      "macro_score": 0.42,
-      "total_score": 0.476,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.502,
+      "valuation_score": 0.613,
+      "catalyst_score": 0.426,
+      "flow_score": 0.5,
+      "macro_score": 0.46,
+      "total_score": 0.501,
+      "age_days": 137
     },
     "000333.SZ": {
       "symbol": "000333.SZ",
       "name": "Midea Group / 美的集团",
       "kind": "stock",
       "theme": "china-a-home-appliances",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-30",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-home-appliances, quote_fresh=True, risk_state=neutral"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-30",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.38,
-      "catalyst_score": 0.5,
-      "flow_score": 0.57,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.522,
+      "valuation_score": 0.518,
+      "catalyst_score": 0.522,
+      "flow_score": 0.54,
       "macro_score": 0.5,
-      "total_score": 0.486,
-      "age_days": 0
+      "total_score": 0.522,
+      "age_days": 17
     },
     "0005.HK": {
       "symbol": "0005.HK",
       "name": "HSBC / 汇丰控股",
       "kind": "stock",
       "theme": "financials-bank",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-03-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=financials-bank, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.51,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.566,
+      "valuation_score": 0.613,
+      "catalyst_score": 0.494,
+      "flow_score": 0.56,
       "macro_score": 0.42,
-      "total_score": 0.491,
-      "age_days": 0
+      "total_score": 0.542,
+      "age_days": 47
     },
     "0006.HK": {
       "symbol": "0006.HK",
       "name": "Power Assets / 电能实业",
       "kind": "stock",
       "theme": "utilities-defensive",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=utilities-defensive, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.56,
-      "valuation_score": 0.51,
-      "catalyst_score": 0.44,
-      "flow_score": 0.47,
-      "macro_score": 0.42,
-      "total_score": 0.492,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.575,
+      "valuation_score": 0.616,
+      "catalyst_score": 0.454,
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.521,
+      "age_days": 137
     },
     "000858.SZ": {
       "symbol": "000858.SZ",
       "name": "Wuliangye / 五粮液",
       "kind": "stock",
       "theme": "china-a-consumer-staples",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-30",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-consumer-staples, quote_fresh=True, risk_state=neutral"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-30",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.56,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.5,
-      "flow_score": 0.57,
-      "macro_score": 0.5,
-      "total_score": 0.535,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.649,
+      "valuation_score": 0.632,
+      "catalyst_score": 0.8,
+      "flow_score": 0.54,
+      "macro_score": 0.54,
+      "total_score": 0.656,
+      "age_days": 17
     },
     "002594.SZ": {
       "symbol": "002594.SZ",
       "name": "BYD / 比亚迪",
       "kind": "stock",
       "theme": "china-a-auto-ev",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-29",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "earnings_gap",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-auto-ev, quote_fresh=True, risk_state=neutral"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-29",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.5,
-      "flow_score": 0.53,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.393,
+      "valuation_score": 0.457,
+      "catalyst_score": 0.316,
+      "flow_score": 0.5,
       "macro_score": 0.5,
-      "total_score": 0.521,
-      "age_days": 0
+      "total_score": 0.413,
+      "age_days": 18
     },
     "0386.HK": {
       "symbol": "0386.HK",
       "name": "Sinopec / 中国石油化工股份",
       "kind": "stock",
       "theme": "energy",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-03-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=energy, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.44,
-      "flow_score": 0.56,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.505,
+      "valuation_score": 0.669,
+      "catalyst_score": 0.552,
+      "flow_score": 0.54,
       "macro_score": 0.42,
-      "total_score": 0.492,
-      "age_days": 0
+      "total_score": 0.546,
+      "age_days": 47
     },
     "0388.HK": {
       "symbol": "0388.HK",
       "name": "HKEX / 香港交易所",
       "kind": "stock",
       "theme": "financials-exchange",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-03-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=financials-exchange, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.51,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.63,
+      "valuation_score": 0.477,
+      "catalyst_score": 0.543,
+      "flow_score": 0.56,
       "macro_score": 0.42,
-      "total_score": 0.491,
-      "age_days": 0
+      "total_score": 0.546,
+      "age_days": 47
     },
     "0700.HK": {
       "symbol": "0700.HK",
       "name": "Tencent / 腾讯控股",
       "kind": "stock",
       "theme": "internet-platform",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-03-31",
       "as_of_session": "close",
       "event_risk": "policy",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.42,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
-      "macro_score": 0.42,
-      "total_score": 0.471,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.568,
+      "valuation_score": 0.529,
+      "catalyst_score": 0.534,
+      "flow_score": 0.56,
+      "macro_score": 0.38,
+      "total_score": 0.532,
+      "age_days": 47
     },
     "0728.HK": {
       "symbol": "0728.HK",
       "name": "China Telecom / 中国电信",
       "kind": "stock",
       "theme": "telecom-dividend",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-03-31",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=telecom-dividend, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.56,
-      "valuation_score": 0.51,
-      "catalyst_score": 0.44,
-      "flow_score": 0.6,
-      "macro_score": 0.42,
-      "total_score": 0.512,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.469,
+      "valuation_score": 0.671,
+      "catalyst_score": 0.474,
+      "flow_score": 0.58,
+      "macro_score": 0.46,
+      "total_score": 0.526,
+      "age_days": 47
     },
     "0857.HK": {
       "symbol": "0857.HK",
       "name": "PetroChina / 中国石油股份",
       "kind": "stock",
       "theme": "energy",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-03-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=energy, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.5,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.492,
+      "valuation_score": 0.662,
+      "catalyst_score": 0.5,
+      "flow_score": 0.48,
       "macro_score": 0.42,
-      "total_score": 0.493,
-      "age_days": 0
+      "total_score": 0.519,
+      "age_days": 47
     },
     "0883.HK": {
       "symbol": "0883.HK",
       "name": "CNOOC / 中国海洋石油",
       "kind": "stock",
       "theme": "energy",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-03-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=energy, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.52,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.568,
+      "valuation_score": 0.671,
+      "catalyst_score": 0.522,
+      "flow_score": 0.5,
       "macro_score": 0.42,
-      "total_score": 0.496,
-      "age_days": 0
+      "total_score": 0.552,
+      "age_days": 47
     },
     "0941.HK": {
       "symbol": "0941.HK",
       "name": "China Mobile / 中国移动",
       "kind": "stock",
       "theme": "telecom-dividend",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-03-31",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=telecom-dividend, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.56,
-      "valuation_score": 0.38,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
-      "macro_score": 0.42,
-      "total_score": 0.483,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.494,
+      "valuation_score": 0.643,
+      "catalyst_score": 0.497,
+      "flow_score": 0.56,
+      "macro_score": 0.46,
+      "total_score": 0.531,
+      "age_days": 47
     },
     "1024.HK": {
       "symbol": "1024.HK",
       "name": "Kuaishou / 快手-W",
       "kind": "stock",
       "theme": "internet-platform",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
       "event_risk": "policy",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.42,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
-      "macro_score": 0.42,
-      "total_score": 0.481,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.628,
+      "valuation_score": 0.599,
+      "catalyst_score": 0.551,
+      "flow_score": 0.56,
+      "macro_score": 0.38,
+      "total_score": 0.568,
+      "age_days": 137
     },
     "1093.HK": {
       "symbol": "1093.HK",
       "name": "CSPC Pharma / 石药集团",
       "kind": "stock",
       "theme": "healthcare-pharma",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=healthcare-pharma, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.44,
-      "flow_score": 0.56,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.54,
+      "valuation_score": 0.595,
+      "catalyst_score": 0.474,
+      "flow_score": 0.54,
       "macro_score": 0.42,
-      "total_score": 0.492,
-      "age_days": 0
+      "total_score": 0.523,
+      "age_days": 137
     },
     "1177.HK": {
       "symbol": "1177.HK",
       "name": "Sino Biopharm / 中国生物制药",
       "kind": "stock",
       "theme": "healthcare-pharma",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "earnings_gap",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=healthcare-pharma, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.44,
-      "flow_score": 0.6,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.483,
+      "valuation_score": 0.531,
+      "catalyst_score": 0.396,
+      "flow_score": 0.58,
       "macro_score": 0.42,
-      "total_score": 0.498,
-      "age_days": 0
+      "total_score": 0.479,
+      "age_days": 137
     },
     "1299.HK": {
       "symbol": "1299.HK",
       "name": "AIA / 友邦保险",
       "kind": "stock",
       "theme": "financials-insurance",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=financials-insurance, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.51,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.619,
+      "valuation_score": 0.578,
+      "catalyst_score": 0.596,
+      "flow_score": 0.56,
       "macro_score": 0.42,
-      "total_score": 0.491,
-      "age_days": 0
+      "total_score": 0.576,
+      "age_days": 137
     },
     "159915.SZ": {
       "symbol": "159915.SZ",
       "name": "E Fund ChiNext ETF / 易方达创业板ETF",
       "kind": "etf",
       "theme": "china-a-growth-tech",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-05-17",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney fund public data",
+          "kind": "formal_public_fund",
+          "url": "https://fund.eastmoney.com/pingzhongdata/159915.js"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=china-a-growth-tech, quote_fresh=True, risk_state=neutral"
+        "formal provider fund_name=创业板ETF易方达, source_date=2026-05-17",
+        "scores derived from public fund return fields plus local liquidity context"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.58,
-      "valuation_score": 0.38,
-      "catalyst_score": 0.53,
-      "flow_score": 0.6,
-      "macro_score": 0.53,
-      "total_score": 0.526,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.52,
+      "valuation_score": 0.787,
+      "catalyst_score": 0.701,
+      "flow_score": 0.58,
+      "macro_score": 0.5,
+      "total_score": 0.626,
       "age_days": 0
     },
     "1810.HK": {
@@ -722,161 +597,133 @@
       "name": "Xiaomi / 小米集团-W",
       "kind": "stock",
       "theme": "consumer-tech",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=consumer-tech, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.563,
+      "valuation_score": 0.59,
+      "catalyst_score": 0.481,
+      "flow_score": 0.56,
       "macro_score": 0.42,
-      "total_score": 0.505,
-      "age_days": 0
+      "total_score": 0.533,
+      "age_days": 137
     },
     "2020.HK": {
       "symbol": "2020.HK",
       "name": "ANTA Sports / 安踏体育",
       "kind": "stock",
       "theme": "consumer-discretionary",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=consumer-discretionary, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.57,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.603,
+      "valuation_score": 0.597,
+      "catalyst_score": 0.486,
+      "flow_score": 0.54,
       "macro_score": 0.42,
-      "total_score": 0.504,
-      "age_days": 0
+      "total_score": 0.545,
+      "age_days": 137
     },
     "2269.HK": {
       "symbol": "2269.HK",
       "name": "WuXi Biologics / 药明生物",
       "kind": "stock",
       "theme": "healthcare-biotech",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
       "event_risk": "policy",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=healthcare-biotech, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.42,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.62,
-      "macro_score": 0.42,
-      "total_score": 0.487,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.636,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.628,
+      "flow_score": 0.6,
+      "macro_score": 0.38,
+      "total_score": 0.582,
+      "age_days": 137
     },
     "2331.HK": {
       "symbol": "2331.HK",
       "name": "Li Ning / 李宁",
       "kind": "stock",
       "theme": "consumer-discretionary",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=consumer-discretionary, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.44,
-      "flow_score": 0.56,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.554,
+      "valuation_score": 0.596,
+      "catalyst_score": 0.532,
+      "flow_score": 0.54,
       "macro_score": 0.42,
-      "total_score": 0.492,
-      "age_days": 0
+      "total_score": 0.541,
+      "age_days": 137
     },
     "2800.HK": {
       "symbol": "2800.HK",
       "name": "Tracker Fund of Hong Kong / 盈富基金",
       "kind": "etf",
       "theme": "hong-kong-broad-market",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-05-17",
       "as_of_session": "close",
-      "event_risk": "none",
+      "event_risk": "quote_stale",
       "source_count": 0,
       "proxy_source_count": 3,
       "sources": [
@@ -895,16 +742,16 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=hong-kong-broad-market, quote_fresh=True, risk_state=risk_off"
+        "kind=etf, theme=hong-kong-broad-market, quote_fresh=False, risk_state=risk_off"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
       "fundamental_score": 0.62,
       "valuation_score": 0.58,
       "catalyst_score": 0.44,
-      "flow_score": 0.62,
+      "flow_score": 0.57,
       "macro_score": 0.45,
-      "total_score": 0.55,
+      "total_score": 0.542,
       "age_days": 0
     },
     "300750.SZ": {
@@ -912,47 +759,40 @@
       "name": "CATL / 宁德时代",
       "kind": "stock",
       "theme": "china-a-battery-ev",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-16",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-battery-ev, quote_fresh=True, risk_state=neutral"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-16",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.51,
-      "catalyst_score": 0.5,
-      "flow_score": 0.53,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.674,
+      "valuation_score": 0.539,
+      "catalyst_score": 0.8,
+      "flow_score": 0.5,
       "macro_score": 0.5,
-      "total_score": 0.507,
-      "age_days": 0
+      "total_score": 0.635,
+      "age_days": 31
     },
     "3033.HK": {
       "symbol": "3033.HK",
       "name": "CSOP Hang Seng TECH Index ETF / 南方东英恒生科技指数ETF",
       "kind": "etf",
       "theme": "hang-seng-tech",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-05-17",
       "as_of_session": "close",
-      "event_risk": "none",
+      "event_risk": "quote_stale",
       "source_count": 0,
       "proxy_source_count": 3,
       "sources": [
@@ -971,16 +811,16 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=hang-seng-tech, quote_fresh=True, risk_state=risk_off"
+        "kind=etf, theme=hang-seng-tech, quote_fresh=False, risk_state=risk_off"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
       "fundamental_score": 0.58,
       "valuation_score": 0.58,
       "catalyst_score": 0.44,
-      "flow_score": 0.62,
+      "flow_score": 0.57,
       "macro_score": 0.45,
-      "total_score": 0.538,
+      "total_score": 0.53,
       "age_days": 0
     },
     "3067.HK": {
@@ -988,9 +828,9 @@
       "name": "iShares Hang Seng TECH ETF / 安硕恒生科技ETF",
       "kind": "etf",
       "theme": "hang-seng-tech",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-05-17",
       "as_of_session": "close",
-      "event_risk": "none",
+      "event_risk": "quote_stale",
       "source_count": 0,
       "proxy_source_count": 3,
       "sources": [
@@ -1009,16 +849,16 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=hang-seng-tech, quote_fresh=True, risk_state=risk_off"
+        "kind=etf, theme=hang-seng-tech, quote_fresh=False, risk_state=risk_off"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
       "fundamental_score": 0.58,
       "valuation_score": 0.58,
       "catalyst_score": 0.44,
-      "flow_score": 0.6,
+      "flow_score": 0.55,
       "macro_score": 0.45,
-      "total_score": 0.535,
+      "total_score": 0.527,
       "age_days": 0
     },
     "3690.HK": {
@@ -1026,75 +866,61 @@
       "name": "Meituan / 美团-W",
       "kind": "stock",
       "theme": "internet-platform",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
       "event_risk": "policy",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.42,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
-      "macro_score": 0.42,
-      "total_score": 0.481,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.351,
+      "valuation_score": 0.415,
+      "catalyst_score": 0.378,
+      "flow_score": 0.56,
+      "macro_score": 0.38,
+      "total_score": 0.405,
+      "age_days": 137
     },
     "510300.SH": {
       "symbol": "510300.SH",
       "name": "Huatai-PineBridge CSI 300 ETF / 华泰柏瑞沪深300ETF",
       "kind": "etf",
       "theme": "china-a-broad-market",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-05-17",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney fund public data",
+          "kind": "formal_public_fund",
+          "url": "https://fund.eastmoney.com/pingzhongdata/510300.js"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=china-a-broad-market, quote_fresh=True, risk_state=risk_off"
+        "formal provider fund_name=沪深300ETF华泰柏瑞, source_date=2026-05-17",
+        "scores derived from public fund return fields plus local liquidity context"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.62,
-      "valuation_score": 0.51,
-      "catalyst_score": 0.44,
-      "flow_score": 0.56,
-      "macro_score": 0.45,
-      "total_score": 0.527,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.58,
+      "valuation_score": 0.666,
+      "catalyst_score": 0.546,
+      "flow_score": 0.54,
+      "macro_score": 0.46,
+      "total_score": 0.571,
       "age_days": 0
     },
     "510500.SH": {
@@ -1102,37 +928,30 @@
       "name": "China Southern CSI 500 ETF / 南方中证500ETF",
       "kind": "etf",
       "theme": "china-a-midcap-market",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-05-17",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney fund public data",
+          "kind": "formal_public_fund",
+          "url": "https://fund.eastmoney.com/pingzhongdata/510500.js"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=china-a-midcap-market, quote_fresh=True, risk_state=risk_off"
+        "formal provider fund_name=中证500ETF南方, source_date=2026-05-17",
+        "scores derived from public fund return fields plus local liquidity context"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.58,
-      "valuation_score": 0.51,
-      "catalyst_score": 0.44,
-      "flow_score": 0.6,
-      "macro_score": 0.45,
-      "total_score": 0.521,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.52,
+      "valuation_score": 0.741,
+      "catalyst_score": 0.591,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.581,
       "age_days": 0
     },
     "510880.SH": {
@@ -1140,37 +959,30 @@
       "name": "Huatai-PineBridge Dividend ETF / 华泰柏瑞红利ETF",
       "kind": "etf",
       "theme": "china-a-dividend-value",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-05-17",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney fund public data",
+          "kind": "formal_public_fund",
+          "url": "https://fund.eastmoney.com/pingzhongdata/510880.js"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=china-a-dividend-value, quote_fresh=True, risk_state=risk_off"
+        "formal provider fund_name=红利ETF华泰柏瑞, source_date=2026-05-17",
+        "scores derived from public fund return fields plus local liquidity context"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.62,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.53,
-      "macro_score": 0.45,
-      "total_score": 0.536,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.58,
+      "valuation_score": 0.545,
+      "catalyst_score": 0.511,
+      "flow_score": 0.5,
+      "macro_score": 0.46,
+      "total_score": 0.532,
       "age_days": 0
     },
     "512480.SH": {
@@ -1178,37 +990,30 @@
       "name": "GuolianAn Semiconductor ETF / 国联安半导体ETF",
       "kind": "etf",
       "theme": "china-a-semiconductors",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-05-17",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "policy",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney fund public data",
+          "kind": "formal_public_fund",
+          "url": "https://fund.eastmoney.com/pingzhongdata/512480.js"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=china-a-semiconductors, quote_fresh=True, risk_state=risk_off"
+        "formal provider fund_name=半导体ETF国联安, source_date=2026-05-17",
+        "scores derived from public fund return fields plus local liquidity context"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.38,
-      "catalyst_score": 0.44,
-      "flow_score": 0.6,
-      "macro_score": 0.45,
-      "total_score": 0.471,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.48,
+      "valuation_score": 0.8,
+      "catalyst_score": 0.768,
+      "flow_score": 0.58,
+      "macro_score": 0.38,
+      "total_score": 0.621,
       "age_days": 0
     },
     "515790.SH": {
@@ -1216,37 +1021,30 @@
       "name": "Huatai-PineBridge Photovoltaic ETF / 华泰柏瑞光伏ETF",
       "kind": "etf",
       "theme": "china-a-renewable-energy",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-05-17",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "policy",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney fund public data",
+          "kind": "formal_public_fund",
+          "url": "https://fund.eastmoney.com/pingzhongdata/515790.js"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=china-a-renewable-energy, quote_fresh=True, risk_state=risk_off"
+        "formal provider fund_name=光伏ETF华泰柏瑞, source_date=2026-05-17",
+        "scores derived from public fund return fields plus local liquidity context"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.57,
-      "macro_score": 0.45,
-      "total_score": 0.507,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.48,
+      "valuation_score": 0.68,
+      "catalyst_score": 0.54,
+      "flow_score": 0.54,
+      "macro_score": 0.38,
+      "total_score": 0.534,
       "age_days": 0
     },
     "588000.SH": {
@@ -1254,37 +1052,30 @@
       "name": "ChinaAMC STAR 50 ETF / 华夏上证科创板50ETF",
       "kind": "etf",
       "theme": "china-a-hard-tech",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-05-17",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "policy",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney fund public data",
+          "kind": "formal_public_fund",
+          "url": "https://fund.eastmoney.com/pingzhongdata/588000.js"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=china-a-hard-tech, quote_fresh=True, risk_state=risk_off"
+        "formal provider fund_name=科创50ETF华夏, source_date=2026-05-17",
+        "scores derived from public fund return fields plus local liquidity context"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.38,
-      "catalyst_score": 0.44,
-      "flow_score": 0.6,
-      "macro_score": 0.45,
-      "total_score": 0.471,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.48,
+      "valuation_score": 0.775,
+      "catalyst_score": 0.704,
+      "flow_score": 0.58,
+      "macro_score": 0.38,
+      "total_score": 0.6,
       "age_days": 0
     },
     "600030.SH": {
@@ -1292,342 +1083,279 @@
       "name": "CITIC Securities / 中信证券",
       "kind": "stock",
       "theme": "china-a-capital-markets",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-25",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-capital-markets, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-25",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.53,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.717,
+      "valuation_score": 0.569,
+      "catalyst_score": 0.8,
+      "flow_score": 0.5,
       "macro_score": 0.42,
-      "total_score": 0.497,
-      "age_days": 0
+      "total_score": 0.646,
+      "age_days": 22
     },
     "600036.SH": {
       "symbol": "600036.SH",
       "name": "China Merchants Bank / 招商银行",
       "kind": "stock",
       "theme": "china-a-financials-bank",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-29",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "elevated",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-financials-bank, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-29",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.44,
-      "flow_score": 0.53,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.58,
+      "valuation_score": 0.557,
+      "catalyst_score": 0.527,
+      "flow_score": 0.5,
       "macro_score": 0.42,
-      "total_score": 0.487,
-      "age_days": 0
+      "total_score": 0.534,
+      "age_days": 18
     },
     "600276.SH": {
       "symbol": "600276.SH",
       "name": "Hengrui Medicine / 恒瑞医药",
       "kind": "stock",
       "theme": "china-a-healthcare-pharma",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-23",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-healthcare-pharma, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-23",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.53,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.59,
+      "valuation_score": 0.625,
+      "catalyst_score": 0.674,
+      "flow_score": 0.5,
       "macro_score": 0.42,
-      "total_score": 0.497,
-      "age_days": 0
+      "total_score": 0.588,
+      "age_days": 24
     },
     "600519.SH": {
       "symbol": "600519.SH",
       "name": "Kweichow Moutai / 贵州茅台",
       "kind": "stock",
       "theme": "china-a-consumer-staples",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-25",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-consumer-staples, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-25",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.56,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.44,
-      "flow_score": 0.57,
-      "macro_score": 0.42,
-      "total_score": 0.512,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.585,
+      "valuation_score": 0.721,
+      "catalyst_score": 0.539,
+      "flow_score": 0.54,
+      "macro_score": 0.46,
+      "total_score": 0.581,
+      "age_days": 22
     },
     "600900.SH": {
       "symbol": "600900.SH",
       "name": "Yangtze Power / 长江电力",
       "kind": "stock",
       "theme": "china-a-utilities-defensive",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-30",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-utilities-defensive, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-30",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.56,
-      "valuation_score": 0.51,
-      "catalyst_score": 0.44,
-      "flow_score": 0.57,
-      "macro_score": 0.42,
-      "total_score": 0.508,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.63,
+      "valuation_score": 0.583,
+      "catalyst_score": 0.682,
+      "flow_score": 0.54,
+      "macro_score": 0.46,
+      "total_score": 0.603,
+      "age_days": 17
     },
     "601088.SH": {
       "symbol": "601088.SH",
       "name": "China Shenhua / 中国神华",
       "kind": "stock",
       "theme": "china-a-energy-dividend",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-25",
       "as_of_session": "close",
-      "event_risk": "none",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-energy-dividend, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-25",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.56,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.57,
-      "macro_score": 0.42,
-      "total_score": 0.522,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.482,
+      "valuation_score": 0.563,
+      "catalyst_score": 0.452,
+      "flow_score": 0.54,
+      "macro_score": 0.46,
+      "total_score": 0.497,
+      "age_days": 22
     },
     "601318.SH": {
       "symbol": "601318.SH",
       "name": "Ping An Insurance / 中国平安",
       "kind": "stock",
       "theme": "china-a-financials-insurance",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-29",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "elevated",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-financials-insurance, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-29",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.44,
-      "flow_score": 0.57,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.499,
+      "valuation_score": 0.472,
+      "catalyst_score": 0.432,
+      "flow_score": 0.54,
       "macro_score": 0.42,
-      "total_score": 0.493,
-      "age_days": 0
+      "total_score": 0.475,
+      "age_days": 18
     },
     "601899.SH": {
       "symbol": "601899.SH",
       "name": "Zijin Mining / 紫金矿业",
       "kind": "stock",
       "theme": "china-a-metals-mining",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-04-22",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-metals-mining, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31, notice_date=2026-04-22",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.44,
-      "flow_score": 0.57,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.685,
+      "valuation_score": 0.605,
+      "catalyst_score": 0.774,
+      "flow_score": 0.54,
       "macro_score": 0.42,
-      "total_score": 0.493,
-      "age_days": 0
+      "total_score": 0.643,
+      "age_days": 25
     },
     "6862.HK": {
       "symbol": "6862.HK",
       "name": "Haidilao / 海底捞",
       "kind": "stock",
       "theme": "consumer-discretionary",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=consumer-discretionary, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.56,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.581,
+      "valuation_score": 0.56,
+      "catalyst_score": 0.472,
+      "flow_score": 0.54,
       "macro_score": 0.42,
-      "total_score": 0.502,
-      "age_days": 0
+      "total_score": 0.527,
+      "age_days": 137
     },
     "688981.SH": {
       "symbol": "688981.SH",
@@ -1637,1249 +1365,532 @@
       "as_of_date": "2026-05-15",
       "as_of_session": "close",
       "event_risk": "policy",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-semiconductors, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31, notice_date=2026-05-15",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.42,
-      "valuation_score": 0.51,
-      "catalyst_score": 0.44,
-      "flow_score": 0.6,
-      "macro_score": 0.42,
-      "total_score": 0.47,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.522,
+      "valuation_score": 0.518,
+      "catalyst_score": 0.542,
+      "flow_score": 0.58,
+      "macro_score": 0.38,
+      "total_score": 0.521,
+      "age_days": 2
     },
     "9618.HK": {
       "symbol": "9618.HK",
       "name": "JD.com / 京东集团-SW",
       "kind": "stock",
       "theme": "internet-platform",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2026-03-31",
       "as_of_session": "close",
       "event_risk": "policy",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.42,
-      "valuation_score": 0.38,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
-      "macro_score": 0.42,
-      "total_score": 0.441,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.418,
+      "valuation_score": 0.594,
+      "catalyst_score": 0.381,
+      "flow_score": 0.56,
+      "macro_score": 0.38,
+      "total_score": 0.461,
+      "age_days": 47
     },
     "9988.HK": {
       "symbol": "9988.HK",
       "name": "Alibaba / 阿里巴巴-W",
       "kind": "stock",
       "theme": "internet-platform",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
       "event_risk": "policy",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=internet-platform, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.42,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
-      "macro_score": 0.42,
-      "total_score": 0.481,
-      "age_days": 0
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.472,
+      "valuation_score": 0.568,
+      "catalyst_score": 0.377,
+      "flow_score": 0.56,
+      "macro_score": 0.38,
+      "total_score": 0.471,
+      "age_days": 137
     },
     "9992.HK": {
       "symbol": "9992.HK",
       "name": "Pop Mart / 泡泡玛特",
       "kind": "stock",
       "theme": "consumer-discretionary",
-      "as_of_date": "2026-05-15",
+      "as_of_date": "2025-12-31",
       "as_of_session": "close",
-      "event_risk": "unknown",
-      "source_count": 0,
-      "proxy_source_count": 3,
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
       "sources": [
         {
-          "label": "automatic_local_proxy_v1",
-          "kind": "automatic_proxy"
-        },
-        {
-          "label": "trade_universe.toml",
-          "kind": "static_metadata"
-        },
-        {
-          "label": "snapshot_quote_and_market_summary",
-          "kind": "local_snapshot"
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
         }
       ],
       "notes": [
-        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=consumer-discretionary, quote_fresh=True, risk_state=risk_off"
+        "formal provider report_date=2025-12-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
-      "evidence_mode": "automatic_local_proxy",
-      "proxy_only": true,
-      "fundamental_score": 0.5,
-      "valuation_score": 0.53,
-      "catalyst_score": 0.44,
-      "flow_score": 0.58,
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.798,
+      "valuation_score": 0.506,
+      "catalyst_score": 0.8,
+      "flow_score": 0.56,
       "macro_score": 0.42,
-      "total_score": 0.495,
-      "age_days": 0
+      "total_score": 0.667,
+      "age_days": 137
     }
   },
   "findings": [
     {
       "symbol": "0002.HK",
       "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "0002.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
     },
     {
       "symbol": "0002.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.476
-    },
-    {
-      "symbol": "0002.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
+      "total_score": 0.501
     },
     {
       "symbol": "000333.SZ",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "000333.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "000333.SZ",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.486
-    },
-    {
-      "symbol": "000333.SZ",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "000333.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "0005.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "0005.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "0005.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.491
-    },
-    {
-      "symbol": "0005.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "0005.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "0006.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "0006.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "0006.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.492
-    },
-    {
-      "symbol": "0006.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "000858.SZ",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "000858.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "000858.SZ",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.535
-    },
-    {
-      "symbol": "000858.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "002594.SZ",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "002594.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "002594.SZ",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.521
-    },
-    {
-      "symbol": "002594.SZ",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "002594.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "0386.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "0386.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "0386.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.492
-    },
-    {
-      "symbol": "0386.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "0386.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "0388.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "0388.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "0388.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.491
-    },
-    {
-      "symbol": "0388.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "0388.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "0700.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "0700.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "0700.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.471
-    },
-    {
-      "symbol": "0700.HK",
-      "severity": "warning",
-      "reason": "event_risk_policy"
-    },
-    {
-      "symbol": "0700.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "0728.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "0728.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "0728.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.512
-    },
-    {
-      "symbol": "0728.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "0857.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "0857.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "0857.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.493
-    },
-    {
-      "symbol": "0857.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "0857.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "0883.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "0883.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "0883.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.496
-    },
-    {
-      "symbol": "0883.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "0883.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "0941.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "0941.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "0941.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.483
-    },
-    {
-      "symbol": "0941.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "1024.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "1024.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "1024.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.481
-    },
-    {
-      "symbol": "1024.HK",
-      "severity": "warning",
-      "reason": "event_risk_policy"
-    },
-    {
-      "symbol": "1024.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "1093.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "1093.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "1093.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.492
-    },
-    {
-      "symbol": "1093.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "1093.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "1177.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "1177.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "1177.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.498
-    },
-    {
-      "symbol": "1177.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "1177.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "1299.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "1299.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "1299.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.491
-    },
-    {
-      "symbol": "1299.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "1299.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "159915.SZ",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "159915.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "159915.SZ",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.526
-    },
-    {
-      "symbol": "159915.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "1810.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "1810.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "1810.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.505
-    },
-    {
-      "symbol": "1810.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "1810.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "2020.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "2020.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "2020.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.504
-    },
-    {
-      "symbol": "2020.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "2020.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "2269.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "2269.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "2269.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.487
-    },
-    {
-      "symbol": "2269.HK",
-      "severity": "warning",
-      "reason": "event_risk_policy"
-    },
-    {
-      "symbol": "2269.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "2331.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "2331.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "2331.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.492
-    },
-    {
-      "symbol": "2331.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "2331.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "2800.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "2800.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "2800.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "300750.SZ",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "300750.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "300750.SZ",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.507
-    },
-    {
-      "symbol": "300750.SZ",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "300750.SZ",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "3033.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "3033.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "3033.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.538
-    },
-    {
-      "symbol": "3033.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "3067.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "3067.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "3067.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.535
-    },
-    {
-      "symbol": "3067.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "3690.HK",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "3690.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "3690.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.481
-    },
-    {
-      "symbol": "3690.HK",
-      "severity": "warning",
-      "reason": "event_risk_policy"
-    },
-    {
-      "symbol": "3690.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "510300.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "510300.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "510300.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.527
-    },
-    {
-      "symbol": "510300.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "510500.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "510500.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "510500.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.521
-    },
-    {
-      "symbol": "510500.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "510880.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "510880.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "510880.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.536
-    },
-    {
-      "symbol": "510880.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "512480.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "512480.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "512480.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.471
-    },
-    {
-      "symbol": "512480.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "515790.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "515790.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "515790.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.507
-    },
-    {
-      "symbol": "515790.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "588000.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "588000.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "588000.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.471
-    },
-    {
-      "symbol": "588000.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "600030.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "600030.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "600030.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.497
-    },
-    {
-      "symbol": "600030.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "600030.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "600036.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "600036.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "600036.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.487
-    },
-    {
-      "symbol": "600036.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "600036.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "600276.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "600276.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "600276.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.497
-    },
-    {
-      "symbol": "600276.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "600276.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "600519.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "600519.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "600519.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.512
-    },
-    {
-      "symbol": "600519.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "600900.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "600900.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "600900.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.508
-    },
-    {
-      "symbol": "600900.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "601088.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "601088.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "601088.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
       "total_score": 0.522
     },
     {
+      "symbol": "0005.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 47
+    },
+    {
+      "symbol": "0005.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.542
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.521
+    },
+    {
+      "symbol": "002594.SZ",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.413
+    },
+    {
+      "symbol": "002594.SZ",
+      "severity": "warning",
+      "reason": "event_risk_earnings_gap"
+    },
+    {
+      "symbol": "0386.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 47
+    },
+    {
+      "symbol": "0386.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.546
+    },
+    {
+      "symbol": "0388.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 47
+    },
+    {
+      "symbol": "0388.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.546
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 47
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.532
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "0728.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 47
+    },
+    {
+      "symbol": "0728.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.526
+    },
+    {
+      "symbol": "0857.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 47
+    },
+    {
+      "symbol": "0857.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.519
+    },
+    {
+      "symbol": "0883.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 47
+    },
+    {
+      "symbol": "0941.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 47
+    },
+    {
+      "symbol": "0941.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.531
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "1093.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
+    },
+    {
+      "symbol": "1093.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.523
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.479
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "warning",
+      "reason": "event_risk_earnings_gap"
+    },
+    {
+      "symbol": "1299.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
+    },
+    {
+      "symbol": "1810.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
+    },
+    {
+      "symbol": "1810.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.533
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.545
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.541
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "warning",
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.542
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "warning",
+      "reason": "event_risk_quote_stale"
+    },
+    {
+      "symbol": "2800.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "300750.SZ",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 31
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "warning",
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.53
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "warning",
+      "reason": "event_risk_quote_stale"
+    },
+    {
+      "symbol": "3033.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "warning",
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.527
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "warning",
+      "reason": "event_risk_quote_stale"
+    },
+    {
+      "symbol": "3067.HK",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.405
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "510880.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.532
+    },
+    {
+      "symbol": "512480.SH",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "515790.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.534
+    },
+    {
+      "symbol": "515790.SH",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "588000.SH",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "600036.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.534
+    },
+    {
+      "symbol": "600036.SH",
+      "severity": "warning",
+      "reason": "event_risk_elevated"
+    },
+    {
       "symbol": "601088.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "601318.SH",
       "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "601318.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.497
     },
     {
       "symbol": "601318.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.493
+      "total_score": 0.475
     },
     {
       "symbol": "601318.SH",
       "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "601318.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "601899.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "601899.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "601899.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.493
-    },
-    {
-      "symbol": "601899.SH",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "601899.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
+      "reason": "event_risk_elevated"
     },
     {
       "symbol": "6862.HK",
       "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "6862.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
     },
     {
       "symbol": "6862.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.502
-    },
-    {
-      "symbol": "6862.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "6862.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
-      "symbol": "688981.SH",
-      "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "688981.SH",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
+      "total_score": 0.527
     },
     {
       "symbol": "688981.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.47
+      "total_score": 0.521
     },
     {
       "symbol": "688981.SH",
@@ -2887,27 +1898,16 @@
       "reason": "event_risk_policy"
     },
     {
-      "symbol": "688981.SH",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
       "symbol": "9618.HK",
       "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "9618.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 47
     },
     {
       "symbol": "9618.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.441
+      "total_score": 0.461
     },
     {
       "symbol": "9618.HK",
@@ -2915,27 +1915,16 @@
       "reason": "event_risk_policy"
     },
     {
-      "symbol": "9618.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
       "symbol": "9988.HK",
       "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "9988.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
     },
     {
       "symbol": "9988.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.481
+      "total_score": 0.471
     },
     {
       "symbol": "9988.HK",
@@ -2943,43 +1932,16 @@
       "reason": "event_risk_policy"
     },
     {
-      "symbol": "9988.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
-    },
-    {
       "symbol": "9992.HK",
       "severity": "info",
-      "reason": "automatic_proxy_evidence",
-      "provider": "automatic_local_proxy_v1"
-    },
-    {
-      "symbol": "9992.HK",
-      "severity": "warning",
-      "reason": "nontechnical_proxy_only",
-      "proxy_source_count": 3
-    },
-    {
-      "symbol": "9992.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.495
-    },
-    {
-      "symbol": "9992.HK",
-      "severity": "warning",
-      "reason": "event_risk_unknown"
-    },
-    {
-      "symbol": "9992.HK",
-      "severity": "warning",
-      "reason": "nontechnical_source_missing"
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 137
     }
   ],
   "sources": {
     "config": "D:\\Code\\yoyo\\config\\nontechnical_evidence.toml",
     "trade_universe": "D:\\Code\\yoyo\\config\\trade_universe.toml",
-    "snapshot": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-15.json",
+    "snapshot": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-17.json",
     "ranking": null
   }
 }

@@ -23,15 +23,22 @@ REASON_LABELS = {
     "cost_gate_failed": "成本/边际不足",
     "downtrend_regime": "趋势偏弱",
     "event_risk_policy": "政策风险",
+    "event_risk_quote_stale": "行情日期滞后",
     "event_risk_unknown": "事件风险未知",
+    "hk_halt_or_no_turnover_suspected": "疑似停牌/无成交",
+    "cn_limit_down_liquidity_block": "跌停流动性风险",
+    "cn_limit_up_chase_block": "涨停追高风险",
+    "low_volume_ratio_20_below_0_6": "量能严重不足",
     "market_range_pos_60_above_action_limit": "市场位置偏高",
+    "market_proxy_missing": "市场参考资料缺失",
     "nontechnical_component_missing": "非技术面组件缺失",
     "nontechnical_evidence_date_missing": "非技术面日期缺失",
     "nontechnical_evidence_from_future": "非技术面证据来自未来",
     "nontechnical_evidence_from_future_session": "非技术面证据来自未来时段",
     "nontechnical_evidence_missing": "非技术面证据缺失",
     "nontechnical_evidence_stale": "非技术面证据过期",
-    "nontechnical_proxy_only": "仅代理证据",
+    "nontechnical_proxy_only": "正式资料未接入",
+    "nontechnical_score_missing": "非技术分缺失",
     "nontechnical_score_below_action_min": "非技术分不足",
     "nontechnical_source_missing": "正式证据缺失",
     "not_theme_score_leader": "不是主题领先",
@@ -296,12 +303,12 @@ def research_action_for(row: dict[str, Any]) -> dict[str, Any]:
     if state in ACTION_LIKE_STATES or qualified_for_action or (qualified_for_watch and (score >= 70 or proxy_only or event_risk in {"unknown", "policy", "high"})):
         why = "接近候选，但仍有关键确认项未满足。"
         if proxy_only:
-            why = "仅有代理证据或存在代理证据阻断，不能视为正式行动候选。"
+            why = "正式资料未接入或存在资料阻断，不能视为正式行动候选。"
         return {
             "key": "confirm",
             "label": "等确认",
             "why": why,
-            "upgrade": "阻断项清零、正式门槛通过、事件风险回落且证据不再仅为代理后，可升级为「可考虑研究」。",
+            "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
             "invalidation": row.get("invalidation") or "若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。",
             "formal_actionable": False,
         }
@@ -491,7 +498,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
             lines.append(f"  - 非技术面：{row['nontechnical_evidence']}")
         if row.get("invalidation"):
             lines.append(f"  - 失效条件：{row['invalidation']}")
-    lines.extend(["", "## 研究型行动建议", "- 声明：本节仅用于安排后续研究优先级；research-only、非交易、不下单、不改组合；不得把代理证据或 shadow 结果描述为正式可行动。"])
+    lines.extend(["", "## 研究型行动建议", "- 声明：本节仅用于安排后续研究优先级；research-only、非交易、不下单、不改组合；不得把正式资料未接入的结果或 shadow 结果描述为正式可行动。"])
     research_actions = payload.get("research_actions") or []
     if not research_actions:
         lines.append("- 今日没有可排序的研究对象。")
@@ -501,7 +508,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         blockers = clean_list(row.get("blockers"))
         blocker_text = "、".join(reason_label(item) for item in blockers[:4]) if blockers else "暂无主要障碍"
         score = row.get("score") if row.get("score") is not None else "n/a"
-        proxy_note = "；仅代理证据，不清除正式行动门槛" if profile.get("proxy_only") else ""
+        proxy_note = "；正式资料未接入，不清除正式行动门槛" if profile.get("proxy_only") else ""
         formal_note = "正式门槛通过但仍非交易指令" if action.get("formal_actionable") else "非正式行动候选"
         lines.append(f"- `{row.get('symbol')}`：{action.get('label')}；状态={row.get('state')}；score={score}；{formal_note}{proxy_note}。")
         lines.append(f"  - why：{row.get('why_source') or action.get('why')}")
@@ -520,12 +527,12 @@ def render_markdown(payload: dict[str, Any]) -> str:
             f"- Calibration samples（historical/posterior diagnostics，不计入 forward readiness）：{payload['calibration']['sample_count']}；hit_rate={payload['calibration']['hit_rate']}；Brier={payload['calibration']['brier_score']}；calibration_error={payload['calibration']['calibration_error']}。",
             "",
             "## 非技术面证据与归因",
-            f"- Evidence coverage：curated_available={curated_available} / symbols={nontechnical_summary.get('symbol_count')}；proxy_only={proxy_only_count}；missing={nontechnical_summary.get('missing_count')}；blocking_findings={nontechnical_summary.get('blocking_finding_count')}；critical_findings={nontechnical_summary.get('critical_finding_count')}。",
+            f"- 非技术面证据覆盖：正式证据={curated_available} / 标的数={nontechnical_summary.get('symbol_count')}；正式资料未接入={proxy_only_count}；缺失={nontechnical_summary.get('missing_count')}；阻断项={nontechnical_summary.get('blocking_finding_count')}；严重项={nontechnical_summary.get('critical_finding_count')}。",
             f"- Attribution samples：{payload['nontechnical']['attribution_summary'].get('attributed_sample_count')}；hit_rate={payload['nontechnical']['attribution_summary'].get('hit_rate')}；avg_return={payload['nontechnical']['attribution_summary'].get('avg_return_pct')}。",
         ]
     )
     if proxy_only_count:
-        lines.append(f"- proxy-only 覆盖仅来自本地元数据/行情代理，不是 audited fundamentals；这些行只作观察和诊断，不清除行动门槛。")
+        lines.append("- 正式资料未接入的行尚未取得正式基本面、估值或事件资料；这些行只作观察和排序，不清除行动门槛。")
     for row in payload["nontechnical"].get("score_buckets") or []:
         lines.append(f"- 非技术面分桶 `{row.get('score_bucket')}` samples={row.get('scored_sample_count')} hit_rate={row.get('hit_rate')} avg_return={row.get('avg_return_pct')}")
     lines.extend(["", "## Shadow 变体竞赛"])

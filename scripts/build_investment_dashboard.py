@@ -11,7 +11,7 @@ from typing import Any
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = ROOT / "research" / "dashboard" / "index.html"
 DISCLAIMER = "仅供研究 · 非交易信号 · 不构成投资建议"
-PROXY_ONLY_WARNING = "代理证据不是经审计基本面，也不足以清除行动门槛；只能用于观察和诊断。"
+PROXY_ONLY_WARNING = "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。"
 ACTION_STATES = {"buy_candidate", "accumulate", "hold", "trim", "sell_candidate"}
 WATCH_STATES = {"watch", "watch_only"}
 AVOID_STATES = {"avoid", "no_action", "blocked"}
@@ -27,13 +27,28 @@ REASON_LABELS = {
     "cost_gate_failed": "成本/边际不足",
     "downtrend_regime": "趋势偏弱",
     "event_risk_policy": "政策风险",
+    "event_risk_quote_stale": "行情日期滞后",
     "event_risk_unknown": "事件风险未知",
+    "hk_halt_or_no_turnover_suspected": "疑似停牌/无成交",
+    "cn_limit_down_liquidity_block": "跌停流动性风险",
+    "cn_limit_up_chase_block": "涨停追高风险",
+    "low_volume_ratio_20_below_0_6": "量能严重不足",
     "market_range_pos_60_above_action_limit": "市场位置偏高",
-    "nontechnical_proxy_only": "仅代理证据",
+    "market_proxy_missing": "市场参考资料缺失",
+    "nontechnical_component_missing": "非技术面组件缺失",
+    "nontechnical_evidence_date_missing": "非技术面日期缺失",
+    "nontechnical_evidence_from_future": "非技术面证据来自未来",
+    "nontechnical_evidence_from_future_session": "非技术面证据来自未来时段",
+    "nontechnical_evidence_missing": "非技术面证据缺失",
+    "nontechnical_evidence_stale": "非技术面证据过期",
+    "nontechnical_proxy_only": "正式资料未接入",
+    "nontechnical_score_missing": "非技术分缺失",
     "nontechnical_score_below_action_min": "非技术分不足",
     "nontechnical_source_missing": "正式证据缺失",
     "not_theme_score_leader": "不是主题领先",
     "price_below_ma20_and_ma60": "跌破均线",
+    "quote_trade_date_missing": "行情交易日缺失",
+    "quote_trade_date_mismatch": "行情日期不匹配",
     "range_pos_60_below_0_12": "区间位置过低",
     "same_theme_best_peer_evidence_missing_or_failed": "同主题证据不足",
     "symbol_recent_adverse_breach": "近期逆向风险",
@@ -230,6 +245,19 @@ def reason_label(reason: str) -> str:
     return REASON_LABELS.get(reason, reason)
 
 
+def visible_reason_labels(reasons: Any) -> list[str]:
+    return [reason_label(item) for item in clean_list(reasons)]
+
+
+def display_name(value: Any) -> str | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    if " / " in text:
+        text = text.split(" / ")[-1].strip()
+    return text or None
+
+
 def formal_blockers(row: dict[str, Any]) -> list[str]:
     return [item for item in clean_list(row.get("blockers")) if item in REASON_LABELS]
 
@@ -263,7 +291,7 @@ def research_action_for(row: dict[str, Any]) -> dict[str, Any]:
         label = "等确认"
         key = "confirm"
         reason = "接近候选，但仍有关键确认项未满足。"
-        upgrade = "阻断项清零、正式门槛通过、事件风险回落且证据不再仅为代理后，可升级为「可考虑研究」。"
+        upgrade = "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。"
         invalidation = "若观察分数跌破门槛或状态转差，移出重点跟踪。"
     elif row.get("qualified_for_watch") is True or score >= 45:
         label = "继续观察"
@@ -311,6 +339,7 @@ def normalize_symbols(ranking: dict[str, Any] | None, close_report: dict[str, An
             "rank": idx + 1,
             "symbol": symbol,
             "name": ranked.get("name") or rec.get("name"),
+            "display_name": display_name(ranked.get("name") or rec.get("name")),
             "judgment": judgment,
             "recommendation_state": state,
             "category": category,
@@ -320,6 +349,7 @@ def normalize_symbols(ranking: dict[str, Any] | None, close_report: dict[str, An
             "confidence": rec.get("confidence") if rec.get("confidence") is not None else ranked.get("confidence"),
             "action_disqualifiers": blockers,
             "blockers": blockers,
+            "blocker_labels": visible_reason_labels(blockers),
             "risk_cap": rec.get("risk_cap"),
             "risk_decision": rec.get("risk_decision"),
             "recommendation_evidence": rec_evidence,
@@ -339,6 +369,7 @@ def normalize_symbols(ranking: dict[str, Any] | None, close_report: dict[str, An
             "rank": None,
             "symbol": symbol,
             "name": rec.get("name"),
+            "display_name": display_name(rec.get("name")),
             "judgment": str(state or "recommendation"),
             "recommendation_state": state,
             "category": category,
@@ -348,6 +379,7 @@ def normalize_symbols(ranking: dict[str, Any] | None, close_report: dict[str, An
             "confidence": rec.get("confidence"),
             "action_disqualifiers": unique(clean_list(rec.get("blockers")) + clean_list(rec.get("risks"))),
             "blockers": unique(clean_list(rec.get("blockers")) + clean_list(rec.get("risks"))),
+            "blocker_labels": visible_reason_labels(unique(clean_list(rec.get("blockers")) + clean_list(rec.get("risks")))),
             "risk_cap": rec.get("risk_cap"),
             "risk_decision": rec.get("risk_decision"),
             "recommendation_evidence": rec_evidence,
@@ -413,6 +445,7 @@ def build_payload(
         "headline": generated_headline(close_report, close_markdown, symbols),
         "counts": counts,
         "research_action_counts": count_research_actions(symbols),
+        "reason_labels": REASON_LABELS,
         "symbols": symbols,
         "evidence": evidence_metrics(close_report, forward_eval, evidence_ledger, nontechnical),
         "proxy_only_warning": PROXY_ONLY_WARNING,
@@ -424,8 +457,12 @@ def json_for_html(data: dict[str, Any]) -> str:
     return json.dumps(data, indent=2, ensure_ascii=False).replace("</", "<\\/")
 
 
+def session_label(session: Any) -> str:
+    return {"morning": "早盘", "midday": "午间", "close": "收盘", "historical": "历史"}.get(str(session), str(session))
+
+
 def render_html(payload: dict[str, Any]) -> str:
-    title = f"投资研究看板 - {payload['date']} {payload['session']}"
+    title = f"投资研究看板 - {payload['date']} {session_label(payload['session'])}"
     safe_title = html.escape(title)
     data_json = json_for_html(payload)
     return f"""<!doctype html>
@@ -524,11 +561,11 @@ def render_html(payload: dict[str, Any]) -> str:
       <span class=\"status-pill\">当前前向胜率 <strong id=\"winRate\">暂无</strong><span class=\"win-note\" id=\"winRateNote\"></span></span>
     </section>
     <p class=\"explain\"><strong>分数怎么理解：</strong>分数是“研究优先级/排序分”，用于决定先看哪些标的；它不是上涨概率，也不是买入信号。只有通过可行动关卡、风险审查和证据门槛后，才可能进入可行动候选。</p>
-    <section class=\"card\" aria-label=\"Evidence metrics\">
+    <section class=\"card\" aria-label=\"证据进度\">
       <div class=\"label\">证据进度</div>
       <p id=\"evidenceMetrics\"></p>
     </section>
-    <div class=\"notice\"><strong>代理证据提示：</strong>{PROXY_ONLY_WARNING}</div>
+    <div class=\"notice\"><strong>正式资料未接入提示：</strong>{PROXY_ONLY_WARNING}</div>
     <section>
       <div class=\"toolbar\"><h2>今日重点研究队列</h2><span class=\"small\">默认只展示前 8 个，完整池子在下方折叠区。</span></div>
       <div id=\"topCards\" class=\"symbol-grid\"></div>
@@ -549,37 +586,24 @@ def render_html(payload: dict[str, Any]) -> str:
   <script id=\"dashboard-data\" type=\"application/json\">{data_json}</script>
   <script>
     const payload = JSON.parse(document.getElementById('dashboard-data').textContent);
-    const text = (value) => value === null || value === undefined || value === '' ? 'n/a' : String(value);
+    const text = (value) => value === null || value === undefined || value === '' ? '暂无' : String(value);
     const boolText = (value) => value ? '是' : '否';
     const categoryText = (value) => value === 'action' ? '可行动' : value === 'watch' ? '观察' : value === 'avoid' ? '回避' : text(value);
     const judgmentText = (value) => ({{buy_candidate: '买入候选', accumulate: '可累积', hold: '持有观察', trim: '减仓候选', sell_candidate: '卖出候选', watch: '观察', watch_only: '仅观察', avoid: '回避', no_action: '不行动', blocked: '被阻断', action_candidate: '行动候选'}}[value] || text(value));
-    const evidenceText = (value) => ({{proxy_only: '代理证据', available: '可用', missing: '缺失'}}[value] || text(value));
+    const evidenceText = (value) => ({{proxy_only: '正式资料未接入', available: '可用', missing: '缺失'}}[value] || text(value));
     const researchAction = (row) => row.research_action || {{key: 'avoid', label: '暂不碰', reason: '暂无研究动作。', upgrade: '等待新证据。', invalidation: '约束未改善前不升级。'}};
     const researchKind = (key) => key === 'consider' ? 'action' : key === 'confirm' || key === 'observe' ? 'watch' : 'avoid';
-    const reasonText = (value) => ({{
-      cost_gate_failed: '成本/边际不足',
-      downtrend_regime: '趋势偏弱',
-      event_risk_policy: '政策风险',
-      event_risk_unknown: '事件风险未知',
-      market_range_pos_60_above_action_limit: '市场位置偏高',
-      nontechnical_proxy_only: '仅代理证据',
-      nontechnical_score_below_action_min: '非技术分不足',
-      nontechnical_source_missing: '正式证据缺失',
-      not_theme_score_leader: '不是主题领先',
-      price_below_ma20_and_ma60: '跌破均线',
-      range_pos_60_below_0_12: '区间位置过低',
-      same_theme_best_peer_evidence_missing_or_failed: '同主题证据不足',
-      symbol_recent_adverse_breach: '近期逆向风险',
-      symbol_risk_veto: '个股风险否决',
-      volume_ratio_20_below_1_0: '量能不足'
-    }}[value] || text(value));
+    const reasonLabels = payload.reason_labels || {{}};
+    const humanizeKey = (value) => text(value).replace(/_/g, ' ');
+    const reasonText = (value) => reasonLabels[value] || humanizeKey(value);
     const winRateText = (value) => value === null || value === undefined ? '暂无' : `${{(Number(value) * 100).toFixed(1)}}%`;
-    const reasonPills = (reasons, limit = 3) => {{
+    const reasonPills = (reasons, labels, limit = 3) => {{
       const box = document.createElement('div');
       box.className = 'reason-pills';
       const items = (reasons || []).slice(0, limit);
+      const visibleLabels = (labels || []).slice(0, limit);
       if (!items.length) {{ box.appendChild(chip('暂无关键障碍', '')); return box; }}
-      for (const reason of items) {{ const span = document.createElement('span'); span.className = 'reason-pill'; span.title = text(reason); span.textContent = reasonText(reason); box.appendChild(span); }}
+      items.forEach((reason, index) => {{ const span = document.createElement('span'); span.className = 'reason-pill'; span.title = text(reason); span.textContent = visibleLabels[index] || reasonText(reason); box.appendChild(span); }});
       return box;
     }};
     const cell = (label, value) => {{ const td = document.createElement('td'); td.dataset.label = label; if (value instanceof Node) td.appendChild(value); else td.textContent = text(value); return td; }};
@@ -593,7 +617,7 @@ def render_html(payload: dict[str, Any]) -> str:
     document.getElementById('avoidCount').textContent = text(researchCounts.avoid || 0);
     document.getElementById('winRate').textContent = winRateText(payload.evidence.forward_win_rate);
     document.getElementById('winRateNote').textContent = `前向样本=${{text(payload.evidence.forward_samples)}}；样本不足时胜率不显示。`;
-    document.getElementById('evidenceMetrics').textContent = `前向记录=${{text(payload.evidence.forward_logs)}}；成熟天数=${{text(payload.evidence.matured_days)}}；前向样本=${{text(payload.evidence.forward_samples)}}；人工/正式证据=${{text(payload.evidence.curated_available)}}；代理证据=${{text(payload.evidence.proxy_only)}}；缺失=${{text(payload.evidence.missing)}}`;
+    document.getElementById('evidenceMetrics').textContent = `前向记录=${{text(payload.evidence.forward_logs)}}；成熟天数=${{text(payload.evidence.matured_days)}}；前向样本=${{text(payload.evidence.forward_samples)}}；人工/正式证据=${{text(payload.evidence.curated_available)}}；正式资料未接入=${{text(payload.evidence.proxy_only)}}；缺失=${{text(payload.evidence.missing)}}`;
     const topCards = document.getElementById('topCards');
     const renderTopCards = () => {{
       topCards.textContent = '';
@@ -606,7 +630,7 @@ def render_html(payload: dict[str, Any]) -> str:
       heading.textContent = text(row.symbol);
       const name = document.createElement('div');
       name.className = 'name';
-      name.textContent = text(row.name);
+      name.textContent = text(row.display_name || row.name);
       const action = researchAction(row);
       const status = document.createElement('div');
       status.appendChild(chip(action.label, researchKind(action.key)));
@@ -623,7 +647,7 @@ def render_html(payload: dict[str, Any]) -> str:
       const blockers = document.createElement('div');
       blockers.className = 'blockers';
       blockers.textContent = '主要障碍：';
-      blockers.appendChild(reasonPills(row.blockers, 3));
+      blockers.appendChild(reasonPills(row.blockers, row.blocker_labels, 3));
       const next = document.createElement('div');
       next.className = 'small';
       next.textContent = `升级条件：${{text(action.upgrade)}}｜失效条件：${{text(action.invalidation)}}`;
@@ -635,14 +659,14 @@ def render_html(payload: dict[str, Any]) -> str:
     for (const row of payload.symbols) {{
       const tr = document.createElement('tr');
       const action = researchAction(row);
-      tr.dataset.search = [row.symbol, row.name, row.judgment, row.category, action.label, action.reason, action.upgrade, action.invalidation, ...(row.blockers || []), row.nontechnical_evidence && row.nontechnical_evidence.status].map(text).join(' ').toLowerCase();
+      tr.dataset.search = [row.symbol, row.display_name, row.name, row.judgment, row.category, action.label, action.reason, action.upgrade, action.invalidation, ...(row.blockers || []), ...(row.blocker_labels || []), row.nontechnical_evidence && row.nontechnical_evidence.status].map(text).join(' ').toLowerCase();
       tr.dataset.researchAction = action.key;
       const title = document.createElement('div');
       const symbolStrong = document.createElement('strong');
       symbolStrong.textContent = text(row.symbol);
       const nameSmall = document.createElement('div');
       nameSmall.className = 'small';
-      nameSmall.textContent = text(row.name);
+      nameSmall.textContent = text(row.display_name || row.name);
       title.appendChild(symbolStrong);
       title.appendChild(nameSmall);
       tr.appendChild(cell('代码/名称', title));
@@ -661,7 +685,7 @@ def render_html(payload: dict[str, Any]) -> str:
       priority.appendChild(why);
       tr.appendChild(cell('研究优先级', priority));
       tr.appendChild(cell('置信度', row.confidence));
-      tr.appendChild(cell('主要障碍', reasonPills(row.blockers, 8)));
+      tr.appendChild(cell('主要障碍', reasonPills(row.blockers, row.blocker_labels, 8)));
       const conditions = document.createElement('div');
       const upgrade = document.createElement('div');
       upgrade.textContent = `升级：${{text(action.upgrade)}}`;
@@ -675,7 +699,7 @@ def render_html(payload: dict[str, Any]) -> str:
       evidenceNode.appendChild(chip(evidenceText(evidence.status), evidence.proxy_only ? 'proxy' : ''));
       const detail = document.createElement('div');
       detail.className = 'small';
-      detail.textContent = `代理证据=${{boolText(evidence.proxy_only)}}；总分=${{text(evidence.total_score)}}；事件风险=${{text(evidence.event_risk)}}`;
+      detail.textContent = `正式资料未接入=${{boolText(evidence.proxy_only)}}；总分=${{text(evidence.total_score)}}；事件风险=${{text(evidence.event_risk)}}`;
       evidenceNode.appendChild(detail);
       if (evidence.proxy_only) {{ const warn = document.createElement('div'); warn.className = 'small'; warn.textContent = payload.proxy_only_warning; evidenceNode.appendChild(warn); }}
       tr.appendChild(cell('非技术面证据', evidenceNode));

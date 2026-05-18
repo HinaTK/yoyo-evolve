@@ -1,17 +1,20 @@
 # Nontechnical Evidence Attribution
 
-Generated: `2026-05-16T08:56:23Z`
-As-of: date=`2026-05-15`, session=`close`
+Generated: `2026-05-17T09:10:43Z`
+As-of: date=`2026-05-17`, session=`close`
 Research only: `True`; no execution: `True`
 
 ## Summary
 - outcomes: `854`
-- attributed samples: `0`
-- skipped without point-in-time evidence: `854`
-- hit_rate: `None`
-- avg_return_pct: `None`
+- attributed samples: `270`
+- skipped without point-in-time evidence: `584`
+- hit_rate: `0.511`
+- avg_return_pct: `-0.594`
 
 ## Total Score Buckets
+- `0.40-0.55` samples=170 hit_rate=0.524 avg_return=-0.838
+- `0.55-0.70` samples=4 hit_rate=0.0 avg_return=10.151
 
 ## Findings
-- `scored_attribution_rows` actual=0 expected=>= 5
+- `bucket:total_score:None` actual=4 expected=>= 5
+- `bucket:catalyst_score:0.55-0.70` actual=4 expected=>= 5

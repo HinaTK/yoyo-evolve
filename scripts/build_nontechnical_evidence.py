@@ -4,7 +4,10 @@ import argparse
 import datetime as dt
 import json
 import pathlib
+import re
 import tomllib
+import urllib.parse
+import urllib.request
 from typing import Any
 
 
@@ -23,9 +26,13 @@ DEFAULT_WEIGHTS = {
     "macro_score": 0.10,
 }
 COMPONENT_KEYS = tuple(DEFAULT_WEIGHTS.keys())
+FORMAL_EVIDENCE_MODES = {"curated_point_in_time", "formal_provider_point_in_time"}
 DEFENSIVE_THEMES = {"dividend", "utilities", "defensive", "broad-market", "consumer-staples"}
 POLICY_HEAVY_THEMES = {"biotech", "semiconductor", "semiconductors", "hard-tech", "renewable", "platform"}
 HARD_EVENT_RISKS = {"elevated", "earnings_gap", "regulatory", "policy", "suspension", "accounting", "quote_stale"}
+EASTMONEY_CN_FINANCE_URL = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+EASTMONEY_HK_DATA_URL = "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+EASTMONEY_FUND_JS_URL = "https://fund.eastmoney.com/pingzhongdata/{code}.js"
 
 
 def utc_now() -> str:
@@ -43,6 +50,24 @@ def load_json(path: pathlib.Path | None) -> dict[str, Any]:
     if path is None or not path.exists():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def fetch_json(url: str, params: dict[str, Any], timeout: float) -> dict[str, Any]:
+    full_url = f"{url}?{urllib.parse.urlencode(params)}" if params else url
+    req = urllib.request.Request(
+        full_url,
+        headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json,text/plain,*/*"},
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        charset = resp.headers.get_content_charset() or "utf-8"
+        return json.loads(resp.read().decode(charset, errors="ignore"))
+
+
+def fetch_text(url: str, timeout: float) -> str:
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Accept": "text/javascript,text/plain,*/*"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        charset = resp.headers.get_content_charset() or "utf-8"
+        return resp.read().decode(charset, errors="ignore")
 
 
 def resolve_path(value: str | pathlib.Path | None) -> pathlib.Path | None:
@@ -100,6 +125,8 @@ def date_token(value: Any) -> str | None:
     text = str(value or "").strip()
     if len(text) >= 10 and text[4] == "-" and text[7] == "-":
         return text[:10]
+    if len(text) >= 8 and text[:8].isdigit():
+        return f"{text[:4]}-{text[4:6]}-{text[6:8]}"
     return None
 
 
@@ -170,6 +197,327 @@ def market_summary(snapshot: dict[str, Any], symbol: str) -> dict[str, Any]:
     by_exchange = summary.get("by_exchange", {}) if isinstance(summary.get("by_exchange"), dict) else {}
     exchange_summary = by_exchange.get(exchange, {}) if exchange else {}
     return exchange_summary if isinstance(exchange_summary, dict) and exchange_summary else summary
+
+
+def formal_provider_config(config: dict[str, Any]) -> dict[str, Any]:
+    provider = config.get("formal_provider", {}) if isinstance(config.get("formal_provider"), dict) else {}
+    return provider
+
+
+def formal_provider_fetch_allowed(config: dict[str, Any], as_of_date: str) -> bool:
+    provider = formal_provider_config(config)
+    if not provider.get("enabled", False):
+        return False
+    if bool(provider.get("current_date_only", True)) and as_of_date != dt.date.today().isoformat():
+        return False
+    return True
+
+
+def formal_provider_timeout(config: dict[str, Any]) -> float:
+    return float(formal_provider_config(config).get("timeout_secs", 5.0))
+
+
+def first_data_row(payload: dict[str, Any]) -> dict[str, Any] | None:
+    direct = payload.get("data")
+    if isinstance(direct, list) and direct and isinstance(direct[0], dict):
+        return direct[0]
+    result = payload.get("result") if isinstance(payload.get("result"), dict) else {}
+    nested = result.get("data") if isinstance(result, dict) else None
+    if isinstance(nested, list) and nested and isinstance(nested[0], dict):
+        return nested[0]
+    return None
+
+
+def average_present(values: list[float | None], default: float = 0.5) -> float:
+    present = [value for value in values if value is not None]
+    return round(clamp(sum(present) / len(present) if present else default), 3)
+
+
+def score_growth_pct(value: Any) -> float | None:
+    pct = as_float(value)
+    if pct is None:
+        return None
+    return clamp(0.50 + pct / 100.0, 0.25, 0.80)
+
+
+def score_roe_pct(value: Any) -> float | None:
+    pct = as_float(value)
+    if pct is None:
+        return None
+    return clamp(0.40 + pct / 50.0, 0.25, 0.85)
+
+
+def score_margin_pct(value: Any) -> float | None:
+    pct = as_float(value)
+    if pct is None:
+        return None
+    return clamp(0.45 + pct / 120.0, 0.25, 0.85)
+
+
+def score_cash_ratio(value: Any) -> float | None:
+    ratio = as_float(value)
+    if ratio is None:
+        return None
+    return clamp(0.50 + ratio * 0.30, 0.25, 0.80)
+
+
+def score_debt_pct(value: Any) -> float | None:
+    pct = as_float(value)
+    if pct is None:
+        return None
+    return clamp(0.75 - pct / 250.0, 0.25, 0.75)
+
+
+def score_pe(value: Any) -> float | None:
+    pe = as_float(value)
+    if pe is None:
+        return None
+    if pe <= 0:
+        return 0.35
+    if pe <= 12:
+        return 0.72
+    if pe <= 25:
+        return 0.60
+    if pe <= 45:
+        return 0.48
+    return 0.35
+
+
+def score_pb(value: Any) -> float | None:
+    pb = as_float(value)
+    if pb is None:
+        return None
+    if pb <= 0:
+        return 0.35
+    if pb <= 1.0:
+        return 0.68
+    if pb <= 3.0:
+        return 0.58
+    if pb <= 6.0:
+        return 0.48
+    return 0.35
+
+
+def score_dividend_pct(value: Any) -> float | None:
+    pct = as_float(value)
+    if pct is None:
+        return None
+    return clamp(0.45 + pct / 20.0, 0.35, 0.75)
+
+
+def flow_score_from_metadata(metadata: dict[str, Any]) -> float:
+    score = 0.50
+    turnover = as_float(metadata.get("turnover"))
+    latest_volume = as_float(metadata.get("latest_volume") or metadata.get("quote_volume"))
+    volume_ratio = as_float(metadata.get("volume_ratio_20"))
+    if turnover is not None and turnover > 1_000_000_000:
+        score += 0.06
+    elif latest_volume is not None and latest_volume > 10_000_000:
+        score += 0.04
+    if volume_ratio is not None:
+        if volume_ratio >= 1.2:
+            score += 0.04
+        elif volume_ratio < 0.7:
+            score -= 0.06
+    return round(clamp(score), 3)
+
+
+def macro_score_from_context(symbol: str, metadata: dict[str, Any], snapshot: dict[str, Any]) -> float:
+    score = 0.50
+    theme = str(metadata.get("theme") or "").lower()
+    if theme_contains(theme, DEFENSIVE_THEMES):
+        score += 0.04
+    if theme_contains(theme, POLICY_HEAVY_THEMES):
+        score -= 0.04
+    risk_state = str(market_summary(snapshot, symbol).get("risk_state") or "neutral")
+    if risk_state == "risk_on":
+        score += 0.05
+    elif risk_state == "risk_off":
+        score -= 0.08
+    return round(clamp(score), 3)
+
+
+def formal_event_risk(metadata: dict[str, Any], growth_values: list[Any], debt_ratio: Any = None) -> str:
+    theme = str(metadata.get("theme") or "").lower()
+    if theme_contains(theme, POLICY_HEAVY_THEMES):
+        return "policy"
+    if any((value := as_float(raw)) is not None and value <= -30.0 for raw in growth_values):
+        return "earnings_gap"
+    debt = as_float(debt_ratio)
+    if debt is not None and debt >= 85.0:
+        return "elevated"
+    return "low"
+
+
+def eastmoney_cn_code(symbol: str) -> str | None:
+    code, _, suffix = symbol.upper().partition(".")
+    if len(code) != 6 or suffix not in {"SH", "SZ", "BJ"}:
+        return None
+    return f"{suffix}{code}"
+
+
+def eastmoney_hk_secucode(symbol: str) -> str | None:
+    code, _, suffix = symbol.upper().partition(".")
+    if suffix != "HK" or not code.isdigit():
+        return None
+    return f"{code.zfill(5)}.HK"
+
+
+def formal_cn_stock_evidence(symbol: str, metadata: dict[str, Any], snapshot: dict[str, Any], timeout: float, as_of_session: str | None) -> dict[str, Any] | None:
+    code = eastmoney_cn_code(symbol)
+    if code is None:
+        return None
+    payload = fetch_json(EASTMONEY_CN_FINANCE_URL, {"type": "0", "code": code}, timeout)
+    row = first_data_row(payload)
+    if row is None:
+        return None
+    as_of_date = date_token(row.get("NOTICE_DATE") or row.get("UPDATE_DATE") or row.get("REPORT_DATE"))
+    if as_of_date is None:
+        return None
+    revenue_growth = row.get("TOTALOPERATEREVETZ")
+    profit_growth = row.get("PARENTNETPROFITTZ")
+    debt_ratio = row.get("ZCFZL")
+    scores = {
+        "fundamental_score": average_present([score_roe_pct(row.get("ROEJQ")), score_growth_pct(profit_growth), score_growth_pct(revenue_growth), score_cash_ratio(row.get("JYXJLYYSR"))]),
+        "valuation_score": average_present([score_roe_pct(row.get("ROEJQ")), score_debt_pct(debt_ratio), score_margin_pct(row.get("XSJLL"))]),
+        "catalyst_score": average_present([score_growth_pct(revenue_growth), score_growth_pct(profit_growth)]),
+        "flow_score": flow_score_from_metadata(metadata),
+        "macro_score": macro_score_from_context(symbol, metadata, snapshot),
+    }
+    return {
+        "symbol": symbol,
+        "as_of_date": as_of_date,
+        "as_of_session": as_of_session,
+        **scores,
+        "event_risk": formal_event_risk(metadata, [revenue_growth, profit_growth], debt_ratio),
+        "source_count": 1,
+        "sources": [{"label": "Eastmoney A-share F10 financial indicators", "kind": "formal_public_f10", "url": EASTMONEY_CN_FINANCE_URL}],
+        "notes": [
+            f"formal provider report_date={date_token(row.get('REPORT_DATE'))}, notice_date={date_token(row.get('NOTICE_DATE'))}",
+            "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields",
+        ],
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": False,
+    }
+
+
+def formal_hk_stock_evidence(symbol: str, metadata: dict[str, Any], snapshot: dict[str, Any], timeout: float, as_of_session: str | None) -> dict[str, Any] | None:
+    secucode = eastmoney_hk_secucode(symbol)
+    if secucode is None:
+        return None
+    params = {
+        "reportName": "RPT_CUSTOM_HKF10_FN_MAININDICATORMAX",
+        "columns": "ALL",
+        "filter": f'(SECUCODE="{secucode}")',
+        "pageNumber": "1",
+        "pageSize": "1",
+        "sortColumns": "REPORT_DATE",
+        "sortTypes": "-1",
+        "source": "HKF10",
+        "client": "PC",
+    }
+    row = first_data_row(fetch_json(EASTMONEY_HK_DATA_URL, params, timeout))
+    if row is None:
+        return None
+    as_of_date = date_token(row.get("UPDATE_DATE") or row.get("NOTICE_DATE") or row.get("REPORT_DATE"))
+    if as_of_date is None:
+        return None
+    revenue_growth = row.get("OPERATE_INCOME_QOQ")
+    profit_growth = row.get("HOLDER_PROFIT_QOQ")
+    scores = {
+        "fundamental_score": average_present([score_roe_pct(row.get("ROE_AVG")), score_growth_pct(profit_growth), score_growth_pct(revenue_growth), score_margin_pct(row.get("NET_PROFIT_RATIO"))]),
+        "valuation_score": average_present([score_pe(row.get("PE_TTM")), score_pb(row.get("PB_TTM")), score_dividend_pct(row.get("DIVIDEND_RATE"))]),
+        "catalyst_score": average_present([score_growth_pct(revenue_growth), score_growth_pct(profit_growth)]),
+        "flow_score": flow_score_from_metadata(metadata),
+        "macro_score": macro_score_from_context(symbol, metadata, snapshot),
+    }
+    return {
+        "symbol": symbol,
+        "as_of_date": as_of_date,
+        "as_of_session": as_of_session,
+        **scores,
+        "event_risk": formal_event_risk(metadata, [revenue_growth, profit_growth]),
+        "source_count": 1,
+        "sources": [{"label": "Eastmoney HK F10 financial indicators", "kind": "formal_public_f10", "url": EASTMONEY_HK_DATA_URL}],
+        "notes": [
+            f"formal provider report_date={date_token(row.get('REPORT_DATE'))}",
+            "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields",
+        ],
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": False,
+    }
+
+
+def js_var(text: str, name: str) -> str | None:
+    match = re.search(rf"var\s+{re.escape(name)}\s*=\s*\"([^\"]*)\"", text)
+    return match.group(1) if match else None
+
+
+def formal_cn_fund_evidence(symbol: str, metadata: dict[str, Any], snapshot: dict[str, Any], timeout: float, as_of_session: str | None) -> dict[str, Any] | None:
+    code, _, suffix = symbol.upper().partition(".")
+    if suffix not in {"SH", "SZ"} or len(code) != 6:
+        return None
+    text = fetch_text(EASTMONEY_FUND_JS_URL.format(code=code), timeout).lstrip("\ufeff")
+    if "var fS_code" not in text:
+        return None
+    date_match = re.search(r"/\*(\d{4}-\d{2}-\d{2})\s+\d{2}:\d{2}:\d{2}\*/var", text)
+    as_of_date = date_match.group(1) if date_match else None
+    if as_of_date is None:
+        return None
+    one_year = as_float(js_var(text, "syl_1n"))
+    six_month = as_float(js_var(text, "syl_6y"))
+    three_month = as_float(js_var(text, "syl_3y"))
+    month = as_float(js_var(text, "syl_1y"))
+    theme = str(metadata.get("theme") or "").lower()
+    baseline = 0.58 if theme_contains(theme, DEFENSIVE_THEMES | {"broad-market"}) else 0.52
+    if theme_contains(theme, POLICY_HEAVY_THEMES):
+        baseline -= 0.04
+    scores = {
+        "fundamental_score": round(clamp(baseline), 3),
+        "valuation_score": average_present([score_growth_pct(one_year), score_growth_pct(six_month)], default=0.52),
+        "catalyst_score": average_present([score_growth_pct(month), score_growth_pct(three_month), score_growth_pct(six_month)], default=0.50),
+        "flow_score": flow_score_from_metadata(metadata),
+        "macro_score": macro_score_from_context(symbol, metadata, snapshot),
+    }
+    return {
+        "symbol": symbol,
+        "as_of_date": as_of_date,
+        "as_of_session": as_of_session,
+        **scores,
+        "event_risk": formal_event_risk(metadata, [one_year, six_month, three_month]),
+        "source_count": 1,
+        "sources": [{"label": "Eastmoney fund public data", "kind": "formal_public_fund", "url": EASTMONEY_FUND_JS_URL.format(code=code)}],
+        "notes": [
+            f"formal provider fund_name={js_var(text, 'fS_name') or ''}, source_date={as_of_date}",
+            "scores derived from public fund return fields plus local liquidity context",
+        ],
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": False,
+    }
+
+
+def formal_provider_evidence(
+    symbol: str,
+    metadata: dict[str, Any],
+    snapshot: dict[str, Any],
+    config: dict[str, Any],
+    as_of_date: str,
+    as_of_session: str | None,
+) -> dict[str, Any] | None:
+    if not formal_provider_fetch_allowed(config, as_of_date):
+        return None
+    timeout = formal_provider_timeout(config)
+    kind = str(metadata.get("kind") or "").lower()
+    try:
+        if symbol.upper().endswith((".SH", ".SZ", ".BJ")):
+            if kind == "etf":
+                return formal_cn_fund_evidence(symbol, metadata, snapshot, timeout, as_of_session)
+            return formal_cn_stock_evidence(symbol, metadata, snapshot, timeout, as_of_session)
+        if symbol.upper().endswith(".HK") and kind != "etf":
+            return formal_hk_stock_evidence(symbol, metadata, snapshot, timeout, as_of_session)
+    except Exception:
+        return None
+    return None
 
 
 def proxy_event_risk(symbol: str, metadata: dict[str, Any], quote_fresh: bool, config: dict[str, Any]) -> str:
@@ -384,6 +732,8 @@ def build_evidence(
         raw_configured = configured.get(symbol)
         proxy_generated = False
         if raw_configured is None:
+            raw_configured = formal_provider_evidence(symbol, symbols[symbol], snapshot_payload, config, as_of_date, as_of_session)
+        if raw_configured is None:
             raw_configured = automatic_proxy_evidence(symbol, symbols[symbol], snapshot_payload, config, as_of_date, as_of_session)
             proxy_generated = raw_configured is not None
         row, row_findings = build_symbol_evidence(symbol, symbols[symbol], raw_configured, as_of_date, as_of_session, policy, weights, proxy_generated)
@@ -393,7 +743,8 @@ def build_evidence(
     missing_count = sum(1 for row in rows.values() if row.get("evidence_mode") == "missing_fail_closed")
     proxy_count = sum(1 for row in rows.values() if row.get("evidence_mode") == "automatic_local_proxy")
     proxy_only_count = sum(1 for row in rows.values() if row.get("evidence_mode") == "automatic_local_proxy" or row.get("proxy_only") is True)
-    available_count = sum(1 for row in rows.values() if row.get("evidence_mode") == "curated_point_in_time" and row.get("proxy_only") is not True)
+    formal_available_count = sum(1 for row in rows.values() if row.get("evidence_mode") in FORMAL_EVIDENCE_MODES and row.get("proxy_only") is not True)
+    formal_provider_count = sum(1 for row in rows.values() if row.get("evidence_mode") == "formal_provider_point_in_time" and row.get("proxy_only") is not True)
     hard_event_risks = {"unknown", *HARD_EVENT_RISKS}
     return {
         "generated_at": utc_now(),
@@ -406,17 +757,18 @@ def build_evidence(
         "weights": weights,
         "summary": {
             "symbol_count": len(rows),
-            "available_count": available_count,
-            "curated_available_count": available_count,
+            "available_count": formal_available_count,
+            "curated_available_count": formal_available_count,
+            "formal_provider_count": formal_provider_count,
             "automatic_proxy_count": proxy_count,
             "proxy_only_count": proxy_only_count,
             "proxy_coverage_ratio": round(proxy_only_count / len(rows), 3) if rows else None,
             "missing_count": missing_count,
-            "coverage_ratio": round(available_count / len(rows), 3) if rows else None,
+            "coverage_ratio": round(formal_available_count / len(rows), 3) if rows else None,
             "actionable_evidence_count": sum(
                 1
                 for row in rows.values()
-                if row.get("evidence_mode") == "curated_point_in_time"
+                if row.get("evidence_mode") in FORMAL_EVIDENCE_MODES
                 and row.get("proxy_only") is not True
                 and row.get("total_score") is not None
                 and row.get("total_score") >= float(policy.get("min_total_score_for_action", 0.55))
