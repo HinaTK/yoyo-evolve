@@ -61,6 +61,17 @@ def utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def hkt_display_time(value: str) -> str:
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return value
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    hkt = parsed.astimezone(dt.timezone(dt.timedelta(hours=8)))
+    return hkt.strftime("%Y-%m-%d %H:%M HKT")
+
+
 def output_stem(date: str, session: str) -> str:
     return date if session in {"close", "historical"} else f"{date}-{session}"
 
@@ -124,6 +135,13 @@ def clean_list(value: Any) -> list[str]:
     if value:
         return [str(value)]
     return []
+
+
+def date_token(value: Any) -> str | None:
+    text = str(value or "").strip()
+    if len(text) >= 10 and text[4] == "-" and text[7] == "-":
+        return text[:10]
+    return None
 
 
 def evidence_text_implies_proxy_only(value: Any) -> bool:
@@ -419,6 +437,33 @@ def evidence_metrics(close_report: dict[str, Any] | None, forward_eval: dict[str
     }
 
 
+def snapshot_metrics(ranking: dict[str, Any] | None) -> dict[str, Any]:
+    rows = (ranking or {}).get("all_ranked", [])
+    rows = rows if isinstance(rows, list) else []
+    snapshot_date = date_token((ranking or {}).get("as_of_date"))
+    quote_dates: list[str] = []
+    mismatch_count = 0
+    dated_rows = 0
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        quote_date = date_token(row.get("quote_trade_date") or row.get("as_of"))
+        if quote_date is None:
+            continue
+        dated_rows += 1
+        quote_dates.append(quote_date)
+        if snapshot_date and quote_date != snapshot_date:
+            mismatch_count += 1
+    unique_quote_dates = sorted(set(quote_dates))
+    return {
+        "as_of_date": snapshot_date,
+        "latest_quote_trade_date": unique_quote_dates[-1] if unique_quote_dates else None,
+        "quote_trade_dates": unique_quote_dates,
+        "quote_dated_symbol_count": dated_rows,
+        "quote_date_mismatch_count": mismatch_count,
+    }
+
+
 def build_payload(
     date: str,
     session: str,
@@ -434,8 +479,10 @@ def build_payload(
     payload_session = str((close_report or {}).get("session") or (ranking or {}).get("session") or session)
     symbols = normalize_symbols(ranking, close_report, nontechnical)
     counts = count_categories(symbols)
+    generated_at = utc_now()
     return {
-        "generated_at": utc_now(),
+        "generated_at": generated_at,
+        "generated_at_hkt": hkt_display_time(generated_at),
         "date": payload_date,
         "session": payload_session,
         "disclaimer": DISCLAIMER,
@@ -448,6 +495,7 @@ def build_payload(
         "reason_labels": REASON_LABELS,
         "symbols": symbols,
         "evidence": evidence_metrics(close_report, forward_eval, evidence_ledger, nontechnical),
+        "snapshot": snapshot_metrics(ranking),
         "proxy_only_warning": PROXY_ONLY_WARNING,
         "sources": {name: file_metadata(path) for name, path in sources.items()},
     }
@@ -465,6 +513,13 @@ def render_html(payload: dict[str, Any]) -> str:
     title = f"投资研究看板 - {payload['date']} {session_label(payload['session'])}"
     safe_title = html.escape(title)
     data_json = json_for_html(payload)
+    run_time = html.escape(str(payload.get("generated_at_hkt") or payload.get("generated_at") or "暂无"))
+    snapshot_info = payload.get("snapshot", {}) if isinstance(payload.get("snapshot"), dict) else {}
+    snapshot_date = html.escape(str(snapshot_info.get("as_of_date") or "暂无"))
+    quote_date = html.escape(str(snapshot_info.get("latest_quote_trade_date") or "暂无"))
+    mismatch_count = int(snapshot_info.get("quote_date_mismatch_count") or 0)
+    quote_status = "行情日期与报告日期一致" if mismatch_count == 0 else f"本次分析有 {mismatch_count} 个标的使用非报告日行情"
+    quote_status = html.escape(quote_status)
     return f"""<!doctype html>
 <html lang=\"zh-CN\">
 <head>
@@ -518,6 +573,8 @@ def render_html(payload: dict[str, Any]) -> str:
     .filter-pill.watch.active {{ background: var(--amber); border-color: var(--amber); }}
     .filter-pill.avoid.active {{ background: var(--red); border-color: var(--red); }}
     .status-pill {{ color: var(--blue); }}
+    .run-meta {{ display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin: 0 0 12px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 250, 240, 0.76); color: var(--muted); font: 700 0.92rem 'Microsoft YaHei', sans-serif; }}
+    .run-meta strong {{ color: var(--ink); }}
     .card {{ border: 1px solid var(--line); border-radius: 18px; padding: 18px; background: rgba(255, 250, 240, 0.82); box-shadow: 0 14px 35px rgba(58, 45, 27, 0.08); }}
     .label {{ color: var(--muted); font: 700 0.82rem 'Microsoft YaHei', sans-serif; letter-spacing: 0.08em; }}
     .value {{ margin-top: 8px; font: 700 clamp(1.8rem, 4vw, 3rem) Georgia, 'Microsoft YaHei', serif; }}
@@ -552,6 +609,7 @@ def render_html(payload: dict[str, Any]) -> str:
 </head>
 <body>
   <main>
+    <div class=\"run-meta\"><span>最新执行时间：<strong>{run_time}</strong></span><span>行情快照日期：<strong>{snapshot_date}</strong></span><span>行情实际交易日：<strong>{quote_date}</strong></span><span>{quote_status}</span></div>
     <section class=\"pillbar\" aria-label=\"筛选与胜率\">
       <button class=\"filter-pill active\" type=\"button\" data-filter=\"all\">全部 <strong id=\"totalCount\">0</strong></button>
       <button class=\"filter-pill action\" type=\"button\" data-filter=\"consider\">可考虑研究 <strong id=\"considerCount\">0</strong></button>

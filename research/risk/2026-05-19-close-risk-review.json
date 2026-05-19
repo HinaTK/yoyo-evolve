@@ -1,0 +1,115 @@
+{
+  "date": "2026-05-19",
+  "session": "close",
+  "generated_at": "2026-05-19T01:43:05Z",
+  "source": "deterministic_level6_risk_review",
+  "policy": {
+    "primary_use": "recommendation_only",
+    "execution_allowed": false,
+    "position_policy": "max_position_pct is a recommendation cap only; this system never executes orders or mutates a portfolio.",
+    "max_single_position_pct": 10.0,
+    "buy_candidate_pass_rule": "qualified_for_action=true, cost_gate_passed=true, volume_ratio_20>=1.0, and no downtrend_regime",
+    "same_theme_peer_rule": "same_theme_peer_evidence_passed=true",
+    "nontechnical_evidence_rule": "buy_candidate also requires fresh non-technical evidence when the ranking policy requires it"
+  },
+  "verdicts": [
+    {
+      "symbol": "0941.HK",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action",
+        "low_symbol_pass_rate",
+        "repeated_symbol_selection_error"
+      ],
+      "reasons": [
+        "pass_rate=0.000 over 30 evaluated calls",
+        "records include symbol_selection_error",
+        "deterministic draft state is avoid"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "0005.HK",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action",
+        "low_symbol_pass_rate",
+        "negative_symbol_avg_return",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "pass_rate=0.000 over 6 evaluated calls",
+        "avg_return_pct=-1.649 over 6 evaluated calls",
+        "records_avg_return_pct=-1.649 over 6 records",
+        "backtest_max_adverse_pct<=-8.0% in 4 of 34 promotable samples",
+        "symbol risk memory has action_veto=true"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "512480.SH",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 1 of 8 promotable samples",
+        "symbol risk memory has action_veto=true"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    }
+  ]
+}

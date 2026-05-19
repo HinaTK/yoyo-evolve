@@ -1,14 +1,14 @@
 # Forward Evidence Ledger
 
-Generated: `2026-05-17T09:10:42Z`
+Generated: `2026-05-19T01:43:06Z`
 Audit passed: `True`
 Includes replay: `False`
 
 ## Summary
-- shadow logs: `27`
-- forward shadow logs: `7`
+- shadow logs: `29`
+- forward shadow logs: `9`
 - historical replay logs: `20`
-- no-action logs: `24`
+- no-action logs: `26`
 - candidate entries: `0`
 - matured candidates: `0`
 - pending candidates: `0`
@@ -25,6 +25,8 @@ Includes replay: `False`
 - `2026-05-15` `close` candidates=0 status=`no_action` path=`D:\Code\yoyo\research\shadow\2026-05-15-close-shadow.json`
 - `2026-05-16` `close` candidates=0 status=`no_action` path=`D:\Code\yoyo\research\shadow\2026-05-16-close-shadow.json`
 - `2026-05-17` `close` candidates=0 status=`no_action` path=`D:\Code\yoyo\research\shadow\2026-05-17-close-shadow.json`
+- `2026-05-18` `close` candidates=0 status=`no_action` path=`D:\Code\yoyo\research\shadow\2026-05-18-close-shadow.json`
+- `2026-05-19` `close` candidates=0 status=`no_action` path=`D:\Code\yoyo\research\shadow\2026-05-19-close-shadow.json`
 
 ## Recent Candidate Entries
 - no candidate entries yet

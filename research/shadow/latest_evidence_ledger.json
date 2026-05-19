@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-05-17T09:10:42Z",
+  "generated_at": "2026-05-19T01:43:06Z",
   "shadow_dir": "D:\\Code\\yoyo\\research\\shadow",
   "registry": "D:\\Code\\yoyo\\data\\snapshots\\registry.json",
   "include_replay": false,
-  "as_of_date": "2026-05-17",
+  "as_of_date": "2026-05-19",
   "audit_passed": true,
   "summary": {
-    "shadow_log_count": 27,
-    "forward_shadow_log_count": 7,
+    "shadow_log_count": 29,
+    "forward_shadow_log_count": 9,
     "historical_replay_log_count": 20,
-    "no_action_log_count": 24,
+    "no_action_log_count": 26,
     "candidate_entry_count": 0,
     "matured_candidate_count": 0,
     "pending_candidate_count": 0,
@@ -18,12 +18,12 @@
     "critical_audit_finding_count": 0
   },
   "shadow_evaluation_summary": {
-    "total_shadow_log_count": 27,
-    "forward_shadow_log_count": 7,
+    "total_shadow_log_count": 29,
+    "forward_shadow_log_count": 9,
     "historical_replay_log_count": 20,
-    "evaluated_log_count": 7,
+    "evaluated_log_count": 9,
     "matured_forward_shadow_days": 1,
-    "no_action_log_count": 7,
+    "no_action_log_count": 9,
     "pending_sample_count": 0,
     "sample_count": 0,
     "win_rate": null,
@@ -39,7 +39,7 @@
     "findings": [
       {
         "metric": "forward_shadow_days",
-        "actual": 7,
+        "actual": 9,
         "expected": ">= 20"
       },
       {
@@ -344,6 +344,90 @@
         },
         "as_of_date": "2026-05-17",
         "ranking_generated_at": "2026-05-17T09:10:22Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\2026-05-18-close-shadow.json",
+      "date": "2026-05-18",
+      "session": "close",
+      "generated_at": "2026-05-18T09:10:40Z",
+      "evidence_mode": "forward_shadow",
+      "counts_toward_forward_evidence": true,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "forward_shadow",
+        "counts_toward_forward_evidence": true
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-18-close-ranking.json",
+          "exists": true,
+          "sha256": "2ce24a0db19a16b9fc8bed4480d5c7703870fb45d034b1f63070d3aff21a069e",
+          "size_bytes": 249510
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-18.json",
+          "exists": true,
+          "sha256": "8058bdf32fa2fded528db0f8ccb033f89c298b7c4896d059ab5509c9b4b6af41",
+          "size_bytes": 66521
+        },
+        "as_of_date": "2026-05-18",
+        "ranking_generated_at": "2026-05-18T09:10:20Z",
+        "strategy_id": "l5_mvp_conservative_v1",
+        "strategy_version": "l5_mvp_conservative_v1",
+        "strategy_status": "active"
+      },
+      "audit_findings": []
+    },
+    {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\2026-05-19-close-shadow.json",
+      "date": "2026-05-19",
+      "session": "close",
+      "generated_at": "2026-05-19T01:43:06Z",
+      "evidence_mode": "forward_shadow",
+      "counts_toward_forward_evidence": true,
+      "candidate_count": 0,
+      "status": "no_action",
+      "shadow_policy": {
+        "status": "experimental_shadow_only",
+        "production_ranking_unchanged": true,
+        "no_execution": true,
+        "no_portfolio_mutation": true,
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "evidence_mode": "forward_shadow",
+        "counts_toward_forward_evidence": true
+      },
+      "source": {
+        "ranking": {
+          "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-19-close-ranking.json",
+          "exists": true,
+          "sha256": "1ceec01c495bfb8c9d771697d7a91d41cb192c105c22b60588862822eb446af0",
+          "size_bytes": 250824
+        },
+        "snapshot": {
+          "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-19.json",
+          "exists": true,
+          "sha256": "8741bffa4d9538b1ce9e0c85b0a20462ac8c324be7f804972aa51373688eba84",
+          "size_bytes": 65923
+        },
+        "as_of_date": "2026-05-19",
+        "ranking_generated_at": "2026-05-19T01:42:47Z",
         "strategy_id": "l5_mvp_conservative_v1",
         "strategy_version": "l5_mvp_conservative_v1",
         "strategy_status": "active"

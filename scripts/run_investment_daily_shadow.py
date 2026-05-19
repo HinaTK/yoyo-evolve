@@ -148,6 +148,7 @@ class DailyShadowOptions:
     shadow_file: pathlib.Path | None = None
     evidence_mode: str | None = None
     force_snapshot: bool = False
+    reuse_existing_snapshot: bool = False
     skip_fetch: bool = False
     skip_radar_fetch: bool = False
     skip_symbol_risk: bool = False
@@ -226,10 +227,12 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             return 0
         return runner(name, command, root, check)
 
+    refresh_live_snapshot = options.session != "historical" and not options.reuse_existing_snapshot
+
     if options.skip_fetch:
         if not snapshot_file.exists():
             raise SystemExit(f"Missing snapshot file with --skip-fetch: {snapshot_file}")
-    elif options.force_snapshot or not snapshot_file.exists():
+    elif options.force_snapshot or refresh_live_snapshot or not snapshot_file.exists():
         call(
             "fetch_trade_snapshot",
             [
@@ -244,7 +247,7 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             ],
         )
 
-    if not options.skip_fetch and not options.skip_radar_fetch and radar_snapshot_file != snapshot_file and (options.force_snapshot or not radar_snapshot_file.exists()):
+    if not options.skip_fetch and not options.skip_radar_fetch and radar_snapshot_file != snapshot_file and (options.force_snapshot or refresh_live_snapshot or not radar_snapshot_file.exists()):
         call(
             "fetch_radar_snapshot",
             [
@@ -649,6 +652,7 @@ def parse_args() -> DailyShadowOptions:
     parser.add_argument("--shadow-file", default=None)
     parser.add_argument("--shadow-evidence-mode", choices=["forward_shadow", "historical_replay"], default=None)
     parser.add_argument("--force-snapshot", action="store_true")
+    parser.add_argument("--reuse-existing-snapshot", action="store_true", help="Opt out of the default live-session quote refresh and reuse an existing snapshot if present.")
     parser.add_argument("--skip-fetch", action="store_true", help="Use an existing trade snapshot instead of fetching quotes.")
     parser.add_argument("--skip-radar-fetch", action="store_true")
     parser.add_argument("--skip-symbol-risk", action="store_true")
@@ -684,6 +688,7 @@ def parse_args() -> DailyShadowOptions:
         shadow_file=resolve_path(root, args.shadow_file),
         evidence_mode=args.shadow_evidence_mode,
         force_snapshot=args.force_snapshot,
+        reuse_existing_snapshot=args.reuse_existing_snapshot,
         skip_fetch=args.skip_fetch,
         skip_radar_fetch=args.skip_radar_fetch,
         skip_symbol_risk=args.skip_symbol_risk,

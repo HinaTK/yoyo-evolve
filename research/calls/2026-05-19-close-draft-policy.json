@@ -1,0 +1,120 @@
+{
+  "date": "2026-05-19",
+  "session": "close",
+  "generated_at": "2026-05-19T01:43:05Z",
+  "source_ranking": "D:\\Code\\yoyo\\research\\rankings\\2026-05-19-close-ranking.json",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "draft_policy": {
+    "source": "deterministic_ranking_edge_gate",
+    "actionable_rule": "buy_candidate requires qualified_for_action=true, cost_gate_passed=true, and same_theme_peer_evidence_passed=true",
+    "confidence_rule": "confidence is capped by score and reduced for adverse symbol risk, failed peer evidence, disqualifiers, and failed edge/cost gates"
+  },
+  "recommendations": [
+    {
+      "symbol": "0941.HK",
+      "state": "avoid",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.21,
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 0941.HK.",
+      "evidence": [
+        "score=56.37, trend_score=99.35, momentum_score=35.96",
+        "expected_edge_bps=37.57, net_expected_edge_bps=2.57, cost_gate_passed=False",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=2800.HK, range_pos_60=0.5273, max_market_range_for_action=0.7, pct_change_1d=0.23",
+        "same_theme_peer_check theme_rank=1, theme_leader=0941.HK, is_theme_leader=True, theme_peer_count=2",
+        "same_theme_best_peer_evidence passed=True, best_symbol=0941.HK, best_score=56.37, selected_vs_best_score_gap=0.0, next_best_symbol=0728.HK, selected_vs_next_best_score_gap=3.46, peer_relative_decision=theme_leader",
+        "confidence_calibration penalty=0.1, symbol_risk_tags=['low_symbol_pass_rate', 'repeated_symbol_selection_error'], action_disqualifiers=['nontechnical_evidence_stale', 'nontechnical_score_below_action_min', 'volume_ratio_20_below_1_0']",
+        "nontechnical_evidence status=available, total_score=0.521, event_risk=low, flags=['nontechnical_evidence_stale', 'nontechnical_score_below_action_min']",
+        "latest_close=86.5, ma20=84.885, ma60=81.1858, range_pos_60=0.9783, volume_ratio_20=0.0027"
+      ],
+      "risks": [
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "diagnostic_layer_action_cap_watch_only",
+        "cost_or_minimum_edge_gate_not_met"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "telecom-dividend",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=56.37 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    },
+    {
+      "symbol": "0005.HK",
+      "state": "avoid",
+      "theme": "financials-bank",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.21,
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 0005.HK.",
+      "evidence": [
+        "score=56.35, trend_score=96.13, momentum_score=46.04",
+        "expected_edge_bps=27.03, net_expected_edge_bps=-7.97, cost_gate_passed=False",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=2800.HK, range_pos_60=0.5273, max_market_range_for_action=0.7, pct_change_1d=0.23",
+        "same_theme_peer_check theme_rank=1, theme_leader=0005.HK, is_theme_leader=True, theme_peer_count=1",
+        "same_theme_best_peer_evidence passed=True, best_symbol=0005.HK, best_score=56.35, selected_vs_best_score_gap=0.0, next_best_symbol=None, selected_vs_next_best_score_gap=None, peer_relative_decision=sole_theme_candidate",
+        "confidence_calibration penalty=0.1, symbol_risk_tags=['low_symbol_pass_rate', 'negative_symbol_avg_return', 'backtest_adverse_breach'], action_disqualifiers=['nontechnical_evidence_stale', 'nontechnical_score_below_action_min', 'volume_ratio_20_below_1_0']",
+        "nontechnical_evidence status=available, total_score=0.532, event_risk=low, flags=['nontechnical_evidence_stale', 'nontechnical_score_below_action_min']",
+        "latest_close=140.0, ma20=140.0145, ma60=133.7183, range_pos_60=0.8718, volume_ratio_20=0.0207"
+      ],
+      "risks": [
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "diagnostic_layer_action_cap_watch_only",
+        "cost_or_minimum_edge_gate_not_met"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "financials-bank",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=56.35 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    },
+    {
+      "symbol": "512480.SH",
+      "state": "avoid",
+      "theme": "china-a-semiconductors",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.21,
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 512480.SH.",
+      "evidence": [
+        "score=53.83, trend_score=98.22, momentum_score=31.08",
+        "expected_edge_bps=27.06, net_expected_edge_bps=-7.94, cost_gate_passed=False",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=510300.SH, range_pos_60=0.6985, max_market_range_for_action=0.7, pct_change_1d=-0.25",
+        "same_theme_peer_check theme_rank=1, theme_leader=512480.SH, is_theme_leader=True, theme_peer_count=2",
+        "same_theme_best_peer_evidence passed=True, best_symbol=512480.SH, best_score=53.83, selected_vs_best_score_gap=0.0, next_best_symbol=688981.SH, selected_vs_next_best_score_gap=9.6, peer_relative_decision=theme_leader",
+        "confidence_calibration penalty=0.1, symbol_risk_tags=['backtest_adverse_breach'], action_disqualifiers=['event_risk_policy', 'volume_ratio_20_below_1_0']",
+        "nontechnical_evidence status=available, total_score=0.608, event_risk=policy, flags=['event_risk_policy']",
+        "latest_close=2.048, ma20=1.8304, ma60=1.6442, range_pos_60=0.9407, volume_ratio_20=0.1673"
+      ],
+      "risks": [
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "diagnostic_layer_action_cap_watch_only",
+        "cost_or_minimum_edge_gate_not_met"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "china-a-semiconductors",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=53.83 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    }
+  ]
+}

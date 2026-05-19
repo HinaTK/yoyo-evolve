@@ -35,7 +35,6 @@ PROMPT_PROVIDER_RETRIES="${PROMPT_PROVIDER_RETRIES:-3}"
 PROVIDER_RETRY_SECONDS="${PROVIDER_RETRY_SECONDS:-120}"
 SKIP_EXISTING_OUTPUTS="${SKIP_EXISTING_OUTPUTS:-true}"
 INVESTMENT_LIGHT_CONTEXT="${INVESTMENT_LIGHT_CONTEXT:-true}"
-FORCE_SNAPSHOT="${FORCE_SNAPSHOT:-false}"
 ENABLE_SHADOW_LOGGING="${ENABLE_SHADOW_LOGGING:-true}"
 if [ -z "${SNAPSHOT_FILE:-}" ]; then
     if [ "$SESSION" = "morning" ] || [ "$SESSION" = "midday" ]; then
@@ -92,6 +91,14 @@ case "$SESSION" in
         exit 2
         ;;
 esac
+
+if [ -z "${FORCE_SNAPSHOT:-}" ]; then
+    if [ "$SESSION" = "historical" ]; then
+        FORCE_SNAPSHOT="false"
+    else
+        FORCE_SNAPSHOT="true"
+    fi
+fi
 
 if [ "$SESSION" = "historical" ]; then
     OUTPUT_STEM="$DATE"

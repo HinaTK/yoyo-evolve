@@ -1,17 +1,17 @@
 # Nontechnical Evidence Ledger
 
-Generated: `2026-05-17T09:10:41Z`
-As-of: `2026-05-17`
+Generated: `2026-05-19T01:43:05Z`
+As-of: `2026-05-19`
 Research only: `True`; no execution: `True`
 
 ## Summary
 - symbols: `46`
-- curated_available: `43`
-- proxy_only: `3` automatic=`3`
+- curated_available: `41`
+- proxy_only: `5` automatic=`5`
 - missing: `0`
-- coverage_ratio: `0.935`
-- actionable_evidence_count: `13`
-- findings: `79` critical=`0`
+- coverage_ratio: `0.891`
+- actionable_evidence_count: `12`
+- findings: `83` critical=`0`
 
 ## Findings
 - `0002.HK` nontechnical_evidence_stale severity=info

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>投资研究看板 - 2026-05-17 收盘</title>
+  <title>投资研究看板 - 2026-05-19 收盘</title>
   <style>
     :root {
       --ink: #18211f;
@@ -51,6 +51,8 @@
     .filter-pill.watch.active { background: var(--amber); border-color: var(--amber); }
     .filter-pill.avoid.active { background: var(--red); border-color: var(--red); }
     .status-pill { color: var(--blue); }
+    .run-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin: 0 0 12px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 250, 240, 0.76); color: var(--muted); font: 700 0.92rem 'Microsoft YaHei', sans-serif; }
+    .run-meta strong { color: var(--ink); }
     .card { border: 1px solid var(--line); border-radius: 18px; padding: 18px; background: rgba(255, 250, 240, 0.82); box-shadow: 0 14px 35px rgba(58, 45, 27, 0.08); }
     .label { color: var(--muted); font: 700 0.82rem 'Microsoft YaHei', sans-serif; letter-spacing: 0.08em; }
     .value { margin-top: 8px; font: 700 clamp(1.8rem, 4vw, 3rem) Georgia, 'Microsoft YaHei', serif; }
@@ -85,6 +87,7 @@
 </head>
 <body>
   <main>
+    <div class="run-meta"><span>最新执行时间：<strong>2026-05-19 09:43 HKT</strong></span><span>行情快照日期：<strong>2026-05-19</strong></span><span>行情实际交易日：<strong>2026-05-19</strong></span><span>行情日期与报告日期一致</span></div>
     <section class="pillbar" aria-label="筛选与胜率">
       <button class="filter-pill active" type="button" data-filter="all">全部 <strong id="totalCount">0</strong></button>
       <button class="filter-pill action" type="button" data-filter="consider">可考虑研究 <strong id="considerCount">0</strong></button>
@@ -117,24 +120,25 @@
     </details>
   </main>
   <script id="dashboard-data" type="application/json">{
-  "generated_at": "2026-05-17T09:10:43Z",
-  "date": "2026-05-17",
+  "generated_at": "2026-05-19T01:43:07Z",
+  "generated_at_hkt": "2026-05-19 09:43 HKT",
+  "date": "2026-05-19",
   "session": "close",
   "disclaimer": "仅供研究 · 非交易信号 · 不构成投资建议",
   "research_only": true,
   "no_trading_signal": true,
   "not_investment_advice": true,
-  "headline": "今日暂无可行动候选；观察名单：159915.SZ。",
+  "headline": "今日暂无可行动候选；观察名单：无。",
   "counts": {
     "action": 0,
-    "watch": 16,
-    "avoid": 30
+    "watch": 0,
+    "avoid": 46
   },
   "research_action_counts": {
     "consider": 0,
-    "confirm": 12,
-    "observe": 1,
-    "avoid": 33
+    "confirm": 0,
+    "observe": 9,
+    "avoid": 37
   },
   "reason_labels": {
     "cost_gate_failed": "成本/边际不足",
@@ -171,41 +175,44 @@
   "symbols": [
     {
       "rank": 1,
-      "symbol": "000333.SZ",
-      "name": "Midea Group / 美的集团",
-      "display_name": "美的集团",
+      "symbol": "0941.HK",
+      "name": "China Mobile / 中国移动",
+      "display_name": "中国移动",
       "judgment": "avoid",
       "recommendation_state": "avoid",
       "category": "avoid",
       "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 80.88,
-      "confidence": 0.26,
+      "qualified_for_watch": false,
+      "score": 56.37,
+      "confidence": 0.21,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
+        "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
-        "market_range_pos_60_above_action_limit",
-        "symbol_risk_veto"
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
+        "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
-        "market_range_pos_60_above_action_limit",
-        "symbol_risk_veto"
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
+        "非技术面证据过期",
         "非技术分不足",
-        "市场位置偏高",
-        "个股风险否决"
+        "量能不足",
+        "量能严重不足",
+        "成本/边际不足"
       ],
       "risk_cap": "avoid",
       "risk_decision": "veto",
-      "recommendation_evidence": "nontechnical_evidence status=available, total_score=0.522, event_risk=low, flags=['nontechnical_score_below_action_min']",
+      "recommendation_evidence": "nontechnical_evidence status=available, total_score=0.521, event_risk=low, flags=['nontechnical_evidence_stale', 'nontechnical_score_below_action_min']",
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.522,
+        "total_score": 0.521,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -216,10 +223,10 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
+          "非技术面证据过期",
           "非技术分不足",
-          "市场位置偏高",
-          "个股风险否决"
+          "量能不足",
+          "量能严重不足"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -228,45 +235,48 @@
     },
     {
       "rank": 2,
-      "symbol": "688981.SH",
-      "name": "SMIC / 中芯国际",
-      "display_name": "中芯国际",
+      "symbol": "0005.HK",
+      "name": "HSBC / 汇丰控股",
+      "display_name": "汇丰控股",
       "judgment": "avoid",
       "recommendation_state": "avoid",
       "category": "avoid",
       "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 77.32,
-      "confidence": 0.25,
+      "qualified_for_watch": false,
+      "score": 56.35,
+      "confidence": 0.21,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
+        "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
-        "event_risk_policy",
-        "market_range_pos_60_above_action_limit",
-        "symbol_risk_veto"
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
+        "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
-        "event_risk_policy",
-        "market_range_pos_60_above_action_limit",
-        "symbol_risk_veto"
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
+        "非技术面证据过期",
         "非技术分不足",
-        "政策风险",
-        "市场位置偏高",
-        "个股风险否决"
+        "量能不足",
+        "量能严重不足",
+        "个股风险否决",
+        "成本/边际不足"
       ],
       "risk_cap": "avoid",
       "risk_decision": "veto",
-      "recommendation_evidence": "nontechnical_evidence status=available, total_score=0.521, event_risk=policy, flags=['nontechnical_score_below_action_min', 'event_risk_policy']",
+      "recommendation_evidence": "nontechnical_evidence status=available, total_score=0.532, event_risk=low, flags=['nontechnical_evidence_stale', 'nontechnical_score_below_action_min']",
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.521,
-        "event_risk": "policy",
+        "total_score": 0.532,
+        "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
         "warning": null
@@ -276,10 +286,10 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
+          "非技术面证据过期",
           "非技术分不足",
-          "政策风险",
-          "市场位置偏高"
+          "量能不足",
+          "量能严重不足"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -288,99 +298,44 @@
     },
     {
       "rank": 3,
-      "symbol": "159915.SZ",
-      "name": "E Fund ChiNext ETF / 易方达创业板ETF",
-      "display_name": "易方达创业板ETF",
-      "judgment": "watch_only",
-      "recommendation_state": "watch_only",
-      "category": "watch",
-      "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 75.71,
-      "confidence": 0.43,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit",
-        "diagnostic_layer_action_cap_watch_only"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit",
-        "diagnostic_layer_action_cap_watch_only"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "市场位置偏高",
-        "diagnostic_layer_action_cap_watch_only"
-      ],
-      "risk_cap": "watch_only",
-      "risk_decision": "pass",
-      "recommendation_evidence": "nontechnical_evidence status=available, total_score=0.626, event_risk=low, flags=[]",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.626,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "市场位置偏高"
-        ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 4,
       "symbol": "512480.SH",
       "name": "GuolianAn Semiconductor ETF / 国联安半导体ETF",
       "display_name": "国联安半导体ETF",
       "judgment": "avoid",
-      "recommendation_state": null,
+      "recommendation_state": "avoid",
       "category": "avoid",
       "qualified_for_action": false,
       "qualified_for_watch": false,
-      "score": 74.92,
-      "confidence": null,
+      "score": 53.83,
+      "confidence": 0.21,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "event_risk_policy",
-        "market_range_pos_60_above_action_limit",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "not_theme_score_leader",
-        "symbol_risk_veto"
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "event_risk_policy",
-        "market_range_pos_60_above_action_limit",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "not_theme_score_leader",
-        "symbol_risk_veto"
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "政策风险",
-        "市场位置偏高",
-        "同主题证据不足",
-        "不是主题领先",
-        "个股风险否决"
+        "量能不足",
+        "量能严重不足",
+        "个股风险否决",
+        "成本/边际不足"
       ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "recommendation_evidence": "nontechnical_evidence status=available, total_score=0.608, event_risk=policy, flags=['event_risk_policy']",
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.621,
+        "total_score": 0.608,
         "event_risk": "policy",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -391,10 +346,10 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
           "政策风险",
-          "市场位置偏高",
-          "同主题证据不足"
+          "量能不足",
+          "量能严重不足",
+          "个股风险否决"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -402,141 +357,34 @@
       }
     },
     {
-      "rank": 5,
-      "symbol": "0941.HK",
-      "name": "China Mobile / 中国移动",
-      "display_name": "中国移动",
-      "judgment": "watch",
-      "recommendation_state": null,
-      "category": "watch",
-      "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 72.51,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "非技术分不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.531,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足"
-        ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 6,
-      "symbol": "0002.HK",
-      "name": "CLP Holdings / 中电控股",
-      "display_name": "中电控股",
-      "judgment": "watch",
-      "recommendation_state": null,
-      "category": "watch",
-      "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 70.48,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "volume_ratio_20_below_1_0"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "volume_ratio_20_below_1_0"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "非技术分不足",
-        "量能不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.501,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足",
-          "量能不足"
-        ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 7,
+      "rank": 4,
       "symbol": "588000.SH",
       "name": "ChinaAMC STAR 50 ETF / 华夏上证科创板50ETF",
       "display_name": "华夏上证科创板50ETF",
-      "judgment": "watch",
+      "judgment": "avoid",
       "recommendation_state": null,
-      "category": "watch",
+      "category": "avoid",
       "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 70.2,
+      "qualified_for_watch": false,
+      "score": 53.24,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "event_risk_policy",
-        "market_range_pos_60_above_action_limit"
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "event_risk_policy",
-        "market_range_pos_60_above_action_limit"
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "政策风险",
-        "市场位置偏高"
+        "量能不足",
+        "量能严重不足",
+        "成本/边际不足"
       ],
       "risk_cap": null,
       "risk_decision": null,
@@ -544,113 +392,66 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.6,
+        "total_score": 0.59,
         "event_risk": "policy",
         "source_count": 1,
         "proxy_source_count": 0,
         "warning": null
       },
       "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
+        "key": "observe",
+        "label": "继续观察",
+        "reason": "有跟踪价值，但当前强度或证据不足。",
         "reason_chips": [
-          "行情日期不匹配",
           "政策风险",
-          "市场位置偏高"
+          "量能不足",
+          "量能严重不足",
+          "成本/边际不足"
         ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
+        "upgrade": "分数进入观察线且状态改善后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
         "research_only": true
       }
     },
     {
-      "rank": 8,
-      "symbol": "9618.HK",
-      "name": "JD.com / 京东集团-SW",
-      "display_name": "京东集团-SW",
-      "judgment": "watch",
+      "rank": 5,
+      "symbol": "0728.HK",
+      "name": "China Telecom / 中国电信",
+      "display_name": "中国电信",
+      "judgment": "avoid",
       "recommendation_state": null,
-      "category": "watch",
+      "category": "avoid",
       "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 70.04,
+      "qualified_for_watch": false,
+      "score": 52.91,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
-        "event_risk_policy"
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
-        "event_risk_policy"
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "非技术面证据过期",
         "非技术分不足",
-        "政策风险"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.461,
-        "event_risk": "policy",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足",
-          "政策风险"
-        ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 9,
-      "symbol": "1299.HK",
-      "name": "AIA / 友邦保险",
-      "display_name": "友邦保险",
-      "judgment": "watch",
-      "recommendation_state": null,
-      "category": "watch",
-      "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 68.8,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "volume_ratio_20_below_1_0",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "volume_ratio_20_below_1_0",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
         "量能不足",
+        "同主题证据不足",
+        "量能严重不足",
+        "不是主题领先",
         "个股风险否决",
         "成本/边际不足"
       ],
@@ -660,7 +461,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.576,
+        "total_score": 0.512,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -671,9 +472,235 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
+          "非技术面证据过期",
+          "非技术分不足",
+          "量能不足",
+          "同主题证据不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 6,
+      "symbol": "159915.SZ",
+      "name": "E Fund ChiNext ETF / 易方达创业板ETF",
+      "display_name": "易方达创业板ETF",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 50.63,
+      "confidence": null,
+      "action_disqualifiers": [
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "量能不足",
+        "量能严重不足",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.602,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "reason": "有跟踪价值，但当前强度或证据不足。",
+        "reason_chips": [
+          "量能不足",
+          "量能严重不足",
+          "成本/边际不足"
+        ],
+        "upgrade": "分数进入观察线且状态改善后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 7,
+      "symbol": "510500.SH",
+      "name": "China Southern CSI 500 ETF / 南方中证500ETF",
+      "display_name": "南方中证500ETF",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 50.52,
+      "confidence": null,
+      "action_disqualifiers": [
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "量能不足",
+        "量能严重不足",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.57,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "reason": "有跟踪价值，但当前强度或证据不足。",
+        "reason_chips": [
+          "量能不足",
+          "量能严重不足",
+          "成本/边际不足"
+        ],
+        "upgrade": "分数进入观察线且状态改善后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 8,
+      "symbol": "0006.HK",
+      "name": "Power Assets / 电能实业",
+      "display_name": "电能实业",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 50.31,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "非技术分不足",
+        "量能不足",
+        "量能严重不足",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.529,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "reason": "有跟踪价值，但当前强度或证据不足。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "非技术分不足",
+          "量能不足",
+          "量能严重不足"
+        ],
+        "upgrade": "分数进入观察线且状态改善后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 9,
+      "symbol": "1299.HK",
+      "name": "AIA / 友邦保险",
+      "display_name": "友邦保险",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 50.27,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "量能不足",
+        "量能严重不足",
+        "个股风险否决",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.567,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
           "非技术面证据过期",
           "量能不足",
+          "量能严重不足",
           "个股风险否决"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
@@ -683,27 +710,42 @@
     },
     {
       "rank": 10,
-      "symbol": "600900.SH",
-      "name": "Yangtze Power / 长江电力",
-      "display_name": "长江电力",
-      "judgment": "watch",
+      "symbol": "0002.HK",
+      "name": "CLP Holdings / 中电控股",
+      "display_name": "中电控股",
+      "judgment": "avoid",
       "recommendation_state": null,
-      "category": "watch",
+      "category": "avoid",
       "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 68.61,
+      "qualified_for_watch": false,
+      "score": 50.22,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit"
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit"
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
-        "市场位置偏高"
+        "非技术面证据过期",
+        "非技术分不足",
+        "量能不足",
+        "同主题证据不足",
+        "量能严重不足",
+        "不是主题领先",
+        "成本/边际不足"
       ],
       "risk_cap": null,
       "risk_decision": null,
@@ -711,107 +753,57 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.603,
+        "total_score": 0.5,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
         "warning": null
       },
       "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
+        "key": "observe",
+        "label": "继续观察",
+        "reason": "有跟踪价值，但当前强度或证据不足。",
         "reason_chips": [
-          "行情日期不匹配",
-          "市场位置偏高"
+          "非技术面证据过期",
+          "非技术分不足",
+          "量能不足",
+          "同主题证据不足"
         ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
+        "upgrade": "分数进入观察线且状态改善后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
         "research_only": true
       }
     },
     {
       "rank": 11,
-      "symbol": "510500.SH",
-      "name": "China Southern CSI 500 ETF / 南方中证500ETF",
-      "display_name": "南方中证500ETF",
-      "judgment": "watch",
+      "symbol": "000333.SZ",
+      "name": "Midea Group / 美的集团",
+      "display_name": "美的集团",
+      "judgment": "avoid",
       "recommendation_state": null,
-      "category": "watch",
+      "category": "avoid",
       "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 68.49,
+      "qualified_for_watch": false,
+      "score": 48.7,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "市场位置偏高"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.581,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "市场位置偏高"
-        ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 12,
-      "symbol": "0005.HK",
-      "name": "HSBC / 汇丰控股",
-      "display_name": "汇丰控股",
-      "judgment": "watch",
-      "recommendation_state": null,
-      "category": "watch",
-      "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 66.35,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
         "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
         "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
         "非技术分不足",
         "量能不足",
+        "量能严重不足",
         "个股风险否决",
         "成本/边际不足"
       ],
@@ -821,7 +813,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.542,
+        "total_score": 0.507,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -832,132 +824,9 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
           "非技术分不足",
-          "量能不足"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 13,
-      "symbol": "2800.HK",
-      "name": "Tracker Fund of Hong Kong / 盈富基金",
-      "display_name": "盈富基金",
-      "judgment": "watch",
-      "recommendation_state": null,
-      "category": "watch",
-      "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 65.72,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_proxy_only",
-        "nontechnical_score_below_action_min",
-        "event_risk_quote_stale",
-        "nontechnical_source_missing",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_proxy_only",
-        "nontechnical_score_below_action_min",
-        "event_risk_quote_stale",
-        "nontechnical_source_missing",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "正式资料未接入",
-        "非技术分不足",
-        "行情日期滞后",
-        "正式证据缺失",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "proxy_only",
-        "proxy_only": true,
-        "total_score": 0.542,
-        "event_risk": "quote_stale",
-        "source_count": 0,
-        "proxy_source_count": 3,
-        "warning": "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。"
-      },
-      "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "正式资料未接入",
-          "非技术分不足",
-          "行情日期滞后"
-        ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 14,
-      "symbol": "0388.HK",
-      "name": "HKEX / 香港交易所",
-      "display_name": "香港交易所",
-      "judgment": "watch",
-      "recommendation_state": null,
-      "category": "watch",
-      "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 65.03,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "非技术分不足",
-        "个股风险否决",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.546,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足",
+          "量能不足",
+          "量能严重不足",
           "个股风险否决"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
@@ -966,33 +835,30 @@
       }
     },
     {
-      "rank": 15,
-      "symbol": "510300.SH",
-      "name": "Huatai-PineBridge CSI 300 ETF / 华泰柏瑞沪深300ETF",
-      "display_name": "华泰柏瑞沪深300ETF",
-      "judgment": "watch",
+      "rank": 12,
+      "symbol": "600900.SH",
+      "name": "Yangtze Power / 长江电力",
+      "display_name": "长江电力",
+      "judgment": "avoid",
       "recommendation_state": null,
-      "category": "watch",
+      "category": "avoid",
       "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 64.85,
+      "qualified_for_watch": false,
+      "score": 48.09,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "量能不足",
-        "市场位置偏高",
+        "量能严重不足",
         "成本/边际不足"
       ],
       "risk_cap": null,
@@ -1001,64 +867,236 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.571,
+        "total_score": 0.596,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
         "warning": null
       },
       "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
+        "key": "observe",
+        "label": "继续观察",
+        "reason": "有跟踪价值，但当前强度或证据不足。",
         "reason_chips": [
-          "行情日期不匹配",
           "量能不足",
-          "市场位置偏高",
+          "量能严重不足",
           "成本/边际不足"
         ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
+        "upgrade": "分数进入观察线且状态改善后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
         "research_only": true
       }
     },
     {
-      "rank": 16,
-      "symbol": "0006.HK",
-      "name": "Power Assets / 电能实业",
-      "display_name": "电能实业",
+      "rank": 13,
+      "symbol": "0388.HK",
+      "name": "HKEX / 香港交易所",
+      "display_name": "香港交易所",
       "judgment": "avoid",
       "recommendation_state": null,
       "category": "avoid",
       "qualified_for_action": false,
       "qualified_for_watch": false,
-      "score": 64.7,
+      "score": 47.69,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
         "volume_ratio_20_below_1_0",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "not_theme_score_leader",
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
         "volume_ratio_20_below_1_0",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "not_theme_score_leader",
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "非技术面证据过期",
         "非技术分不足",
         "量能不足",
-        "同主题证据不足",
-        "不是主题领先",
+        "量能严重不足",
+        "个股风险否决",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.536,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "非技术分不足",
+          "量能不足",
+          "量能严重不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 14,
+      "symbol": "9618.HK",
+      "name": "JD.com / 京东集团-SW",
+      "display_name": "京东集团-SW",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 47.53,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "非技术分不足",
+        "政策风险",
+        "量能不足",
+        "量能严重不足",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.452,
+        "event_risk": "policy",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "reason": "有跟踪价值，但当前强度或证据不足。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "非技术分不足",
+          "政策风险",
+          "量能不足"
+        ],
+        "upgrade": "分数进入观察线且状态改善后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 15,
+      "symbol": "510300.SH",
+      "name": "Huatai-PineBridge CSI 300 ETF / 华泰柏瑞沪深300ETF",
+      "display_name": "华泰柏瑞沪深300ETF",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 47.37,
+      "confidence": null,
+      "action_disqualifiers": [
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "量能不足",
+        "量能严重不足",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.563,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "reason": "有跟踪价值，但当前强度或证据不足。",
+        "reason_chips": [
+          "量能不足",
+          "量能严重不足",
+          "成本/边际不足"
+        ],
+        "upgrade": "分数进入观察线且状态改善后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 16,
+      "symbol": "0857.HK",
+      "name": "PetroChina / 中国石油股份",
+      "display_name": "中国石油股份",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 45.19,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "非技术分不足",
+        "量能不足",
+        "量能严重不足",
         "成本/边际不足"
       ],
       "risk_cap": null,
@@ -1078,10 +1116,10 @@
         "label": "继续观察",
         "reason": "有跟踪价值，但当前强度或证据不足。",
         "reason_chips": [
-          "行情日期不匹配",
           "非技术面证据过期",
           "非技术分不足",
-          "量能不足"
+          "量能不足",
+          "量能严重不足"
         ],
         "upgrade": "分数进入观察线且状态改善后，可升级为「等确认」。",
         "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
@@ -1090,39 +1128,42 @@
     },
     {
       "rank": 17,
-      "symbol": "0728.HK",
-      "name": "China Telecom / 中国电信",
-      "display_name": "中国电信",
+      "symbol": "688981.SH",
+      "name": "SMIC / 中芯国际",
+      "display_name": "中芯国际",
       "judgment": "avoid",
       "recommendation_state": null,
       "category": "avoid",
       "qualified_for_action": false,
       "qualified_for_watch": false,
-      "score": 63.93,
+      "score": 44.23,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
         "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
         "not_theme_score_leader",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
         "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
         "not_theme_score_leader",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
         "非技术分不足",
+        "政策风险",
+        "量能不足",
         "同主题证据不足",
+        "量能严重不足",
         "不是主题领先",
         "个股风险否决",
         "成本/边际不足"
@@ -1133,8 +1174,8 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.526,
-        "event_risk": "low",
+        "total_score": 0.514,
+        "event_risk": "policy",
         "source_count": 1,
         "proxy_source_count": 0,
         "warning": null
@@ -1144,9 +1185,9 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
           "非技术分不足",
+          "政策风险",
+          "量能不足",
           "同主题证据不足"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
@@ -1156,214 +1197,31 @@
     },
     {
       "rank": 18,
-      "symbol": "300750.SZ",
-      "name": "CATL / 宁德时代",
-      "display_name": "宁德时代",
-      "judgment": "watch",
-      "recommendation_state": null,
-      "category": "watch",
-      "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 59.83,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "量能不足",
-        "市场位置偏高",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.635,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "量能不足",
-          "市场位置偏高"
-        ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 19,
-      "symbol": "0857.HK",
-      "name": "PetroChina / 中国石油股份",
-      "display_name": "中国石油股份",
-      "judgment": "watch",
-      "recommendation_state": null,
-      "category": "watch",
-      "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 58.92,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "volume_ratio_20_below_1_0",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "volume_ratio_20_below_1_0",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "非技术分不足",
-        "量能不足",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.519,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足",
-          "量能不足"
-        ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 20,
-      "symbol": "515790.SH",
-      "name": "Huatai-PineBridge Photovoltaic ETF / 华泰柏瑞光伏ETF",
-      "display_name": "华泰柏瑞光伏ETF",
-      "judgment": "watch",
-      "recommendation_state": null,
-      "category": "watch",
-      "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 58.62,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_score_below_action_min",
-        "event_risk_policy",
-        "market_range_pos_60_above_action_limit",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_score_below_action_min",
-        "event_risk_policy",
-        "market_range_pos_60_above_action_limit",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术分不足",
-        "政策风险",
-        "市场位置偏高",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.534,
-        "event_risk": "policy",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "confirm",
-        "label": "等确认",
-        "reason": "接近候选，但仍有关键确认项未满足。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术分不足",
-          "政策风险",
-          "市场位置偏高"
-        ],
-        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
-        "invalidation": "若观察分数跌破门槛或状态转差，移出重点跟踪。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 21,
       "symbol": "600030.SH",
       "name": "CITIC Securities / 中信证券",
       "display_name": "中信证券",
-      "judgment": "watch",
+      "judgment": "avoid",
       "recommendation_state": null,
-      "category": "watch",
+      "category": "avoid",
       "qualified_for_action": false,
-      "qualified_for_watch": true,
-      "score": 58.03,
+      "qualified_for_watch": false,
+      "score": 41.47,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "量能不足",
-        "市场位置偏高",
+        "量能严重不足",
         "个股风险否决",
         "成本/边际不足"
       ],
@@ -1373,7 +1231,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.646,
+        "total_score": 0.645,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -1384,10 +1242,190 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
           "量能不足",
-          "市场位置偏高",
-          "个股风险否决"
+          "量能严重不足",
+          "个股风险否决",
+          "成本/边际不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 19,
+      "symbol": "515790.SH",
+      "name": "Huatai-PineBridge Photovoltaic ETF / 华泰柏瑞光伏ETF",
+      "display_name": "华泰柏瑞光伏ETF",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 40.39,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术分不足",
+        "政策风险",
+        "量能不足",
+        "量能严重不足",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.532,
+        "event_risk": "policy",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "信号不足或约束不通过，暂不投入研究时间。",
+        "reason_chips": [
+          "非技术分不足",
+          "政策风险",
+          "量能不足",
+          "量能严重不足"
+        ],
+        "upgrade": "重新通过观察门槛且无硬阻断后，可恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 20,
+      "symbol": "300750.SZ",
+      "name": "CATL / 宁德时代",
+      "display_name": "宁德时代",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 38.9,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "量能不足",
+        "量能严重不足",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.626,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "信号不足或约束不通过，暂不投入研究时间。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "量能不足",
+          "量能严重不足",
+          "成本/边际不足"
+        ],
+        "upgrade": "重新通过观察门槛且无硬阻断后，可恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 21,
+      "symbol": "2800.HK",
+      "name": "Tracker Fund of Hong Kong / 盈富基金",
+      "display_name": "盈富基金",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 24.58,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "正式资料未接入",
+        "正式证据缺失",
+        "量能不足",
+        "量能严重不足",
+        "跌破均线",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "proxy_only",
+        "proxy_only": true,
+        "total_score": 0.558,
+        "event_risk": "none",
+        "source_count": 0,
+        "proxy_source_count": 3,
+        "warning": "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。"
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "正式资料未接入",
+          "正式证据缺失",
+          "量能不足",
+          "量能严重不足"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -1404,34 +1442,40 @@
       "category": "avoid",
       "qualified_for_action": false,
       "qualified_for_watch": false,
-      "score": 51.92,
+      "score": 18.29,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
         "event_risk_policy",
+        "volume_ratio_20_below_1_0",
         "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "price_below_ma20_and_ma60",
         "not_theme_score_leader",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
         "event_risk_policy",
+        "volume_ratio_20_below_1_0",
         "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "price_below_ma20_and_ma60",
         "not_theme_score_leader",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "非技术面证据过期",
         "非技术分不足",
         "政策风险",
+        "量能不足",
         "同主题证据不足",
+        "量能严重不足",
+        "跌破均线",
         "不是主题领先",
         "个股风险否决",
         "成本/边际不足"
@@ -1442,7 +1486,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.405,
+        "total_score": 0.395,
         "event_risk": "policy",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -1453,10 +1497,10 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
           "非技术面证据过期",
           "非技术分不足",
-          "政策风险"
+          "政策风险",
+          "量能不足"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -1465,270 +1509,6 @@
     },
     {
       "rank": 23,
-      "symbol": "601088.SH",
-      "name": "China Shenhua / 中国神华",
-      "display_name": "中国神华",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 46.78,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_score_below_action_min",
-        "market_range_pos_60_above_action_limit",
-        "price_below_ma20_and_ma60",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_score_below_action_min",
-        "market_range_pos_60_above_action_limit",
-        "price_below_ma20_and_ma60",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术分不足",
-        "市场位置偏高",
-        "跌破均线",
-        "个股风险否决",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.497,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术分不足",
-          "市场位置偏高",
-          "跌破均线"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 24,
-      "symbol": "510880.SH",
-      "name": "Huatai-PineBridge Dividend ETF / 华泰柏瑞红利ETF",
-      "display_name": "华泰柏瑞红利ETF",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 38.5,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_score_below_action_min",
-        "market_range_pos_60_above_action_limit",
-        "price_below_ma20_and_ma60",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_score_below_action_min",
-        "market_range_pos_60_above_action_limit",
-        "price_below_ma20_and_ma60",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术分不足",
-        "市场位置偏高",
-        "跌破均线",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.532,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术分不足",
-          "市场位置偏高",
-          "跌破均线"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 25,
-      "symbol": "3033.HK",
-      "name": "CSOP Hang Seng TECH Index ETF / 南方东英恒生科技指数ETF",
-      "display_name": "南方东英恒生科技指数ETF",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 37.55,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_proxy_only",
-        "nontechnical_score_below_action_min",
-        "event_risk_quote_stale",
-        "nontechnical_source_missing",
-        "price_below_ma20_and_ma60",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_proxy_only",
-        "nontechnical_score_below_action_min",
-        "event_risk_quote_stale",
-        "nontechnical_source_missing",
-        "price_below_ma20_and_ma60",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "正式资料未接入",
-        "非技术分不足",
-        "行情日期滞后",
-        "正式证据缺失",
-        "跌破均线",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "proxy_only",
-        "proxy_only": true,
-        "total_score": 0.53,
-        "event_risk": "quote_stale",
-        "source_count": 0,
-        "proxy_source_count": 3,
-        "warning": "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。"
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "正式资料未接入",
-          "非技术分不足",
-          "行情日期滞后"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 26,
-      "symbol": "3067.HK",
-      "name": "iShares Hang Seng TECH ETF / 安硕恒生科技ETF",
-      "display_name": "安硕恒生科技ETF",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 31.39,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_proxy_only",
-        "nontechnical_score_below_action_min",
-        "event_risk_quote_stale",
-        "nontechnical_source_missing",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_proxy_only",
-        "nontechnical_score_below_action_min",
-        "event_risk_quote_stale",
-        "nontechnical_source_missing",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "正式资料未接入",
-        "非技术分不足",
-        "行情日期滞后",
-        "正式证据缺失",
-        "同主题证据不足",
-        "跌破均线",
-        "不是主题领先",
-        "个股风险否决",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "proxy_only",
-        "proxy_only": true,
-        "total_score": 0.527,
-        "event_risk": "quote_stale",
-        "source_count": 0,
-        "proxy_source_count": 3,
-        "warning": "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。"
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "正式资料未接入",
-          "非技术分不足",
-          "行情日期滞后"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 27,
       "symbol": "0883.HK",
       "name": "CNOOC / 中国海洋石油",
       "display_name": "中国海洋石油",
@@ -1737,33 +1517,33 @@
       "category": "avoid",
       "qualified_for_action": false,
       "qualified_for_watch": false,
-      "score": 30.31,
+      "score": 18.26,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "volume_ratio_20_below_1_0",
         "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
         "price_below_ma20_and_ma60",
         "not_theme_score_leader",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "volume_ratio_20_below_1_0",
         "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
         "price_below_ma20_and_ma60",
         "not_theme_score_leader",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "非技术面证据过期",
         "量能不足",
         "同主题证据不足",
+        "量能严重不足",
         "跌破均线",
         "不是主题领先",
         "个股风险否决",
@@ -1775,7 +1555,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.552,
+        "total_score": 0.551,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -1786,8 +1566,74 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
           "非技术面证据过期",
+          "量能不足",
+          "同主题证据不足",
+          "量能严重不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 24,
+      "symbol": "1024.HK",
+      "name": "Kuaishou / 快手-W",
+      "display_name": "快手-W",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 18.01,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "政策风险",
+        "量能不足",
+        "同主题证据不足",
+        "量能严重不足",
+        "不是主题领先",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.558,
+        "event_risk": "policy",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "政策风险",
           "量能不足",
           "同主题证据不足"
         ],
@@ -1797,101 +1643,35 @@
       }
     },
     {
-      "rank": 28,
-      "symbol": "1024.HK",
-      "name": "Kuaishou / 快手-W",
-      "display_name": "快手-W",
+      "rank": 25,
+      "symbol": "510880.SH",
+      "name": "Huatai-PineBridge Dividend ETF / 华泰柏瑞红利ETF",
+      "display_name": "华泰柏瑞红利ETF",
       "judgment": "avoid",
       "recommendation_state": null,
       "category": "avoid",
       "qualified_for_action": false,
       "qualified_for_watch": false,
-      "score": 29.74,
+      "score": 17.52,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "event_risk_policy",
-        "volume_ratio_20_below_1_0",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "not_theme_score_leader",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "event_risk_policy",
-        "volume_ratio_20_below_1_0",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "not_theme_score_leader",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "政策风险",
-        "量能不足",
-        "同主题证据不足",
-        "不是主题领先",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.568,
-        "event_risk": "policy",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "信号不足或约束不通过，暂不投入研究时间。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "政策风险",
-          "量能不足"
-        ],
-        "upgrade": "重新通过观察门槛且无硬阻断后，可恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 29,
-      "symbol": "2020.HK",
-      "name": "ANTA Sports / 安踏体育",
-      "display_name": "安踏体育",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 27.14,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "price_below_ma20_and_ma60",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "price_below_ma20_and_ma60",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
         "非技术分不足",
+        "量能不足",
+        "量能严重不足",
         "跌破均线",
         "成本/边际不足"
       ],
@@ -1901,7 +1681,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.545,
+        "total_score": 0.534,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -1912,9 +1692,9 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
           "非技术分不足",
+          "量能不足",
+          "量能严重不足",
           "跌破均线"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
@@ -1923,7 +1703,223 @@
       }
     },
     {
-      "rank": 30,
+      "rank": 26,
+      "symbol": "9988.HK",
+      "name": "Alibaba / 阿里巴巴-W",
+      "display_name": "阿里巴巴-W",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 14.57,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "symbol_recent_adverse_breach",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "symbol_recent_adverse_breach",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "非技术分不足",
+        "政策风险",
+        "量能不足",
+        "近期逆向风险",
+        "同主题证据不足",
+        "量能严重不足",
+        "跌破均线",
+        "不是主题领先",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.461,
+        "event_risk": "policy",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "非技术分不足",
+          "政策风险",
+          "量能不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 27,
+      "symbol": "3033.HK",
+      "name": "CSOP Hang Seng TECH Index ETF / 南方东英恒生科技指数ETF",
+      "display_name": "南方东英恒生科技指数ETF",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 12.18,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "正式资料未接入",
+        "非技术分不足",
+        "正式证据缺失",
+        "量能不足",
+        "量能严重不足",
+        "跌破均线",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "proxy_only",
+        "proxy_only": true,
+        "total_score": 0.546,
+        "event_risk": "none",
+        "source_count": 0,
+        "proxy_source_count": 3,
+        "warning": "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。"
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "正式资料未接入",
+          "非技术分不足",
+          "正式证据缺失",
+          "量能不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 28,
+      "symbol": "3067.HK",
+      "name": "iShares Hang Seng TECH ETF / 安硕恒生科技ETF",
+      "display_name": "安硕恒生科技ETF",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 12.02,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "正式资料未接入",
+        "非技术分不足",
+        "正式证据缺失",
+        "量能不足",
+        "同主题证据不足",
+        "量能严重不足",
+        "跌破均线",
+        "不是主题领先",
+        "个股风险否决",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "proxy_only",
+        "proxy_only": true,
+        "total_score": 0.546,
+        "event_risk": "none",
+        "source_count": 0,
+        "proxy_source_count": 3,
+        "warning": "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。"
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "正式资料未接入",
+          "非技术分不足",
+          "正式证据缺失",
+          "量能不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 29,
       "symbol": "002594.SZ",
       "name": "BYD / 比亚迪",
       "display_name": "比亚迪",
@@ -1932,34 +1928,31 @@
       "category": "avoid",
       "qualified_for_action": false,
       "qualified_for_watch": false,
-      "score": 25.16,
+      "score": 11.75,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "nontechnical_score_below_action_min",
         "event_risk_earnings_gap",
         "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
         "price_below_ma20_and_ma60",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "nontechnical_score_below_action_min",
         "event_risk_earnings_gap",
         "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
         "price_below_ma20_and_ma60",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "非技术分不足",
         "event_risk_earnings_gap",
         "量能不足",
-        "市场位置偏高",
+        "量能严重不足",
         "跌破均线",
         "个股风险否决",
         "成本/边际不足"
@@ -1970,7 +1963,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.413,
+        "total_score": 0.404,
         "event_risk": "earnings_gap",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -1981,10 +1974,10 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
           "非技术分不足",
           "量能不足",
-          "市场位置偏高"
+          "量能严重不足",
+          "跌破均线"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -1992,42 +1985,39 @@
       }
     },
     {
-      "rank": 31,
-      "symbol": "2269.HK",
-      "name": "WuXi Biologics / 药明生物",
-      "display_name": "药明生物",
+      "rank": 30,
+      "symbol": "2020.HK",
+      "name": "ANTA Sports / 安踏体育",
+      "display_name": "安踏体育",
       "judgment": "avoid",
       "recommendation_state": null,
       "category": "avoid",
       "qualified_for_action": false,
       "qualified_for_watch": false,
-      "score": 2.36,
+      "score": 4.56,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
-        "event_risk_policy",
-        "downtrend_regime",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "price_below_ma20_and_ma60",
-        "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
-        "event_risk_policy",
-        "downtrend_regime",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "price_below_ma20_and_ma60",
-        "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "非技术面证据过期",
-        "政策风险",
-        "趋势偏弱",
+        "非技术分不足",
+        "量能不足",
+        "量能严重不足",
         "跌破均线",
-        "个股风险否决",
         "成本/边际不足"
       ],
       "risk_cap": null,
@@ -2036,8 +2026,8 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.582,
-        "event_risk": "policy",
+        "total_score": 0.538,
+        "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
         "warning": null
@@ -2047,10 +2037,10 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
           "非技术面证据过期",
-          "政策风险",
-          "趋势偏弱"
+          "非技术分不足",
+          "量能不足",
+          "量能严重不足"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -2058,7 +2048,7 @@
       }
     },
     {
-      "rank": 32,
+      "rank": 31,
       "symbol": "0700.HK",
       "name": "Tencent / 腾讯控股",
       "display_name": "腾讯控股",
@@ -2070,13 +2060,13 @@
       "score": 0.0,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
         "event_risk_policy",
         "volume_ratio_20_below_1_0",
         "symbol_recent_adverse_breach",
         "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
@@ -2084,13 +2074,13 @@
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
         "event_risk_policy",
         "volume_ratio_20_below_1_0",
         "symbol_recent_adverse_breach",
         "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
@@ -2098,13 +2088,13 @@
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "非技术面证据过期",
         "非技术分不足",
         "政策风险",
         "量能不足",
         "近期逆向风险",
         "同主题证据不足",
+        "量能严重不足",
         "趋势偏弱",
         "区间位置过低",
         "跌破均线",
@@ -2117,7 +2107,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.532,
+        "total_score": 0.522,
         "event_risk": "policy",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -2128,10 +2118,10 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
           "非技术面证据过期",
           "非技术分不足",
-          "政策风险"
+          "政策风险",
+          "量能不足"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -2139,82 +2129,7 @@
       }
     },
     {
-      "rank": 33,
-      "symbol": "9988.HK",
-      "name": "Alibaba / 阿里巴巴-W",
-      "display_name": "阿里巴巴-W",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 0.0,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "event_risk_policy",
-        "symbol_recent_adverse_breach",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "event_risk_policy",
-        "symbol_recent_adverse_breach",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "非技术分不足",
-        "政策风险",
-        "近期逆向风险",
-        "同主题证据不足",
-        "趋势偏弱",
-        "跌破均线",
-        "不是主题领先",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.471,
-        "event_risk": "policy",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足",
-          "政策风险"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 34,
+      "rank": 32,
       "symbol": "1810.HK",
       "name": "Xiaomi / 小米集团-W",
       "display_name": "小米集团-W",
@@ -2226,479 +2141,35 @@
       "score": 0.0,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
         "symbol_recent_adverse_breach",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "price_below_ma20_and_ma60",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "nontechnical_evidence_stale",
         "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
         "symbol_recent_adverse_breach",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "price_below_ma20_and_ma60",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "非技术面证据过期",
         "非技术分不足",
+        "量能不足",
         "近期逆向风险",
+        "量能严重不足",
         "趋势偏弱",
         "跌破均线",
-        "个股风险否决",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.533,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足",
-          "近期逆向风险"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 35,
-      "symbol": "0386.HK",
-      "name": "Sinopec / 中国石油化工股份",
-      "display_name": "中国石油化工股份",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 0.0,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "range_pos_60_below_0_12",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "range_pos_60_below_0_12",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "非技术分不足",
-        "同主题证据不足",
-        "趋势偏弱",
-        "区间位置过低",
-        "跌破均线",
-        "不是主题领先",
-        "个股风险否决",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.546,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足",
-          "同主题证据不足"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 36,
-      "symbol": "2331.HK",
-      "name": "Li Ning / 李宁",
-      "display_name": "李宁",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 0.0,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "range_pos_60_below_0_12",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "range_pos_60_below_0_12",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "非技术分不足",
-        "同主题证据不足",
-        "趋势偏弱",
-        "区间位置过低",
-        "跌破均线",
-        "不是主题领先",
-        "个股风险否决",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.541,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足",
-          "同主题证据不足"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 37,
-      "symbol": "9992.HK",
-      "name": "Pop Mart / 泡泡玛特",
-      "display_name": "泡泡玛特",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 0.0,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "volume_ratio_20_below_1_0",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "range_pos_60_below_0_12",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "volume_ratio_20_below_1_0",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "range_pos_60_below_0_12",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "量能不足",
-        "同主题证据不足",
-        "趋势偏弱",
-        "区间位置过低",
-        "跌破均线",
-        "不是主题领先",
-        "个股风险否决",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.667,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "量能不足",
-          "同主题证据不足"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 38,
-      "symbol": "6862.HK",
-      "name": "Haidilao / 海底捞",
-      "display_name": "海底捞",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 0.0,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "volume_ratio_20_below_1_0",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "volume_ratio_20_below_1_0",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "非技术分不足",
-        "量能不足",
-        "同主题证据不足",
-        "趋势偏弱",
-        "跌破均线",
-        "不是主题领先",
-        "个股风险否决",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.527,
-        "event_risk": "low",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足",
-          "量能不足"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 39,
-      "symbol": "1177.HK",
-      "name": "Sino Biopharm / 中国生物制药",
-      "display_name": "中国生物制药",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 0.0,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "event_risk_earnings_gap",
-        "downtrend_regime",
-        "range_pos_60_below_0_12",
-        "price_below_ma20_and_ma60",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "event_risk_earnings_gap",
-        "downtrend_regime",
-        "range_pos_60_below_0_12",
-        "price_below_ma20_and_ma60",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "非技术分不足",
-        "event_risk_earnings_gap",
-        "趋势偏弱",
-        "区间位置过低",
-        "跌破均线",
-        "成本/边际不足"
-      ],
-      "risk_cap": null,
-      "risk_decision": null,
-      "recommendation_evidence": "",
-      "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.479,
-        "event_risk": "earnings_gap",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
-      },
-      "research_action": {
-        "key": "avoid",
-        "label": "暂不碰",
-        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
-        "reason_chips": [
-          "行情日期不匹配",
-          "非技术面证据过期",
-          "非技术分不足",
-          "趋势偏弱"
-        ],
-        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
-        "invalidation": "硬性阻断未解除前，不升级。",
-        "research_only": true
-      }
-    },
-    {
-      "rank": 40,
-      "symbol": "1093.HK",
-      "name": "CSPC Pharma / 石药集团",
-      "display_name": "石药集团",
-      "judgment": "avoid",
-      "recommendation_state": null,
-      "category": "avoid",
-      "qualified_for_action": false,
-      "qualified_for_watch": false,
-      "score": 0.0,
-      "confidence": null,
-      "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "volume_ratio_20_below_1_0",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "range_pos_60_below_0_12",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blockers": [
-        "quote_trade_date_mismatch",
-        "nontechnical_evidence_stale",
-        "nontechnical_score_below_action_min",
-        "volume_ratio_20_below_1_0",
-        "same_theme_best_peer_evidence_missing_or_failed",
-        "downtrend_regime",
-        "range_pos_60_below_0_12",
-        "price_below_ma20_and_ma60",
-        "not_theme_score_leader",
-        "symbol_risk_veto",
-        "cost_gate_failed"
-      ],
-      "blocker_labels": [
-        "行情日期不匹配",
-        "非技术面证据过期",
-        "非技术分不足",
-        "量能不足",
-        "同主题证据不足",
-        "趋势偏弱",
-        "区间位置过低",
-        "跌破均线",
-        "不是主题领先",
         "个股风险否决",
         "成本/边际不足"
       ],
@@ -2719,10 +2190,10 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
           "非技术面证据过期",
           "非技术分不足",
-          "量能不足"
+          "量能不足",
+          "近期逆向风险"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -2730,10 +2201,10 @@
       }
     },
     {
-      "rank": 41,
-      "symbol": "600519.SH",
-      "name": "Kweichow Moutai / 贵州茅台",
-      "display_name": "贵州茅台",
+      "rank": 33,
+      "symbol": "0386.HK",
+      "name": "Sinopec / 中国石油化工股份",
+      "display_name": "中国石油化工股份",
       "judgment": "avoid",
       "recommendation_state": null,
       "category": "avoid",
@@ -2742,24 +2213,408 @@
       "score": 0.0,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "非技术分不足",
+        "量能不足",
+        "同主题证据不足",
+        "量能严重不足",
+        "趋势偏弱",
+        "区间位置过低",
+        "跌破均线",
+        "不是主题领先",
+        "个股风险否决",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.539,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "非技术分不足",
+          "量能不足",
+          "同主题证据不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 34,
+      "symbol": "2331.HK",
+      "name": "Li Ning / 李宁",
+      "display_name": "李宁",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 0.0,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "非技术分不足",
+        "量能不足",
+        "同主题证据不足",
+        "量能严重不足",
+        "趋势偏弱",
+        "区间位置过低",
+        "跌破均线",
+        "不是主题领先",
+        "个股风险否决",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.535,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "非技术分不足",
+          "量能不足",
+          "同主题证据不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 35,
+      "symbol": "9992.HK",
+      "name": "Pop Mart / 泡泡玛特",
+      "display_name": "泡泡玛特",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 0.0,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "量能不足",
+        "同主题证据不足",
+        "量能严重不足",
+        "趋势偏弱",
+        "区间位置过低",
+        "跌破均线",
+        "不是主题领先",
+        "个股风险否决",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.657,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "量能不足",
+          "同主题证据不足",
+          "量能严重不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 36,
+      "symbol": "6862.HK",
+      "name": "Haidilao / 海底捞",
+      "display_name": "海底捞",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 0.0,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "非技术分不足",
+        "量能不足",
+        "同主题证据不足",
+        "量能严重不足",
+        "趋势偏弱",
+        "跌破均线",
+        "不是主题领先",
+        "个股风险否决",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.52,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "非技术分不足",
+          "量能不足",
+          "同主题证据不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 37,
+      "symbol": "2269.HK",
+      "name": "WuXi Biologics / 药明生物",
+      "display_name": "药明生物",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 0.0,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "政策风险",
+        "量能不足",
+        "量能严重不足",
+        "趋势偏弱",
+        "跌破均线",
+        "个股风险否决",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.566,
+        "event_risk": "policy",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "政策风险",
+          "量能不足",
+          "量能严重不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 38,
+      "symbol": "1177.HK",
+      "name": "Sino Biopharm / 中国生物制药",
+      "display_name": "中国生物制药",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 0.0,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
-        "市场位置偏高",
+        "非技术面证据过期",
+        "非技术分不足",
+        "event_risk_earnings_gap",
+        "量能不足",
+        "量能严重不足",
         "趋势偏弱",
         "区间位置过低",
         "跌破均线",
@@ -2771,7 +2626,85 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.581,
+        "total_score": 0.466,
+        "event_risk": "earnings_gap",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "非技术面证据过期",
+          "非技术分不足",
+          "量能不足",
+          "量能严重不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 39,
+      "symbol": "1093.HK",
+      "name": "CSPC Pharma / 石药集团",
+      "display_name": "石药集团",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 0.0,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术面证据过期",
+        "非技术分不足",
+        "量能不足",
+        "同主题证据不足",
+        "量能严重不足",
+        "趋势偏弱",
+        "区间位置过低",
+        "跌破均线",
+        "不是主题领先",
+        "个股风险否决",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.516,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -2782,8 +2715,71 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
-          "市场位置偏高",
+          "非技术面证据过期",
+          "非技术分不足",
+          "量能不足",
+          "同主题证据不足"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 40,
+      "symbol": "600519.SH",
+      "name": "Kweichow Moutai / 贵州茅台",
+      "display_name": "贵州茅台",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 0.0,
+      "confidence": null,
+      "action_disqualifiers": [
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "量能不足",
+        "量能严重不足",
+        "趋势偏弱",
+        "区间位置过低",
+        "跌破均线",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "available",
+        "proxy_only": false,
+        "total_score": 0.574,
+        "event_risk": "low",
+        "source_count": 1,
+        "proxy_source_count": 0,
+        "warning": null
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "量能不足",
+          "量能严重不足",
           "趋势偏弱",
           "区间位置过低"
         ],
@@ -2793,7 +2789,7 @@
       }
     },
     {
-      "rank": 42,
+      "rank": 41,
       "symbol": "000858.SZ",
       "name": "Wuliangye / 五粮液",
       "display_name": "五粮液",
@@ -2805,9 +2801,9 @@
       "score": 0.0,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit",
+        "volume_ratio_20_below_1_0",
         "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
@@ -2815,9 +2811,9 @@
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit",
+        "volume_ratio_20_below_1_0",
         "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
@@ -2825,9 +2821,9 @@
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
-        "市场位置偏高",
+        "量能不足",
         "同主题证据不足",
+        "量能严重不足",
         "趋势偏弱",
         "区间位置过低",
         "跌破均线",
@@ -2840,7 +2836,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.656,
+        "total_score": 0.641,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -2851,9 +2847,9 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
-          "市场位置偏高",
+          "量能不足",
           "同主题证据不足",
+          "量能严重不足",
           "趋势偏弱"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
@@ -2862,7 +2858,7 @@
       }
     },
     {
-      "rank": 43,
+      "rank": 42,
       "symbol": "600036.SH",
       "name": "China Merchants Bank / 招商银行",
       "display_name": "招商银行",
@@ -2874,33 +2870,30 @@
       "score": 0.0,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
         "nontechnical_score_below_action_min",
         "event_risk_elevated",
         "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
         "nontechnical_score_below_action_min",
         "event_risk_elevated",
         "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
         "非技术分不足",
         "event_risk_elevated",
         "量能不足",
-        "市场位置偏高",
+        "量能严重不足",
         "趋势偏弱",
         "区间位置过低",
         "跌破均线",
@@ -2912,7 +2905,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.534,
+        "total_score": 0.533,
         "event_risk": "elevated",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -2923,10 +2916,10 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
           "非技术分不足",
           "量能不足",
-          "市场位置偏高"
+          "量能严重不足",
+          "趋势偏弱"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -2934,7 +2927,7 @@
       }
     },
     {
-      "rank": 44,
+      "rank": 43,
       "symbol": "601318.SH",
       "name": "Ping An Insurance / 中国平安",
       "display_name": "中国平安",
@@ -2946,30 +2939,36 @@
       "score": 0.0,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
+        "nontechnical_proxy_only",
         "nontechnical_score_below_action_min",
-        "event_risk_elevated",
-        "market_range_pos_60_above_action_limit",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
+        "nontechnical_proxy_only",
         "nontechnical_score_below_action_min",
-        "event_risk_elevated",
-        "market_range_pos_60_above_action_limit",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
+        "正式资料未接入",
         "非技术分不足",
-        "event_risk_elevated",
-        "市场位置偏高",
+        "事件风险未知",
+        "正式证据缺失",
+        "量能不足",
+        "量能严重不足",
         "趋势偏弱",
         "区间位置过低",
         "跌破均线",
@@ -2979,23 +2978,23 @@
       "risk_decision": null,
       "recommendation_evidence": "",
       "nontechnical_evidence": {
-        "status": "available",
-        "proxy_only": false,
-        "total_score": 0.475,
-        "event_risk": "elevated",
-        "source_count": 1,
-        "proxy_source_count": 0,
-        "warning": null
+        "status": "proxy_only",
+        "proxy_only": true,
+        "total_score": 0.502,
+        "event_risk": "unknown",
+        "source_count": 0,
+        "proxy_source_count": 3,
+        "warning": "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。"
       },
       "research_action": {
         "key": "avoid",
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
+          "正式资料未接入",
           "非技术分不足",
-          "市场位置偏高",
-          "趋势偏弱"
+          "事件风险未知",
+          "正式证据缺失"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -3003,7 +3002,7 @@
       }
     },
     {
-      "rank": 45,
+      "rank": 44,
       "symbol": "600276.SH",
       "name": "Hengrui Medicine / 恒瑞医药",
       "display_name": "恒瑞医药",
@@ -3015,27 +3014,102 @@
       "score": 0.0,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
         "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "price_below_ma20_and_ma60",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
         "volume_ratio_20_below_1_0",
-        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
         "price_below_ma20_and_ma60",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
+        "正式资料未接入",
+        "非技术分不足",
+        "事件风险未知",
+        "正式证据缺失",
         "量能不足",
-        "市场位置偏高",
+        "量能严重不足",
+        "趋势偏弱",
+        "跌破均线",
+        "个股风险否决",
+        "成本/边际不足"
+      ],
+      "risk_cap": null,
+      "risk_decision": null,
+      "recommendation_evidence": "",
+      "nontechnical_evidence": {
+        "status": "proxy_only",
+        "proxy_only": true,
+        "total_score": 0.502,
+        "event_risk": "unknown",
+        "source_count": 0,
+        "proxy_source_count": 3,
+        "warning": "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。"
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
+        "reason_chips": [
+          "正式资料未接入",
+          "非技术分不足",
+          "事件风险未知",
+          "正式证据缺失"
+        ],
+        "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前，不升级。",
+        "research_only": true
+      }
+    },
+    {
+      "rank": 45,
+      "symbol": "601088.SH",
+      "name": "China Shenhua / 中国神华",
+      "display_name": "中国神华",
+      "judgment": "avoid",
+      "recommendation_state": null,
+      "category": "avoid",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "score": 0.0,
+      "confidence": null,
+      "action_disqualifiers": [
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blocker_labels": [
+        "非技术分不足",
+        "量能不足",
+        "量能严重不足",
         "趋势偏弱",
         "跌破均线",
         "个股风险否决",
@@ -3047,7 +3121,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.588,
+        "total_score": 0.49,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -3058,9 +3132,9 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
+          "非技术分不足",
           "量能不足",
-          "市场位置偏高",
+          "量能严重不足",
           "趋势偏弱"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
@@ -3081,25 +3155,28 @@
       "score": 0.0,
       "confidence": null,
       "action_disqualifiers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
+        "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blockers": [
-        "quote_trade_date_mismatch",
-        "market_range_pos_60_above_action_limit",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
         "downtrend_regime",
+        "range_pos_60_below_0_12",
         "price_below_ma20_and_ma60",
         "symbol_risk_veto",
         "cost_gate_failed"
       ],
       "blocker_labels": [
-        "行情日期不匹配",
-        "市场位置偏高",
+        "量能不足",
+        "量能严重不足",
         "趋势偏弱",
+        "区间位置过低",
         "跌破均线",
         "个股风险否决",
         "成本/边际不足"
@@ -3110,7 +3187,7 @@
       "nontechnical_evidence": {
         "status": "available",
         "proxy_only": false,
-        "total_score": 0.643,
+        "total_score": 0.636,
         "event_risk": "low",
         "source_count": 1,
         "proxy_source_count": 0,
@@ -3121,10 +3198,10 @@
         "label": "暂不碰",
         "reason": "存在硬阻断或状态不匹配，今日不纳入候选。",
         "reason_chips": [
-          "行情日期不匹配",
-          "市场位置偏高",
+          "量能不足",
+          "量能严重不足",
           "趋势偏弱",
-          "跌破均线"
+          "区间位置过低"
         ],
         "upgrade": "硬阻断消失、分数回到观察线后，才恢复观察。",
         "invalidation": "硬性阻断未解除前，不升级。",
@@ -3133,26 +3210,35 @@
     }
   ],
   "evidence": {
-    "forward_logs": 7,
+    "forward_logs": 9,
     "matured_days": 1,
     "forward_samples": 0,
     "forward_win_rate": null,
-    "curated_available": 43,
-    "proxy_only": 3,
+    "curated_available": 41,
+    "proxy_only": 5,
     "missing": 0
+  },
+  "snapshot": {
+    "as_of_date": "2026-05-19",
+    "latest_quote_trade_date": "2026-05-19",
+    "quote_trade_dates": [
+      "2026-05-19"
+    ],
+    "quote_dated_symbol_count": 46,
+    "quote_date_mismatch_count": 0
   },
   "proxy_only_warning": "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。",
   "sources": {
     "close_report_json": {
-      "path": "D:\\Code\\yoyo\\research\\products\\daily_close\\2026-05-17-close-report.json",
+      "path": "D:\\Code\\yoyo\\research\\products\\daily_close\\2026-05-19-close-report.json",
       "exists": true
     },
     "close_report_markdown": {
-      "path": "D:\\Code\\yoyo\\research\\products\\daily_close\\2026-05-17-close-report.md",
+      "path": "D:\\Code\\yoyo\\research\\products\\daily_close\\2026-05-19-close-report.md",
       "exists": true
     },
     "ranking": {
-      "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-17-close-ranking.json",
+      "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-19-close-ranking.json",
       "exists": true
     },
     "nontechnical_evidence": {

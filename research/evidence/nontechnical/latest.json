@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-17T09:10:41Z",
-  "as_of_date": "2026-05-17",
+  "generated_at": "2026-05-19T01:43:05Z",
+  "as_of_date": "2026-05-19",
   "as_of_session": "close",
   "research_only": true,
   "no_execution": true,
@@ -20,18 +20,18 @@
   },
   "summary": {
     "symbol_count": 46,
-    "available_count": 43,
-    "curated_available_count": 43,
-    "formal_provider_count": 43,
-    "automatic_proxy_count": 3,
-    "proxy_only_count": 3,
-    "proxy_coverage_ratio": 0.065,
+    "available_count": 41,
+    "curated_available_count": 41,
+    "formal_provider_count": 41,
+    "automatic_proxy_count": 5,
+    "proxy_only_count": 5,
+    "proxy_coverage_ratio": 0.109,
     "missing_count": 0,
-    "coverage_ratio": 0.935,
-    "actionable_evidence_count": 13,
-    "finding_count": 79,
+    "coverage_ratio": 0.891,
+    "actionable_evidence_count": 12,
+    "finding_count": 83,
     "critical_finding_count": 0,
-    "blocking_finding_count": 23
+    "blocking_finding_count": 25
   },
   "symbols": {
     "0002.HK": {
@@ -58,12 +58,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.502,
-      "valuation_score": 0.613,
+      "valuation_score": 0.614,
       "catalyst_score": 0.426,
-      "flow_score": 0.5,
-      "macro_score": 0.46,
-      "total_score": 0.501,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.54,
+      "total_score": 0.5,
+      "age_days": 139
     },
     "000333.SZ": {
       "symbol": "000333.SZ",
@@ -91,10 +91,10 @@
       "fundamental_score": 0.522,
       "valuation_score": 0.518,
       "catalyst_score": 0.522,
-      "flow_score": 0.54,
+      "flow_score": 0.44,
       "macro_score": 0.5,
-      "total_score": 0.522,
-      "age_days": 17
+      "total_score": 0.507,
+      "age_days": 19
     },
     "0005.HK": {
       "symbol": "0005.HK",
@@ -122,10 +122,10 @@
       "fundamental_score": 0.566,
       "valuation_score": 0.613,
       "catalyst_score": 0.494,
-      "flow_score": 0.56,
-      "macro_score": 0.42,
-      "total_score": 0.542,
-      "age_days": 47
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.532,
+      "age_days": 49
     },
     "0006.HK": {
       "symbol": "0006.HK",
@@ -154,9 +154,9 @@
       "valuation_score": 0.616,
       "catalyst_score": 0.454,
       "flow_score": 0.44,
-      "macro_score": 0.46,
-      "total_score": 0.521,
-      "age_days": 137
+      "macro_score": 0.54,
+      "total_score": 0.529,
+      "age_days": 139
     },
     "000858.SZ": {
       "symbol": "000858.SZ",
@@ -184,10 +184,10 @@
       "fundamental_score": 0.649,
       "valuation_score": 0.632,
       "catalyst_score": 0.8,
-      "flow_score": 0.54,
+      "flow_score": 0.44,
       "macro_score": 0.54,
-      "total_score": 0.656,
-      "age_days": 17
+      "total_score": 0.641,
+      "age_days": 19
     },
     "002594.SZ": {
       "symbol": "002594.SZ",
@@ -215,10 +215,10 @@
       "fundamental_score": 0.393,
       "valuation_score": 0.457,
       "catalyst_score": 0.316,
-      "flow_score": 0.5,
+      "flow_score": 0.44,
       "macro_score": 0.5,
-      "total_score": 0.413,
-      "age_days": 18
+      "total_score": 0.404,
+      "age_days": 20
     },
     "0386.HK": {
       "symbol": "0386.HK",
@@ -244,12 +244,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.505,
-      "valuation_score": 0.669,
+      "valuation_score": 0.67,
       "catalyst_score": 0.552,
-      "flow_score": 0.54,
-      "macro_score": 0.42,
-      "total_score": 0.546,
-      "age_days": 47
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.539,
+      "age_days": 49
     },
     "0388.HK": {
       "symbol": "0388.HK",
@@ -277,10 +277,10 @@
       "fundamental_score": 0.63,
       "valuation_score": 0.477,
       "catalyst_score": 0.543,
-      "flow_score": 0.56,
-      "macro_score": 0.42,
-      "total_score": 0.546,
-      "age_days": 47
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.536,
+      "age_days": 49
     },
     "0700.HK": {
       "symbol": "0700.HK",
@@ -306,12 +306,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.568,
-      "valuation_score": 0.529,
+      "valuation_score": 0.53,
       "catalyst_score": 0.534,
-      "flow_score": 0.56,
-      "macro_score": 0.38,
-      "total_score": 0.532,
-      "age_days": 47
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.522,
+      "age_days": 49
     },
     "0728.HK": {
       "symbol": "0728.HK",
@@ -337,12 +337,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.469,
-      "valuation_score": 0.671,
+      "valuation_score": 0.666,
       "catalyst_score": 0.474,
-      "flow_score": 0.58,
-      "macro_score": 0.46,
-      "total_score": 0.526,
-      "age_days": 47
+      "flow_score": 0.44,
+      "macro_score": 0.54,
+      "total_score": 0.512,
+      "age_days": 49
     },
     "0857.HK": {
       "symbol": "0857.HK",
@@ -368,12 +368,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.492,
-      "valuation_score": 0.662,
+      "valuation_score": 0.661,
       "catalyst_score": 0.5,
-      "flow_score": 0.48,
-      "macro_score": 0.42,
-      "total_score": 0.519,
-      "age_days": 47
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.521,
+      "age_days": 49
     },
     "0883.HK": {
       "symbol": "0883.HK",
@@ -399,12 +399,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.568,
-      "valuation_score": 0.671,
+      "valuation_score": 0.67,
       "catalyst_score": 0.522,
-      "flow_score": 0.5,
-      "macro_score": 0.42,
-      "total_score": 0.552,
-      "age_days": 47
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.551,
+      "age_days": 49
     },
     "0941.HK": {
       "symbol": "0941.HK",
@@ -432,10 +432,10 @@
       "fundamental_score": 0.494,
       "valuation_score": 0.643,
       "catalyst_score": 0.497,
-      "flow_score": 0.56,
-      "macro_score": 0.46,
-      "total_score": 0.531,
-      "age_days": 47
+      "flow_score": 0.44,
+      "macro_score": 0.54,
+      "total_score": 0.521,
+      "age_days": 49
     },
     "1024.HK": {
       "symbol": "1024.HK",
@@ -463,10 +463,10 @@
       "fundamental_score": 0.628,
       "valuation_score": 0.599,
       "catalyst_score": 0.551,
-      "flow_score": 0.56,
-      "macro_score": 0.38,
-      "total_score": 0.568,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.558,
+      "age_days": 139
     },
     "1093.HK": {
       "symbol": "1093.HK",
@@ -492,12 +492,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.54,
-      "valuation_score": 0.595,
+      "valuation_score": 0.596,
       "catalyst_score": 0.474,
-      "flow_score": 0.54,
-      "macro_score": 0.42,
-      "total_score": 0.523,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.516,
+      "age_days": 139
     },
     "1177.HK": {
       "symbol": "1177.HK",
@@ -523,12 +523,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.483,
-      "valuation_score": 0.531,
+      "valuation_score": 0.532,
       "catalyst_score": 0.396,
-      "flow_score": 0.58,
-      "macro_score": 0.42,
-      "total_score": 0.479,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.466,
+      "age_days": 139
     },
     "1299.HK": {
       "symbol": "1299.HK",
@@ -554,19 +554,19 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.619,
-      "valuation_score": 0.578,
+      "valuation_score": 0.579,
       "catalyst_score": 0.596,
-      "flow_score": 0.56,
-      "macro_score": 0.42,
-      "total_score": 0.576,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.567,
+      "age_days": 139
     },
     "159915.SZ": {
       "symbol": "159915.SZ",
       "name": "E Fund ChiNext ETF / 易方达创业板ETF",
       "kind": "etf",
       "theme": "china-a-growth-tech",
-      "as_of_date": "2026-05-17",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
       "event_risk": "low",
       "source_count": 1,
@@ -579,17 +579,17 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=创业板ETF易方达, source_date=2026-05-17",
+        "formal provider fund_name=创业板ETF易方达, source_date=2026-05-19",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.52,
-      "valuation_score": 0.787,
-      "catalyst_score": 0.701,
-      "flow_score": 0.58,
+      "valuation_score": 0.794,
+      "catalyst_score": 0.686,
+      "flow_score": 0.44,
       "macro_score": 0.5,
-      "total_score": 0.626,
+      "total_score": 0.602,
       "age_days": 0
     },
     "1810.HK": {
@@ -618,10 +618,10 @@
       "fundamental_score": 0.563,
       "valuation_score": 0.59,
       "catalyst_score": 0.481,
-      "flow_score": 0.56,
-      "macro_score": 0.42,
-      "total_score": 0.533,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.523,
+      "age_days": 139
     },
     "2020.HK": {
       "symbol": "2020.HK",
@@ -649,10 +649,10 @@
       "fundamental_score": 0.603,
       "valuation_score": 0.597,
       "catalyst_score": 0.486,
-      "flow_score": 0.54,
-      "macro_score": 0.42,
-      "total_score": 0.545,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.538,
+      "age_days": 139
     },
     "2269.HK": {
       "symbol": "2269.HK",
@@ -680,10 +680,10 @@
       "fundamental_score": 0.636,
       "valuation_score": 0.53,
       "catalyst_score": 0.628,
-      "flow_score": 0.6,
-      "macro_score": 0.38,
-      "total_score": 0.582,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.566,
+      "age_days": 139
     },
     "2331.HK": {
       "symbol": "2331.HK",
@@ -709,21 +709,21 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.554,
-      "valuation_score": 0.596,
+      "valuation_score": 0.597,
       "catalyst_score": 0.532,
-      "flow_score": 0.54,
-      "macro_score": 0.42,
-      "total_score": 0.541,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.535,
+      "age_days": 139
     },
     "2800.HK": {
       "symbol": "2800.HK",
       "name": "Tracker Fund of Hong Kong / 盈富基金",
       "kind": "etf",
       "theme": "hong-kong-broad-market",
-      "as_of_date": "2026-05-17",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
-      "event_risk": "quote_stale",
+      "event_risk": "none",
       "source_count": 0,
       "proxy_source_count": 3,
       "sources": [
@@ -742,16 +742,16 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=hong-kong-broad-market, quote_fresh=False, risk_state=risk_off"
+        "kind=etf, theme=hong-kong-broad-market, quote_fresh=True, risk_state=neutral"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
       "fundamental_score": 0.62,
       "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.57,
-      "macro_score": 0.45,
-      "total_score": 0.542,
+      "catalyst_score": 0.53,
+      "flow_score": 0.47,
+      "macro_score": 0.53,
+      "total_score": 0.558,
       "age_days": 0
     },
     "300750.SZ": {
@@ -780,19 +780,19 @@
       "fundamental_score": 0.674,
       "valuation_score": 0.539,
       "catalyst_score": 0.8,
-      "flow_score": 0.5,
+      "flow_score": 0.44,
       "macro_score": 0.5,
-      "total_score": 0.635,
-      "age_days": 31
+      "total_score": 0.626,
+      "age_days": 33
     },
     "3033.HK": {
       "symbol": "3033.HK",
       "name": "CSOP Hang Seng TECH Index ETF / 南方东英恒生科技指数ETF",
       "kind": "etf",
       "theme": "hang-seng-tech",
-      "as_of_date": "2026-05-17",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
-      "event_risk": "quote_stale",
+      "event_risk": "none",
       "source_count": 0,
       "proxy_source_count": 3,
       "sources": [
@@ -811,16 +811,16 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=hang-seng-tech, quote_fresh=False, risk_state=risk_off"
+        "kind=etf, theme=hang-seng-tech, quote_fresh=True, risk_state=neutral"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
       "fundamental_score": 0.58,
       "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.57,
-      "macro_score": 0.45,
-      "total_score": 0.53,
+      "catalyst_score": 0.53,
+      "flow_score": 0.47,
+      "macro_score": 0.53,
+      "total_score": 0.546,
       "age_days": 0
     },
     "3067.HK": {
@@ -828,9 +828,9 @@
       "name": "iShares Hang Seng TECH ETF / 安硕恒生科技ETF",
       "kind": "etf",
       "theme": "hang-seng-tech",
-      "as_of_date": "2026-05-17",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
-      "event_risk": "quote_stale",
+      "event_risk": "none",
       "source_count": 0,
       "proxy_source_count": 3,
       "sources": [
@@ -849,16 +849,16 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=hang-seng-tech, quote_fresh=False, risk_state=risk_off"
+        "kind=etf, theme=hang-seng-tech, quote_fresh=True, risk_state=neutral"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
       "fundamental_score": 0.58,
       "valuation_score": 0.58,
-      "catalyst_score": 0.44,
-      "flow_score": 0.55,
-      "macro_score": 0.45,
-      "total_score": 0.527,
+      "catalyst_score": 0.53,
+      "flow_score": 0.47,
+      "macro_score": 0.53,
+      "total_score": 0.546,
       "age_days": 0
     },
     "3690.HK": {
@@ -887,17 +887,17 @@
       "fundamental_score": 0.351,
       "valuation_score": 0.415,
       "catalyst_score": 0.378,
-      "flow_score": 0.56,
-      "macro_score": 0.38,
-      "total_score": 0.405,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.395,
+      "age_days": 139
     },
     "510300.SH": {
       "symbol": "510300.SH",
       "name": "Huatai-PineBridge CSI 300 ETF / 华泰柏瑞沪深300ETF",
       "kind": "etf",
       "theme": "china-a-broad-market",
-      "as_of_date": "2026-05-17",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
       "event_risk": "low",
       "source_count": 1,
@@ -910,17 +910,17 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=沪深300ETF华泰柏瑞, source_date=2026-05-17",
+        "formal provider fund_name=沪深300ETF华泰柏瑞, source_date=2026-05-19",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.58,
-      "valuation_score": 0.666,
-      "catalyst_score": 0.546,
-      "flow_score": 0.54,
-      "macro_score": 0.46,
-      "total_score": 0.571,
+      "valuation_score": 0.669,
+      "catalyst_score": 0.542,
+      "flow_score": 0.44,
+      "macro_score": 0.54,
+      "total_score": 0.563,
       "age_days": 0
     },
     "510500.SH": {
@@ -928,7 +928,7 @@
       "name": "China Southern CSI 500 ETF / 南方中证500ETF",
       "kind": "etf",
       "theme": "china-a-midcap-market",
-      "as_of_date": "2026-05-17",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
       "event_risk": "low",
       "source_count": 1,
@@ -941,17 +941,17 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=中证500ETF南方, source_date=2026-05-17",
+        "formal provider fund_name=中证500ETF南方, source_date=2026-05-19",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.52,
-      "valuation_score": 0.741,
+      "valuation_score": 0.75,
       "catalyst_score": 0.591,
-      "flow_score": 0.58,
-      "macro_score": 0.42,
-      "total_score": 0.581,
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.57,
       "age_days": 0
     },
     "510880.SH": {
@@ -959,7 +959,7 @@
       "name": "Huatai-PineBridge Dividend ETF / 华泰柏瑞红利ETF",
       "kind": "etf",
       "theme": "china-a-dividend-value",
-      "as_of_date": "2026-05-17",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
       "event_risk": "low",
       "source_count": 1,
@@ -972,17 +972,17 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=红利ETF华泰柏瑞, source_date=2026-05-17",
+        "formal provider fund_name=红利ETF华泰柏瑞, source_date=2026-05-19",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.58,
-      "valuation_score": 0.545,
-      "catalyst_score": 0.511,
-      "flow_score": 0.5,
-      "macro_score": 0.46,
-      "total_score": 0.532,
+      "valuation_score": 0.555,
+      "catalyst_score": 0.517,
+      "flow_score": 0.44,
+      "macro_score": 0.54,
+      "total_score": 0.534,
       "age_days": 0
     },
     "512480.SH": {
@@ -990,7 +990,7 @@
       "name": "GuolianAn Semiconductor ETF / 国联安半导体ETF",
       "kind": "etf",
       "theme": "china-a-semiconductors",
-      "as_of_date": "2026-05-17",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
       "event_risk": "policy",
       "source_count": 1,
@@ -1003,17 +1003,17 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=半导体ETF国联安, source_date=2026-05-17",
+        "formal provider fund_name=半导体ETF国联安, source_date=2026-05-19",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.48,
       "valuation_score": 0.8,
-      "catalyst_score": 0.768,
-      "flow_score": 0.58,
-      "macro_score": 0.38,
-      "total_score": 0.621,
+      "catalyst_score": 0.769,
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.608,
       "age_days": 0
     },
     "515790.SH": {
@@ -1021,7 +1021,7 @@
       "name": "Huatai-PineBridge Photovoltaic ETF / 华泰柏瑞光伏ETF",
       "kind": "etf",
       "theme": "china-a-renewable-energy",
-      "as_of_date": "2026-05-17",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
       "event_risk": "policy",
       "source_count": 1,
@@ -1034,17 +1034,17 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=光伏ETF华泰柏瑞, source_date=2026-05-17",
+        "formal provider fund_name=光伏ETF华泰柏瑞, source_date=2026-05-19",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.48,
-      "valuation_score": 0.68,
-      "catalyst_score": 0.54,
-      "flow_score": 0.54,
-      "macro_score": 0.38,
-      "total_score": 0.534,
+      "valuation_score": 0.699,
+      "catalyst_score": 0.545,
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.532,
       "age_days": 0
     },
     "588000.SH": {
@@ -1052,7 +1052,7 @@
       "name": "ChinaAMC STAR 50 ETF / 华夏上证科创板50ETF",
       "kind": "etf",
       "theme": "china-a-hard-tech",
-      "as_of_date": "2026-05-17",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
       "event_risk": "policy",
       "source_count": 1,
@@ -1065,17 +1065,17 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=科创50ETF华夏, source_date=2026-05-17",
+        "formal provider fund_name=科创50ETF华夏, source_date=2026-05-19",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.48,
-      "valuation_score": 0.775,
-      "catalyst_score": 0.704,
-      "flow_score": 0.58,
-      "macro_score": 0.38,
-      "total_score": 0.6,
+      "valuation_score": 0.782,
+      "catalyst_score": 0.71,
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.59,
       "age_days": 0
     },
     "600030.SH": {
@@ -1104,10 +1104,10 @@
       "fundamental_score": 0.717,
       "valuation_score": 0.569,
       "catalyst_score": 0.8,
-      "flow_score": 0.5,
-      "macro_score": 0.42,
-      "total_score": 0.646,
-      "age_days": 22
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.645,
+      "age_days": 24
     },
     "600036.SH": {
       "symbol": "600036.SH",
@@ -1135,41 +1135,48 @@
       "fundamental_score": 0.58,
       "valuation_score": 0.557,
       "catalyst_score": 0.527,
-      "flow_score": 0.5,
-      "macro_score": 0.42,
-      "total_score": 0.534,
-      "age_days": 18
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.533,
+      "age_days": 20
     },
     "600276.SH": {
       "symbol": "600276.SH",
       "name": "Hengrui Medicine / 恒瑞医药",
       "kind": "stock",
       "theme": "china-a-healthcare-pharma",
-      "as_of_date": "2026-04-23",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
-      "event_risk": "low",
-      "source_count": 1,
-      "proxy_source_count": 0,
+      "event_risk": "unknown",
+      "source_count": 0,
+      "proxy_source_count": 3,
       "sources": [
         {
-          "label": "Eastmoney A-share F10 financial indicators",
-          "kind": "formal_public_f10",
-          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
         }
       ],
       "notes": [
-        "formal provider report_date=2026-03-31, notice_date=2026-04-23",
-        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-healthcare-pharma, quote_fresh=True, risk_state=neutral"
       ],
-      "evidence_mode": "formal_provider_point_in_time",
-      "proxy_only": false,
-      "fundamental_score": 0.59,
-      "valuation_score": 0.625,
-      "catalyst_score": 0.674,
-      "flow_score": 0.5,
-      "macro_score": 0.42,
-      "total_score": 0.588,
-      "age_days": 24
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.5,
+      "flow_score": 0.47,
+      "macro_score": 0.5,
+      "total_score": 0.502,
+      "age_days": 0
     },
     "600519.SH": {
       "symbol": "600519.SH",
@@ -1197,10 +1204,10 @@
       "fundamental_score": 0.585,
       "valuation_score": 0.721,
       "catalyst_score": 0.539,
-      "flow_score": 0.54,
-      "macro_score": 0.46,
-      "total_score": 0.581,
-      "age_days": 22
+      "flow_score": 0.44,
+      "macro_score": 0.54,
+      "total_score": 0.574,
+      "age_days": 24
     },
     "600900.SH": {
       "symbol": "600900.SH",
@@ -1228,10 +1235,10 @@
       "fundamental_score": 0.63,
       "valuation_score": 0.583,
       "catalyst_score": 0.682,
-      "flow_score": 0.54,
-      "macro_score": 0.46,
-      "total_score": 0.603,
-      "age_days": 17
+      "flow_score": 0.44,
+      "macro_score": 0.54,
+      "total_score": 0.596,
+      "age_days": 19
     },
     "601088.SH": {
       "symbol": "601088.SH",
@@ -1259,41 +1266,48 @@
       "fundamental_score": 0.482,
       "valuation_score": 0.563,
       "catalyst_score": 0.452,
-      "flow_score": 0.54,
-      "macro_score": 0.46,
-      "total_score": 0.497,
-      "age_days": 22
+      "flow_score": 0.44,
+      "macro_score": 0.54,
+      "total_score": 0.49,
+      "age_days": 24
     },
     "601318.SH": {
       "symbol": "601318.SH",
       "name": "Ping An Insurance / 中国平安",
       "kind": "stock",
       "theme": "china-a-financials-insurance",
-      "as_of_date": "2026-04-29",
+      "as_of_date": "2026-05-19",
       "as_of_session": "close",
-      "event_risk": "elevated",
-      "source_count": 1,
-      "proxy_source_count": 0,
+      "event_risk": "unknown",
+      "source_count": 0,
+      "proxy_source_count": 3,
       "sources": [
         {
-          "label": "Eastmoney A-share F10 financial indicators",
-          "kind": "formal_public_f10",
-          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
         }
       ],
       "notes": [
-        "formal provider report_date=2026-03-31, notice_date=2026-04-29",
-        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-financials-insurance, quote_fresh=True, risk_state=neutral"
       ],
-      "evidence_mode": "formal_provider_point_in_time",
-      "proxy_only": false,
-      "fundamental_score": 0.499,
-      "valuation_score": 0.472,
-      "catalyst_score": 0.432,
-      "flow_score": 0.54,
-      "macro_score": 0.42,
-      "total_score": 0.475,
-      "age_days": 18
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.53,
+      "catalyst_score": 0.5,
+      "flow_score": 0.47,
+      "macro_score": 0.5,
+      "total_score": 0.502,
+      "age_days": 0
     },
     "601899.SH": {
       "symbol": "601899.SH",
@@ -1321,10 +1335,10 @@
       "fundamental_score": 0.685,
       "valuation_score": 0.605,
       "catalyst_score": 0.774,
-      "flow_score": 0.54,
-      "macro_score": 0.42,
-      "total_score": 0.643,
-      "age_days": 25
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.636,
+      "age_days": 27
     },
     "6862.HK": {
       "symbol": "6862.HK",
@@ -1350,12 +1364,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.581,
-      "valuation_score": 0.56,
+      "valuation_score": 0.561,
       "catalyst_score": 0.472,
-      "flow_score": 0.54,
-      "macro_score": 0.42,
-      "total_score": 0.527,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.52,
+      "age_days": 139
     },
     "688981.SH": {
       "symbol": "688981.SH",
@@ -1383,10 +1397,10 @@
       "fundamental_score": 0.522,
       "valuation_score": 0.518,
       "catalyst_score": 0.542,
-      "flow_score": 0.58,
-      "macro_score": 0.38,
-      "total_score": 0.521,
-      "age_days": 2
+      "flow_score": 0.48,
+      "macro_score": 0.46,
+      "total_score": 0.514,
+      "age_days": 4
     },
     "9618.HK": {
       "symbol": "9618.HK",
@@ -1412,12 +1426,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.418,
-      "valuation_score": 0.594,
+      "valuation_score": 0.595,
       "catalyst_score": 0.381,
-      "flow_score": 0.56,
-      "macro_score": 0.38,
-      "total_score": 0.461,
-      "age_days": 47
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.452,
+      "age_days": 49
     },
     "9988.HK": {
       "symbol": "9988.HK",
@@ -1445,10 +1459,10 @@
       "fundamental_score": 0.472,
       "valuation_score": 0.568,
       "catalyst_score": 0.377,
-      "flow_score": 0.56,
-      "macro_score": 0.38,
-      "total_score": 0.471,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.461,
+      "age_days": 139
     },
     "9992.HK": {
       "symbol": "9992.HK",
@@ -1474,12 +1488,12 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.798,
-      "valuation_score": 0.506,
+      "valuation_score": 0.507,
       "catalyst_score": 0.8,
-      "flow_score": 0.56,
-      "macro_score": 0.42,
-      "total_score": 0.667,
-      "age_days": 137
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.657,
+      "age_days": 139
     }
   },
   "findings": [
@@ -1487,49 +1501,49 @@
       "symbol": "0002.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "0002.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.501
+      "total_score": 0.5
     },
     {
       "symbol": "000333.SZ",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.522
+      "total_score": 0.507
     },
     {
       "symbol": "0005.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 47
+      "age_days": 49
     },
     {
       "symbol": "0005.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.542
+      "total_score": 0.532
     },
     {
       "symbol": "0006.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "0006.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.521
+      "total_score": 0.529
     },
     {
       "symbol": "002594.SZ",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.413
+      "total_score": 0.404
     },
     {
       "symbol": "002594.SZ",
@@ -1540,37 +1554,37 @@
       "symbol": "0386.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 47
+      "age_days": 49
     },
     {
       "symbol": "0386.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.546
+      "total_score": 0.539
     },
     {
       "symbol": "0388.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 47
+      "age_days": 49
     },
     {
       "symbol": "0388.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.546
+      "total_score": 0.536
     },
     {
       "symbol": "0700.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 47
+      "age_days": 49
     },
     {
       "symbol": "0700.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.532
+      "total_score": 0.522
     },
     {
       "symbol": "0700.HK",
@@ -1581,49 +1595,49 @@
       "symbol": "0728.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 47
+      "age_days": 49
     },
     {
       "symbol": "0728.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.526
+      "total_score": 0.512
     },
     {
       "symbol": "0857.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 47
+      "age_days": 49
     },
     {
       "symbol": "0857.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.519
+      "total_score": 0.521
     },
     {
       "symbol": "0883.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 47
+      "age_days": 49
     },
     {
       "symbol": "0941.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 47
+      "age_days": 49
     },
     {
       "symbol": "0941.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.531
+      "total_score": 0.521
     },
     {
       "symbol": "1024.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "1024.HK",
@@ -1634,25 +1648,25 @@
       "symbol": "1093.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "1093.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.523
+      "total_score": 0.516
     },
     {
       "symbol": "1177.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "1177.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.479
+      "total_score": 0.466
     },
     {
       "symbol": "1177.HK",
@@ -1663,37 +1677,37 @@
       "symbol": "1299.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "1810.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "1810.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.533
+      "total_score": 0.523
     },
     {
       "symbol": "2020.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "2020.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.545
+      "total_score": 0.538
     },
     {
       "symbol": "2269.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "2269.HK",
@@ -1704,13 +1718,13 @@
       "symbol": "2331.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "2331.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.541
+      "total_score": 0.535
     },
     {
       "symbol": "2800.HK",
@@ -1723,17 +1737,6 @@
       "severity": "warning",
       "reason": "nontechnical_proxy_only",
       "proxy_source_count": 3
-    },
-    {
-      "symbol": "2800.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.542
-    },
-    {
-      "symbol": "2800.HK",
-      "severity": "warning",
-      "reason": "event_risk_quote_stale"
     },
     {
       "symbol": "2800.HK",
@@ -1744,7 +1747,7 @@
       "symbol": "300750.SZ",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 31
+      "age_days": 33
     },
     {
       "symbol": "3033.HK",
@@ -1762,12 +1765,7 @@
       "symbol": "3033.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.53
-    },
-    {
-      "symbol": "3033.HK",
-      "severity": "warning",
-      "reason": "event_risk_quote_stale"
+      "total_score": 0.546
     },
     {
       "symbol": "3033.HK",
@@ -1790,12 +1788,7 @@
       "symbol": "3067.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.527
-    },
-    {
-      "symbol": "3067.HK",
-      "severity": "warning",
-      "reason": "event_risk_quote_stale"
+      "total_score": 0.546
     },
     {
       "symbol": "3067.HK",
@@ -1806,13 +1799,13 @@
       "symbol": "3690.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "3690.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.405
+      "total_score": 0.395
     },
     {
       "symbol": "3690.HK",
@@ -1823,7 +1816,7 @@
       "symbol": "510880.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.532
+      "total_score": 0.534
     },
     {
       "symbol": "512480.SH",
@@ -1834,7 +1827,7 @@
       "symbol": "515790.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.534
+      "total_score": 0.532
     },
     {
       "symbol": "515790.SH",
@@ -1850,7 +1843,7 @@
       "symbol": "600036.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.534
+      "total_score": 0.533
     },
     {
       "symbol": "600036.SH",
@@ -1858,39 +1851,84 @@
       "reason": "event_risk_elevated"
     },
     {
+      "symbol": "600276.SH",
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "warning",
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.502
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
       "symbol": "601088.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.497
+      "total_score": 0.49
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "warning",
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "601318.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.475
+      "total_score": 0.502
     },
     {
       "symbol": "601318.SH",
       "severity": "warning",
-      "reason": "event_risk_elevated"
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
     },
     {
       "symbol": "6862.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     },
     {
       "symbol": "6862.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.527
+      "total_score": 0.52
     },
     {
       "symbol": "688981.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.521
+      "total_score": 0.514
     },
     {
       "symbol": "688981.SH",
@@ -1901,30 +1939,30 @@
       "symbol": "9618.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 47
+      "age_days": 49
     },
     {
       "symbol": "9618.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.452
+    },
+    {
+      "symbol": "9618.HK",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "info",
+      "reason": "nontechnical_evidence_stale",
+      "age_days": 139
+    },
+    {
+      "symbol": "9988.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
       "total_score": 0.461
-    },
-    {
-      "symbol": "9618.HK",
-      "severity": "warning",
-      "reason": "event_risk_policy"
-    },
-    {
-      "symbol": "9988.HK",
-      "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 137
-    },
-    {
-      "symbol": "9988.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.471
     },
     {
       "symbol": "9988.HK",
@@ -1935,13 +1973,13 @@
       "symbol": "9992.HK",
       "severity": "info",
       "reason": "nontechnical_evidence_stale",
-      "age_days": 137
+      "age_days": 139
     }
   ],
   "sources": {
     "config": "D:\\Code\\yoyo\\config\\nontechnical_evidence.toml",
     "trade_universe": "D:\\Code\\yoyo\\config\\trade_universe.toml",
-    "snapshot": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-17.json",
+    "snapshot": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-19.json",
     "ranking": null
   }
 }

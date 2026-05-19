@@ -2534,6 +2534,62 @@ horizon_days = 14
             self.assertEqual(summary["paths"]["ranking"], str(tmp_path.resolve() / "research" / "rankings" / "2026-04-27-close-ranking.json"))
             self.assertEqual(summary["paths"]["dashboard"], str(tmp_path.resolve() / "research" / "dashboard" / "index.html"))
 
+    def test_daily_shadow_runner_refreshes_live_snapshots_by_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_daily_shadow_configs(tmp_path)
+            snapshot = tmp_path / "data" / "snapshots" / "2026-04-27.json"
+            radar_snapshot = tmp_path / "data" / "snapshots" / "2026-04-27-radar.json"
+            snapshot.parent.mkdir(parents=True, exist_ok=True)
+            snapshot.write_text(json.dumps({"as_of_date": "2026-04-27", "items": []}), encoding="utf-8")
+            radar_snapshot.write_text(json.dumps({"as_of_date": "2026-04-27", "items": []}), encoding="utf-8")
+            calls = []
+
+            def fake_runner(name, command, cwd, check=True):
+                calls.append((name, [str(part) for part in command], cwd, check))
+                return 0
+
+            daily_shadow.run_pipeline(
+                daily_shadow.DailyShadowOptions(
+                    root=tmp_path,
+                    python_bin="python",
+                    date="2026-04-27",
+                    session="close",
+                ),
+                runner=fake_runner,
+            )
+
+            names = [name for name, *_ in calls]
+            self.assertIn("fetch_trade_snapshot", names)
+            self.assertIn("fetch_radar_snapshot", names)
+
+    def test_daily_shadow_runner_reuses_historical_snapshot_by_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            self.write_daily_shadow_configs(tmp_path)
+            snapshot = tmp_path / "data" / "snapshots" / "2026-04-27.json"
+            snapshot.parent.mkdir(parents=True, exist_ok=True)
+            snapshot.write_text(json.dumps({"as_of_date": "2026-04-27", "items": []}), encoding="utf-8")
+            calls = []
+
+            def fake_runner(name, command, cwd, check=True):
+                calls.append((name, [str(part) for part in command], cwd, check))
+                return 0
+
+            daily_shadow.run_pipeline(
+                daily_shadow.DailyShadowOptions(
+                    root=tmp_path,
+                    python_bin="python",
+                    date="2026-04-27",
+                    session="historical",
+                    evaluate_shadow=False,
+                ),
+                runner=fake_runner,
+            )
+
+            names = [name for name, *_ in calls]
+            self.assertNotIn("fetch_trade_snapshot", names)
+
     def test_investment_dashboard_builds_static_html_from_fixture_artifacts(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = pathlib.Path(tmp)
@@ -2572,6 +2628,7 @@ horizon_days = 14
                                 "qualified_for_action": True,
                                 "qualified_for_watch": True,
                                 "action_disqualifiers": [],
+                                "quote_trade_date": "2026-04-27",
                                 "nontechnical_evidence": {"status": "available", "total_score": 0.74, "event_risk": "low", "source_count": 2},
                             },
                             {
@@ -2581,6 +2638,7 @@ horizon_days = 14
                                 "qualified_for_action": False,
                                 "qualified_for_watch": True,
                                 "action_disqualifiers": ["quote_trade_date_mismatch", "event_risk_quote_stale", "nontechnical_proxy_only"],
+                                "quote_trade_date": "2026-04-26",
                                 "nontechnical_evidence": {"status": "proxy_only", "proxy_only": True, "total_score": 0.58, "event_risk": "unknown", "proxy_source_count": 3},
                             },
                         ],
@@ -2610,6 +2668,14 @@ horizon_days = 14
             self.assertIn("仅供研究 · 非交易信号 · 不构成投资建议", html_text)
             self.assertIn("id=\"symbolSearch\"", html_text)
             self.assertIn("当前前向胜率", html_text)
+            self.assertIn("最新执行时间", html_text)
+            self.assertIn("generated_at_hkt", result["payload"])
+            self.assertIn("行情快照日期", html_text)
+            self.assertIn("行情实际交易日", html_text)
+            self.assertIn("本次分析有 1 个标的使用非报告日行情", html_text)
+            self.assertEqual(result["payload"]["snapshot"]["as_of_date"], "2026-04-27")
+            self.assertEqual(result["payload"]["snapshot"]["latest_quote_trade_date"], "2026-04-27")
+            self.assertEqual(result["payload"]["snapshot"]["quote_date_mismatch_count"], 1)
             self.assertIn("data-filter=\"consider\"", html_text)
             self.assertIn("data-filter=\"confirm\"", html_text)
             self.assertIn("data-filter=\"observe\"", html_text)
