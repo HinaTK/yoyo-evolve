@@ -2590,6 +2590,12 @@ horizon_days = 14
             names = [name for name, *_ in calls]
             self.assertNotIn("fetch_trade_snapshot", names)
 
+    def test_investment_evolve_refreshes_live_llm_outputs_by_default(self):
+        text = (ROOT / "scripts" / "evolve_investment.sh").read_text(encoding="utf-8")
+
+        self.assertIn('SKIP_EXISTING_OUTPUTS="${SKIP_EXISTING_OUTPUTS:-}"', text)
+        self.assertIn('if [ "$SESSION" = "historical" ]; then\n        SKIP_EXISTING_OUTPUTS="true"\n    else\n        SKIP_EXISTING_OUTPUTS="false"', text)
+
     def test_investment_dashboard_builds_static_html_from_fixture_artifacts(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = pathlib.Path(tmp)
