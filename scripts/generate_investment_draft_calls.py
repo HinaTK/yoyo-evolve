@@ -14,10 +14,28 @@ CONFIDENCE_RISK_PENALTIES = {
     "repeated_symbol_selection_error": 0.05,
     "backtest_adverse_breach": 0.08,
 }
+WATCH_COMPATIBLE_DISQUALIFIERS = {"cost_gate_failed"}
 
 
 def load_json(path: pathlib.Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def focus_rows(focus_pool: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    if not focus_pool:
+        return {}
+    rows = {}
+    for key in ("active_focus_symbols", "watch_focus_symbols"):
+        for row in focus_pool.get(key, []):
+            if isinstance(row, dict) and row.get("symbol"):
+                rows[str(row["symbol"])] = row
+    for industry in focus_pool.get("industry_ranking", []):
+        if not isinstance(industry, dict):
+            continue
+        for row in industry.get("top_symbols", []):
+            if isinstance(row, dict) and row.get("symbol"):
+                rows.setdefault(str(row["symbol"]), row)
+    return rows
 
 
 def recommendation_state(row: dict[str, Any], source_layer: str) -> str:
@@ -29,8 +47,10 @@ def recommendation_state(row: dict[str, Any], source_layer: str) -> str:
         and not row.get("action_disqualifiers")
     ):
         return "buy_candidate"
-    if bool(row.get("qualified_for_watch")) and not row.get("disqualifiers"):
-        return "watch_only"
+    if bool(row.get("qualified_for_watch")):
+        disqualifiers = {str(item) for item in row.get("disqualifiers", [])}
+        if not disqualifiers or disqualifiers <= WATCH_COMPATIBLE_DISQUALIFIERS:
+            return "watch_only"
     return "avoid"
 
 
@@ -66,10 +86,10 @@ def confidence(row: dict[str, Any], state: str) -> float:
     return round(max(0.15, min(0.45, 0.20 + (score / 100.0) * 0.20) - penalty), 2)
 
 
-def evidence(row: dict[str, Any], state: str) -> list[str]:
+def evidence(row: dict[str, Any], state: str, focus_row: dict[str, Any] | None = None) -> list[str]:
     risk = row.get("symbol_risk") if isinstance(row.get("symbol_risk"), dict) else {}
     nontechnical = row.get("nontechnical_evidence") if isinstance(row.get("nontechnical_evidence"), dict) else {}
-    return [
+    values = [
         f"score={row.get('score')}, trend_score={row.get('trend_score')}, momentum_score={row.get('momentum_score')}",
         f"expected_edge_bps={row.get('expected_edge_bps')}, net_expected_edge_bps={row.get('net_expected_edge_bps')}, cost_gate_passed={row.get('cost_gate_passed')}",
         f"source_layer={row.get('source_layer')}, eligible_for_action_from_layer={row.get('eligible_for_action_from_layer')}, layer_action_cap={row.get('layer_action_cap')}",
@@ -80,6 +100,11 @@ def evidence(row: dict[str, Any], state: str) -> list[str]:
         f"nontechnical_evidence status={nontechnical.get('status')}, total_score={nontechnical.get('total_score')}, event_risk={nontechnical.get('event_risk')}, flags={row.get('nontechnical_evidence_flags', [])}",
         f"latest_close={row.get('latest_close')}, ma20={row.get('ma20')}, ma60={row.get('ma60')}, range_pos_60={row.get('range_pos_60')}, volume_ratio_20={row.get('volume_ratio_20')}",
     ]
+    if focus_row:
+        values.append(
+            f"focus_industry={focus_row.get('focus_industry')} rank={focus_row.get('focus_industry_rank')} score={focus_row.get('focus_industry_score')} role={focus_row.get('focus_role')} focus_state={focus_row.get('focus_state')}"
+        )
+    return values
 
 
 def risks(row: dict[str, Any], horizon_days_min: int, horizon_days_max: int) -> list[str]:
@@ -102,11 +127,11 @@ def risks(row: dict[str, Any], horizon_days_min: int, horizon_days_max: int) -> 
     return list(dict.fromkeys(values))
 
 
-def make_recommendation(row: dict[str, Any], horizon_days_min: int, horizon_days_max: int, source_layer: str) -> dict[str, Any]:
+def make_recommendation(row: dict[str, Any], horizon_days_min: int, horizon_days_max: int, source_layer: str, focus_row: dict[str, Any] | None = None) -> dict[str, Any]:
     state = recommendation_state(row, source_layer)
     symbol = str(row.get("symbol") or "")
     method = row.get("edge_method") or "technical_snapshot_score_v1"
-    return {
+    recommendation = {
         "symbol": symbol,
         "state": state,
         "theme": row.get("theme") or "unknown",
@@ -115,17 +140,40 @@ def make_recommendation(row: dict[str, Any], horizon_days_min: int, horizon_days
         "horizon_days_max": horizon_days_max,
         "confidence": confidence(row, state),
         "rationale": f"Draft {state} generated from deterministic ranking and edge gate fields for {symbol}.",
-        "evidence": evidence(row, state),
+        "evidence": evidence(row, state, focus_row),
         "risks": risks(row, horizon_days_min, horizon_days_max),
         "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
         "selection_source_theme": row.get("theme") or "unknown",
         "selection_reason": f"source_layer={source_layer} rank_score={row.get('score')} edge_method={method} evidence_window={row.get('evidence_window')}",
     }
+    if focus_row:
+        recommendation.update(
+            {
+                "focus_industry": focus_row.get("focus_industry"),
+                "focus_industry_name": focus_row.get("focus_industry_name"),
+                "focus_industry_score": focus_row.get("focus_industry_score"),
+                "focus_industry_rank": focus_row.get("focus_industry_rank"),
+                "focus_role": focus_row.get("focus_role"),
+                "focus_state": focus_row.get("focus_state"),
+            }
+        )
+        recommendation["selection_reason"] += f" focus_industry={focus_row.get('focus_industry')} focus_rank={focus_row.get('focus_industry_rank')} focus_role={focus_row.get('focus_role')}"
+    return recommendation
+
+
+def ranking_rows_by_symbol(ranking: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    rows: dict[str, dict[str, Any]] = {}
+    for key in ("all_ranked", "top_candidates", "diagnostic_candidates", "actionable_candidates"):
+        for row in ranking.get(key, []):
+            if isinstance(row, dict) and row.get("symbol"):
+                rows[str(row["symbol"])] = row
+    return rows
 
 
 def build_calls(
     ranking: dict[str, Any],
     include_diagnostics: bool,
+    focus_pool: dict[str, Any] | None = None,
     date: str | None = None,
     session: str | None = None,
     horizon_days_min: int = 14,
@@ -138,6 +186,17 @@ def build_calls(
             if row.get("symbol") not in seen:
                 rows.append((row, "diagnostic_candidates"))
                 seen.add(row.get("symbol"))
+    focus_by_symbol = focus_rows(focus_pool)
+    ranked_by_symbol = ranking_rows_by_symbol(ranking)
+    if include_diagnostics and focus_by_symbol:
+        for symbol in focus_by_symbol:
+            if symbol in seen:
+                continue
+            row = ranked_by_symbol.get(symbol)
+            if row is None:
+                continue
+            rows.append((row, "focus_watch_symbols"))
+            seen.add(symbol)
     return {
         "date": date or ranking.get("as_of_date"),
         "session": session or ranking.get("as_of_session") or ranking.get("session") or "unknown",
@@ -150,7 +209,14 @@ def build_calls(
             "actionable_rule": "buy_candidate requires qualified_for_action=true, cost_gate_passed=true, and same_theme_peer_evidence_passed=true",
             "confidence_rule": "confidence is capped by score and reduced for adverse symbol risk, failed peer evidence, disqualifiers, and failed edge/cost gates",
         },
-        "recommendations": [make_recommendation(row, horizon_days_min, horizon_days_max, source_layer) for row, source_layer in rows],
+        "focus_policy": {
+            "source": "dynamic_focus_pool" if focus_pool else None,
+            "active_focus_industries": (focus_pool or {}).get("active_focus_industries", []),
+            "active_focus_symbol_count": len((focus_pool or {}).get("active_focus_symbols", [])),
+            "watch_focus_industries": (focus_pool or {}).get("watch_focus_industries", []),
+            "watch_focus_symbol_count": len((focus_pool or {}).get("watch_focus_symbols", [])),
+        },
+        "recommendations": [make_recommendation(row, horizon_days_min, horizon_days_max, source_layer, focus_by_symbol.get(str(row.get("symbol")))) for row, source_layer in rows],
     }
 
 
@@ -160,13 +226,15 @@ def main() -> int:
     parser.add_argument("--output", required=True)
     parser.add_argument("--date", default=None)
     parser.add_argument("--session", default=None)
+    parser.add_argument("--focus-pool", default=None)
     parser.add_argument("--horizon-days-min", type=int, default=14)
     parser.add_argument("--horizon-days-max", type=int, default=90)
     parser.add_argument("--include-diagnostics", action="store_true")
     args = parser.parse_args()
 
     ranking_path = pathlib.Path(args.ranking)
-    calls = build_calls(load_json(ranking_path), args.include_diagnostics, args.date, args.session, args.horizon_days_min, args.horizon_days_max)
+    focus_pool = load_json(pathlib.Path(args.focus_pool)) if args.focus_pool else None
+    calls = build_calls(load_json(ranking_path), args.include_diagnostics, focus_pool, args.date, args.session, args.horizon_days_min, args.horizon_days_max)
     calls["source_ranking"] = str(ranking_path)
     out_path = pathlib.Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)

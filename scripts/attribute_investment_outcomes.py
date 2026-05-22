@@ -82,6 +82,21 @@ def ranking_rows(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return rows
 
 
+def focus_rows(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    rows: dict[str, dict[str, Any]] = {}
+    for key in ("active_focus_symbols", "watch_focus_symbols"):
+        for item in payload.get(key, []):
+            if isinstance(item, dict) and item.get("symbol"):
+                rows[str(item["symbol"])] = item
+    for industry in payload.get("industry_ranking", []):
+        if not isinstance(industry, dict):
+            continue
+        for item in industry.get("top_symbols", []):
+            if isinstance(item, dict) and item.get("symbol"):
+                rows.setdefault(str(item["symbol"]), item)
+    return rows
+
+
 def top_theme_row(payload: dict[str, Any], theme: str | None) -> dict[str, Any] | None:
     if not theme:
         return None
@@ -124,6 +139,8 @@ def classify_attribution(
     risk_verdict: dict[str, Any] | None,
     ranking_row: dict[str, Any] | None,
     ranking: dict[str, Any],
+    focus_row: dict[str, Any] | None = None,
+    focus_has_active: bool = False,
 ) -> tuple[list[str], list[str]]:
     tags: list[str] = []
     evidence: list[str] = []
@@ -147,6 +164,16 @@ def classify_attribution(
     if learning == "theme_error":
         tags.append("theme_error")
         evidence.append(f"theme_error peer_median_return_pct={record.get('peer_median_return_pct')}")
+
+    if focus_row:
+        evidence.append(
+            f"focus_industry={focus_row.get('focus_industry')} focus_rank={focus_row.get('focus_industry_rank')} focus_score={focus_row.get('focus_industry_score')} focus_role={focus_row.get('focus_role')} focus_state={focus_row.get('focus_state')}"
+        )
+        if learning == "theme_error":
+            tags.append("focus_industry_error")
+    elif focus_has_active and final_state in BULLISH_STATES and verdict == "fail":
+        tags.append("focus_priority_ignored")
+        evidence.append("bullish failed call was outside active_focus_symbols while focus pool had active industries")
 
     if ranking_row:
         cost_passed = ranking_row.get("cost_gate_passed")
@@ -195,7 +222,7 @@ def classify_attribution(
     return unique(tags), unique(evidence)
 
 
-def build_attribution(records_payload: dict[str, Any], calls_dir: pathlib.Path, rankings_dir: pathlib.Path, risk_dir: pathlib.Path) -> dict[str, Any]:
+def build_attribution(records_payload: dict[str, Any], calls_dir: pathlib.Path, rankings_dir: pathlib.Path, risk_dir: pathlib.Path, focus_dir: pathlib.Path | None = None) -> dict[str, Any]:
     entries = []
     counter: Counter[str] = Counter()
     call_counter: Counter[str] = Counter()
@@ -218,11 +245,13 @@ def build_attribution(records_payload: dict[str, Any], calls_dir: pathlib.Path, 
         draft_payload = cached(first_existing(calls_dir, stems, "draft-policy"))
         risk_payload = cached(first_existing(risk_dir, stems, "risk-review"))
         ranking_payload = cached(first_existing(rankings_dir, stems, "ranking"))
+        focus_payload = cached(first_existing(focus_dir, stems, "focus")) if focus_dir else {}
         final_call = recommendations_by_symbol(final_payload).get(symbol)
         draft_call = recommendations_by_symbol(draft_payload).get(symbol)
         risk_verdict = risk_by_symbol(risk_payload).get(symbol)
         ranking_row = ranking_rows(ranking_payload).get(symbol)
-        tags, evidence = classify_attribution(record, final_call, draft_call, risk_verdict, ranking_row, ranking_payload)
+        focus_row = focus_rows(focus_payload).get(symbol)
+        tags, evidence = classify_attribution(record, final_call, draft_call, risk_verdict, ranking_row, ranking_payload, focus_row, bool(focus_payload.get("active_focus_symbols")))
         counter.update(tags)
         call_key = f"{call_date}|{session}|{symbol}"
         for tag in tags:
@@ -240,6 +269,9 @@ def build_attribution(records_payload: dict[str, Any], calls_dir: pathlib.Path, 
                 "draft_state": (draft_call or {}).get("state"),
                 "risk_decision": (risk_verdict or {}).get("risk_decision"),
                 "risk_cap": (risk_verdict or {}).get("final_state_cap"),
+                "focus_industry": (focus_row or final_call or draft_call or {}).get("focus_industry"),
+                "focus_industry_rank": (focus_row or final_call or draft_call or {}).get("focus_industry_rank"),
+                "focus_role": (focus_row or final_call or draft_call or {}).get("focus_role"),
                 "verdict": record.get("verdict"),
                 "return_pct": record.get("return_pct"),
                 "learning_tag": record.get("learning_tag"),
@@ -293,11 +325,12 @@ def main() -> int:
     parser.add_argument("--calls-dir", default=str(ROOT / "research" / "calls"))
     parser.add_argument("--rankings-dir", default=str(ROOT / "research" / "rankings"))
     parser.add_argument("--risk-dir", default=str(ROOT / "research" / "risk"))
+    parser.add_argument("--focus-dir", default=str(ROOT / "research" / "focus"))
     parser.add_argument("--output-json", default=str(ROOT / "research" / "evaluations" / "latest_attribution.json"))
     parser.add_argument("--output-md", default=str(ROOT / "research" / "evaluations" / "latest_attribution.md"))
     args = parser.parse_args()
 
-    result = build_attribution(load_json(pathlib.Path(args.records_json)), pathlib.Path(args.calls_dir), pathlib.Path(args.rankings_dir), pathlib.Path(args.risk_dir))
+    result = build_attribution(load_json(pathlib.Path(args.records_json)), pathlib.Path(args.calls_dir), pathlib.Path(args.rankings_dir), pathlib.Path(args.risk_dir), pathlib.Path(args.focus_dir))
     output_json = pathlib.Path(args.output_json)
     output_md = pathlib.Path(args.output_md)
     output_json.parent.mkdir(parents=True, exist_ok=True)

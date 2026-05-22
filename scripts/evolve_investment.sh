@@ -46,6 +46,7 @@ fi
 WATCHLIST_CONFIG="${WATCHLIST_CONFIG:-$ROOT_DIR/config/watchlist.toml}"
 TRADE_UNIVERSE_CONFIG="${TRADE_UNIVERSE_CONFIG:-$ROOT_DIR/config/trade_universe.toml}"
 RADAR_CONFIG="${RADAR_CONFIG:-$ROOT_DIR/config/market_radar.toml}"
+FOCUS_INDUSTRIES_CONFIG="${FOCUS_INDUSTRIES_CONFIG:-$ROOT_DIR/config/focus_industries.toml}"
 if [ -z "${RADAR_SNAPSHOT_FILE:-}" ]; then
     if [ "$SESSION" = "historical" ]; then
         RADAR_SNAPSHOT_FILE="$SNAPSHOT_FILE"
@@ -121,6 +122,8 @@ else
 fi
 RANKING_FILE="$ROOT_DIR/research/rankings/$OUTPUT_STEM-ranking.json"
 RANKING_REL="research/rankings/$OUTPUT_STEM-ranking.json"
+FOCUS_REL="research/focus/$OUTPUT_STEM-focus.json"
+FOCUS_FILE="$ROOT_DIR/$FOCUS_REL"
 ACTIVE_STRATEGY_FILE="$ROOT_DIR/config/active_strategy.toml"
 OPTIMIZATION_CONFIG="$ROOT_DIR/config/optimization.toml"
 SYMBOL_RISK_FILE="$ROOT_DIR/research/experiments/symbol_risk_memory.json"
@@ -133,9 +136,11 @@ RADAR_CONFIG_PY="$(python_path "$RADAR_CONFIG")"
 SNAPSHOT_FILE_PY="$(python_path "$SNAPSHOT_FILE")"
 RADAR_SNAPSHOT_FILE_PY="$(python_path "$RADAR_SNAPSHOT_FILE")"
 RANKING_FILE_PY="$(python_path "$RANKING_FILE")"
+FOCUS_FILE_PY="$(python_path "$FOCUS_FILE")"
 export SNAPSHOT_FILE_PY
 export RADAR_SNAPSHOT_FILE_PY
 export RANKING_FILE_PY
+export FOCUS_FILE_PY
 
 case "$SESSION" in
     morning)
@@ -152,7 +157,7 @@ case "$SESSION" in
         ;;
 esac
 
-mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations" "$ROOT_DIR/research/rankings" "$ROOT_DIR/research/experiments" "$ROOT_DIR/research/risk" "$ROOT_DIR/research/shadow"
+mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations" "$ROOT_DIR/research/rankings" "$ROOT_DIR/research/focus" "$ROOT_DIR/research/experiments" "$ROOT_DIR/research/risk" "$ROOT_DIR/research/shadow"
 
 if [ -f "$ROOT_DIR/scripts/yoyo_context.sh" ]; then
     # shellcheck disable=SC1091
@@ -249,6 +254,13 @@ if [ -f "$NONTECHNICAL_EVIDENCE_CONFIG" ]; then
     NONTECHNICAL_ARG=(--nontechnical-evidence "$NONTECHNICAL_EVIDENCE_FILE")
 fi
 "$PYTHON_BIN" "$ROOT_DIR/scripts/rank_investment_universe.py" --snapshot "$SNAPSHOT_FILE" --output "$RANKING_FILE" --strategy-config "$ACTIVE_STRATEGY_FILE" --as-of-session "$SESSION" "${SYMBOL_RISK_ARG[@]}" "${NONTECHNICAL_ARG[@]}" $RANK_ARGS
+
+if [ -f "$FOCUS_INDUSTRIES_CONFIG" ]; then
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/generate_investment_focus_pool.py" \
+        --ranking "$RANKING_FILE" \
+        --config "$FOCUS_INDUSTRIES_CONFIG" \
+        --output "$FOCUS_FILE"
+fi
 
 if [ "$ENABLE_SHADOW_LOGGING" = "true" ]; then
     SHADOW_FILE="$ROOT_DIR/research/shadow/$OUTPUT_STEM-shadow.json"
@@ -358,6 +370,16 @@ RANKING=$($PYTHON_BIN - <<'PY'
 import os, pathlib
 path = pathlib.Path(os.environ['RANKING_FILE_PY'])
 print(path.read_text(encoding='utf-8'))
+PY
+)
+
+FOCUS_POOL=$($PYTHON_BIN - <<'PY'
+import os, pathlib
+path = pathlib.Path(os.environ['FOCUS_FILE_PY'])
+if path.exists():
+    print(path.read_text(encoding='utf-8'))
+else:
+    print('{}')
 PY
 )
 
@@ -535,9 +557,11 @@ write_run_manifest() {
         --file optimization_config "$OPTIMIZATION_CONFIG" \
         --file trade_universe "$TRADE_UNIVERSE_CONFIG" \
         --file market_radar "$RADAR_CONFIG" \
+        --file focus_industries "$FOCUS_INDUSTRIES_CONFIG" \
         --file trade_snapshot "$SNAPSHOT_FILE" \
         --file radar_snapshot "$RADAR_SNAPSHOT_FILE" \
         --file ranking "$RANKING_FILE" \
+        --file focus_pool "$FOCUS_FILE" \
         --file draft_calls "$DRAFT_CALLS_FILE" \
         --file risk_review "$RISK_REVIEW_FILE" \
         --file final_calls "$CALLS_FILE" \
@@ -550,11 +574,17 @@ write_run_manifest() {
 
 write_run_manifest
 
+FOCUS_POOL_ARG=()
+if [ -f "$FOCUS_FILE" ]; then
+    FOCUS_POOL_ARG=(--focus-pool "$FOCUS_FILE")
+fi
+
 "$PYTHON_BIN" "$ROOT_DIR/scripts/generate_investment_draft_calls.py" \
     --ranking "$RANKING_FILE" \
     --output "$DRAFT_CALLS_FILE" \
     --date "$DATE" \
     --session "$SESSION" \
+    "${FOCUS_POOL_ARG[@]}" \
     $HORIZON_ARGS \
     --include-diagnostics
 
@@ -626,6 +656,8 @@ $RADAR_SNAPSHOT
 $SNAPSHOT
 - Deterministic trade universe ranking:
 $RANKING
+- Dynamic focus industries and symbols:
+$FOCUS_POOL
 - Stable rules:
 $RULES
 - Error patterns:
@@ -642,6 +674,8 @@ Output requirements:
 - Keep facts separate from interpretations.
 - First summarize market radar results by sector/theme strength, then explain which radar themes are actionable inside the trade universe.
 - Cover market regime, theme strength, ETF confirmation, standout names, and risk posture.
+- Treat the dynamic focus pool as the tactical priority layer for the user's four preferred industries: technology, new_energy, brokerage, and healthcare.
+- Explain which focus industries are active, watch, or diagnostic today; use watch_focus_symbols as observation candidates, and do not treat a symbol leaving active_focus_symbols as deletion from trade_universe.
 - If a radar theme is strong but not represented in the trade universe, say it is an external opportunity to consider adding later, not an immediate recommendation.
 - If a radar theme is represented in the trade universe, compare the available symbols and identify the best current expression of that theme.
 - Treat actionable_candidates as the only deterministic layer eligible for upgrade consideration; use diagnostic_candidates only for observation and explanation.
@@ -678,6 +712,8 @@ $RADAR_SNAPSHOT
 $SNAPSHOT
 - Deterministic trade universe ranking:
 $RANKING
+- Dynamic focus industries and symbols:
+$FOCUS_POOL
 - Stable rules:
 $RULES
 - Active learnings:
@@ -691,6 +727,7 @@ Plan requirements:
 - Write the markdown plan in Simplified Chinese.
 - Treat missing real holdings as recommendation-only mode: rank candidates for possible action, not as live portfolio management.
 - Start with a "市场雷达结论" section: strongest themes, weakest themes, and any opportunity not covered by the current trade universe.
+- Include a "四大行业动态优先级" section using the focus pool. Prioritize active_focus_industries and active_focus_symbols, include watch_focus_symbols under observation, and preserve all deterministic action gates.
 - Pick at most 5 candidates from the configured trade universe, not only the focused watchlist.
 - For each strong theme, compare same-theme symbols in the trade universe and explain why the selected symbol is currently better than its peers.
 - For each candidate, state why it deserves attention today.
@@ -728,6 +765,8 @@ $TRADE_UNIVERSE
 $RADAR_SNAPSHOT
 - Deterministic trade universe ranking:
 $RANKING
+- Dynamic focus industries and symbols:
+$FOCUS_POOL
 - Stable rules:
 $RULES
 - Error patterns:
@@ -745,6 +784,7 @@ Report requirements:
 - If portfolio mode is recommendation_only, explicitly say this is candidate recommendation mode, not real-position management; do not treat 100% cash as a portfolio decision.
 - Provide a top section called "今日结论" with three buckets: "可重点观察", "触发后才考虑", and "暂时回避/低优先级".
 - Include a "市场雷达" section before top candidates. Name the strongest/weakest radar themes, and clearly separate "雷达发现" from "当前交易池内建议".
+- Include a "四大行业优先级" section. Use focus_industry, focus_industry_score, focus_industry_rank, focus_role, and focus_state when available; explain why active focus names are prioritized, why watch focus names remain observation-only, or why names are downgraded.
 - Do not recommend radar-only symbols as trades unless they are also present in the configured trade universe; instead list them under "可考虑加入交易池".
 - For dynamic symbol selection, include a "为什么选它而不是同主题其他标的" paragraph for each top candidate.
 - Use the deterministic ranking as the starting point. You may override it only if you explicitly explain the evidence-based reason.
@@ -787,6 +827,8 @@ $RADAR_SNAPSHOT
 $SNAPSHOT
 - Deterministic trade universe ranking:
 $RANKING
+- Dynamic focus industries and symbols:
+$FOCUS_POOL
 - Deterministic draft policy calls:
 $( [ -f "$DRAFT_CALLS_FILE" ] && cat "$DRAFT_CALLS_FILE" )
 - Deterministic risk review:
@@ -806,6 +848,7 @@ Output requirements:
 - Do not turn qualified_for_action=false rows into buy_candidate, accumulate, or hold.
 - If is_theme_leader=false, keep the state non-actionable unless selection_reason explains why it is better than the deterministic same-theme leader.
 - Do not use actionable states unless the ranking score and cost gate support enough expected edge.
+- Preserve focus_industry, focus_industry_score, focus_industry_rank, focus_role, and focus_state from the draft policy when present.
 - Use this exact schema:
   {
     "date": "$DATE",
@@ -827,7 +870,12 @@ Output requirements:
         "risks": ["risk 1", "risk 2"],
           "invalidation": "single string",
           "selection_source_theme": "theme that caused this symbol to be selected",
-          "selection_reason": "why this symbol was selected over same-theme alternatives"
+          "selection_reason": "why this symbol was selected over same-theme alternatives",
+          "focus_industry": "optional focus industry id when available",
+          "focus_industry_score": 0.0,
+          "focus_industry_rank": 1,
+          "focus_role": "leader|high_beta|confirming_etf|configured_theme_member",
+          "focus_state": "actionable|watch_only|diagnostic"
         }
       ]
     }
@@ -863,6 +911,8 @@ $( [ -f "$REPORT_FILE" ] && cat "$REPORT_FILE" )
 $SNAPSHOT
 - Deterministic trade universe ranking:
 $RANKING
+- Dynamic focus industries and symbols:
+$FOCUS_POOL
 - Stable rules:
 $RULES
 - Error patterns:
@@ -876,6 +926,7 @@ $OPTIMIZATION_SUMMARY
 
 Reflection requirements:
 - Write the reflection in Simplified Chinese.
+- Reflect on whether the four-industry focus priority improved or distorted today's selection; note industry-level mistakes separately from same-theme symbol-selection mistakes.
 - Record where confidence is weakest.
 - State what evidence is still missing.
 - Name 1-3 likely failure modes for today's recommendations.

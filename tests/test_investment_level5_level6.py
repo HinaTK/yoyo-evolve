@@ -37,6 +37,7 @@ import build_investment_evidence_ledger as evidence_ledger  # noqa: E402
 import build_investment_calibration_scorecard as calibration_scorecard  # noqa: E402
 import build_nontechnical_evidence as nontechnical_builder  # noqa: E402
 import evaluate_nontechnical_evidence as nontechnical_eval  # noqa: E402
+import generate_investment_focus_pool as focus_pool  # noqa: E402
 
 
 class InvestmentLevel5Level6Tests(unittest.TestCase):
@@ -175,6 +176,26 @@ valuation_score = 0.20
 catalyst_score = 0.25
 flow_score = 0.15
 macro_score = 0.10
+""".lstrip(),
+            encoding="utf-8",
+        )
+        (config_dir / "focus_industries.toml").write_text(
+            """
+[policy]
+max_active_industries = 2
+max_active_symbols_per_industry = 2
+min_active_industry_score = 40
+min_watch_industry_score = 20
+min_focus_symbol_score = 0
+
+[[industries]]
+id = "growth_focus"
+name = "成长"
+strategic_weight = 1.0
+themes = ["growth"]
+leader_symbols = ["AAA.HK"]
+high_beta_symbols = []
+confirming_symbols = []
 """.lstrip(),
             encoding="utf-8",
         )
@@ -1237,6 +1258,157 @@ macro_score = 0.10
         self.assertTrue(ranked[0]["cost_gate_passed"])
         self.assertTrue(ranked[0]["qualified_for_action"])
         self.assertIn("same_theme_best_peer_evidence_passed", ranked[0]["qualification_flags"])
+
+    def test_focus_pool_prioritizes_configured_industries_and_symbols(self):
+        ranking = {
+            "snapshot": "data/snapshots/test.json",
+            "as_of_date": "2026-05-20",
+            "as_of_session": "close",
+            "all_ranked": [
+                {
+                    "symbol": "AAA.HK",
+                    "name": "AAA",
+                    "theme": "internet-platform",
+                    "kind": "stock",
+                    "score": 82.0,
+                    "qualified_for_action": True,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": False,
+                    "cost_gate_passed": True,
+                    "volume_ratio_20": 1.6,
+                    "disqualifiers": [],
+                    "action_disqualifiers": [],
+                },
+                {
+                    "symbol": "BBB.HK",
+                    "name": "BBB",
+                    "theme": "healthcare-biotech",
+                    "kind": "stock",
+                    "score": 58.0,
+                    "qualified_for_action": False,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": False,
+                    "cost_gate_passed": False,
+                    "volume_ratio_20": 1.1,
+                    "disqualifiers": [],
+                    "action_disqualifiers": ["cost_gate_failed"],
+                },
+                {"symbol": "CCC.HK", "theme": "energy", "kind": "stock", "score": 90.0, "qualified_for_action": True, "qualified_for_watch": True, "diagnostic_only": False, "volume_ratio_20": 2.0},
+            ],
+        }
+        config = {
+            "policy": {"max_active_industries": 2, "max_active_symbols_per_industry": 2, "min_active_industry_score": 40, "min_watch_industry_score": 20, "min_focus_symbol_score": 0},
+            "industries": [
+                {"id": "technology", "name": "科技", "strategic_weight": 1.1, "themes": ["internet-platform"], "leader_symbols": ["AAA.HK"], "high_beta_symbols": [], "confirming_symbols": []},
+                {"id": "healthcare", "name": "医疗", "strategic_weight": 1.0, "themes": ["healthcare-biotech"], "leader_symbols": ["BBB.HK"], "high_beta_symbols": [], "confirming_symbols": []},
+            ],
+        }
+
+        result = focus_pool.rank_industries(ranking, config)
+
+        self.assertEqual(result["active_focus_industries"][0], "technology")
+        self.assertEqual(result["active_focus_symbols"][0]["symbol"], "AAA.HK")
+        self.assertEqual(result["active_focus_symbols"][0]["focus_role"], "leader")
+        self.assertEqual(result["active_focus_symbols"][0]["focus_state"], "actionable")
+        self.assertNotIn("CCC.HK", {row["symbol"] for row in result["active_focus_symbols"]})
+
+    def test_focus_pool_keeps_watch_industry_leaders_observable(self):
+        ranking = {
+            "snapshot": "data/snapshots/test.json",
+            "as_of_date": "2026-05-20",
+            "as_of_session": "close",
+            "all_ranked": [
+                {"symbol": "300750.SZ", "name": "CATL", "theme": "china-a-battery-ev", "kind": "stock", "score": 56.0, "qualified_for_action": False, "qualified_for_watch": True, "diagnostic_only": True, "cost_gate_passed": False, "volume_ratio_20": 0.92, "disqualifiers": ["cost_gate_failed"], "action_disqualifiers": ["volume_ratio_20_below_1_0"]},
+                {"symbol": "515790.SH", "name": "PV ETF", "theme": "china-a-renewable-energy", "kind": "etf", "score": 2.0, "qualified_for_action": False, "qualified_for_watch": False, "diagnostic_only": True, "cost_gate_passed": False, "volume_ratio_20": 1.4, "disqualifiers": ["downtrend_regime"], "action_disqualifiers": []},
+            ],
+        }
+        config = {
+            "policy": {"max_active_industries": 2, "max_active_symbols_per_industry": 2, "max_watch_symbols_per_industry": 2, "min_active_industry_score": 90, "min_watch_industry_score": 20, "min_focus_symbol_score": 0},
+            "industries": [
+                {"id": "new_energy", "name": "新能源", "strategic_weight": 1.0, "themes": ["china-a-battery-ev", "china-a-renewable-energy"], "leader_symbols": ["300750.SZ"], "high_beta_symbols": [], "confirming_symbols": ["515790.SH"]},
+            ],
+        }
+
+        result = focus_pool.rank_industries(ranking, config)
+
+        self.assertEqual(result["watch_focus_industries"], ["new_energy"])
+        self.assertEqual(result["watch_focus_symbols"][0]["symbol"], "300750.SZ")
+        self.assertEqual(result["watch_focus_symbols"][0]["focus_state"], "watch_only")
+
+    def test_draft_calls_include_focus_pool_fields_when_available(self):
+        ranking = {
+            "snapshot": "data/snapshots/test.json",
+            "as_of_date": "2026-05-20",
+            "as_of_session": "close",
+            "all_ranked": [
+                {
+                    "symbol": "300750.SZ",
+                    "theme": "china-a-battery-ev",
+                    "kind": "stock",
+                    "score": 56.0,
+                    "qualified_for_action": False,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": True,
+                    "cost_gate_passed": False,
+                    "same_theme_peer_evidence_passed": True,
+                    "action_disqualifiers": ["volume_ratio_20_below_1_0"],
+                    "disqualifiers": ["cost_gate_failed"],
+                }
+            ],
+            "actionable_candidates": [
+                {
+                    "symbol": "AAA.HK",
+                    "theme": "internet-platform",
+                    "kind": "stock",
+                    "score": 82.0,
+                    "qualified_for_action": True,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": False,
+                    "cost_gate_passed": True,
+                    "same_theme_peer_evidence_passed": True,
+                    "action_disqualifiers": [],
+                    "disqualifiers": [],
+                }
+            ],
+            "diagnostic_candidates": [],
+        }
+        focus = {
+            "active_focus_industries": ["technology"],
+            "watch_focus_industries": ["new_energy"],
+            "active_focus_symbols": [
+                {
+                    "symbol": "AAA.HK",
+                    "focus_industry": "technology",
+                    "focus_industry_name": "科技",
+                    "focus_industry_score": 76.5,
+                    "focus_industry_rank": 1,
+                    "focus_role": "leader",
+                    "focus_state": "actionable",
+                }
+            ],
+            "watch_focus_symbols": [
+                {
+                    "symbol": "300750.SZ",
+                    "focus_industry": "new_energy",
+                    "focus_industry_name": "新能源",
+                    "focus_industry_score": 48.0,
+                    "focus_industry_rank": 3,
+                    "focus_role": "leader",
+                    "focus_state": "watch_only",
+                }
+            ],
+        }
+
+        calls = draft_calls.build_calls(ranking, include_diagnostics=True, focus_pool=focus)
+        rec = calls["recommendations"][0]
+        by_symbol = {item["symbol"]: item for item in calls["recommendations"]}
+
+        self.assertEqual(rec["focus_industry"], "technology")
+        self.assertEqual(rec["focus_industry_rank"], 1)
+        self.assertIn("focus_industry=technology", rec["selection_reason"])
+        self.assertTrue(any("focus_industry=technology" in item for item in rec["evidence"]))
+        self.assertEqual(by_symbol["300750.SZ"]["focus_industry"], "new_energy")
+        self.assertEqual(by_symbol["300750.SZ"]["state"], "watch_only")
 
     def test_nontechnical_evidence_required_blocks_action_when_missing(self):
         item = ranker.item_score(
@@ -2498,7 +2670,7 @@ horizon_days = 14
                 runner=fake_runner,
             )
 
-            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "build_nontechnical_evidence", "rank_universe", "build_draft_calls", "build_risk_review", "validate_draft_calls", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard", "evaluate_nontechnical_attribution", "run_shadow_variants", "build_investment_dashboard"])
+            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "build_nontechnical_evidence", "rank_universe", "generate_focus_pool", "build_draft_calls", "build_risk_review", "validate_draft_calls", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard", "evaluate_nontechnical_attribution", "run_shadow_variants", "build_investment_dashboard"])
             self.assertTrue(all(command[0] == "python" for _, command, *_ in calls))
             self.assertFalse(any("bash" in part.lower() for _, command, *_ in calls for part in command))
             shadow_command = next(command for name, command, *_ in calls if name == "log_shadow")
@@ -2521,6 +2693,7 @@ horizon_days = 14
             self.assertEqual(attribution_command[attribution_command.index("--as-of-date") + 1], "2026-04-27")
             self.assertEqual(attribution_command[attribution_command.index("--as-of-session") + 1], "close")
             draft_command = next(command for name, command, *_ in calls if name == "build_draft_calls")
+            self.assertIn("--focus-pool", draft_command)
             self.assertIn("--include-diagnostics", draft_command)
             risk_command = next(command for name, command, *_ in calls if name == "build_risk_review")
             self.assertTrue(risk_command[risk_command.index("--draft-calls") + 1].endswith("2026-04-27-close-draft-policy.json"))
@@ -3821,6 +3994,26 @@ horizon_days = 14
 
         self.assertIn("llm_final_deviation", tags)
 
+    def test_attribution_tags_focus_industry_errors_separately(self):
+        record = {
+            "symbol": "AAA.HK",
+            "theme": "internet-platform",
+            "state": "buy_candidate",
+            "verdict": "fail",
+            "return_pct": -1.8,
+            "learning_tag": "theme_error",
+            "peer_median_return_pct": 0.9,
+        }
+        final_call = self.valid_call("AAA.HK", "buy_candidate")
+        draft_call = self.valid_call("AAA.HK", "buy_candidate")
+        focus_row = {"focus_industry": "technology", "focus_industry_rank": 1, "focus_industry_score": 77.0, "focus_role": "leader", "focus_state": "actionable"}
+
+        tags, evidence = attribution.classify_attribution(record, final_call, draft_call, None, None, {}, focus_row=focus_row)
+
+        self.assertIn("theme_error", tags)
+        self.assertIn("focus_industry_error", tags)
+        self.assertTrue(any("focus_industry=technology" in item for item in evidence))
+
     def test_attribution_does_not_blame_risk_when_final_exceeds_risk_cap(self):
         record = {
             "symbol": "AAA.HK",
@@ -3914,15 +4107,16 @@ horizon_days = 14
     def test_planner_generates_tasks_from_repeated_attribution(self):
         tasks = planner.plan_tasks(
             {},
-            {},
+            {"summary": {"sample_count": 20, "sample_quality": "sufficient"}},
             {},
             "",
-            {"record_count": 6, "attribution_call_counts": {"risk_veto_too_strict": 2, "cost_gate_too_loose": 3}},
+            {"record_count": 6, "attribution_call_counts": {"risk_veto_too_strict": 2, "cost_gate_too_loose": 3, "focus_industry_error": 2}},
         )
 
         titles = [task["title"] for task in tasks]
         self.assertIn("Calibrate risk veto strictness after saved-opportunity evidence", titles)
         self.assertIn("Tighten loose cost gate diagnostics", titles)
+        self.assertIn("Improve four-industry focus priority scoring", titles)
         self.assertTrue(any("scripts/attribute_investment_outcomes.py" in command for task in tasks for command in task["validation"]))
 
     def test_planner_ignores_window_counts_without_call_counts(self):

@@ -39,6 +39,7 @@ Local model configuration lives in `.env` and is intentionally ignored by git. U
 - `config/market_radar.toml` — broad HK and mainland A-share radar used to detect sector/theme strength.
 - `config/trade_universe.toml` — HK and mainland A-share symbols the system is allowed to dynamically rank and recommend.
 - `config/watchlist.toml` — smaller user-focus list; no longer the only source of recommendations.
+- `config/focus_industries.toml` — stable user preference layer for the four priority industries: technology, new energy, brokerage, and healthcare.
 - `config/investment_profile.toml` — risk, cost, selection, and ranking thresholds.
 - `config/portfolio.toml` — currently recommendation-only mode; no real holdings are assumed.
 - `memory/active_investment_learnings.md` — active investment lessons.
@@ -54,12 +55,13 @@ One investment session performs this pipeline:
 3. Fetch the trade universe snapshot into `data/snapshots/`.
 4. Fetch the market radar snapshot into `data/snapshots/`.
 5. Rank the trade universe with `scripts/rank_investment_universe.py`.
-6. Run posterior evaluation with `scripts/evaluate_investment_calls.py`.
-7. Ask yoyo-invest to write market assessment markdown.
-8. Ask yoyo-invest to write a focused daily plan.
-9. Ask yoyo-invest to write the recommendation report in Chinese.
-10. Ask yoyo-invest to convert the report into structured calls JSON.
-11. Ask yoyo-invest to write a reflection; only close/historical sessions may update long-term memory.
+6. Generate the dynamic four-industry focus pool with `scripts/generate_investment_focus_pool.py`.
+7. Run posterior evaluation with `scripts/evaluate_investment_calls.py`.
+8. Ask yoyo-invest to write market assessment markdown.
+9. Ask yoyo-invest to write a focused daily plan.
+10. Ask yoyo-invest to write the recommendation report in Chinese.
+11. Ask yoyo-invest to convert the report into structured calls JSON.
+12. Ask yoyo-invest to write a reflection; only close/historical sessions may update long-term memory.
 
 ## Outputs
 
@@ -69,6 +71,7 @@ One investment session performs this pipeline:
 - `research/daily/YYYY-MM-DD-SESSION-reflection.md`
 - `research/calls/YYYY-MM-DD-SESSION-calls.json`
 - `research/rankings/YYYY-MM-DD-SESSION-ranking.json`
+- `research/focus/YYYY-MM-DD-SESSION-focus.json`
 - `research/evaluations/latest.md`
 - `research/evaluations/latest.json`
 
@@ -151,7 +154,7 @@ Level 6 readiness gates define what the current research metrics are allowed to 
 Layer 3/4 hardening attributes posterior outcomes back to the deterministic and LLM layers, then feeds repeated causes into bounded improvement planning:
 
 - `scripts/attribute_investment_outcomes.py` joins `research/evaluations/latest_records.json` with final calls, draft policy calls, risk reviews, and ranking rows when those artifacts exist.
-- Attribution records tag evidence-supported causes such as `ranking_selection_error`, `same_theme_best_missed`, `cost_gate_too_loose`, `cost_gate_too_strict`, `risk_veto_missed`, `risk_veto_saved_loss`, `risk_veto_too_strict`, `symbol_risk_memory_too_harsh`, and `llm_final_deviation`.
+- Attribution records tag evidence-supported causes such as `ranking_selection_error`, `same_theme_best_missed`, `cost_gate_too_loose`, `cost_gate_too_strict`, `risk_veto_missed`, `risk_veto_saved_loss`, `risk_veto_too_strict`, `symbol_risk_memory_too_harsh`, `focus_industry_error`, `focus_priority_ignored`, and `llm_final_deviation`.
 - The attribution layer is fail-soft: missing historical draft, risk, or ranking artifacts do not block attribution from posterior records.
 - `scripts/evolve_investment_system.sh` runs attribution after posterior evaluation and before planning, writing `research/evaluations/latest_attribution.json` and `research/evaluations/latest_attribution.md`.
 - `scripts/plan_investment_system_improvements.py` reads latest attribution by default and can generate focused tasks when the same attribution tag repeats, with validation commands that stay research-only.

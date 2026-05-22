@@ -14,6 +14,8 @@
 - 仅因 trend_score 强就重新启用被 veto 的高分主题 leader，而未检查 low pass_rate、负平均回报、adverse breach 与近期 actual best peer。
 
 - 把非日期对齐 dynamic ranking 中的 theme leader、trend_score 或 volume-expansion 误当作当日入场触发，而不是 audit priority。
+- 把四大行业动态焦点池误当作硬性买入名单，或在焦点池外推荐失败后没有归因 `focus_priority_ignored`。
+- 把行业优先级错误和同主题个股选择错误混为一谈，导致自迭代无法调整行业评分权重。
 
 ## Updating This File
 - Add errors that recur at least twice.

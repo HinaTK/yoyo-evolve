@@ -176,6 +176,7 @@ def ensure_directories(root: pathlib.Path) -> None:
     for relative in [
         "data/snapshots",
         "research/rankings",
+        "research/focus",
         "research/calls",
         "research/risk",
         "research/experiments",
@@ -199,6 +200,7 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
     snapshot_file = resolve_path(root, options.snapshot_file) or default_snapshot_file(root, options.date, options.session)
     radar_snapshot_file = resolve_path(root, options.radar_snapshot_file) or default_radar_snapshot_file(root, options.date, options.session, snapshot_file)
     ranking_file = resolve_path(root, options.ranking_file) or root / "research" / "rankings" / f"{stem}-ranking.json"
+    focus_file = root / "research" / "focus" / f"{stem}-focus.json"
     shadow_file = resolve_path(root, options.shadow_file) or root / "research" / "shadow" / f"{stem}-shadow.json"
     calls_file = resolve_path(root, options.calls_file) or root / "research" / "calls" / f"{stem}-calls.json"
     draft_calls_file = root / "research" / "calls" / f"{stem}-draft-policy.json"
@@ -210,6 +212,7 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
     optimization_config = root / "config" / "optimization.toml"
     trade_universe_config = root / "config" / "trade_universe.toml"
     radar_config = root / "config" / "market_radar.toml"
+    focus_industries_config = root / "config" / "focus_industries.toml"
     active_strategy_file = root / "config" / "active_strategy.toml"
     nontechnical_evidence_config = root / "config" / "nontechnical_evidence.toml"
     nontechnical_evidence_file = root / "research" / "evidence" / "nontechnical" / "latest.json"
@@ -333,23 +336,38 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
         rank_command.extend(["--nontechnical-evidence", rank_nontechnical_file])
     call("rank_universe", rank_command)
 
-    if options.build_draft_calls:
+    if focus_industries_config.exists():
         call(
-            "build_draft_calls",
+            "generate_focus_pool",
             [
                 options.python_bin,
-                script_path(root, "generate_investment_draft_calls.py"),
+                script_path(root, "generate_investment_focus_pool.py"),
                 "--ranking",
                 ranking_file,
+                "--config",
+                focus_industries_config,
                 "--output",
-                draft_calls_file,
-                "--date",
-                options.date,
-                "--session",
-                options.session,
-                "--include-diagnostics",
+                focus_file,
             ],
         )
+
+    if options.build_draft_calls:
+        draft_command: list[str | pathlib.Path] = [
+            options.python_bin,
+            script_path(root, "generate_investment_draft_calls.py"),
+            "--ranking",
+            ranking_file,
+            "--output",
+            draft_calls_file,
+            "--date",
+            options.date,
+            "--session",
+            options.session,
+        ]
+        if focus_file.exists() or options.dry_run or focus_industries_config.exists():
+            draft_command.extend(["--focus-pool", focus_file])
+        draft_command.append("--include-diagnostics")
+        call("build_draft_calls", draft_command)
 
     if options.build_risk_review and (draft_calls_file.exists() or options.dry_run or options.build_draft_calls):
         risk_command: list[str | pathlib.Path] = [
@@ -619,6 +637,7 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             "radar_snapshot": str(radar_snapshot_file),
             "registry": str(registry_file),
             "ranking": str(ranking_file),
+            "focus_pool": str(focus_file),
             "draft_calls": str(draft_calls_file),
             "calls": str(calls_file),
             "shadow": str(shadow_file),

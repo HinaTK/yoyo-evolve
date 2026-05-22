@@ -16,6 +16,8 @@
 - 被 veto 的高分主题 leader 必须维持 audit-only，直到日期对齐重跑后同时通过 `actionable_candidates`、risk gates，并证明相对近期 actual best peer 的 peer-relative strength。
 
 - Dynamic ranking from non-date-aligned quotes may identify audit priorities only; it cannot supply triggers, ETF confirmation, or peer-relative strength for same-day action.
+- `focus_industries.toml` expresses stable user preference; `research/focus/*-focus.json` only changes daily attention and must not delete or auto-add durable trade-universe symbols without explicit confirmation.
+- Track four-industry mistakes separately: industry priority errors are not the same as same-theme symbol-selection errors.
 
 ## Updating This File
 - Only add a rule after repeated evidence across multiple review windows.

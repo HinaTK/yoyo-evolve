@@ -277,3 +277,195 @@ symbol = "688981.SH"
 name = "SMIC / 中芯国际"
 kind = "stock"
 theme = "china-a-semiconductors"
+
+[[symbols]]
+symbol = "9999.HK"
+name = "NetEase / 网易-S"
+kind = "stock"
+theme = "internet-platform"
+
+[[symbols]]
+symbol = "0981.HK"
+name = "SMIC / 中芯国际"
+kind = "stock"
+theme = "china-a-semiconductors"
+
+[[symbols]]
+symbol = "000725.SZ"
+name = "BOE Technology / 京东方A"
+kind = "stock"
+theme = "china-a-display-tech"
+
+[[symbols]]
+symbol = "002475.SZ"
+name = "Luxshare Precision / 立讯精密"
+kind = "stock"
+theme = "china-a-consumer-electronics"
+
+[[symbols]]
+symbol = "603501.SH"
+name = "Will Semiconductor / 韦尔股份"
+kind = "stock"
+theme = "china-a-semiconductors"
+
+[[symbols]]
+symbol = "1211.HK"
+name = "BYD Company / 比亚迪股份"
+kind = "stock"
+theme = "hk-ev"
+
+[[symbols]]
+symbol = "2015.HK"
+name = "Li Auto / 理想汽车-W"
+kind = "stock"
+theme = "hk-ev"
+
+[[symbols]]
+symbol = "9866.HK"
+name = "NIO / 蔚来-SW"
+kind = "stock"
+theme = "hk-ev"
+
+[[symbols]]
+symbol = "9868.HK"
+name = "XPeng / 小鹏汽车-W"
+kind = "stock"
+theme = "hk-ev"
+
+[[symbols]]
+symbol = "1772.HK"
+name = "Ganfeng Lithium / 赣锋锂业"
+kind = "stock"
+theme = "china-a-lithium"
+
+[[symbols]]
+symbol = "002460.SZ"
+name = "Ganfeng Lithium / 赣锋锂业"
+kind = "stock"
+theme = "china-a-lithium"
+
+[[symbols]]
+symbol = "002466.SZ"
+name = "Tianqi Lithium / 天齐锂业"
+kind = "stock"
+theme = "china-a-lithium"
+
+[[symbols]]
+symbol = "300014.SZ"
+name = "EVE Energy / 亿纬锂能"
+kind = "stock"
+theme = "china-a-battery-ev"
+
+[[symbols]]
+symbol = "601012.SH"
+name = "LONGi Green Energy / 隆基绿能"
+kind = "stock"
+theme = "china-a-renewable-energy"
+
+[[symbols]]
+symbol = "300274.SZ"
+name = "Sungrow / 阳光电源"
+kind = "stock"
+theme = "china-a-solar-inverter"
+
+[[symbols]]
+symbol = "600406.SH"
+name = "NARI Technology / 国电南瑞"
+kind = "stock"
+theme = "china-a-ai-power-grid"
+
+[[symbols]]
+symbol = "002335.SZ"
+name = "Kehua Data / 科华数据"
+kind = "stock"
+theme = "china-a-ai-power-infrastructure"
+
+[[symbols]]
+symbol = "002050.SZ"
+name = "Sanhua Intelligent Controls / 三花智控"
+kind = "stock"
+theme = "china-a-ai-thermal-management"
+
+[[symbols]]
+symbol = "300124.SZ"
+name = "Inovance Technology / 汇川技术"
+kind = "stock"
+theme = "china-a-ai-power-infrastructure"
+
+[[symbols]]
+symbol = "300059.SZ"
+name = "East Money / 东方财富"
+kind = "stock"
+theme = "china-a-capital-markets"
+
+[[symbols]]
+symbol = "601688.SH"
+name = "Huatai Securities / 华泰证券"
+kind = "stock"
+theme = "china-a-capital-markets"
+
+[[symbols]]
+symbol = "601211.SH"
+name = "Guotai Junan / 国泰君安"
+kind = "stock"
+theme = "china-a-capital-markets"
+
+[[symbols]]
+symbol = "000776.SZ"
+name = "GF Securities / 广发证券"
+kind = "stock"
+theme = "china-a-capital-markets"
+
+[[symbols]]
+symbol = "3908.HK"
+name = "CICC / 中金公司"
+kind = "stock"
+theme = "hk-capital-markets"
+
+[[symbols]]
+symbol = "6886.HK"
+name = "HTSC / 华泰证券"
+kind = "stock"
+theme = "hk-capital-markets"
+
+[[symbols]]
+symbol = "1801.HK"
+name = "Innovent Biologics / 信达生物"
+kind = "stock"
+theme = "healthcare-biotech"
+
+[[symbols]]
+symbol = "6160.HK"
+name = "BeiGene / 百济神州"
+kind = "stock"
+theme = "healthcare-biotech"
+
+[[symbols]]
+symbol = "2359.HK"
+name = "WuXi AppTec / 药明康德"
+kind = "stock"
+theme = "healthcare-cxo"
+
+[[symbols]]
+symbol = "603259.SH"
+name = "WuXi AppTec / 药明康德"
+kind = "stock"
+theme = "healthcare-cxo"
+
+[[symbols]]
+symbol = "300760.SZ"
+name = "Mindray Medical / 迈瑞医疗"
+kind = "stock"
+theme = "china-a-healthcare-device"
+
+[[symbols]]
+symbol = "300015.SZ"
+name = "Aier Eye Hospital / 爱尔眼科"
+kind = "stock"
+theme = "china-a-healthcare-services"
+
+[[symbols]]
+symbol = "300122.SZ"
+name = "Zhifei Biological / 智飞生物"
+kind = "stock"
+theme = "china-a-healthcare-pharma"

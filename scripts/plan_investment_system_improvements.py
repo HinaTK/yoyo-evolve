@@ -36,6 +36,16 @@ ATTRIBUTION_TASK_SPECS = {
         "Make ranking or recommendation evidence prefer same-theme leaders when posterior attribution repeatedly shows selected symbols lagged better-ranked peers.",
         ["python scripts/attribute_investment_outcomes.py", "python -m unittest tests/test_investment_level5_level6.py"],
     ),
+    "focus_industry_error": (
+        "Improve four-industry focus priority scoring",
+        "Adjust focus-industry scoring or evidence so technology, new_energy, brokerage, and healthcare priorities are not repeatedly promoted when posterior theme evidence fails.",
+        ["python -m py_compile scripts/generate_investment_focus_pool.py scripts/attribute_investment_outcomes.py", "python -m unittest tests/test_investment_level5_level6.py"],
+    ),
+    "focus_priority_ignored": (
+        "Diagnose recommendations outside active focus pool",
+        "Add diagnostics or prompt constraints for failed bullish calls that ignored the active four-industry focus pool without evidence.",
+        ["python scripts/attribute_investment_outcomes.py", "python -m unittest tests/test_investment_level5_level6.py"],
+    ),
 }
 
 
@@ -89,7 +99,7 @@ def add_attribution_tasks(tasks: list[dict[str, Any]], attribution: dict[str, An
     record_count = as_int(attribution.get("record_count"))
     if not record_count:
         return
-    for tag in ("risk_veto_too_strict", "cost_gate_too_strict", "risk_veto_missed", "cost_gate_too_loose", "ranking_selection_error"):
+    for tag in ("risk_veto_too_strict", "cost_gate_too_strict", "risk_veto_missed", "cost_gate_too_loose", "ranking_selection_error", "focus_industry_error", "focus_priority_ignored"):
         count = attribution_count(attribution, tag)
         if count < 2:
             continue
