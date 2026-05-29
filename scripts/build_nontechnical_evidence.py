@@ -2,6 +2,7 @@
 
 import argparse
 import datetime as dt
+import glob
 import json
 import pathlib
 import re
@@ -25,8 +26,21 @@ DEFAULT_WEIGHTS = {
     "flow_score": 0.15,
     "macro_score": 0.10,
 }
+DEFAULT_COMPONENT_MAX_STALENESS_DAYS = {
+    "fundamental_score": 120,
+    "valuation_score": 45,
+    "catalyst_score": 30,
+    "flow_score": 5,
+    "macro_score": 14,
+    "event_risk": 7,
+}
 COMPONENT_KEYS = tuple(DEFAULT_WEIGHTS.keys())
-FORMAL_EVIDENCE_MODES = {"curated_point_in_time", "formal_provider_point_in_time"}
+FORMAL_EVIDENCE_MODES = {
+    "curated_point_in_time",
+    "manual_point_in_time",
+    "formal_provider_point_in_time",
+}
+SESSION_ORDER = {"morning": 0, "midday": 1, "close": 2, "historical": 2}
 DEFENSIVE_THEMES = {"dividend", "utilities", "defensive", "broad-market", "consumer-staples"}
 POLICY_HEAVY_THEMES = {"biotech", "semiconductor", "semiconductors", "hard-tech", "renewable", "platform"}
 HARD_EVENT_RISKS = {"elevated", "earnings_gap", "regulatory", "policy", "suspension", "accounting", "quote_stale"}
@@ -77,9 +91,134 @@ def resolve_path(value: str | pathlib.Path | None) -> pathlib.Path | None:
     return path if path.is_absolute() else ROOT / path
 
 
+def configured_source_count(row: dict[str, Any]) -> int:
+    if row.get("source_count") is not None:
+        try:
+            return int(row.get("source_count") or 0)
+        except (TypeError, ValueError):
+            return 0
+    return len(normalize_sources(row.get("sources")))
+
+
+def evidence_rows_from_payload(payload: Any) -> list[dict[str, Any]]:
+    raw_rows: list[Any] = []
+    if isinstance(payload, list):
+        raw_rows.extend(payload)
+    elif isinstance(payload, dict):
+        defaults = {key: payload[key] for key in ("as_of_date", "as_of_session", "evidence_mode") if payload.get(key) is not None}
+        raw_symbols = payload.get("symbols", {})
+        if isinstance(raw_symbols, dict):
+            for symbol, row in raw_symbols.items():
+                if isinstance(row, dict):
+                    raw_rows.append({**defaults, "symbol": str(symbol), **row})
+        if isinstance(payload.get("evidence"), list):
+            raw_rows.extend({**defaults, **row} if isinstance(row, dict) else row for row in payload["evidence"])
+
+    rows = []
+    for row in raw_rows:
+        if isinstance(row, dict) and row.get("symbol"):
+            rows.append(dict(row))
+    return rows
+
+
+def placeholder_evidence(row: dict[str, Any]) -> bool:
+    return explicit_true(row.get("manual_review_required"))
+
+
+def read_curated_evidence_file(path: pathlib.Path) -> list[dict[str, Any]]:
+    try:
+        if path.suffix.lower() == ".json":
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        elif path.suffix.lower() == ".toml":
+            with path.open("rb") as fh:
+                payload = tomllib.load(fh)
+        else:
+            return []
+    except (OSError, json.JSONDecodeError, tomllib.TOMLDecodeError):
+        return []
+
+    rows = [row for row in evidence_rows_from_payload(payload) if not placeholder_evidence(row)]
+    for row in rows:
+        row.setdefault("evidence_mode", "manual_point_in_time")
+        row.setdefault("source_count", configured_source_count(row))
+    return rows
+
+
+def curated_source_paths(config: dict[str, Any]) -> list[pathlib.Path]:
+    source_config = config.get("curated_sources", {}) if isinstance(config.get("curated_sources"), dict) else {}
+    if not source_config.get("enabled", False):
+        return []
+
+    raw_paths: list[Any] = []
+    if source_config.get("path"):
+        raw_paths.append(source_config["path"])
+    if isinstance(source_config.get("paths"), list):
+        raw_paths.extend(source_config["paths"])
+
+    paths: list[pathlib.Path] = []
+    seen: set[str] = set()
+    for raw_path in raw_paths:
+        resolved = resolve_path(str(raw_path).strip())
+        if resolved is None:
+            continue
+        pattern = str(resolved)
+        if any(token in pattern for token in "*?["):
+            matches = [pathlib.Path(match) for match in glob.glob(pattern)]
+        else:
+            matches = [resolved]
+        for path in sorted(matches):
+            key = str(path)
+            if key not in seen and path.is_file():
+                paths.append(path)
+                seen.add(key)
+    return paths
+
+
+def curated_source_rows(config: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for path in curated_source_paths(config):
+        for row in read_curated_evidence_file(path):
+            row["loaded_from"] = str(path)
+            rows.append(row)
+    return rows
+
+
+def evidence_session_rank(value: Any) -> int:
+    text = str(value or "").strip().lower()
+    return SESSION_ORDER.get(text, -1)
+
+
+def evidence_row_after(row: dict[str, Any], as_of_date: str | None, as_of_session: str | None) -> bool:
+    report_date = parse_date(as_of_date)
+    evidence_date = parse_date(row.get("as_of_date"))
+    if report_date is None or evidence_date is None:
+        return False
+    if evidence_date > report_date:
+        return True
+    if evidence_date < report_date:
+        return False
+    evidence_session = str(row.get("as_of_session") or "").strip().lower()
+    report_session = str(as_of_session or "").strip().lower()
+    if not evidence_session or not report_session:
+        return False
+    return SESSION_ORDER.get(evidence_session, 99) > SESSION_ORDER.get(report_session, 99)
+
+
+def evidence_selection_key(row: dict[str, Any], index: int) -> tuple[dt.date, int, int, int]:
+    evidence_date = parse_date(row.get("as_of_date")) or dt.date.min
+    return (evidence_date, evidence_session_rank(row.get("as_of_session")), configured_source_count(row), index)
+
+
 def parse_policy(config: dict[str, Any]) -> tuple[dict[str, Any], dict[str, float]]:
     policy = DEFAULT_POLICY.copy()
     policy.update(config.get("policy", {}) if isinstance(config.get("policy"), dict) else {})
+    freshness = config.get("freshness", {}) if isinstance(config.get("freshness"), dict) else {}
+    component_days = DEFAULT_COMPONENT_MAX_STALENESS_DAYS.copy()
+    for key in DEFAULT_COMPONENT_MAX_STALENESS_DAYS:
+        config_key = f"{key}_days"
+        if freshness.get(config_key) is not None:
+            component_days[key] = int(freshness[config_key])
+    policy["component_max_staleness_days"] = component_days
     weights = DEFAULT_WEIGHTS.copy()
     raw_weights = config.get("weights", {}) if isinstance(config.get("weights"), dict) else {}
     for key, value in raw_weights.items():
@@ -88,12 +227,30 @@ def parse_policy(config: dict[str, Any]) -> tuple[dict[str, Any], dict[str, floa
     return policy, weights
 
 
-def configured_symbols(config: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    rows: dict[str, dict[str, Any]] = {}
-    for row in config.get("evidence", []):
-        if isinstance(row, dict) and row.get("symbol"):
-            rows[str(row["symbol"])] = row
-    return rows
+def configured_symbols(
+    config: dict[str, Any],
+    as_of_date: str | None = None,
+    as_of_session: str | None = None,
+) -> dict[str, dict[str, Any]]:
+    candidates: dict[str, list[tuple[int, dict[str, Any]]]] = {}
+    configured_rows = curated_source_rows(config)
+    inline_rows = config.get("evidence", []) if isinstance(config.get("evidence"), list) else []
+    configured_rows.extend(row for row in inline_rows if isinstance(row, dict))
+    for index, row in enumerate(configured_rows):
+        if not row.get("symbol"):
+            continue
+        candidate = dict(row)
+        sources = normalize_sources(candidate.get("sources"))
+        if candidate.get("source_count") is None and sources:
+            candidate["source_count"] = len(sources)
+        candidates.setdefault(str(candidate["symbol"]), []).append((index, candidate))
+
+    selected: dict[str, dict[str, Any]] = {}
+    for symbol, rows in candidates.items():
+        point_in_time_rows = [(index, row) for index, row in rows if not evidence_row_after(row, as_of_date, as_of_session)]
+        choices = point_in_time_rows or rows
+        selected[symbol] = max(choices, key=lambda item: evidence_selection_key(item[1], item[0]))[1]
+    return selected
 
 
 def universe_symbols(universe: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -163,6 +320,35 @@ def total_score(row: dict[str, Any], weights: dict[str, float]) -> float | None:
         score_sum += max(0.0, min(1.0, value)) * float(weight)
         weight_sum += float(weight)
     return round(score_sum / weight_sum, 3) if weight_sum else None
+
+
+def component_dates_from_configured(configured: dict[str, Any], fallback_date: Any) -> dict[str, str | None]:
+    raw_dates = configured.get("component_as_of_dates", {}) if isinstance(configured.get("component_as_of_dates"), dict) else {}
+    dates: dict[str, str | None] = {}
+    for key in COMPONENT_KEYS:
+        dates[key] = date_token(raw_dates.get(key) or configured.get(f"{key}_as_of_date") or fallback_date)
+    return dates
+
+
+def component_staleness_findings(symbol: str, component_dates: dict[str, Any], report_date: dt.date | None, policy: dict[str, Any]) -> tuple[dict[str, int], list[dict[str, Any]]]:
+    ages: dict[str, int] = {}
+    findings: list[dict[str, Any]] = []
+    if report_date is None:
+        return ages, findings
+    max_days = policy.get("component_max_staleness_days", DEFAULT_COMPONENT_MAX_STALENESS_DAYS)
+    max_days = max_days if isinstance(max_days, dict) else DEFAULT_COMPONENT_MAX_STALENESS_DAYS
+    for key, raw_date in component_dates.items():
+        component_date = parse_date(raw_date)
+        if component_date is None:
+            findings.append({"symbol": symbol, "severity": "warning", "reason": "nontechnical_component_date_missing", "component": key})
+            continue
+        age_days = (report_date - component_date).days
+        ages[key] = age_days
+        if age_days < 0:
+            findings.append({"symbol": symbol, "severity": "critical", "reason": "nontechnical_component_from_future", "component": key, "age_days": age_days})
+        elif age_days > int(max_days.get(key, policy.get("max_staleness_days", 30))):
+            findings.append({"symbol": symbol, "severity": "info", "reason": "nontechnical_component_stale", "component": key, "age_days": age_days})
+    return ages, findings
 
 
 def normalize_sources(raw: Any) -> list[dict[str, Any]]:
@@ -363,7 +549,7 @@ def eastmoney_hk_secucode(symbol: str) -> str | None:
     return f"{code.zfill(5)}.HK"
 
 
-def formal_cn_stock_evidence(symbol: str, metadata: dict[str, Any], snapshot: dict[str, Any], timeout: float, as_of_session: str | None) -> dict[str, Any] | None:
+def formal_cn_stock_evidence(symbol: str, metadata: dict[str, Any], snapshot: dict[str, Any], timeout: float, decision_date: str, as_of_session: str | None) -> dict[str, Any] | None:
     code = eastmoney_cn_code(symbol)
     if code is None:
         return None
@@ -388,6 +574,14 @@ def formal_cn_stock_evidence(symbol: str, metadata: dict[str, Any], snapshot: di
         "symbol": symbol,
         "as_of_date": as_of_date,
         "as_of_session": as_of_session,
+        "component_as_of_dates": {
+            "fundamental_score": as_of_date,
+            "valuation_score": as_of_date,
+            "catalyst_score": as_of_date,
+            "flow_score": decision_date,
+            "macro_score": decision_date,
+        },
+        "event_risk_as_of_date": as_of_date,
         **scores,
         "event_risk": formal_event_risk(metadata, [revenue_growth, profit_growth], debt_ratio),
         "source_count": 1,
@@ -401,7 +595,7 @@ def formal_cn_stock_evidence(symbol: str, metadata: dict[str, Any], snapshot: di
     }
 
 
-def formal_hk_stock_evidence(symbol: str, metadata: dict[str, Any], snapshot: dict[str, Any], timeout: float, as_of_session: str | None) -> dict[str, Any] | None:
+def formal_hk_stock_evidence(symbol: str, metadata: dict[str, Any], snapshot: dict[str, Any], timeout: float, decision_date: str, as_of_session: str | None) -> dict[str, Any] | None:
     secucode = eastmoney_hk_secucode(symbol)
     if secucode is None:
         return None
@@ -435,6 +629,14 @@ def formal_hk_stock_evidence(symbol: str, metadata: dict[str, Any], snapshot: di
         "symbol": symbol,
         "as_of_date": as_of_date,
         "as_of_session": as_of_session,
+        "component_as_of_dates": {
+            "fundamental_score": as_of_date,
+            "valuation_score": as_of_date,
+            "catalyst_score": as_of_date,
+            "flow_score": decision_date,
+            "macro_score": decision_date,
+        },
+        "event_risk_as_of_date": as_of_date,
         **scores,
         "event_risk": formal_event_risk(metadata, [revenue_growth, profit_growth]),
         "source_count": 1,
@@ -453,7 +655,7 @@ def js_var(text: str, name: str) -> str | None:
     return match.group(1) if match else None
 
 
-def formal_cn_fund_evidence(symbol: str, metadata: dict[str, Any], snapshot: dict[str, Any], timeout: float, as_of_session: str | None) -> dict[str, Any] | None:
+def formal_cn_fund_evidence(symbol: str, metadata: dict[str, Any], snapshot: dict[str, Any], timeout: float, decision_date: str, as_of_session: str | None) -> dict[str, Any] | None:
     code, _, suffix = symbol.upper().partition(".")
     if suffix not in {"SH", "SZ"} or len(code) != 6:
         return None
@@ -483,6 +685,14 @@ def formal_cn_fund_evidence(symbol: str, metadata: dict[str, Any], snapshot: dic
         "symbol": symbol,
         "as_of_date": as_of_date,
         "as_of_session": as_of_session,
+        "component_as_of_dates": {
+            "fundamental_score": as_of_date,
+            "valuation_score": as_of_date,
+            "catalyst_score": as_of_date,
+            "flow_score": decision_date,
+            "macro_score": decision_date,
+        },
+        "event_risk_as_of_date": as_of_date,
         **scores,
         "event_risk": formal_event_risk(metadata, [one_year, six_month, three_month]),
         "source_count": 1,
@@ -511,10 +721,10 @@ def formal_provider_evidence(
     try:
         if symbol.upper().endswith((".SH", ".SZ", ".BJ")):
             if kind == "etf":
-                return formal_cn_fund_evidence(symbol, metadata, snapshot, timeout, as_of_session)
-            return formal_cn_stock_evidence(symbol, metadata, snapshot, timeout, as_of_session)
+                return formal_cn_fund_evidence(symbol, metadata, snapshot, timeout, as_of_date, as_of_session)
+            return formal_cn_stock_evidence(symbol, metadata, snapshot, timeout, as_of_date, as_of_session)
         if symbol.upper().endswith(".HK") and kind != "etf":
-            return formal_hk_stock_evidence(symbol, metadata, snapshot, timeout, as_of_session)
+            return formal_hk_stock_evidence(symbol, metadata, snapshot, timeout, as_of_date, as_of_session)
     except Exception:
         return None
     return None
@@ -612,6 +822,8 @@ def automatic_proxy_evidence(
         "symbol": symbol,
         "as_of_date": as_of_date,
         "as_of_session": as_of_session,
+        "component_as_of_dates": {key: as_of_date for key in COMPONENT_KEYS},
+        "event_risk_as_of_date": as_of_date,
         "fundamental_score": round(clamp(min(fundamental, max_score)), 3),
         "valuation_score": round(clamp(min(valuation, max_score)), 3),
         "catalyst_score": round(clamp(min(catalyst, max_score)), 3),
@@ -656,6 +868,8 @@ def build_symbol_evidence(
     evidence_date = parse_date(raw_as_of)
     report_date = parse_date(as_of_date)
     evidence_mode = configured_mode or ("automatic_local_proxy" if proxy_generated else "proxy_only" if proxy_only else "curated_point_in_time" if configured else "missing_fail_closed")
+    component_as_of_dates = component_dates_from_configured(configured, raw_as_of)
+    event_risk_as_of_date = date_token(configured.get("event_risk_as_of_date") or configured.get("event_as_of_date") or raw_as_of)
     row: dict[str, Any] = {
         "symbol": symbol,
         "name": metadata.get("name"),
@@ -663,6 +877,8 @@ def build_symbol_evidence(
         "theme": metadata.get("theme"),
         "as_of_date": date_token(raw_as_of),
         "as_of_session": configured.get("as_of_session") or as_of_session,
+        "component_as_of_dates": component_as_of_dates,
+        "event_risk_as_of_date": event_risk_as_of_date,
         "event_risk": str(configured.get("event_risk") or "unknown").lower(),
         "source_count": source_count,
         "proxy_source_count": proxy_source_count if proxy_only else 0,
@@ -689,8 +905,23 @@ def build_symbol_evidence(
         row["age_days"] = age_days
         if age_days < 0:
             findings.append({"symbol": symbol, "severity": "critical", "reason": "nontechnical_evidence_from_future"})
-        elif age_days > int(policy.get("max_staleness_days", 30)):
+        elif not any(component_as_of_dates.values()) and age_days > int(policy.get("max_staleness_days", 30)):
             findings.append({"symbol": symbol, "severity": "info", "reason": "nontechnical_evidence_stale", "age_days": age_days})
+    component_age_days, component_findings = component_staleness_findings(symbol, component_as_of_dates, report_date, policy)
+    if component_age_days:
+        row["component_age_days"] = component_age_days
+    findings.extend(component_findings)
+    if report_date is not None and event_risk_as_of_date is not None:
+        event_risk_date = parse_date(event_risk_as_of_date)
+        max_days = policy.get("component_max_staleness_days", DEFAULT_COMPONENT_MAX_STALENESS_DAYS)
+        max_days = max_days if isinstance(max_days, dict) else DEFAULT_COMPONENT_MAX_STALENESS_DAYS
+        if event_risk_date is not None:
+            event_age_days = (report_date - event_risk_date).days
+            row["event_risk_age_days"] = event_age_days
+            if event_age_days < 0:
+                findings.append({"symbol": symbol, "severity": "critical", "reason": "event_risk_from_future", "age_days": event_age_days})
+            elif event_age_days > int(max_days.get("event_risk", policy.get("max_staleness_days", 30))):
+                findings.append({"symbol": symbol, "severity": "warning", "reason": "event_risk_stale", "age_days": event_age_days})
     if missing_components:
         findings.append({"symbol": symbol, "severity": "warning", "reason": "nontechnical_component_missing", "components": missing_components})
     if row["total_score"] is None:
@@ -716,7 +947,7 @@ def build_evidence(
 ) -> dict[str, Any]:
     config = read_toml(config_path)
     policy, weights = parse_policy(config)
-    configured = configured_symbols(config)
+    configured = configured_symbols(config, as_of_date, as_of_session)
     universe = universe_symbols(read_toml(trade_universe_path))
     snapshot = snapshot_symbols(load_json(snapshot_path))
     snapshot_payload = load_json(snapshot_path)

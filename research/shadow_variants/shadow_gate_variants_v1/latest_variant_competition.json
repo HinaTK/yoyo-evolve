@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-19T01:43:07Z",
+  "generated_at": "2026-05-29T04:10:58Z",
   "competition_id": "shadow_gate_variants_v1",
   "config": {
     "path": "D:\\Code\\yoyo\\config\\shadow_variants.toml",
@@ -9,26 +9,26 @@
   },
   "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
   "ranking": {
-    "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-19-close-ranking.json",
+    "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-29-midday-ranking.json",
     "exists": true,
-    "sha256": "1ceec01c495bfb8c9d771697d7a91d41cb192c105c22b60588862822eb446af0",
-    "size_bytes": 250824
+    "sha256": "49d7d0fa99a907ff2f678c835322b17033b620e9307deb5c99f3d33a6260905e",
+    "size_bytes": 611830
   },
   "snapshot": {
-    "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-19.json",
+    "path": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-29-midday.json",
     "exists": true,
-    "sha256": "8741bffa4d9538b1ce9e0c85b0a20462ac8c324be7f804972aa51373688eba84",
-    "size_bytes": 65923
+    "sha256": "db888685057a94eb3b2b31b893b36bedf1fc963a0141a4b8135ca164bdd75f3e",
+    "size_bytes": 95326
   },
   "registry": {
     "path": "D:\\Code\\yoyo\\data\\snapshots\\registry.json",
     "exists": true,
-    "sha256": "49f3627f291c46c2bec64716ad32aa15104a0c602395520d4b940779e4683499",
-    "size_bytes": 386585
+    "sha256": "067caf7e1595d94cf0c5ccf87a7bee6bb53c4e64b1f2a4f65a94169e9c2442df",
+    "size_bytes": 411519
   },
-  "date": "2026-05-19",
-  "session": "close",
-  "as_of_date": "2026-05-19",
+  "date": "2026-05-29",
+  "session": "midday",
+  "as_of_date": "2026-05-29",
   "evidence_mode": "forward_shadow",
   "dry_run": false,
   "policy": {
@@ -42,17 +42,17 @@
   "written_logs": [
     {
       "variant_id": "baseline_shadow",
-      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-19-close-baseline_shadow-shadow.json",
+      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-29-midday-baseline_shadow-shadow.json",
       "dry_run": false
     },
     {
       "variant_id": "no_heat_filter",
-      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-19-close-no_heat_filter-shadow.json",
+      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-29-midday-no_heat_filter-shadow.json",
       "dry_run": false
     },
     {
       "variant_id": "tighter_stop",
-      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-19-close-tighter_stop-shadow.json",
+      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\logs\\2026-05-29-midday-tighter_stop-shadow.json",
       "dry_run": false
     }
   ],
@@ -66,8 +66,8 @@
       "stop_loss_pct": -4.0,
       "horizon_days": 14,
       "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
-      "log_count": 7,
-      "forward_like_log_count": 7,
+      "log_count": 26,
+      "forward_like_log_count": 26,
       "matured_forward_days": 0,
       "no_execution_audit_passed": true,
       "sample_count": 0,
@@ -90,8 +90,8 @@
       "stop_loss_pct": -4.0,
       "horizon_days": 14,
       "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
-      "log_count": 7,
-      "forward_like_log_count": 7,
+      "log_count": 26,
+      "forward_like_log_count": 26,
       "matured_forward_days": 0,
       "no_execution_audit_passed": true,
       "sample_count": 0,
@@ -114,8 +114,8 @@
       "stop_loss_pct": -3.0,
       "horizon_days": 14,
       "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
-      "log_count": 7,
-      "forward_like_log_count": 7,
+      "log_count": 26,
+      "forward_like_log_count": 26,
       "matured_forward_days": 0,
       "no_execution_audit_passed": true,
       "sample_count": 0,

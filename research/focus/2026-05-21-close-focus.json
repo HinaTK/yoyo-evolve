@@ -1,0 +1,956 @@
+{
+  "generated_at": "2026-05-22T06:50:23Z",
+  "source_ranking": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-21.json",
+  "as_of_date": "2026-05-21",
+  "as_of_session": "close",
+  "policy": {
+    "max_active_industries": 4.0,
+    "max_active_symbols_per_industry": 4.0,
+    "max_watch_symbols_per_industry": 2.0,
+    "min_active_industry_score": 55.0,
+    "min_watch_industry_score": 42.0,
+    "min_focus_symbol_score": 35.0
+  },
+  "weights": {
+    "leader_score": 0.3,
+    "average_top_score": 0.25,
+    "breadth": 0.15,
+    "volume_confirmation": 0.15,
+    "actionability": 0.15
+  },
+  "focus_universe": [
+    {
+      "id": "technology",
+      "name": "\u79d1\u6280",
+      "themes": [
+        "hang-seng-tech",
+        "internet-platform",
+        "consumer-tech",
+        "china-a-hard-tech",
+        "china-a-semiconductors"
+      ],
+      "leader_symbols": [
+        "0700.HK",
+        "9988.HK",
+        "3690.HK",
+        "1810.HK",
+        "9999.HK",
+        "0981.HK",
+        "688981.SH",
+        "002475.SZ",
+        "603501.SH"
+      ],
+      "high_beta_symbols": [
+        "1024.HK",
+        "9618.HK",
+        "000725.SZ"
+      ],
+      "confirming_symbols": [
+        "3033.HK",
+        "3067.HK",
+        "512480.SH",
+        "588000.SH"
+      ]
+    },
+    {
+      "id": "new_energy",
+      "name": "\u65b0\u80fd\u6e90",
+      "themes": [
+        "china-a-renewable-energy",
+        "china-a-battery-ev",
+        "china-a-auto-ev",
+        "hk-ev",
+        "china-a-solar-inverter",
+        "china-a-lithium",
+        "china-a-ai-power-grid",
+        "china-a-ai-power-infrastructure",
+        "china-a-ai-thermal-management"
+      ],
+      "leader_symbols": [
+        "300750.SZ",
+        "002594.SZ",
+        "1211.HK",
+        "2015.HK",
+        "601012.SH",
+        "300274.SZ",
+        "002335.SZ",
+        "002050.SZ"
+      ],
+      "high_beta_symbols": [
+        "9866.HK",
+        "9868.HK",
+        "1772.HK",
+        "002460.SZ",
+        "002466.SZ",
+        "300014.SZ",
+        "300124.SZ"
+      ],
+      "confirming_symbols": [
+        "515790.SH",
+        "600406.SH",
+        "600900.SH"
+      ]
+    },
+    {
+      "id": "brokerage",
+      "name": "\u5238\u5546",
+      "themes": [
+        "financials-exchange",
+        "china-a-capital-markets",
+        "hk-capital-markets"
+      ],
+      "leader_symbols": [
+        "600030.SH",
+        "300059.SZ",
+        "601688.SH",
+        "601211.SH",
+        "3908.HK",
+        "6886.HK"
+      ],
+      "high_beta_symbols": [
+        "000776.SZ"
+      ],
+      "confirming_symbols": [
+        "0388.HK"
+      ]
+    },
+    {
+      "id": "healthcare",
+      "name": "\u533b\u7597",
+      "themes": [
+        "healthcare-biotech",
+        "healthcare-pharma",
+        "china-a-healthcare-pharma",
+        "healthcare-cxo",
+        "china-a-healthcare-device",
+        "china-a-healthcare-services"
+      ],
+      "leader_symbols": [
+        "2269.HK",
+        "1177.HK",
+        "1093.HK",
+        "1801.HK",
+        "6160.HK",
+        "2359.HK",
+        "600276.SH",
+        "300760.SZ",
+        "603259.SH"
+      ],
+      "high_beta_symbols": [
+        "300015.SZ",
+        "300122.SZ"
+      ],
+      "confirming_symbols": []
+    }
+  ],
+  "industry_ranking": [
+    {
+      "id": "technology",
+      "name": "\u79d1\u6280",
+      "strategic_weight": 1.12,
+      "configured_priority": 1,
+      "score": 66.31,
+      "status": "active",
+      "matched_symbol_count": 11,
+      "qualified_watch_count": 3,
+      "qualified_action_count": 0,
+      "leader_symbol": "588000.SH",
+      "leader_score": 64.99,
+      "average_top_score": 63.25,
+      "breadth_score": 27.27,
+      "volume_confirmation_score": 67.01,
+      "actionability_score": 65.0,
+      "reasons": [
+        "leader=588000.SH leader_score=64.99",
+        "qualified_action_count=0",
+        "qualified_watch_count=3",
+        "strategic_weight=1.12"
+      ],
+      "top_symbols": [
+        {
+          "symbol": "588000.SH",
+          "name": "ChinaAMC STAR 50 ETF / \u534e\u590f\u4e0a\u8bc1\u79d1\u521b\u677f50ETF",
+          "theme": "china-a-hard-tech",
+          "kind": "etf",
+          "score": 64.99,
+          "focus_industry": "technology",
+          "focus_industry_name": "\u79d1\u6280",
+          "focus_industry_score": 66.31,
+          "focus_industry_rank": 1,
+          "focus_industry_status": "active",
+          "focus_role": "confirming_etf",
+          "focus_state": "watch_only",
+          "qualified_for_action": false,
+          "qualified_for_watch": true,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.3597,
+          "disqualifiers": [
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "nontechnical_source_missing"
+          ]
+        },
+        {
+          "symbol": "688981.SH",
+          "name": "SMIC / \u4e2d\u82af\u56fd\u9645",
+          "theme": "china-a-semiconductors",
+          "kind": "stock",
+          "score": 63.54,
+          "focus_industry": "technology",
+          "focus_industry_name": "\u79d1\u6280",
+          "focus_industry_score": 66.31,
+          "focus_industry_rank": 1,
+          "focus_industry_status": "active",
+          "focus_role": "leader",
+          "focus_state": "watch_only",
+          "qualified_for_action": false,
+          "qualified_for_watch": true,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.8023,
+          "disqualifiers": [
+            "symbol_risk_veto",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_policy",
+            "nontechnical_source_missing"
+          ]
+        },
+        {
+          "symbol": "512480.SH",
+          "name": "GuolianAn Semiconductor ETF / \u56fd\u8054\u5b89\u534a\u5bfc\u4f53ETF",
+          "theme": "china-a-semiconductors",
+          "kind": "etf",
+          "score": 62.57,
+          "focus_industry": "technology",
+          "focus_industry_name": "\u79d1\u6280",
+          "focus_industry_score": 66.31,
+          "focus_industry_rank": 1,
+          "focus_industry_status": "active",
+          "focus_role": "confirming_etf",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.1908,
+          "disqualifiers": [
+            "not_theme_score_leader",
+            "symbol_risk_veto",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "nontechnical_source_missing",
+            "same_theme_best_peer_evidence_missing_or_failed"
+          ]
+        },
+        {
+          "symbol": "9618.HK",
+          "name": "JD.com / \u4eac\u4e1c\u96c6\u56e2-SW",
+          "theme": "internet-platform",
+          "kind": "stock",
+          "score": 61.91,
+          "focus_industry": "technology",
+          "focus_industry_name": "\u79d1\u6280",
+          "focus_industry_score": 66.31,
+          "focus_industry_rank": 1,
+          "focus_industry_status": "active",
+          "focus_role": "high_beta",
+          "focus_state": "watch_only",
+          "qualified_for_action": false,
+          "qualified_for_watch": true,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.008,
+          "disqualifiers": [
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_policy",
+            "nontechnical_source_missing"
+          ]
+        },
+        {
+          "symbol": "3690.HK",
+          "name": "Meituan / \u7f8e\u56e2-W",
+          "theme": "internet-platform",
+          "kind": "stock",
+          "score": 40.53,
+          "focus_industry": "technology",
+          "focus_industry_name": "\u79d1\u6280",
+          "focus_industry_score": 66.31,
+          "focus_industry_rank": 1,
+          "focus_industry_status": "active",
+          "focus_role": "leader",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.28,
+          "disqualifiers": [
+            "price_below_ma20_and_ma60",
+            "not_theme_score_leader",
+            "symbol_risk_veto",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_policy",
+            "nontechnical_source_missing",
+            "same_theme_best_peer_evidence_missing_or_failed"
+          ]
+        },
+        {
+          "symbol": "3033.HK",
+          "name": "CSOP Hang Seng TECH Index ETF / \u5357\u65b9\u4e1c\u82f1\u6052\u751f\u79d1\u6280\u6307\u6570ETF",
+          "theme": "hang-seng-tech",
+          "kind": "etf",
+          "score": 22.94,
+          "focus_industry": "technology",
+          "focus_industry_name": "\u79d1\u6280",
+          "focus_industry_score": 66.31,
+          "focus_industry_rank": 1,
+          "focus_industry_status": "active",
+          "focus_role": "confirming_etf",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.3466,
+          "disqualifiers": [
+            "price_below_ma20_and_ma60",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "nontechnical_source_missing"
+          ]
+        }
+      ],
+      "rank": 1
+    },
+    {
+      "id": "brokerage",
+      "name": "\u5238\u5546",
+      "strategic_weight": 1.0,
+      "configured_priority": 3,
+      "score": 60.6,
+      "status": "active",
+      "matched_symbol_count": 2,
+      "qualified_watch_count": 1,
+      "qualified_action_count": 0,
+      "leader_symbol": "600030.SH",
+      "leader_score": 65.84,
+      "average_top_score": 53.39,
+      "breadth_score": 50.0,
+      "volume_confirmation_score": 68.34,
+      "actionability_score": 65.0,
+      "reasons": [
+        "leader=600030.SH leader_score=65.84",
+        "qualified_action_count=0",
+        "qualified_watch_count=1",
+        "strategic_weight=1.0"
+      ],
+      "top_symbols": [
+        {
+          "symbol": "600030.SH",
+          "name": "CITIC Securities / \u4e2d\u4fe1\u8bc1\u5238",
+          "theme": "china-a-capital-markets",
+          "kind": "stock",
+          "score": 65.84,
+          "focus_industry": "brokerage",
+          "focus_industry_name": "\u5238\u5546",
+          "focus_industry_score": 60.6,
+          "focus_industry_rank": 2,
+          "focus_industry_status": "active",
+          "focus_role": "leader",
+          "focus_state": "watch_only",
+          "qualified_for_action": false,
+          "qualified_for_watch": true,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.6303,
+          "disqualifiers": [
+            "symbol_risk_veto",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_unknown",
+            "nontechnical_source_missing"
+          ]
+        },
+        {
+          "symbol": "0388.HK",
+          "name": "HKEX / \u9999\u6e2f\u4ea4\u6613\u6240",
+          "theme": "financials-exchange",
+          "kind": "stock",
+          "score": 40.94,
+          "focus_industry": "brokerage",
+          "focus_industry_name": "\u5238\u5546",
+          "focus_industry_score": 60.6,
+          "focus_industry_rank": 2,
+          "focus_industry_status": "active",
+          "focus_role": "confirming_etf",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.1031,
+          "disqualifiers": [
+            "price_below_ma20_and_ma60",
+            "symbol_risk_veto",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_unknown",
+            "nontechnical_source_missing"
+          ]
+        }
+      ],
+      "rank": 2
+    },
+    {
+      "id": "new_energy",
+      "name": "\u65b0\u80fd\u6e90",
+      "strategic_weight": 1.04,
+      "configured_priority": 2,
+      "score": 47.66,
+      "status": "watch",
+      "matched_symbol_count": 4,
+      "qualified_watch_count": 1,
+      "qualified_action_count": 0,
+      "leader_symbol": "300750.SZ",
+      "leader_score": 56.02,
+      "average_top_score": 29.9,
+      "breadth_score": 25.0,
+      "volume_confirmation_score": 53.63,
+      "actionability_score": 65.0,
+      "reasons": [
+        "leader=300750.SZ leader_score=56.02",
+        "qualified_action_count=0",
+        "qualified_watch_count=1",
+        "strategic_weight=1.04"
+      ],
+      "top_symbols": [
+        {
+          "symbol": "300750.SZ",
+          "name": "CATL / \u5b81\u5fb7\u65f6\u4ee3",
+          "theme": "china-a-battery-ev",
+          "kind": "stock",
+          "score": 56.02,
+          "focus_industry": "new_energy",
+          "focus_industry_name": "\u65b0\u80fd\u6e90",
+          "focus_industry_score": 47.66,
+          "focus_industry_rank": 3,
+          "focus_industry_status": "watch",
+          "focus_role": "leader",
+          "focus_state": "watch_only",
+          "qualified_for_action": false,
+          "qualified_for_watch": true,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 0.9191,
+          "disqualifiers": [
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_unknown",
+            "nontechnical_source_missing",
+            "volume_ratio_20_below_1_0"
+          ]
+        },
+        {
+          "symbol": "600900.SH",
+          "name": "Yangtze Power / \u957f\u6c5f\u7535\u529b",
+          "theme": "china-a-utilities-defensive",
+          "kind": "stock",
+          "score": 38.73,
+          "focus_industry": "new_energy",
+          "focus_industry_name": "\u65b0\u80fd\u6e90",
+          "focus_industry_score": 47.66,
+          "focus_industry_rank": 3,
+          "focus_industry_status": "watch",
+          "focus_role": "confirming_etf",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.126,
+          "disqualifiers": [
+            "price_below_ma20_and_ma60",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "nontechnical_source_missing"
+          ]
+        },
+        {
+          "symbol": "002594.SZ",
+          "name": "BYD / \u6bd4\u4e9a\u8fea",
+          "theme": "china-a-auto-ev",
+          "kind": "stock",
+          "score": 22.24,
+          "focus_industry": "new_energy",
+          "focus_industry_name": "\u65b0\u80fd\u6e90",
+          "focus_industry_score": 47.66,
+          "focus_industry_rank": 3,
+          "focus_industry_status": "watch",
+          "focus_role": "leader",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 0.8046,
+          "disqualifiers": [
+            "price_below_ma20_and_ma60",
+            "symbol_risk_veto",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_unknown",
+            "nontechnical_source_missing",
+            "volume_ratio_20_below_1_0"
+          ]
+        },
+        {
+          "symbol": "515790.SH",
+          "name": "Huatai-PineBridge Photovoltaic ETF / \u534e\u6cf0\u67cf\u745e\u5149\u4f0fETF",
+          "theme": "china-a-renewable-energy",
+          "kind": "etf",
+          "score": 2.61,
+          "focus_industry": "new_energy",
+          "focus_industry_name": "\u65b0\u80fd\u6e90",
+          "focus_industry_score": 47.66,
+          "focus_industry_rank": 3,
+          "focus_industry_status": "watch",
+          "focus_role": "confirming_etf",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.4404,
+          "disqualifiers": [
+            "downtrend_regime",
+            "price_below_ma20_and_ma60",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "nontechnical_source_missing"
+          ]
+        }
+      ],
+      "rank": 3
+    },
+    {
+      "id": "healthcare",
+      "name": "\u533b\u7597",
+      "strategic_weight": 0.98,
+      "configured_priority": 4,
+      "score": 10.54,
+      "status": "diagnostic",
+      "matched_symbol_count": 4,
+      "qualified_watch_count": 0,
+      "qualified_action_count": 0,
+      "leader_symbol": "2269.HK",
+      "leader_score": 0.0,
+      "average_top_score": 0.0,
+      "breadth_score": 0.0,
+      "volume_confirmation_score": 46.7,
+      "actionability_score": 25.0,
+      "reasons": [
+        "leader=2269.HK leader_score=0.0",
+        "qualified_action_count=0",
+        "qualified_watch_count=0",
+        "strategic_weight=0.98"
+      ],
+      "top_symbols": [
+        {
+          "symbol": "2269.HK",
+          "name": "WuXi Biologics / \u836f\u660e\u751f\u7269",
+          "theme": "healthcare-biotech",
+          "kind": "stock",
+          "score": 0,
+          "focus_industry": "healthcare",
+          "focus_industry_name": "\u533b\u7597",
+          "focus_industry_score": 10.54,
+          "focus_industry_rank": 4,
+          "focus_industry_status": "diagnostic",
+          "focus_role": "leader",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 0.8032,
+          "disqualifiers": [
+            "downtrend_regime",
+            "price_below_ma20_and_ma60",
+            "symbol_risk_veto",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_policy",
+            "nontechnical_source_missing",
+            "volume_ratio_20_below_1_0"
+          ]
+        },
+        {
+          "symbol": "1177.HK",
+          "name": "Sino Biopharm / \u4e2d\u56fd\u751f\u7269\u5236\u836f",
+          "theme": "healthcare-pharma",
+          "kind": "stock",
+          "score": 0,
+          "focus_industry": "healthcare",
+          "focus_industry_name": "\u533b\u7597",
+          "focus_industry_score": 10.54,
+          "focus_industry_rank": 4,
+          "focus_industry_status": "diagnostic",
+          "focus_role": "leader",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 0.9782,
+          "disqualifiers": [
+            "downtrend_regime",
+            "range_pos_60_below_0_12",
+            "price_below_ma20_and_ma60",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_unknown",
+            "nontechnical_source_missing",
+            "volume_ratio_20_below_1_0"
+          ]
+        },
+        {
+          "symbol": "1093.HK",
+          "name": "CSPC Pharma / \u77f3\u836f\u96c6\u56e2",
+          "theme": "healthcare-pharma",
+          "kind": "stock",
+          "score": 0,
+          "focus_industry": "healthcare",
+          "focus_industry_name": "\u533b\u7597",
+          "focus_industry_score": 10.54,
+          "focus_industry_rank": 4,
+          "focus_industry_status": "diagnostic",
+          "focus_role": "leader",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 0.7478,
+          "disqualifiers": [
+            "downtrend_regime",
+            "range_pos_60_below_0_12",
+            "price_below_ma20_and_ma60",
+            "not_theme_score_leader",
+            "symbol_risk_veto",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_unknown",
+            "nontechnical_source_missing",
+            "volume_ratio_20_below_1_0",
+            "same_theme_best_peer_evidence_missing_or_failed"
+          ]
+        },
+        {
+          "symbol": "600276.SH",
+          "name": "Hengrui Medicine / \u6052\u745e\u533b\u836f",
+          "theme": "china-a-healthcare-pharma",
+          "kind": "stock",
+          "score": 0,
+          "focus_industry": "healthcare",
+          "focus_industry_name": "\u533b\u7597",
+          "focus_industry_score": 10.54,
+          "focus_industry_rank": 4,
+          "focus_industry_status": "diagnostic",
+          "focus_role": "leader",
+          "focus_state": "diagnostic",
+          "qualified_for_action": false,
+          "qualified_for_watch": false,
+          "diagnostic_only": true,
+          "cost_gate_passed": false,
+          "volume_ratio_20": 1.2065,
+          "disqualifiers": [
+            "downtrend_regime",
+            "range_pos_60_below_0_12",
+            "price_below_ma20_and_ma60",
+            "symbol_risk_veto",
+            "cost_gate_failed"
+          ],
+          "action_disqualifiers": [
+            "nontechnical_proxy_only",
+            "nontechnical_score_below_action_min",
+            "event_risk_unknown",
+            "nontechnical_source_missing"
+          ]
+        }
+      ],
+      "rank": 4
+    }
+  ],
+  "active_focus_industries": [
+    "technology",
+    "brokerage"
+  ],
+  "active_focus_symbols": [
+    {
+      "symbol": "588000.SH",
+      "name": "ChinaAMC STAR 50 ETF / \u534e\u590f\u4e0a\u8bc1\u79d1\u521b\u677f50ETF",
+      "theme": "china-a-hard-tech",
+      "kind": "etf",
+      "score": 64.99,
+      "focus_industry": "technology",
+      "focus_industry_name": "\u79d1\u6280",
+      "focus_industry_score": 66.31,
+      "focus_industry_rank": 1,
+      "focus_industry_status": "active",
+      "focus_role": "confirming_etf",
+      "focus_state": "watch_only",
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "cost_gate_passed": false,
+      "volume_ratio_20": 1.3597,
+      "disqualifiers": [
+        "cost_gate_failed"
+      ],
+      "action_disqualifiers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "nontechnical_source_missing"
+      ]
+    },
+    {
+      "symbol": "688981.SH",
+      "name": "SMIC / \u4e2d\u82af\u56fd\u9645",
+      "theme": "china-a-semiconductors",
+      "kind": "stock",
+      "score": 63.54,
+      "focus_industry": "technology",
+      "focus_industry_name": "\u79d1\u6280",
+      "focus_industry_score": 66.31,
+      "focus_industry_rank": 1,
+      "focus_industry_status": "active",
+      "focus_role": "leader",
+      "focus_state": "watch_only",
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "cost_gate_passed": false,
+      "volume_ratio_20": 1.8023,
+      "disqualifiers": [
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "action_disqualifiers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "nontechnical_source_missing"
+      ]
+    },
+    {
+      "symbol": "9618.HK",
+      "name": "JD.com / \u4eac\u4e1c\u96c6\u56e2-SW",
+      "theme": "internet-platform",
+      "kind": "stock",
+      "score": 61.91,
+      "focus_industry": "technology",
+      "focus_industry_name": "\u79d1\u6280",
+      "focus_industry_score": 66.31,
+      "focus_industry_rank": 1,
+      "focus_industry_status": "active",
+      "focus_role": "high_beta",
+      "focus_state": "watch_only",
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "cost_gate_passed": false,
+      "volume_ratio_20": 1.008,
+      "disqualifiers": [
+        "cost_gate_failed"
+      ],
+      "action_disqualifiers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "nontechnical_source_missing"
+      ]
+    },
+    {
+      "symbol": "512480.SH",
+      "name": "GuolianAn Semiconductor ETF / \u56fd\u8054\u5b89\u534a\u5bfc\u4f53ETF",
+      "theme": "china-a-semiconductors",
+      "kind": "etf",
+      "score": 62.57,
+      "focus_industry": "technology",
+      "focus_industry_name": "\u79d1\u6280",
+      "focus_industry_score": 66.31,
+      "focus_industry_rank": 1,
+      "focus_industry_status": "active",
+      "focus_role": "confirming_etf",
+      "focus_state": "diagnostic",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "diagnostic_only": true,
+      "cost_gate_passed": false,
+      "volume_ratio_20": 1.1908,
+      "disqualifiers": [
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "action_disqualifiers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "nontechnical_source_missing",
+        "same_theme_best_peer_evidence_missing_or_failed"
+      ]
+    },
+    {
+      "symbol": "600030.SH",
+      "name": "CITIC Securities / \u4e2d\u4fe1\u8bc1\u5238",
+      "theme": "china-a-capital-markets",
+      "kind": "stock",
+      "score": 65.84,
+      "focus_industry": "brokerage",
+      "focus_industry_name": "\u5238\u5546",
+      "focus_industry_score": 60.6,
+      "focus_industry_rank": 2,
+      "focus_industry_status": "active",
+      "focus_role": "leader",
+      "focus_state": "watch_only",
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "cost_gate_passed": false,
+      "volume_ratio_20": 1.6303,
+      "disqualifiers": [
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "action_disqualifiers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing"
+      ]
+    },
+    {
+      "symbol": "0388.HK",
+      "name": "HKEX / \u9999\u6e2f\u4ea4\u6613\u6240",
+      "theme": "financials-exchange",
+      "kind": "stock",
+      "score": 40.94,
+      "focus_industry": "brokerage",
+      "focus_industry_name": "\u5238\u5546",
+      "focus_industry_score": 60.6,
+      "focus_industry_rank": 2,
+      "focus_industry_status": "active",
+      "focus_role": "confirming_etf",
+      "focus_state": "diagnostic",
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "diagnostic_only": true,
+      "cost_gate_passed": false,
+      "volume_ratio_20": 1.1031,
+      "disqualifiers": [
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "action_disqualifiers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing"
+      ]
+    }
+  ],
+  "watch_focus_industries": [
+    "new_energy"
+  ],
+  "watch_focus_symbols": [
+    {
+      "symbol": "300750.SZ",
+      "name": "CATL / \u5b81\u5fb7\u65f6\u4ee3",
+      "theme": "china-a-battery-ev",
+      "kind": "stock",
+      "score": 56.02,
+      "focus_industry": "new_energy",
+      "focus_industry_name": "\u65b0\u80fd\u6e90",
+      "focus_industry_score": 47.66,
+      "focus_industry_rank": 3,
+      "focus_industry_status": "watch",
+      "focus_role": "leader",
+      "focus_state": "watch_only",
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "diagnostic_only": true,
+      "cost_gate_passed": false,
+      "volume_ratio_20": 0.9191,
+      "disqualifiers": [
+        "cost_gate_failed"
+      ],
+      "action_disqualifiers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0"
+      ]
+    }
+  ],
+  "diagnostic_only_industries": [
+    "healthcare"
+  ],
+  "notes": [
+    "Dynamic focus pool only changes daily attention, not the durable trade_universe whitelist.",
+    "watch_focus_symbols are observation candidates from watch-level industries; they are not eligible for action unless deterministic ranking gates also pass.",
+    "Symbols outside active_focus_symbols may remain in trade_universe but should not be upgraded solely because another focus industry is strong."
+  ],
+  "source_ranking_file": "research\\rankings\\2026-05-21-close-ranking.json",
+  "source_config": "config\\focus_industries.toml"
+}

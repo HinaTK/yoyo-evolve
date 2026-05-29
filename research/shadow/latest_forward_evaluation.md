@@ -1,13 +1,13 @@
 # Shadow Forward Evaluation
 
-Generated: `2026-05-19T01:43:06Z`
+Generated: `2026-05-29T04:10:56Z`
 Evaluation mode: `forward_shadow_only`
 Counts toward forward evidence: `True`
 Gate passed: `False`
 
 ## Summary
-- forward shadow logs: `9`
-- matured forward days: `1`
+- forward shadow logs: `28`
+- matured forward days: `4`
 - samples: `0`
 - pending samples: `0`
 - win rate: `None`
@@ -18,8 +18,7 @@ Gate passed: `False`
 - stop triggered rate: `None`
 
 ## Findings
-- `forward_shadow_days` actual `9`, expected `>= 20`
-- `matured_forward_shadow_days` actual `1`, expected `>= 20`
+- `matured_forward_shadow_days` actual `4`, expected `>= 20`
 - `forward_sample_count` actual `0`, expected `> 0`
 
 ## Recent Records

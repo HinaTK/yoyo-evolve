@@ -132,6 +132,7 @@ Level 6 third-round stabilization separates action eligibility from diagnostics 
 Level 6 kernel hardening adds traceable run lineage and deterministic draft calls:
 
 - Ranking rows now include per-candidate `expected_edge_bps`, `net_expected_edge_bps`, `cost_gate_passed`, `edge_method`, and `evidence_window`. Action qualification requires the edge/cost gate to pass; validator rejects actionable final calls without those fields.
+- Nontechnical evidence can be loaded from manual/formal point-in-time files configured under `config/nontechnical_evidence.toml` `[curated_sources]`; proxy-only evidence remains watch/audit-only and cannot override cost, market-risk, or symbol-risk gates.
 - `scripts/generate_investment_draft_calls.py` creates deterministic draft policy JSON from ranking layers. LLM report/calls stages may explain or downgrade these drafts, but should not upgrade beyond the deterministic draft state.
 - `scripts/create_investment_run_manifest.py` writes `research/runs/<date>-<session>/manifest.json` with as-of metadata, model/provider, and sha256/size/existence metadata for key inputs and outputs. The investment loop writes the manifest before LLM stages and refreshes it after final outputs exist.
 

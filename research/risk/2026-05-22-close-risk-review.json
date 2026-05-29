@@ -1,0 +1,697 @@
+{
+  "date": "2026-05-22",
+  "session": "close",
+  "generated_at": "2026-05-22T09:11:07Z",
+  "source": "deterministic_level6_risk_review",
+  "policy": {
+    "primary_use": "recommendation_only",
+    "execution_allowed": false,
+    "position_policy": "max_position_pct is a recommendation cap only; this system never executes orders or mutates a portfolio.",
+    "max_single_position_pct": 10.0,
+    "buy_candidate_pass_rule": "qualified_for_action=true, cost_gate_passed=true, volume_ratio_20>=1.0, and no downtrend_regime",
+    "same_theme_peer_rule": "same_theme_peer_evidence_passed=true",
+    "nontechnical_evidence_rule": "buy_candidate also requires fresh non-technical evidence when the ranking policy requires it"
+  },
+  "verdicts": [
+    {
+      "symbol": "000725.SZ",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "cn_limit_up_chase_block",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "market proxy range_pos_60 must fall below the action limit",
+        "A-share limit-board condition must clear before action upgrade",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "0981.HK",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "002050.SZ",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "market proxy range_pos_60 must fall below the action limit",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "002475.SZ",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "volume_ratio_20 must be at least 1.0",
+        "market proxy range_pos_60 must fall below the action limit"
+      ]
+    },
+    {
+      "symbol": "588000.SH",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "volume_ratio_20 must be at least 1.0",
+        "market proxy range_pos_60 must fall below the action limit",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "300124.SZ",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "volume_ratio_20 must be at least 1.0",
+        "market proxy range_pos_60 must fall below the action limit",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "300274.SZ",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "cost_gate_failed",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "market proxy range_pos_60 must fall below the action limit",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "515790.SH",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "cost_gate_failed",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "market proxy range_pos_60 must fall below the action limit",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "603259.SH",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "cost_gate_failed",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "market proxy range_pos_60 must fall below the action limit"
+      ]
+    },
+    {
+      "symbol": "6160.HK",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "event_risk_policy",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "0388.HK",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "symbol_risk_veto",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "diagnostic_only",
+        "not_qualified_for_action",
+        "low_symbol_pass_rate",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "pass_rate=0.000 over 4 evaluated calls",
+        "backtest_max_adverse_pct<=-8.0% in 2 of 4 promotable samples",
+        "symbol risk memory has action_veto=true"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "688981.SH",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 6 of 19 promotable samples",
+        "symbol risk memory has action_veto=true"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "same-theme best-peer evidence must pass",
+        "market proxy range_pos_60 must fall below the action limit",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "512480.SH",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 1 of 8 promotable samples",
+        "symbol risk memory has action_veto=true"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "volume_ratio_20 must be at least 1.0",
+        "same-theme best-peer evidence must pass",
+        "market proxy range_pos_60 must fall below the action limit",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "300750.SZ",
+      "draft_state": "watch_only",
+      "risk_decision": "pass",
+      "final_state_cap": "watch_only",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is watch_only, so final state is capped at watch_only"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "market proxy range_pos_60 must fall below the action limit",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "002335.SZ",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "cost_gate_failed",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is avoid"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "same-theme best-peer evidence must pass",
+        "market proxy range_pos_60 must fall below the action limit"
+      ]
+    },
+    {
+      "symbol": "2359.HK",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is avoid"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "same-theme best-peer evidence must pass",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "1801.HK",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is avoid"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "same-theme best-peer evidence must pass",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "2269.HK",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 2 of 8 promotable samples",
+        "symbol risk memory has action_veto=true"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "same-theme best-peer evidence must pass",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade",
+        "downtrend regime must clear"
+      ]
+    },
+    {
+      "symbol": "1177.HK",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "volume_ratio_20_below_1_0",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action",
+        "low_symbol_pass_rate",
+        "negative_symbol_avg_return"
+      ],
+      "reasons": [
+        "pass_rate=0.000 over 6 evaluated calls",
+        "avg_return_pct=-0.122 over 6 evaluated calls",
+        "records_avg_return_pct=-0.122 over 6 records",
+        "deterministic draft state is avoid"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade",
+        "downtrend regime must clear"
+      ]
+    },
+    {
+      "symbol": "3908.HK",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is avoid"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "600030.SH",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 1 of 7 promotable samples",
+        "symbol risk memory has action_veto=true"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "market proxy range_pos_60 must fall below the action limit"
+      ]
+    },
+    {
+      "symbol": "000776.SZ",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is avoid"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "same-theme best-peer evidence must pass",
+        "market proxy range_pos_60 must fall below the action limit"
+      ]
+    },
+    {
+      "symbol": "6886.HK",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed",
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is avoid"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "volume_ratio_20 must be at least 1.0",
+        "same-theme best-peer evidence must pass",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "300059.SZ",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "diagnostic_only",
+        "not_qualified_for_watch",
+        "not_qualified_for_action"
+      ],
+      "reasons": [
+        "deterministic draft state is avoid"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "expected edge must pass the cost gate",
+        "same-theme best-peer evidence must pass",
+        "market proxy range_pos_60 must fall below the action limit",
+        "downtrend regime must clear"
+      ]
+    }
+  ]
+}

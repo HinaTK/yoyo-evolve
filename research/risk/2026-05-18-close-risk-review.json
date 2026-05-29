@@ -1,0 +1,100 @@
+{
+  "date": "2026-05-18",
+  "session": "close",
+  "generated_at": "2026-05-18T09:10:39Z",
+  "source": "deterministic_level6_risk_review",
+  "policy": {
+    "primary_use": "recommendation_only",
+    "execution_allowed": false,
+    "position_policy": "max_position_pct is a recommendation cap only; this system never executes orders or mutates a portfolio.",
+    "max_single_position_pct": 10.0,
+    "buy_candidate_pass_rule": "qualified_for_action=true, cost_gate_passed=true, volume_ratio_20>=1.0, and no downtrend_regime",
+    "same_theme_peer_rule": "same_theme_peer_evidence_passed=true",
+    "nontechnical_evidence_rule": "buy_candidate also requires fresh non-technical evidence when the ranking policy requires it"
+  },
+  "verdicts": [
+    {
+      "symbol": "0728.HK",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "symbol_risk_veto",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "diagnostic_only",
+        "not_qualified_for_action",
+        "low_symbol_pass_rate",
+        "negative_symbol_avg_return",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "pass_rate=0.000 over 2 evaluated calls",
+        "avg_return_pct=-0.378 over 2 evaluated calls",
+        "backtest_max_adverse_pct<=-8.0% in 2 of 26 promotable samples",
+        "symbol risk memory has action_veto=true"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "000333.SZ",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "symbol_risk_veto",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 2 of 17 promotable samples",
+        "symbol risk memory has action_veto=true"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "market proxy range_pos_60 must fall below the action limit",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    },
+    {
+      "symbol": "512480.SH",
+      "draft_state": "avoid",
+      "risk_decision": "veto",
+      "final_state_cap": "avoid",
+      "max_position_pct": 0.0,
+      "position_policy": "recommendation_cap_only",
+      "execution_allowed": false,
+      "risk_tags": [
+        "symbol_risk_veto",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_only",
+        "not_qualified_for_action",
+        "backtest_adverse_breach"
+      ],
+      "reasons": [
+        "backtest_max_adverse_pct<=-8.0% in 1 of 8 promotable samples",
+        "symbol risk memory has action_veto=true"
+      ],
+      "required_confirmations": [
+        "ranking row must regain qualified_for_action=true",
+        "volume_ratio_20 must be at least 1.0",
+        "market proxy range_pos_60 must fall below the action limit",
+        "fresh fundamentals, valuation, catalyst, capital-flow, macro, and event-risk evidence must pass before action upgrade"
+      ]
+    }
+  ]
+}

@@ -157,6 +157,7 @@ class DailyShadowOptions:
     build_evidence_ledger: bool = True
     build_calibration_scorecard: bool = True
     build_nontechnical_evidence: bool = True
+    build_nontechnical_gap_queue: bool = True
     evaluate_nontechnical_attribution: bool = True
     build_draft_calls: bool = True
     build_risk_review: bool = True
@@ -216,6 +217,7 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
     active_strategy_file = root / "config" / "active_strategy.toml"
     nontechnical_evidence_config = root / "config" / "nontechnical_evidence.toml"
     nontechnical_evidence_file = root / "research" / "evidence" / "nontechnical" / "latest.json"
+    nontechnical_gap_queue_file = root / "research" / "evidence" / "nontechnical" / "latest_actionable_gap_queue.json"
     nontechnical_attribution_file = root / "research" / "evaluations" / "latest_nontechnical_attribution.json"
     optimization = read_toml(optimization_config)
     symbol_risk_file = configured_symbol_risk_file(root, optimization)
@@ -335,6 +337,29 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
     if nontechnical_evidence_config.exists():
         rank_command.extend(["--nontechnical-evidence", rank_nontechnical_file])
     call("rank_universe", rank_command)
+
+    if options.build_nontechnical_gap_queue and nontechnical_evidence_config.exists() and (options.dry_run or nontechnical_evidence_file.exists() or options.build_nontechnical_evidence):
+        call(
+            "build_nontechnical_gap_queue",
+            [
+                options.python_bin,
+                script_path(root, "build_nontechnical_evidence_gap_queue.py"),
+                "--nontechnical-evidence",
+                nontechnical_evidence_file,
+                "--ranking",
+                ranking_file,
+                "--as-of-date",
+                options.date,
+                "--as-of-session",
+                options.session,
+                "--output-json",
+                nontechnical_gap_queue_file,
+                "--output-md",
+                root / "research" / "evidence" / "nontechnical" / "latest_actionable_gap_queue.md",
+                "--output-skeleton-json",
+                root / "research" / "evidence" / "nontechnical" / "manual" / "actionable_gap_skeleton.json",
+            ],
+        )
 
     if focus_industries_config.exists():
         call(
@@ -617,6 +642,8 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
                 ranking_file,
                 "--nontechnical-evidence",
                 nontechnical_evidence_file,
+                "--nontechnical-gap-queue",
+                nontechnical_gap_queue_file,
                 "--forward-evaluation",
                 root / "research" / "shadow" / "latest_forward_evaluation.json",
                 "--evidence-ledger",
@@ -648,6 +675,7 @@ def run_pipeline(options: DailyShadowOptions, runner: Callable[[str, list[str | 
             "risk_review": str(risk_review_file),
             "symbol_risk_memory": str(symbol_risk_file),
             "nontechnical_evidence": str(nontechnical_evidence_file),
+            "nontechnical_gap_queue": str(nontechnical_gap_queue_file),
             "nontechnical_attribution": str(nontechnical_attribution_file),
         },
         "steps": steps,
@@ -680,6 +708,7 @@ def parse_args() -> DailyShadowOptions:
     parser.add_argument("--skip-evidence-ledger", action="store_true")
     parser.add_argument("--skip-calibration-scorecard", action="store_true")
     parser.add_argument("--skip-nontechnical-evidence", action="store_true")
+    parser.add_argument("--skip-nontechnical-gap-queue", action="store_true")
     parser.add_argument("--skip-nontechnical-attribution", action="store_true")
     parser.add_argument("--skip-draft-calls", action="store_true")
     parser.add_argument("--skip-risk-review", action="store_true")
@@ -716,6 +745,7 @@ def parse_args() -> DailyShadowOptions:
         build_evidence_ledger=not args.skip_evidence_ledger,
         build_calibration_scorecard=not args.skip_calibration_scorecard,
         build_nontechnical_evidence=not args.skip_nontechnical_evidence,
+        build_nontechnical_gap_queue=not args.skip_nontechnical_gap_queue,
         evaluate_nontechnical_attribution=not args.skip_nontechnical_attribution,
         build_draft_calls=not args.skip_draft_calls,
         build_risk_review=not args.skip_risk_review,

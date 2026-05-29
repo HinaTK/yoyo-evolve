@@ -19,11 +19,20 @@ ALLOWED_FINAL_STATES_BY_CAP = {
 }
 ACTION_LIKE_STATES = {"buy_candidate", "accumulate", "hold", "trim", "sell_candidate"}
 WATCH_LIKE_STATES = {"watch", "watch_only"}
+ACTION_TIER_LABELS = {
+    "formal_actionable": "正式可行动",
+    "manual_probe": "小仓试错需人工确认",
+    "observe": "继续观察",
+    "suspended": "暂停行动",
+    "blocked": "禁止追入",
+}
 REASON_LABELS = {
     "cost_gate_failed": "成本/边际不足",
     "downtrend_regime": "趋势偏弱",
     "event_risk_policy": "政策风险",
     "event_risk_quote_stale": "行情日期滞后",
+    "event_risk_from_future": "事件风险证据来自未来",
+    "event_risk_stale": "事件风险复核过期",
     "event_risk_unknown": "事件风险未知",
     "hk_halt_or_no_turnover_suspected": "疑似停牌/无成交",
     "cn_limit_down_liquidity_block": "跌停流动性风险",
@@ -31,7 +40,10 @@ REASON_LABELS = {
     "low_volume_ratio_20_below_0_6": "量能严重不足",
     "market_range_pos_60_above_action_limit": "市场位置偏高",
     "market_proxy_missing": "市场参考资料缺失",
+    "nontechnical_component_date_missing": "非技术面组件日期缺失",
+    "nontechnical_component_from_future": "非技术面组件来自未来",
     "nontechnical_component_missing": "非技术面组件缺失",
+    "nontechnical_component_stale": "非技术面组件过期",
     "nontechnical_evidence_date_missing": "非技术面日期缺失",
     "nontechnical_evidence_from_future": "非技术面证据来自未来",
     "nontechnical_evidence_from_future_session": "非技术面证据来自未来时段",
@@ -100,9 +112,17 @@ def reason_label(reason: str) -> str:
     return REASON_LABELS.get(reason, reason)
 
 
+def action_tier_from_row(row: dict[str, Any]) -> tuple[str | None, str | None]:
+    key = str(row.get("action_tier") or "").strip() or None
+    label = str(row.get("action_tier_label") or "").strip() or None
+    if key and not label:
+        label = ACTION_TIER_LABELS.get(key, key)
+    return key, label
+
+
 def ranking_rows_by_symbol(ranking: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
     rows: dict[str, dict[str, Any]] = {}
-    for key in ("all_ranked", "top_candidates", "actionable_candidates", "diagnostic_candidates"):
+    for key in ("all_ranked", "top_candidates", "actionable_candidates", "startup_candidates", "diagnostic_candidates"):
         values = (ranking or {}).get(key, [])
         if not isinstance(values, list):
             continue
@@ -278,6 +298,7 @@ def research_action_for(row: dict[str, Any]) -> dict[str, Any]:
     blockers = unique(clean_list(row.get("gate_blockers")) + [item for item in clean_list(row.get("blockers")) if item in REASON_LABELS])
     blocker_set = set(blockers)
     nontechnical = row.get("nontechnical_profile") if isinstance(row.get("nontechnical_profile"), dict) else {}
+    action_tier, action_tier_label = action_tier_from_row(row)
     event_risk = str(nontechnical.get("event_risk") or "").lower()
     proxy_only = nontechnical.get("proxy_only") is True or "nontechnical_proxy_only" in blocker_set or evidence_text_implies_proxy_only(str(row.get("nontechnical_evidence") or ""))
     hard_blocked = state == "avoid" or bool(blocker_set & HARD_RESEARCH_BLOCKERS)
@@ -285,16 +306,25 @@ def research_action_for(row: dict[str, Any]) -> dict[str, Any]:
     if state in ACTION_LIKE_STATES and qualified_for_action and not blockers and not proxy_only and event_risk not in {"unknown", "policy", "high"}:
         return {
             "key": "consider",
-            "label": "可考虑研究",
+            "label": action_tier_label or "可考虑研究",
             "why": "正式行动门槛、风险上限与非技术面约束均未显示阻断；仍只进入人工研究队列。",
             "upgrade": "不自动升级为交易；需人工复核资金、组合和最新盘中证据后另行判断。",
             "invalidation": row.get("invalidation") or "若风险上限下调、行动门槛失效、事件风险升高或非技术面证据转差，立即降级。",
             "formal_actionable": True,
         }
+    if action_tier == "manual_probe" and qualified_for_watch and not proxy_only and not bool(blocker_set & HARD_RESEARCH_BLOCKERS):
+        return {
+            "key": "probe",
+            "label": action_tier_label or "小仓试错需人工确认",
+            "why": "核心技术、成本和流动性门槛通过，但仍有轻量非技术面复核项；不能当作正式行动候选。",
+            "upgrade": "补齐非技术面复核、阻断项清零后，才可升级为「正式可行动」。",
+            "invalidation": row.get("invalidation") or "若新增硬阻断、事件风险升高、成本/edge 失效或技术结构转弱，立即降级。",
+            "formal_actionable": False,
+        }
     if hard_blocked or (state == "avoid" and not qualified_for_watch):
         return {
             "key": "avoid",
-            "label": "暂不碰",
+            "label": action_tier_label if action_tier in {"blocked", "suspended"} else "暂不碰",
             "why": "状态或硬阻断不支持投入研究时间。",
             "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
             "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
@@ -351,6 +381,16 @@ def summarize_research_actions(recommendations: list[dict[str, Any]], ranking: d
             "score": ranked_row.get("score"),
             "qualified_for_action": ranked_row.get("qualified_for_action") is True,
             "qualified_for_watch": ranked_row.get("qualified_for_watch") is True,
+            "action_tier": ranked_row.get("action_tier") or rec.get("action_tier"),
+            "action_tier_label": ranked_row.get("action_tier_label") or rec.get("action_tier_label"),
+            "action_tier_description": ranked_row.get("action_tier_description") or rec.get("action_tier_description"),
+            "action_tier_reasons": ranked_row.get("action_tier_reasons") or rec.get("action_tier_reasons") or [],
+            "startup_candidate_stage": ranked_row.get("startup_candidate_stage") or rec.get("startup_candidate_stage"),
+            "startup_candidate_label": ranked_row.get("startup_candidate_label") or rec.get("startup_candidate_label"),
+            "startup_candidate_reasons": ranked_row.get("startup_candidate_reasons") or rec.get("startup_candidate_reasons") or [],
+            "startup_watch_candidate": ranked_row.get("startup_watch_candidate") is True or rec.get("startup_watch_candidate") is True,
+            "ma20_distance_pct": ranked_row.get("ma20_distance_pct") or rec.get("ma20_distance_pct"),
+            "theme_startup": ranked_row.get("theme_startup") or rec.get("theme_startup"),
             "gate_blockers": gate_blockers,
             "blockers": blockers,
             "why_source": rec.get("rationale"),
@@ -374,6 +414,16 @@ def summarize_research_actions(recommendations: list[dict[str, Any]], ranking: d
             "score": ranked_row.get("score"),
             "qualified_for_action": ranked_row.get("qualified_for_action") is True,
             "qualified_for_watch": ranked_row.get("qualified_for_watch") is True,
+            "action_tier": ranked_row.get("action_tier"),
+            "action_tier_label": ranked_row.get("action_tier_label"),
+            "action_tier_description": ranked_row.get("action_tier_description"),
+            "action_tier_reasons": ranked_row.get("action_tier_reasons") or [],
+            "startup_candidate_stage": ranked_row.get("startup_candidate_stage"),
+            "startup_candidate_label": ranked_row.get("startup_candidate_label"),
+            "startup_candidate_reasons": ranked_row.get("startup_candidate_reasons") or [],
+            "startup_watch_candidate": ranked_row.get("startup_watch_candidate") is True,
+            "ma20_distance_pct": ranked_row.get("ma20_distance_pct"),
+            "theme_startup": ranked_row.get("theme_startup"),
             "gate_blockers": blockers,
             "blockers": blockers,
             "why_source": None,
@@ -384,7 +434,7 @@ def summarize_research_actions(recommendations: list[dict[str, Any]], ranking: d
         row["research_action"] = research_action_for(row)
         rows.append(row)
 
-    order = {"consider": 0, "confirm": 1, "observe": 2, "avoid": 3}
+    order = {"consider": 0, "probe": 1, "confirm": 2, "observe": 3, "avoid": 4}
     rows.sort(key=lambda row: (order.get(row["research_action"]["key"], 9), -(as_float(row.get("score")) or 0.0), str(row.get("symbol") or "")))
     return rows
 
@@ -431,8 +481,10 @@ def build_payload(
         "research_actions": research_actions,
         "ranking": {
             "actionable_count": len((ranking or {}).get("actionable_candidates", [])) if isinstance((ranking or {}).get("actionable_candidates", []), list) else 0,
+            "startup_count": len((ranking or {}).get("startup_candidates", [])) if isinstance((ranking or {}).get("startup_candidates", []), list) else 0,
             "diagnostic_count": len((ranking or {}).get("diagnostic_candidates", [])) if isinstance((ranking or {}).get("diagnostic_candidates", []), list) else 0,
             "top_watch": top_rows(ranking, "top_candidates", 5),
+            "startup_watch": top_rows(ranking, "startup_candidates", 5),
         },
         "evidence": {
             "forward_shadow_logs": summary_get(evidence_ledger, ["summary", "forward_shadow_log_count"], summary_get(forward_eval, ["summary", "forward_shadow_log_count"])),
@@ -481,7 +533,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         "",
         "## 今日结论",
         f"- 研究模式：仅推荐研究；不执行交易、不修改组合。",
-        f"- 行动候选：{len(buy_like)} 个；观察名单：{len(watch)} 个；回避/不行动：{len(avoid)} 个。",
+        f"- 行动候选：{len(buy_like)} 个；启动前候选：{payload['ranking']['startup_count']} 个；观察名单：{len(watch)} 个；回避/不行动：{len(avoid)} 个。",
         f"- 证据进度：forward logs={payload['evidence']['forward_shadow_logs']}，matured days={payload['evidence']['matured_forward_days']}，forward samples={payload['evidence']['forward_sample_count']}。",
         "",
         "## 重点标的表",
@@ -510,12 +562,17 @@ def render_markdown(payload: dict[str, Any]) -> str:
         score = row.get("score") if row.get("score") is not None else "n/a"
         proxy_note = "；正式资料未接入，不清除正式行动门槛" if profile.get("proxy_only") else ""
         formal_note = "正式门槛通过但仍非交易指令" if action.get("formal_actionable") else "非正式行动候选"
-        lines.append(f"- `{row.get('symbol')}`：{action.get('label')}；状态={row.get('state')}；score={score}；{formal_note}{proxy_note}。")
+        tier_label = row.get("action_tier_label") or ACTION_TIER_LABELS.get(str(row.get("action_tier") or ""), "暂无分级")
+        startup_note = f"；启动={row.get('startup_candidate_label')}" if row.get("startup_candidate_label") else ""
+        lines.append(f"- `{row.get('symbol')}`：{action.get('label')}；分级={tier_label}{startup_note}；状态={row.get('state')}；score={score}；{formal_note}{proxy_note}。")
         lines.append(f"  - why：{row.get('why_source') or action.get('why')}")
         lines.append(f"  - 主要障碍：{blocker_text}。")
         lines.append(f"  - 升级条件：{action.get('upgrade')}")
         lines.append(f"  - 失效条件：{action.get('invalidation')}")
     lines.extend(["", "## Gate 拒绝与观察重点"])
+    startup_watch = payload["ranking"].get("startup_watch") or []
+    if startup_watch:
+        lines.append("- 启动前候选：" + "、".join(f"`{row.get('symbol')}`({row.get('startup_candidate_label')}, MA20距离={row.get('ma20_distance_pct')}%)" for row in startup_watch[:5]))
     for row in payload["ranking"]["top_watch"][:5]:
         disq = row.get("action_disqualifiers") or row.get("disqualifiers") or []
         lines.append(f"- `{row.get('symbol')}` score={row.get('score')} action={row.get('qualified_for_action')} watch={row.get('qualified_for_watch')} gates={disq[:3]}")

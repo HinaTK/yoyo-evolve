@@ -1,0 +1,32 @@
+# External signal candidates are research-only names that may deserve promotion
+# into trade_universe after unusual price action plus reviewed catalysts.
+# They are never actionable until they are added to trade_universe and reranked.
+
+[policy]
+min_score = 70
+min_pct_change_1d = 5.0
+min_recent_limit_up_count = 1
+recent_window_days = 12
+min_catalyst_tags = 2
+min_source_count = 2
+max_candidates = 10
+
+[[symbols]]
+symbol = "603031.SH"
+name = "Anfu Technology / 安孚科技"
+kind = "stock"
+theme = "china-a-ai-optical-chip"
+priority = 1
+trigger_tags = [
+  "earnings_acceleration",
+  "nanfu_profit_rights_increase",
+  "cpo_optical_chip_second_curve",
+  "solid_state_battery_optionality",
+]
+watch_reason = "南孚权益比例提升带来业绩增厚，叠加易缆微CPO/光芯片与固态电池中试平台催化；若仍在池外，应进入人工扩池复核。"
+sources = [
+  { label = "2026Q1 net profit +87.78%", kind = "announcement", url = "https://www.cls.cn/detail/2358198" },
+  { label = "2025 annual profit growth and Nanfu rights increase", kind = "news", url = "https://news.qq.com/rain/a/20260311A03PLK00" },
+  { label = "Suzhou Yilanwei optical-chip/CPO investor relation record", kind = "filing", url = "https://pdf.dfcfw.com/pdf/H22_AN202512241807279074_1.pdf" },
+  { label = "solid-state battery JV and 300MWh pilot line", kind = "news", url = "https://news.qq.com/rain/a/20250307A09N7J00" },
+]

@@ -10,12 +10,31 @@ max_staleness_days = 30
 min_total_score_for_action = 0.55
 block_unknown_event_risk = true
 
+[freshness]
+# Component-level freshness avoids treating quarterly financial statements the
+# same as event-risk, flow, and catalyst checks.
+fundamental_score_days = 120
+valuation_score_days = 45
+catalyst_score_days = 30
+flow_score_days = 5
+macro_score_days = 14
+event_risk_days = 7
+
 [weights]
 fundamental_score = 0.30
 valuation_score = 0.20
 catalyst_score = 0.25
 flow_score = 0.15
 macro_score = 0.10
+
+[curated_sources]
+enabled = true
+# Optional manual/formal point-in-time evidence files. Rows use the same schema as
+# [[evidence]] below and must include real sources/source_count to clear the gate.
+paths = [
+  "research/evidence/nontechnical/manual/*.json",
+  "research/evidence/nontechnical/manual/*.toml",
+]
 
 [automatic_proxy]
 enabled = true

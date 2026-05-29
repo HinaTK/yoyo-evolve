@@ -1,0 +1,5178 @@
+{
+  "date": "2026-05-26",
+  "session": "close",
+  "source_of_truth": "calls_json_with_risk_review_caps",
+  "research_only": true,
+  "no_execution": true,
+  "recommendations": [
+    {
+      "symbol": "000725.SZ",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "china-a-display-tech",
+      "confidence": 0.48,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 000725.SZ.",
+      "risks": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.521, event_risk=low, flags=['event_risk_stale', 'nontechnical_score_below_action_min']"
+    },
+    {
+      "symbol": "0981.HK",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "china-a-semiconductors",
+      "confidence": 0.47,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 0981.HK.",
+      "risks": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.499, event_risk=policy, flags=['nontechnical_component_stale', 'event_risk_stale', 'nontechnical_score_below_action_min', 'event_risk_policy']"
+    },
+    {
+      "symbol": "9999.HK",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "internet-platform",
+      "confidence": 0.47,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 9999.HK.",
+      "risks": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "event_risk_policy"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.552, event_risk=policy, flags=['nontechnical_component_stale', 'event_risk_stale', 'event_risk_policy']"
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "hang-seng-tech",
+      "confidence": 0.24,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 3067.HK.",
+      "risks": [
+        "symbol_risk_veto",
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=proxy_only, total_score=0.581, event_risk=none, flags=['nontechnical_proxy_only', 'nontechnical_source_missing']"
+    },
+    {
+      "symbol": "300124.SZ",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "china-a-ai-power-infrastructure",
+      "confidence": 0.45,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 300124.SZ.",
+      "risks": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.486, event_risk=low, flags=['event_risk_stale', 'nontechnical_score_below_action_min']"
+    },
+    {
+      "symbol": "300274.SZ",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "china-a-solar-inverter",
+      "confidence": 0.45,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 300274.SZ.",
+      "risks": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.427, event_risk=earnings_gap, flags=['event_risk_stale', 'nontechnical_score_below_action_min', 'event_risk_earnings_gap']"
+    },
+    {
+      "symbol": "002050.SZ",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "china-a-ai-thermal-management",
+      "confidence": 0.44,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 002050.SZ.",
+      "risks": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.522, event_risk=low, flags=['event_risk_stale', 'nontechnical_score_below_action_min']"
+    },
+    {
+      "symbol": "600900.SH",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "china-a-utilities-defensive",
+      "confidence": 0.43,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 600900.SH.",
+      "risks": [
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.611, event_risk=low, flags=['event_risk_stale']"
+    },
+    {
+      "symbol": "3908.HK",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "hk-capital-markets",
+      "confidence": 0.44,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 3908.HK.",
+      "risks": [
+        "nontechnical_component_stale",
+        "event_risk_stale"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.609, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']"
+    },
+    {
+      "symbol": "600030.SH",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "china-a-capital-markets",
+      "confidence": 0.23,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 600030.SH.",
+      "risks": [
+        "symbol_risk_veto",
+        "cost_gate_failed",
+        "nontechnical_component_stale"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.66, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']"
+    },
+    {
+      "symbol": "0388.HK",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "financials-exchange",
+      "confidence": 0.18,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 0388.HK.",
+      "risks": [
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.559, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']"
+    },
+    {
+      "symbol": "6886.HK",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "hk-capital-markets",
+      "confidence": 0.18,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 6886.HK.",
+      "risks": [
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.588, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']"
+    },
+    {
+      "symbol": "603259.SH",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "healthcare-cxo",
+      "confidence": 0.32,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 603259.SH.",
+      "risks": [
+        "cost_gate_failed",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.648, event_risk=low, flags=['event_risk_stale']"
+    },
+    {
+      "symbol": "2269.HK",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "healthcare-biotech",
+      "confidence": 0.22,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 2269.HK.",
+      "risks": [
+        "symbol_risk_veto",
+        "cost_gate_failed",
+        "nontechnical_component_stale"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.595, event_risk=policy, flags=['nontechnical_component_stale', 'event_risk_stale', 'event_risk_policy']"
+    },
+    {
+      "symbol": "512480.SH",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "china-a-semiconductors",
+      "confidence": 0.24,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 512480.SH.",
+      "risks": [
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "event_risk_policy"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.631, event_risk=policy, flags=['event_risk_policy']"
+    },
+    {
+      "symbol": "588000.SH",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "china-a-hard-tech",
+      "confidence": 0.42,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 588000.SH.",
+      "risks": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.63, event_risk=policy, flags=['event_risk_policy']"
+    },
+    {
+      "symbol": "515790.SH",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "china-a-renewable-energy",
+      "confidence": 0.3,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 515790.SH.",
+      "risks": [
+        "cost_gate_failed",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.56, event_risk=policy, flags=['event_risk_policy']"
+    },
+    {
+      "symbol": "9868.HK",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "hk-ev",
+      "confidence": 0.3,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 9868.HK.",
+      "risks": [
+        "cost_gate_failed",
+        "nontechnical_component_stale",
+        "event_risk_stale"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.563, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']"
+    },
+    {
+      "symbol": "000776.SZ",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "china-a-capital-markets",
+      "confidence": 0.17,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 000776.SZ.",
+      "risks": [
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.653, event_risk=low, flags=['event_risk_stale']"
+    },
+    {
+      "symbol": "300059.SZ",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "china-a-capital-markets",
+      "confidence": 0.15,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 300059.SZ.",
+      "risks": [
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.665, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']"
+    },
+    {
+      "symbol": "6160.HK",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "healthcare-biotech",
+      "confidence": 0.21,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 6160.HK.",
+      "risks": [
+        "not_theme_score_leader",
+        "cost_gate_failed",
+        "nontechnical_component_stale"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.576, event_risk=policy, flags=['nontechnical_component_stale', 'event_risk_stale', 'event_risk_policy']"
+    },
+    {
+      "symbol": "2359.HK",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "healthcare-cxo",
+      "confidence": 0.19,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 2359.HK.",
+      "risks": [
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.548, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale', 'nontechnical_score_below_action_min']"
+    },
+    {
+      "symbol": "1801.HK",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "healthcare-biotech",
+      "confidence": 0.15,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 1801.HK.",
+      "risks": [
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.455, event_risk=policy, flags=['nontechnical_component_stale', 'event_risk_stale', 'nontechnical_score_below_action_min', 'event_risk_policy']"
+    },
+    {
+      "symbol": "1177.HK",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "healthcare-pharma",
+      "confidence": 0.15,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 1177.HK.",
+      "risks": [
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.487, event_risk=earnings_gap, flags=['nontechnical_component_stale', 'event_risk_stale', 'nontechnical_score_below_action_min', 'event_risk_earnings_gap']"
+    }
+  ],
+  "research_actions": [
+    {
+      "symbol": "3908.HK",
+      "state": "watch_only",
+      "confidence": 0.44,
+      "score": 78.02,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "manual_probe",
+      "action_tier_label": "小仓试错需人工确认",
+      "action_tier_description": "核心技术、成本、流动性和市场门槛通过，但只剩可人工复核的轻量非技术面缺口；任何小仓试错都必须人工确认。",
+      "action_tier_reasons": [
+        "event_risk_stale",
+        "nontechnical_component_stale"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 3908.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.609, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.609,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "probe",
+        "label": "小仓试错需人工确认",
+        "why": "核心技术、成本和流动性门槛通过，但仍有轻量非技术面复核项；不能当作正式行动候选。",
+        "upgrade": "补齐非技术面复核、阻断项清零后，才可升级为「正式可行动」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0002.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 72.21,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "manual_probe",
+      "action_tier_label": "小仓试错需人工确认",
+      "action_tier_description": "核心技术、成本、流动性和市场门槛通过，但只剩可人工复核的轻量非技术面缺口；任何小仓试错都必须人工确认。",
+      "action_tier_reasons": [
+        "event_risk_stale",
+        "nontechnical_component_stale",
+        "nontechnical_score_below_action_min"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.514,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "probe",
+        "label": "小仓试错需人工确认",
+        "why": "核心技术、成本和流动性门槛通过，但仍有轻量非技术面复核项；不能当作正式行动候选。",
+        "upgrade": "补齐非技术面复核、阻断项清零后，才可升级为「正式可行动」。",
+        "invalidation": "若新增硬阻断、事件风险升高、成本/edge 失效或技术结构转弱，立即降级。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "000725.SZ",
+      "state": "watch_only",
+      "confidence": 0.48,
+      "score": 95.36,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 000725.SZ.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.521, event_risk=low, flags=['event_risk_stale', 'nontechnical_score_below_action_min']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.521,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0981.HK",
+      "state": "watch_only",
+      "confidence": 0.47,
+      "score": 92.34,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "event_risk_policy"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 0981.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.499, event_risk=policy, flags=['nontechnical_component_stale', 'event_risk_stale', 'nontechnical_score_below_action_min', 'event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.499,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "9999.HK",
+      "state": "watch_only",
+      "confidence": 0.47,
+      "score": 91.3,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "event_risk_policy"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "event_risk_policy"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "event_risk_policy"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 9999.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.552, event_risk=policy, flags=['nontechnical_component_stale', 'event_risk_stale', 'event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.552,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "300124.SZ",
+      "state": "watch_only",
+      "confidence": 0.45,
+      "score": 84.97,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 300124.SZ.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.486, event_risk=low, flags=['event_risk_stale', 'nontechnical_score_below_action_min']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.486,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "300274.SZ",
+      "state": "watch_only",
+      "confidence": 0.45,
+      "score": 82.21,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 300274.SZ.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.427, event_risk=earnings_gap, flags=['event_risk_stale', 'nontechnical_score_below_action_min', 'event_risk_earnings_gap']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "earnings_gap",
+        "total_score": 0.427,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "002050.SZ",
+      "state": "watch_only",
+      "confidence": 0.44,
+      "score": 80.81,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 002050.SZ.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.522, event_risk=low, flags=['event_risk_stale', 'nontechnical_score_below_action_min']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.522,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "159915.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 77.49,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.622,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600900.SH",
+      "state": "watch_only",
+      "confidence": 0.43,
+      "score": 75.8,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 600900.SH.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.611, event_risk=low, flags=['event_risk_stale']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.611,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "510300.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 73.2,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.583,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "588000.SH",
+      "state": "watch_only",
+      "confidence": 0.42,
+      "score": 70.58,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 588000.SH.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.63, event_risk=policy, flags=['event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.63,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "515790.SH",
+      "state": "watch_only",
+      "confidence": 0.3,
+      "score": 61.96,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 515790.SH.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.56, event_risk=policy, flags=['event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.56,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0941.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 69.7,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "volume_ratio_20_below_1_0"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.535,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 69.07,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "same_theme_best_peer_evidence_missing_or_failed"
+      ],
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "none",
+        "total_score": 0.583,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "603259.SH",
+      "state": "watch_only",
+      "confidence": 0.32,
+      "score": 67.46,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 603259.SH.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.648, event_risk=low, flags=['event_risk_stale']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.648,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0857.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 63.7,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.55,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0006.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 63.68,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "same_theme_best_peer_evidence_missing_or_failed"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.555,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "9868.HK",
+      "state": "watch_only",
+      "confidence": 0.3,
+      "score": 59.73,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 9868.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.563, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.563,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "002475.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 59.68,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.594,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "9618.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 59.47,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "event_risk_policy",
+        "same_theme_best_peer_evidence_missing_or_failed"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.481,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "510500.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 51.31,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.58,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "603501.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 45.89,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.446,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0005.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 81.53,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "symbol_risk_veto"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "symbol_risk_veto"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.56,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "512480.SH",
+      "state": "avoid",
+      "confidence": 0.24,
+      "score": 72.09,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto"
+      ],
+      "blockers": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 512480.SH.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.631, event_risk=policy, flags=['event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.631,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "avoid",
+      "confidence": 0.24,
+      "score": 70.66,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "symbol_risk_veto"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "symbol_risk_veto"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 3067.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=proxy_only, total_score=0.581, event_risk=none, flags=['nontechnical_proxy_only', 'nontechnical_source_missing']",
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "none",
+        "total_score": 0.581,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "688981.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 65.7,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.529,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600030.SH",
+      "state": "avoid",
+      "confidence": 0.23,
+      "score": 63.47,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 600030.SH.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.66, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.66,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "000333.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 62.29,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.516,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "2269.HK",
+      "state": "avoid",
+      "confidence": 0.22,
+      "score": 60.05,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "event_risk_policy",
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "event_risk_policy",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "event_risk_policy",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 2269.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.595, event_risk=policy, flags=['nontechnical_component_stale', 'event_risk_stale', 'event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.595,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0728.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 58.7,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "symbol_risk_veto",
+        "volume_ratio_20_below_1_0"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.524,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "6160.HK",
+      "state": "avoid",
+      "confidence": 0.21,
+      "score": 54.48,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "event_risk_policy",
+        "same_theme_best_peer_evidence_missing_or_failed"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "event_risk_policy",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "event_risk_policy",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 6160.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.576, event_risk=policy, flags=['nontechnical_component_stale', 'event_risk_stale', 'event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.576,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 45.58,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "price_below_ma20_and_ma60"
+      ],
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "none",
+        "total_score": 0.595,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "2359.HK",
+      "state": "avoid",
+      "confidence": 0.19,
+      "score": 44.72,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "volume_ratio_20_below_1_0"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 2359.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.548, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale', 'nontechnical_score_below_action_min']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.548,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0388.HK",
+      "state": "avoid",
+      "confidence": 0.18,
+      "score": 39.5,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 0388.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.559, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.559,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "6886.HK",
+      "state": "avoid",
+      "confidence": 0.18,
+      "score": 39.14,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "price_below_ma20_and_ma60",
+        "same_theme_best_peer_evidence_missing_or_failed"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 6886.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.588, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.588,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1299.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 38.57,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.596,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "300750.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 37.43,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.635,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0883.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 36.74,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "price_below_ma20_and_ma60",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.58,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "000776.SZ",
+      "state": "avoid",
+      "confidence": 0.17,
+      "score": 34.99,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 000776.SZ.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.653, event_risk=low, flags=['event_risk_stale']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.653,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "002466.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 34.89,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "low_volume_ratio_20_below_0_6",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "unknown",
+        "total_score": 0.512,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "信号不足或约束不通过，暂不投入研究时间。",
+        "upgrade": "重新通过观察门槛且无硬阻断后，可恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 32.84,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "event_risk_policy",
+        "price_below_ma20_and_ma60",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "symbol_recent_adverse_breach",
+        "volume_ratio_20_below_1_0"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "symbol_recent_adverse_breach",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "symbol_recent_adverse_breach",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.485,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "002460.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 26.64,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.621,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "3690.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 24.75,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "event_risk_policy",
+        "price_below_ma20_and_ma60",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.434,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "9866.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 22.66,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "price_below_ma20_and_ma60",
+        "same_theme_best_peer_evidence_missing_or_failed"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.555,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "002335.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 21.85,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.555,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "300014.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 20.29,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.606,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1801.HK",
+      "state": "avoid",
+      "confidence": 0.15,
+      "score": 16.01,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "event_risk_policy",
+        "price_below_ma20_and_ma60",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "volume_ratio_20_below_1_0"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 1801.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.455, event_risk=policy, flags=['nontechnical_component_stale', 'event_risk_stale', 'nontechnical_score_below_action_min', 'event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.455,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1772.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 15.53,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "price_below_ma20_and_ma60",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "volume_ratio_20_below_1_0"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.629,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "601899.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 9.62,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.651,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "300059.SZ",
+      "state": "avoid",
+      "confidence": 0.15,
+      "score": 4.28,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 300059.SZ.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.665, event_risk=low, flags=['nontechnical_component_stale', 'event_risk_stale']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.665,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "000858.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.65,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "002594.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "earnings_gap",
+        "total_score": 0.413,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0386.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "range_pos_60_below_0_12",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "symbol_risk_veto",
+        "volume_ratio_20_below_1_0"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.56,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0700.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "event_risk_policy",
+        "price_below_ma20_and_ma60",
+        "range_pos_60_below_0_12",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "symbol_recent_adverse_breach"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "symbol_recent_adverse_breach",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "symbol_recent_adverse_breach",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.545,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1024.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "event_risk_policy",
+        "price_below_ma20_and_ma60",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "volume_ratio_20_below_1_0"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.581,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1093.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "range_pos_60_below_0_12",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.536,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1177.HK",
+      "state": "avoid",
+      "confidence": 0.15,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "event_risk_earnings_gap",
+        "price_below_ma20_and_ma60",
+        "range_pos_60_below_0_12"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 1177.HK.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.487, event_risk=earnings_gap, flags=['nontechnical_component_stale', 'event_risk_stale', 'nontechnical_score_below_action_min', 'event_risk_earnings_gap']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "earnings_gap",
+        "total_score": 0.487,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1211.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "same_theme_best_peer_evidence_missing_or_failed"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.476,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "range_pos_60_below_0_12",
+        "symbol_recent_adverse_breach",
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "symbol_recent_adverse_breach",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "symbol_recent_adverse_breach",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.546,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "2015.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "event_risk_earnings_gap",
+        "price_below_ma20_and_ma60",
+        "range_pos_60_below_0_12",
+        "same_theme_best_peer_evidence_missing_or_failed"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "earnings_gap",
+        "total_score": 0.425,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "2020.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "volume_ratio_20_below_1_0"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.552,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "2331.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "range_pos_60_below_0_12",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "symbol_risk_veto",
+        "volume_ratio_20_below_1_0"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.555,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "300015.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.56,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "300122.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.418,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "300760.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.5,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "510880.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.538,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600036.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_elevated",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_elevated",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "elevated",
+        "total_score": 0.542,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600276.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.596,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600406.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.52,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600519.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.583,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "601012.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.367,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "601088.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.499,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "601211.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "earnings_gap",
+        "total_score": 0.537,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "601318.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_elevated",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_elevated",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "elevated",
+        "total_score": 0.477,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "601688.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "blocked",
+      "action_tier_label": "禁止追入",
+      "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+      "action_tier_reasons": [
+        "market_range_pos_60_above_action_limit"
+      ],
+      "gate_blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.653,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "禁止追入",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "6862.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "range_pos_60_below_0_12",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "nontechnical_score_below_action_min",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.546,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "9992.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "action_tier": "suspended",
+      "action_tier_label": "暂停行动",
+      "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+      "action_tier_reasons": [
+        "cost_gate_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "symbol_risk_veto"
+      ],
+      "gate_blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_component_stale",
+        "event_risk_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.68,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂停行动",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    }
+  ],
+  "ranking": {
+    "actionable_count": 0,
+    "diagnostic_count": 3,
+    "top_watch": [
+      {
+        "symbol": "000725.SZ",
+        "name": "BOE Technology / 京东方A",
+        "kind": "stock",
+        "theme": "china-a-display-tech",
+        "currency": "CNY",
+        "exchange": "SZSE",
+        "score": 95.36,
+        "trend_score": 100,
+        "momentum_score": 100,
+        "risk_penalty": 0.0,
+        "qualification_flags": [
+          "score_meets_watch_threshold",
+          "price_above_ma20",
+          "price_above_ma60",
+          "ma20_above_ma60",
+          "volume_confirmed",
+          "constructive_range_position",
+          "cost_gate_passed",
+          "market_specific_risk_gate_clear",
+          "nontechnical_evidence_gate_blocked",
+          "score_meets_action_threshold",
+          "volume_meets_action_threshold",
+          "market_range_overextended",
+          "symbol_recent_adverse_breach_clear",
+          "same_theme_best_peer_evidence_passed",
+          "diagnostic_candidate"
+        ],
+        "disqualifiers": [],
+        "qualified_for_watch": true,
+        "diagnostic_only": true,
+        "latest_close": 5.77,
+        "pct_change_1d": 9.49,
+        "ma20": 4.317,
+        "ma60": 4.2057,
+        "range_pos_60": 1.3571,
+        "volume_ratio_20": 4.5603,
+        "regime_flags": [
+          "uptrend",
+          "volume-expansion"
+        ],
+        "price_source": "quote",
+        "prev_close": 5.27,
+        "latest_open": 5.22,
+        "latest_high": 5.8,
+        "latest_low": 5.18,
+        "latest_volume": 51377251,
+        "as_of": "2026-05-26",
+        "quote_trade_time": "20260526161442",
+        "quote_trade_date": "2026-05-26",
+        "quote_last": 5.77,
+        "quote_volume": 51377251,
+        "ah_pair": null,
+        "ah_premium_pct": null,
+        "fx_reference": null,
+        "hkd_cny_reference": null,
+        "theme_rank": 1,
+        "theme_peer_count": 1,
+        "theme_leader": "000725.SZ",
+        "theme_leader_score": 95.36,
+        "theme_score_gap_to_leader": 0.0,
+        "theme_top_peer_scores": [
+          {
+            "symbol": "000725.SZ",
+            "score": 95.36,
+            "rank": 1
+          }
+        ],
+        "same_theme_best_symbol": "000725.SZ",
+        "same_theme_best_score": 95.36,
+        "same_theme_selected_vs_best_score_gap": 0.0,
+        "same_theme_next_best_symbol": null,
+        "same_theme_selected_vs_next_best_score_gap": null,
+        "is_theme_leader": true,
+        "same_theme_peer_evidence_passed": true,
+        "peer_relative_decision": "sole_theme_candidate",
+        "snapshot_as_of_date": "2026-05-26",
+        "snapshot_as_of_session": "close",
+        "market_proxy_symbol": "510300.SH",
+        "market_range_pos_60": 0.9233,
+        "market_pct_change_1d": 0.71,
+        "market_volume_ratio_20": 0.7811,
+        "market_proxy_available": true,
+        "max_market_range_for_action": 0.7,
+        "expected_edge_bps": 300.0,
+        "net_expected_edge_bps": 265.0,
+        "cost_gate_passed": true,
+        "edge_method": "technical_snapshot_score_v1",
+        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+        "symbol_risk": {
+          "action_veto": false,
+          "reasons": [],
+          "tags": []
+        },
+        "market_specific_risk_flags": [
+          "hkd_cny_cross_currency_exposure",
+          "hkd_cny_fx_reference_missing"
+        ],
+        "action_disqualifiers": [
+          "event_risk_stale",
+          "nontechnical_score_below_action_min",
+          "market_range_pos_60_above_action_limit"
+        ],
+        "nontechnical_evidence": {
+          "status": "available",
+          "required_for_action": true,
+          "evidence_mode": "formal_provider_point_in_time",
+          "proxy_only": false,
+          "total_score": 0.521,
+          "min_total_score_for_action": 0.55,
+          "as_of_date": "2026-04-30",
+          "as_of_session": "close",
+          "component_as_of_dates": {
+            "fundamental_score": "2026-04-30",
+            "valuation_score": "2026-04-30",
+            "catalyst_score": "2026-04-30",
+            "flow_score": "2026-05-26",
+            "macro_score": "2026-05-26"
+          },
+          "component_age_days": {
+            "fundamental_score": 26,
+            "valuation_score": 26,
+            "catalyst_score": 26,
+            "flow_score": 0,
+            "macro_score": 0
+          },
+          "stale_components": [],
+          "future_components": [],
+          "missing_component_dates": [],
+          "event_risk_as_of_date": "2026-04-30",
+          "event_risk_age_days": 26,
+          "source_count": 1,
+          "proxy_source_count": null,
+          "components": {
+            "fundamental_score": 0.516,
+            "valuation_score": 0.482,
+            "catalyst_score": 0.533,
+            "flow_score": 0.58,
+            "macro_score": 0.5
+          },
+          "event_risk": "low",
+          "notes": [
+            "formal provider report_date=2026-03-31, notice_date=2026-04-30",
+            "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+          ]
+        },
+        "nontechnical_evidence_flags": [
+          "event_risk_stale",
+          "nontechnical_score_below_action_min"
+        ],
+        "qualified_for_action": false,
+        "action_tier": "blocked",
+        "action_tier_label": "禁止追入",
+        "action_tier_description": "存在涨停追高或高位过热阻断，不应升级为行动。",
+        "action_tier_reasons": [
+          "market_range_pos_60_above_action_limit"
+        ],
+        "formal_actionable": false,
+        "manual_confirmation_required": true,
+        "source_layer": "diagnostic_candidates",
+        "eligible_for_action_from_layer": false,
+        "layer_action_cap": "watch_only"
+      },
+      {
+        "symbol": "0981.HK",
+        "name": "SMIC / 中芯国际",
+        "kind": "stock",
+        "theme": "china-a-semiconductors",
+        "currency": "HKD",
+        "exchange": "HKEX",
+        "score": 92.34,
+        "trend_score": 100,
+        "momentum_score": 100,
+        "risk_penalty": 0.0,
+        "qualification_flags": [
+          "score_meets_watch_threshold",
+          "price_above_ma20",
+          "price_above_ma60",
+          "ma20_above_ma60",
+          "volume_confirmed",
+          "constructive_range_position",
+          "cost_gate_passed",
+          "market_specific_risk_gate_clear",
+          "nontechnical_evidence_gate_blocked",
+          "score_meets_action_threshold",
+          "volume_meets_action_threshold",
+          "market_range_not_overextended",
+          "symbol_recent_adverse_breach_clear",
+          "same_theme_best_peer_evidence_passed",
+          "diagnostic_candidate"
+        ],
+        "disqualifiers": [],
+        "qualified_for_watch": true,
+        "diagnostic_only": true,
+        "latest_close": 84.4,
+        "pct_change_1d": 5.7,
+        "ma20": 71.98,
+        "ma60": 63.6975,
+        "range_pos_60": 1.1561,
+        "volume_ratio_20": 2.7884,
+        "regime_flags": [
+          "uptrend",
+          "volume-expansion"
+        ],
+        "price_source": "quote",
+        "prev_close": 79.85,
+        "latest_open": 91.8,
+        "latest_high": 93.0,
+        "latest_low": 84.1,
+        "latest_volume": 371835947,
+        "as_of": "2026-05-26",
+        "quote_trade_time": "2026/05/26 16:08:24",
+        "quote_trade_date": "2026-05-26",
+        "quote_last": 84.4,
+        "quote_volume": 371835947,
+        "ah_pair": null,
+        "ah_premium_pct": null,
+        "fx_reference": null,
+        "hkd_cny_reference": null,
+        "theme_rank": 1,
+        "theme_peer_count": 4,
+        "theme_leader": "0981.HK",
+        "theme_leader_score": 92.34,
+        "theme_score_gap_to_leader": 0.0,
+        "theme_top_peer_scores": [
+          {
+            "symbol": "0981.HK",
+            "score": 92.34,
+            "rank": 1
+          },
+          {
+            "symbol": "512480.SH",
+            "score": 72.09,
+            "rank": 2
+          },
+          {
+            "symbol": "688981.SH",
+            "score": 65.7,
+            "rank": 3
+          }
+        ],
+        "same_theme_best_symbol": "0981.HK",
+        "same_theme_best_score": 92.34,
+        "same_theme_selected_vs_best_score_gap": 0.0,
+        "same_theme_next_best_symbol": "512480.SH",
+        "same_theme_selected_vs_next_best_score_gap": 20.25,
+        "is_theme_leader": true,
+        "same_theme_peer_evidence_passed": true,
+        "peer_relative_decision": "theme_leader",
+        "snapshot_as_of_date": "2026-05-26",
+        "snapshot_as_of_session": "close",
+        "market_proxy_symbol": "2800.HK",
+        "market_range_pos_60": 0.5746,
+        "market_pct_change_1d": 0.08,
+        "market_volume_ratio_20": 1.2562,
+        "market_proxy_available": true,
+        "max_market_range_for_action": 0.7,
+        "expected_edge_bps": 300.0,
+        "net_expected_edge_bps": 265.0,
+        "cost_gate_passed": true,
+        "edge_method": "technical_snapshot_score_v1",
+        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+        "symbol_risk": {
+          "action_veto": false,
+          "reasons": [],
+          "tags": []
+        },
+        "market_specific_risk_flags": [],
+        "action_disqualifiers": [
+          "nontechnical_component_stale",
+          "event_risk_stale",
+          "nontechnical_score_below_action_min",
+          "event_risk_policy"
+        ],
+        "nontechnical_evidence": {
+          "status": "available",
+          "required_for_action": true,
+          "evidence_mode": "formal_provider_point_in_time",
+          "proxy_only": false,
+          "total_score": 0.499,
+          "min_total_score_for_action": 0.55,
+          "as_of_date": "2026-03-31",
+          "as_of_session": "close",
+          "component_as_of_dates": {
+            "fundamental_score": "2026-03-31",
+            "valuation_score": "2026-03-31",
+            "catalyst_score": "2026-03-31",
+            "flow_score": "2026-05-26",
+            "macro_score": "2026-05-26"
+          },
+          "component_age_days": {
+            "fundamental_score": 56,
+            "valuation_score": 56,
+            "catalyst_score": 56,
+            "flow_score": 0,
+            "macro_score": 0
+          },
+          "stale_components": [
+            "valuation_score",
+            "catalyst_score"
+          ],
+          "future_components": [],
+          "missing_component_dates": [],
+          "event_risk_as_of_date": "2026-03-31",
+          "event_risk_age_days": 56,
+          "source_count": 1,
+          "proxy_source_count": null,
+          "components": {
+            "fundamental_score": 0.492,
+            "valuation_score": 0.415,
+            "catalyst_score": 0.511,
+            "flow_score": 0.6,
+            "macro_score": 0.51
+          },
+          "event_risk": "policy",
+          "notes": [
+            "formal provider report_date=2026-03-31",
+            "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+          ]
+        },
+        "nontechnical_evidence_flags": [
+          "nontechnical_component_stale",
+          "event_risk_stale",
+          "nontechnical_score_below_action_min",
+          "event_risk_policy"
+        ],
+        "qualified_for_action": false,
+        "action_tier": "suspended",
+        "action_tier_label": "暂停行动",
+        "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+        "action_tier_reasons": [
+          "event_risk_policy"
+        ],
+        "formal_actionable": false,
+        "manual_confirmation_required": true,
+        "source_layer": "diagnostic_candidates",
+        "eligible_for_action_from_layer": false,
+        "layer_action_cap": "watch_only"
+      },
+      {
+        "symbol": "9999.HK",
+        "name": "NetEase / 网易-S",
+        "kind": "stock",
+        "theme": "internet-platform",
+        "currency": "HKD",
+        "exchange": "HKEX",
+        "score": 91.3,
+        "trend_score": 100,
+        "momentum_score": 100,
+        "risk_penalty": 0.0,
+        "qualification_flags": [
+          "score_meets_watch_threshold",
+          "price_above_ma20",
+          "price_above_ma60",
+          "ma20_above_ma60",
+          "volume_confirmed",
+          "constructive_range_position",
+          "cost_gate_passed",
+          "market_specific_risk_gate_clear",
+          "nontechnical_evidence_gate_blocked",
+          "score_meets_action_threshold",
+          "volume_meets_action_threshold",
+          "market_range_not_overextended",
+          "symbol_recent_adverse_breach_clear",
+          "same_theme_best_peer_evidence_passed",
+          "diagnostic_candidate"
+        ],
+        "disqualifiers": [],
+        "qualified_for_watch": true,
+        "diagnostic_only": true,
+        "latest_close": 189.3,
+        "pct_change_1d": 4.3,
+        "ma20": 179.445,
+        "ma60": 179.1736,
+        "range_pos_60": 1.0867,
+        "volume_ratio_20": 1.845,
+        "regime_flags": [
+          "uptrend",
+          "volume-expansion"
+        ],
+        "price_source": "quote",
+        "prev_close": 181.5,
+        "latest_open": 186.2,
+        "latest_high": 190.6,
+        "latest_low": 184.2,
+        "latest_volume": 12501320,
+        "as_of": "2026-05-26",
+        "quote_trade_time": "2026/05/26 16:08:26",
+        "quote_trade_date": "2026-05-26",
+        "quote_last": 189.3,
+        "quote_volume": 12501320,
+        "ah_pair": null,
+        "ah_premium_pct": null,
+        "fx_reference": null,
+        "hkd_cny_reference": null,
+        "theme_rank": 1,
+        "theme_peer_count": 6,
+        "theme_leader": "9999.HK",
+        "theme_leader_score": 91.3,
+        "theme_score_gap_to_leader": 0.0,
+        "theme_top_peer_scores": [
+          {
+            "symbol": "9999.HK",
+            "score": 91.3,
+            "rank": 1
+          },
+          {
+            "symbol": "9618.HK",
+            "score": 59.47,
+            "rank": 2
+          },
+          {
+            "symbol": "9988.HK",
+            "score": 32.84,
+            "rank": 3
+          }
+        ],
+        "same_theme_best_symbol": "9999.HK",
+        "same_theme_best_score": 91.3,
+        "same_theme_selected_vs_best_score_gap": 0.0,
+        "same_theme_next_best_symbol": "9618.HK",
+        "same_theme_selected_vs_next_best_score_gap": 31.83,
+        "is_theme_leader": true,
+        "same_theme_peer_evidence_passed": true,
+        "peer_relative_decision": "theme_leader",
+        "snapshot_as_of_date": "2026-05-26",
+        "snapshot_as_of_session": "close",
+        "market_proxy_symbol": "2800.HK",
+        "market_range_pos_60": 0.5746,
+        "market_pct_change_1d": 0.08,
+        "market_volume_ratio_20": 1.2562,
+        "market_proxy_available": true,
+        "max_market_range_for_action": 0.7,
+        "expected_edge_bps": 291.78,
+        "net_expected_edge_bps": 256.78,
+        "cost_gate_passed": true,
+        "edge_method": "technical_snapshot_score_v1",
+        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+        "symbol_risk": {
+          "action_veto": false,
+          "reasons": [],
+          "tags": []
+        },
+        "market_specific_risk_flags": [],
+        "action_disqualifiers": [
+          "nontechnical_component_stale",
+          "event_risk_stale",
+          "event_risk_policy"
+        ],
+        "nontechnical_evidence": {
+          "status": "available",
+          "required_for_action": true,
+          "evidence_mode": "formal_provider_point_in_time",
+          "proxy_only": false,
+          "total_score": 0.552,
+          "min_total_score_for_action": 0.55,
+          "as_of_date": "2026-03-31",
+          "as_of_session": "close",
+          "component_as_of_dates": {
+            "fundamental_score": "2026-03-31",
+            "valuation_score": "2026-03-31",
+            "catalyst_score": "2026-03-31",
+            "flow_score": "2026-05-26",
+            "macro_score": "2026-05-26"
+          },
+          "component_age_days": {
+            "fundamental_score": 56,
+            "valuation_score": 56,
+            "catalyst_score": 56,
+            "flow_score": 0,
+            "macro_score": 0
+          },
+          "stale_components": [
+            "valuation_score",
+            "catalyst_score"
+          ],
+          "future_components": [],
+          "missing_component_dates": [],
+          "event_risk_as_of_date": "2026-03-31",
+          "event_risk_age_days": 56,
+          "source_count": 1,
+          "proxy_source_count": null,
+          "components": {
+            "fundamental_score": 0.576,
+            "valuation_score": 0.551,
+            "catalyst_score": 0.513,
+            "flow_score": 0.6,
+            "macro_score": 0.51
+          },
+          "event_risk": "policy",
+          "notes": [
+            "formal provider report_date=2026-03-31",
+            "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+          ]
+        },
+        "nontechnical_evidence_flags": [
+          "nontechnical_component_stale",
+          "event_risk_stale",
+          "event_risk_policy"
+        ],
+        "qualified_for_action": false,
+        "action_tier": "suspended",
+        "action_tier_label": "暂停行动",
+        "action_tier_description": "行情、资料、成本、量能或风险门槛暂未通过；不是追高结论，需等阻断项清零。",
+        "action_tier_reasons": [
+          "event_risk_policy"
+        ],
+        "formal_actionable": false,
+        "manual_confirmation_required": true,
+        "source_layer": "diagnostic_candidates",
+        "eligible_for_action_from_layer": false,
+        "layer_action_cap": "watch_only"
+      }
+    ]
+  },
+  "evidence": {
+    "forward_shadow_logs": 20,
+    "matured_forward_days": 2,
+    "forward_sample_count": 0,
+    "audit_passed": true
+  },
+  "calibration": {
+    "sample_count": 854,
+    "scored_sample_count": null,
+    "hit_rate": null,
+    "brier_score": null,
+    "calibration_error": null
+  },
+  "variants": {
+    "competition_id": "shadow_gate_variants_v1",
+    "scoreboard": [
+      {
+        "variant_id": "baseline_shadow",
+        "variant_label": "Baseline shadow policy",
+        "competition_id": "shadow_gate_variants_v1",
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
+        "log_count": 18,
+        "forward_like_log_count": 18,
+        "matured_forward_days": 0,
+        "no_execution_audit_passed": true,
+        "sample_count": 0,
+        "win_rate": null,
+        "avg_net_return_pct": null,
+        "median_net_return_pct": null,
+        "avg_alpha_pct": null,
+        "max_adverse_pct": null,
+        "adverse_breach_rate": null,
+        "stop_triggered_rate": null,
+        "scoreboard_note": "insufficient_forward_samples",
+        "diagnostic_rank": 1
+      },
+      {
+        "variant_id": "no_heat_filter",
+        "variant_label": "No heat filter diagnostic",
+        "competition_id": "shadow_gate_variants_v1",
+        "risk_filter": "off",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
+        "log_count": 18,
+        "forward_like_log_count": 18,
+        "matured_forward_days": 0,
+        "no_execution_audit_passed": true,
+        "sample_count": 0,
+        "win_rate": null,
+        "avg_net_return_pct": null,
+        "median_net_return_pct": null,
+        "avg_alpha_pct": null,
+        "max_adverse_pct": null,
+        "adverse_breach_rate": null,
+        "stop_triggered_rate": null,
+        "scoreboard_note": "insufficient_forward_samples",
+        "diagnostic_rank": 2
+      },
+      {
+        "variant_id": "tighter_stop",
+        "variant_label": "Tighter daily stop diagnostic",
+        "competition_id": "shadow_gate_variants_v1",
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -3.0,
+        "horizon_days": 14,
+        "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
+        "log_count": 18,
+        "forward_like_log_count": 18,
+        "matured_forward_days": 0,
+        "no_execution_audit_passed": true,
+        "sample_count": 0,
+        "win_rate": null,
+        "avg_net_return_pct": null,
+        "median_net_return_pct": null,
+        "avg_alpha_pct": null,
+        "max_adverse_pct": null,
+        "adverse_breach_rate": null,
+        "stop_triggered_rate": null,
+        "scoreboard_note": "insufficient_forward_samples",
+        "diagnostic_rank": 3
+      }
+    ]
+  },
+  "nontechnical": {
+    "evidence_summary": {
+      "symbol_count": 78,
+      "available_count": 74,
+      "curated_available_count": 74,
+      "formal_provider_count": 74,
+      "automatic_proxy_count": 4,
+      "proxy_only_count": 4,
+      "proxy_coverage_ratio": 0.051,
+      "missing_count": 0,
+      "coverage_ratio": 0.949,
+      "actionable_evidence_count": 34,
+      "finding_count": 234,
+      "critical_finding_count": 0,
+      "blocking_finding_count": 99
+    },
+    "attribution_summary": {
+      "outcome_count": 854,
+      "attributed_sample_count": 270,
+      "skipped_without_point_in_time_evidence": 584,
+      "sample_count": 270,
+      "scored_sample_count": 174,
+      "hit_rate": 0.511,
+      "avg_return_pct": -0.594,
+      "median_return_pct": -1.079
+    },
+    "score_buckets": [
+      {
+        "score_bucket": "0.40-0.55",
+        "sample_count": 258,
+        "scored_sample_count": 168,
+        "hit_rate": 0.524,
+        "avg_return_pct": -0.916,
+        "median_return_pct": -1.409
+      },
+      {
+        "score_bucket": "0.55-0.70",
+        "sample_count": 12,
+        "scored_sample_count": 6,
+        "hit_rate": 0.167,
+        "avg_return_pct": 6.33,
+        "median_return_pct": 2.947
+      }
+    ]
+  },
+  "sources": {
+    "calls": {
+      "path": "D:\\Code\\yoyo\\research\\calls\\2026-05-26-close-draft-policy.json",
+      "exists": true
+    },
+    "ranking": {
+      "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-26-close-ranking.json",
+      "exists": true
+    },
+    "risk_review": {
+      "path": "D:\\Code\\yoyo\\research\\risk\\2026-05-26-close-risk-review.json",
+      "exists": true
+    },
+    "evidence_ledger": {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\latest_evidence_ledger.json",
+      "exists": true
+    },
+    "calibration_scorecard": {
+      "path": "D:\\Code\\yoyo\\research\\evaluations\\latest_calibration_scorecard.json",
+      "exists": true
+    },
+    "forward_evaluation": {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\latest_forward_evaluation.json",
+      "exists": true
+    },
+    "variant_competition": {
+      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\latest_variant_competition.json",
+      "exists": true
+    },
+    "nontechnical_evidence": {
+      "path": "D:\\Code\\yoyo\\research\\evidence\\nontechnical\\latest.json",
+      "exists": true
+    },
+    "nontechnical_attribution": {
+      "path": "D:\\Code\\yoyo\\research\\evaluations\\latest_nontechnical_attribution.json",
+      "exists": true
+    }
+  }
+}

@@ -22,10 +22,10 @@ name = "科技"
 priority = 1
 strategic_weight = 1.12
 max_active_symbols = 4
-themes = ["hang-seng-tech", "internet-platform", "consumer-tech", "china-a-hard-tech", "china-a-semiconductors"]
+themes = ["hang-seng-tech", "internet-platform", "consumer-tech", "china-a-hard-tech", "china-a-semiconductors", "china-a-ai-optical-chip"]
 confirming_symbols = ["3033.HK", "3067.HK", "512480.SH", "588000.SH"]
 leader_symbols = ["0700.HK", "9988.HK", "3690.HK", "1810.HK", "9999.HK", "0981.HK", "688981.SH", "002475.SZ", "603501.SH"]
-high_beta_symbols = ["1024.HK", "9618.HK", "000725.SZ"]
+high_beta_symbols = ["1024.HK", "9618.HK", "000725.SZ", "603031.SH"]
 
 [[industries]]
 id = "new_energy"

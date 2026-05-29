@@ -1,0 +1,63 @@
+{
+  "as_of_date": "2026-05-29",
+  "as_of_session": "morning",
+  "research_only": true,
+  "no_execution": true,
+  "symbols": {
+    "603031.SH": {
+      "symbol": "603031.SH",
+      "name": "Anfu Technology / 安孚科技",
+      "kind": "stock",
+      "theme": "china-a-ai-optical-chip",
+      "evidence_mode": "manual_point_in_time",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "morning",
+      "fundamental_score": 0.76,
+      "valuation_score": 0.48,
+      "catalyst_score": 0.84,
+      "flow_score": 0.62,
+      "macro_score": 0.58,
+      "event_risk": "none",
+      "event_risk_as_of_date": "2026-05-29",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-28",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "sources": [
+        {
+          "label": "2026Q1 net profit +87.78%; Q1 net profit 134m yuan",
+          "kind": "announcement",
+          "url": "https://www.cls.cn/detail/2358198"
+        },
+        {
+          "label": "2025 attributable net profit +34.38%; Nanfu net profit 957m yuan and rights ratio rose to 46.02%",
+          "kind": "news",
+          "url": "https://news.qq.com/rain/a/20260311A03PLK00"
+        },
+        {
+          "label": "Suzhou Yilanwei optical-chip/CPO investor relation record; samples sent to mainstream optical module makers",
+          "kind": "filing",
+          "url": "https://pdf.dfcfw.com/pdf/H22_AN202512241807279074_1.pdf"
+        },
+        {
+          "label": "Nanfu and Gaoneng Times solid-state battery JV; 300MWh sulfide pilot line plan",
+          "kind": "news",
+          "url": "https://news.qq.com/rain/a/20250307A09N7J00"
+        },
+        {
+          "label": "Controlling shareholder partial pledge release disclosed on 2026-05-29",
+          "kind": "announcement",
+          "url": "https://finance.sina.com.cn/roll/2026-05-29/doc-inhznvke1126549.shtml"
+        }
+      ],
+      "notes": [
+        "Core cash-flow anchor is Nanfu consumer battery; the AI optical-chip exposure is a strategic investment, not consolidated core revenue yet.",
+        "Recent price action is hot and may require watch_only until technical, cost, volume, and risk gates clear after reranking.",
+        "Debt, goodwill, overseas margin, and theme-chase risks should be rechecked before any upgrade."
+      ]
+    }
+  }
+}

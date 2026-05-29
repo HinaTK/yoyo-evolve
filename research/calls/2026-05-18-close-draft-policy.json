@@ -1,0 +1,111 @@
+{
+  "date": "2026-05-18",
+  "session": "close",
+  "generated_at": "2026-05-18T09:10:39Z",
+  "source_ranking": "D:\\Code\\yoyo\\research\\rankings\\2026-05-18-close-ranking.json",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "draft_policy": {
+    "source": "deterministic_ranking_edge_gate",
+    "actionable_rule": "buy_candidate requires qualified_for_action=true, cost_gate_passed=true, and same_theme_peer_evidence_passed=true",
+    "confidence_rule": "confidence is capped by score and reduced for adverse symbol risk, failed peer evidence, disqualifiers, and failed edge/cost gates"
+  },
+  "recommendations": [
+    {
+      "symbol": "0728.HK",
+      "state": "avoid",
+      "theme": "telecom-dividend",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.29,
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 0728.HK.",
+      "evidence": [
+        "score=92.67, trend_score=100, momentum_score=100",
+        "expected_edge_bps=300.0, net_expected_edge_bps=265.0, cost_gate_passed=True",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=2800.HK, range_pos_60=0.5041, max_market_range_for_action=0.7, pct_change_1d=-1.15",
+        "same_theme_peer_check theme_rank=1, theme_leader=0728.HK, is_theme_leader=True, theme_peer_count=2",
+        "same_theme_best_peer_evidence passed=True, best_symbol=0728.HK, best_score=92.67, selected_vs_best_score_gap=0.0, next_best_symbol=0941.HK, selected_vs_next_best_score_gap=18.52, peer_relative_decision=theme_leader",
+        "confidence_calibration penalty=0.1, symbol_risk_tags=['low_symbol_pass_rate', 'negative_symbol_avg_return', 'backtest_adverse_breach'], action_disqualifiers=['nontechnical_evidence_stale', 'nontechnical_score_below_action_min']",
+        "nontechnical_evidence status=available, total_score=0.528, event_risk=low, flags=['nontechnical_evidence_stale', 'nontechnical_score_below_action_min']",
+        "latest_close=5.64, ma20=5.215, ma60=5.0505, range_pos_60=1.1781, volume_ratio_20=2.3188"
+      ],
+      "risks": [
+        "symbol_risk_veto",
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "diagnostic_layer_action_cap_watch_only"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "telecom-dividend",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=92.67 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    },
+    {
+      "symbol": "000333.SZ",
+      "state": "avoid",
+      "theme": "china-a-home-appliances",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.25,
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 000333.SZ.",
+      "evidence": [
+        "score=77.34, trend_score=100, momentum_score=56.55",
+        "expected_edge_bps=190.44, net_expected_edge_bps=155.44, cost_gate_passed=True",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=510300.SH, range_pos_60=0.7189, max_market_range_for_action=0.7, pct_change_1d=-0.53",
+        "same_theme_peer_check theme_rank=1, theme_leader=000333.SZ, is_theme_leader=True, theme_peer_count=1",
+        "same_theme_best_peer_evidence passed=True, best_symbol=000333.SZ, best_score=77.34, selected_vs_best_score_gap=0.0, next_best_symbol=None, selected_vs_next_best_score_gap=None, peer_relative_decision=sole_theme_candidate",
+        "confidence_calibration penalty=0.1, symbol_risk_tags=['backtest_adverse_breach'], action_disqualifiers=['nontechnical_score_below_action_min', 'market_range_pos_60_above_action_limit']",
+        "nontechnical_evidence status=available, total_score=0.514, event_risk=low, flags=['nontechnical_score_below_action_min']",
+        "latest_close=82.83, ma20=80.023, ma60=77.8687, range_pos_60=1.0248, volume_ratio_20=1.2033"
+      ],
+      "risks": [
+        "symbol_risk_veto",
+        "nontechnical_score_below_action_min",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_layer_action_cap_watch_only"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "china-a-home-appliances",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=77.34 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    },
+    {
+      "symbol": "512480.SH",
+      "state": "avoid",
+      "theme": "china-a-semiconductors",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.25,
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 512480.SH.",
+      "evidence": [
+        "score=76.17, trend_score=98.67, momentum_score=58.13",
+        "expected_edge_bps=183.53, net_expected_edge_bps=148.53, cost_gate_passed=True",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=510300.SH, range_pos_60=0.7189, max_market_range_for_action=0.7, pct_change_1d=-0.53",
+        "same_theme_peer_check theme_rank=1, theme_leader=512480.SH, is_theme_leader=True, theme_peer_count=2",
+        "same_theme_best_peer_evidence passed=True, best_symbol=512480.SH, best_score=76.17, selected_vs_best_score_gap=0.0, next_best_symbol=688981.SH, selected_vs_next_best_score_gap=10.54, peer_relative_decision=theme_leader",
+        "confidence_calibration penalty=0.1, symbol_risk_tags=['backtest_adverse_breach'], action_disqualifiers=['event_risk_policy', 'volume_ratio_20_below_1_0', 'market_range_pos_60_above_action_limit']",
+        "nontechnical_evidence status=available, total_score=0.617, event_risk=policy, flags=['event_risk_policy']",
+        "latest_close=2.058, ma20=1.8074, ma60=1.637, range_pos_60=0.9556, volume_ratio_20=0.9543"
+      ],
+      "risks": [
+        "symbol_risk_veto",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_layer_action_cap_watch_only"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "china-a-semiconductors",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=76.17 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    }
+  ]
+}

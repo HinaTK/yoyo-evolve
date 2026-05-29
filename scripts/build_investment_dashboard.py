@@ -10,12 +10,20 @@ from typing import Any
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = ROOT / "research" / "dashboard" / "index.html"
+DEFAULT_GAP_QUEUE = ROOT / "research" / "evidence" / "nontechnical" / "latest_actionable_gap_queue.json"
 DISCLAIMER = "仅供研究 · 非交易信号 · 不构成投资建议"
 PROXY_ONLY_WARNING = "正式资料未接入：尚未取得正式核验过的基本面、估值或事件资料，不能清除行动门槛；只能用于观察和排序。"
 ACTION_STATES = {"buy_candidate", "accumulate", "hold", "trim", "sell_candidate"}
 WATCH_STATES = {"watch", "watch_only"}
 AVOID_STATES = {"avoid", "no_action", "blocked"}
-RESEARCH_ACTION_ORDER = ("consider", "confirm", "observe", "avoid")
+RESEARCH_ACTION_ORDER = ("consider", "probe", "confirm", "observe", "avoid")
+ACTION_TIER_LABELS = {
+    "formal_actionable": "正式可行动",
+    "manual_probe": "小仓试错需人工确认",
+    "observe": "继续观察",
+    "suspended": "暂停行动",
+    "blocked": "禁止追入",
+}
 HARD_RESEARCH_BLOCKERS = {
     "symbol_risk_veto",
     "symbol_recent_adverse_breach",
@@ -28,6 +36,8 @@ REASON_LABELS = {
     "downtrend_regime": "趋势偏弱",
     "event_risk_policy": "政策风险",
     "event_risk_quote_stale": "行情日期滞后",
+    "event_risk_from_future": "事件风险证据来自未来",
+    "event_risk_stale": "事件风险复核过期",
     "event_risk_unknown": "事件风险未知",
     "hk_halt_or_no_turnover_suspected": "疑似停牌/无成交",
     "cn_limit_down_liquidity_block": "跌停流动性风险",
@@ -35,7 +45,10 @@ REASON_LABELS = {
     "low_volume_ratio_20_below_0_6": "量能严重不足",
     "market_range_pos_60_above_action_limit": "市场位置偏高",
     "market_proxy_missing": "市场参考资料缺失",
+    "nontechnical_component_date_missing": "非技术面组件日期缺失",
+    "nontechnical_component_from_future": "非技术面组件来自未来",
     "nontechnical_component_missing": "非技术面组件缺失",
+    "nontechnical_component_stale": "非技术面组件过期",
     "nontechnical_evidence_date_missing": "非技术面日期缺失",
     "nontechnical_evidence_from_future": "非技术面证据来自未来",
     "nontechnical_evidence_from_future_session": "非技术面证据来自未来时段",
@@ -276,6 +289,14 @@ def display_name(value: Any) -> str | None:
     return text or None
 
 
+def action_tier_from_row(row: dict[str, Any]) -> tuple[str | None, str | None]:
+    key = str(row.get("action_tier") or "").strip() or None
+    label = str(row.get("action_tier_label") or "").strip() or None
+    if key and not label:
+        label = ACTION_TIER_LABELS.get(key, key)
+    return key, label
+
+
 def formal_blockers(row: dict[str, Any]) -> list[str]:
     return [item for item in clean_list(row.get("blockers")) if item in REASON_LABELS]
 
@@ -287,6 +308,7 @@ def research_action_for(row: dict[str, Any]) -> dict[str, Any]:
     score = as_float(row.get("score")) or 0.0
     state = str(row.get("recommendation_state") or "").lower()
     risk_cap = str(row.get("risk_cap") or "").lower()
+    action_tier, action_tier_label = action_tier_from_row(row)
     event_risk = str(nontechnical.get("event_risk") or "").lower()
     proxy_only = nontechnical.get("proxy_only") is True or evidence_text_implies_proxy_only(row.get("recommendation_evidence"))
     has_hard_blocker = bool(blocker_set & HARD_RESEARCH_BLOCKERS) or state in {"avoid", "blocked", "rejected"}
@@ -294,13 +316,19 @@ def research_action_for(row: dict[str, Any]) -> dict[str, Any]:
     has_action_state = state in ACTION_STATES and (not risk_cap or risk_cap in ACTION_STATES)
 
     if has_action_state and row.get("qualified_for_action") is True and not blockers and not proxy_only and event_risk not in {"unknown", "policy", "high"}:
-        label = "可考虑研究"
+        label = action_tier_label or "可考虑研究"
         key = "consider"
         reason = "正式门槛已过，暂无阻断项。"
         upgrade = "已在研究候选层；仍需人工复核，不自动执行。"
         invalidation = "若出现阻断项、事件风险升高、置信度下降或不再通过正式门槛，立即降级。"
+    elif action_tier == "manual_probe" and row.get("qualified_for_watch") is True and not proxy_only and not bool(blocker_set & HARD_RESEARCH_BLOCKERS):
+        label = action_tier_label or "小仓试错需人工确认"
+        key = "probe"
+        reason = "核心技术、成本和流动性门槛通过，但仍有轻量非技术面复核项。"
+        upgrade = "补齐非技术面复核、阻断项清零后，才可升级为「正式可行动」。"
+        invalidation = "若出现硬阻断、事件风险升高、成本/edge 失效或技术结构转弱，立即降为禁止追入。"
     elif has_hard_blocker or score < 20:
-        label = "暂不碰"
+        label = action_tier_label if action_tier in {"blocked", "suspended"} else "暂不碰"
         key = "avoid"
         reason = "存在硬阻断或状态不匹配，今日不纳入候选。"
         upgrade = "硬阻断消失、分数回到观察线后，才恢复观察。"
@@ -365,6 +393,18 @@ def normalize_symbols(ranking: dict[str, Any] | None, close_report: dict[str, An
             "qualified_for_watch": bool(ranked.get("qualified_for_watch")),
             "score": round(score, 3) if score is not None else None,
             "confidence": rec.get("confidence") if rec.get("confidence") is not None else ranked.get("confidence"),
+            "action_tier": ranked.get("action_tier") or rec.get("action_tier"),
+            "action_tier_label": ranked.get("action_tier_label") or rec.get("action_tier_label"),
+            "action_tier_description": ranked.get("action_tier_description") or rec.get("action_tier_description"),
+            "action_tier_reasons": ranked.get("action_tier_reasons") or rec.get("action_tier_reasons") or [],
+            "startup_candidate_stage": ranked.get("startup_candidate_stage") or rec.get("startup_candidate_stage"),
+            "startup_candidate_label": ranked.get("startup_candidate_label") or rec.get("startup_candidate_label"),
+            "startup_candidate_reasons": ranked.get("startup_candidate_reasons") or rec.get("startup_candidate_reasons") or [],
+            "startup_watch_candidate": ranked.get("startup_watch_candidate") is True or rec.get("startup_watch_candidate") is True,
+            "ma20_distance_pct": ranked.get("ma20_distance_pct") if ranked.get("ma20_distance_pct") is not None else rec.get("ma20_distance_pct"),
+            "theme_startup": ranked.get("theme_startup") or rec.get("theme_startup"),
+            "formal_actionable": ranked.get("formal_actionable") is True or rec.get("formal_actionable") is True,
+            "manual_confirmation_required": ranked.get("manual_confirmation_required") is not False and rec.get("manual_confirmation_required") is not False,
             "action_disqualifiers": blockers,
             "blockers": blockers,
             "blocker_labels": visible_reason_labels(blockers),
@@ -395,6 +435,18 @@ def normalize_symbols(ranking: dict[str, Any] | None, close_report: dict[str, An
             "qualified_for_watch": category in {"action", "watch"},
             "score": None,
             "confidence": rec.get("confidence"),
+            "action_tier": rec.get("action_tier"),
+            "action_tier_label": rec.get("action_tier_label"),
+            "action_tier_description": rec.get("action_tier_description"),
+            "action_tier_reasons": rec.get("action_tier_reasons") or [],
+            "startup_candidate_stage": rec.get("startup_candidate_stage"),
+            "startup_candidate_label": rec.get("startup_candidate_label"),
+            "startup_candidate_reasons": rec.get("startup_candidate_reasons") or [],
+            "startup_watch_candidate": rec.get("startup_watch_candidate") is True,
+            "ma20_distance_pct": rec.get("ma20_distance_pct"),
+            "theme_startup": rec.get("theme_startup"),
+            "formal_actionable": rec.get("formal_actionable") is True,
+            "manual_confirmation_required": rec.get("manual_confirmation_required") is not False,
             "action_disqualifiers": unique(clean_list(rec.get("blockers")) + clean_list(rec.get("risks"))),
             "blockers": unique(clean_list(rec.get("blockers")) + clean_list(rec.get("risks"))),
             "blocker_labels": visible_reason_labels(unique(clean_list(rec.get("blockers")) + clean_list(rec.get("risks")))),
@@ -420,8 +472,15 @@ def count_research_actions(symbols: list[dict[str, Any]]) -> dict[str, int]:
     return {key: sum(1 for row in symbols if (row.get("research_action") or {}).get("key") == key) for key in RESEARCH_ACTION_ORDER}
 
 
-def evidence_metrics(close_report: dict[str, Any] | None, forward_eval: dict[str, Any] | None, evidence_ledger: dict[str, Any] | None, nontechnical: dict[str, Any] | None) -> dict[str, Any]:
+def evidence_metrics(
+    close_report: dict[str, Any] | None,
+    forward_eval: dict[str, Any] | None,
+    evidence_ledger: dict[str, Any] | None,
+    nontechnical: dict[str, Any] | None,
+    nontechnical_gap_queue: dict[str, Any] | None,
+) -> dict[str, Any]:
     nontechnical_summary = (nontechnical or {}).get("summary", {}) if isinstance((nontechnical or {}).get("summary", {}), dict) else {}
+    gap_summary = (nontechnical_gap_queue or {}).get("summary", {}) if isinstance((nontechnical_gap_queue or {}).get("summary", {}), dict) else {}
     close_evidence = (close_report or {}).get("evidence", {}) if isinstance((close_report or {}).get("evidence", {}), dict) else {}
     close_nontech = nested_get(close_report, ["nontechnical", "evidence_summary"], {})
     if not isinstance(close_nontech, dict):
@@ -434,6 +493,9 @@ def evidence_metrics(close_report: dict[str, Any] | None, forward_eval: dict[str
         "curated_available": nontechnical_summary.get("curated_available_count", nontechnical_summary.get("available_count", close_nontech.get("curated_available_count", close_nontech.get("available_count")))),
         "proxy_only": nontechnical_summary.get("proxy_only_count", nontechnical_summary.get("automatic_proxy_count", close_nontech.get("proxy_only_count", close_nontech.get("automatic_proxy_count")))),
         "missing": nontechnical_summary.get("missing_count", close_nontech.get("missing_count")),
+        "actionable_gap_queue": gap_summary.get("queue_count"),
+        "actionable_gap_proxy_only": gap_summary.get("proxy_only_count"),
+        "actionable_gap_event_risk_unknown": gap_summary.get("event_risk_unknown_count"),
     }
 
 
@@ -471,6 +533,7 @@ def build_payload(
     close_markdown: str | None,
     ranking: dict[str, Any] | None,
     nontechnical: dict[str, Any] | None,
+    nontechnical_gap_queue: dict[str, Any] | None,
     forward_eval: dict[str, Any] | None,
     evidence_ledger: dict[str, Any] | None,
     sources: dict[str, pathlib.Path | None],
@@ -494,7 +557,7 @@ def build_payload(
         "research_action_counts": count_research_actions(symbols),
         "reason_labels": REASON_LABELS,
         "symbols": symbols,
-        "evidence": evidence_metrics(close_report, forward_eval, evidence_ledger, nontechnical),
+        "evidence": evidence_metrics(close_report, forward_eval, evidence_ledger, nontechnical, nontechnical_gap_queue),
         "snapshot": snapshot_metrics(ranking),
         "proxy_only_warning": PROXY_ONLY_WARNING,
         "sources": {name: file_metadata(path) for name, path in sources.items()},
@@ -520,6 +583,16 @@ def render_html(payload: dict[str, Any]) -> str:
     mismatch_count = int(snapshot_info.get("quote_date_mismatch_count") or 0)
     quote_status = "行情日期与报告日期一致" if mismatch_count == 0 else f"本次分析有 {mismatch_count} 个标的使用非报告日行情"
     quote_status = html.escape(quote_status)
+    evidence = payload.get("evidence", {}) if isinstance(payload.get("evidence"), dict) else {}
+    proxy_only_count = int(evidence.get("proxy_only") or 0)
+    confirm_count = int((payload.get("research_action_counts") or {}).get("confirm") or 0)
+    notice_html = ""
+    if proxy_only_count > 0:
+        notice_html = (
+            f'<div class="notice"><strong>正式资料未接入提示：</strong>当前正式资料未接入={proxy_only_count}；'
+            f'「等确认」={confirm_count}，其中还包含成本、市场位置、分数、风险等确认项，不等于全部缺正式资料。'
+            f'{html.escape(PROXY_ONLY_WARNING)}</div>'
+        )
     return f"""<!doctype html>
 <html lang=\"zh-CN\">
 <head>
@@ -613,6 +686,7 @@ def render_html(payload: dict[str, Any]) -> str:
     <section class=\"pillbar\" aria-label=\"筛选与胜率\">
       <button class=\"filter-pill active\" type=\"button\" data-filter=\"all\">全部 <strong id=\"totalCount\">0</strong></button>
       <button class=\"filter-pill action\" type=\"button\" data-filter=\"consider\">可考虑研究 <strong id=\"considerCount\">0</strong></button>
+      <button class=\"filter-pill watch\" type=\"button\" data-filter=\"probe\">小仓试错 <strong id=\"probeCount\">0</strong></button>
       <button class=\"filter-pill watch\" type=\"button\" data-filter=\"confirm\">等确认 <strong id=\"confirmCount\">0</strong></button>
       <button class=\"filter-pill watch\" type=\"button\" data-filter=\"observe\">继续观察 <strong id=\"observeCount\">0</strong></button>
       <button class=\"filter-pill avoid\" type=\"button\" data-filter=\"avoid\">暂不碰 <strong id=\"avoidCount\">0</strong></button>
@@ -623,7 +697,7 @@ def render_html(payload: dict[str, Any]) -> str:
       <div class=\"label\">证据进度</div>
       <p id=\"evidenceMetrics\"></p>
     </section>
-    <div class=\"notice\"><strong>正式资料未接入提示：</strong>{PROXY_ONLY_WARNING}</div>
+    {notice_html}
     <section>
       <div class=\"toolbar\"><h2>今日重点研究队列</h2><span class=\"small\">默认只展示前 8 个，完整池子在下方折叠区。</span></div>
       <div id=\"topCards\" class=\"symbol-grid\"></div>
@@ -650,7 +724,8 @@ def render_html(payload: dict[str, Any]) -> str:
     const judgmentText = (value) => ({{buy_candidate: '买入候选', accumulate: '可累积', hold: '持有观察', trim: '减仓候选', sell_candidate: '卖出候选', watch: '观察', watch_only: '仅观察', avoid: '回避', no_action: '不行动', blocked: '被阻断', action_candidate: '行动候选'}}[value] || text(value));
     const evidenceText = (value) => ({{proxy_only: '正式资料未接入', available: '可用', missing: '缺失'}}[value] || text(value));
     const researchAction = (row) => row.research_action || {{key: 'avoid', label: '暂不碰', reason: '暂无研究动作。', upgrade: '等待新证据。', invalidation: '约束未改善前不升级。'}};
-    const researchKind = (key) => key === 'consider' ? 'action' : key === 'confirm' || key === 'observe' ? 'watch' : 'avoid';
+    const researchKind = (key) => key === 'consider' ? 'action' : key === 'probe' || key === 'confirm' || key === 'observe' ? 'watch' : 'avoid';
+    const tierKind = (key) => key === 'formal_actionable' ? 'action' : key === 'manual_probe' || key === 'observe' || key === 'suspended' ? 'watch' : key === 'blocked' ? 'avoid' : '';
     const reasonLabels = payload.reason_labels || {{}};
     const humanizeKey = (value) => text(value).replace(/_/g, ' ');
     const reasonText = (value) => reasonLabels[value] || humanizeKey(value);
@@ -670,12 +745,13 @@ def render_html(payload: dict[str, Any]) -> str:
     document.getElementById('totalCount').textContent = text(payload.symbols.length);
     const researchCounts = payload.research_action_counts || {{}};
     document.getElementById('considerCount').textContent = text(researchCounts.consider || 0);
+    document.getElementById('probeCount').textContent = text(researchCounts.probe || 0);
     document.getElementById('confirmCount').textContent = text(researchCounts.confirm || 0);
     document.getElementById('observeCount').textContent = text(researchCounts.observe || 0);
     document.getElementById('avoidCount').textContent = text(researchCounts.avoid || 0);
     document.getElementById('winRate').textContent = winRateText(payload.evidence.forward_win_rate);
     document.getElementById('winRateNote').textContent = `前向样本=${{text(payload.evidence.forward_samples)}}；样本不足时胜率不显示。`;
-    document.getElementById('evidenceMetrics').textContent = `前向记录=${{text(payload.evidence.forward_logs)}}；成熟天数=${{text(payload.evidence.matured_days)}}；前向样本=${{text(payload.evidence.forward_samples)}}；人工/正式证据=${{text(payload.evidence.curated_available)}}；正式资料未接入=${{text(payload.evidence.proxy_only)}}；缺失=${{text(payload.evidence.missing)}}`;
+    document.getElementById('evidenceMetrics').textContent = `前向记录=${{text(payload.evidence.forward_logs)}}；成熟天数=${{text(payload.evidence.matured_days)}}；前向样本=${{text(payload.evidence.forward_samples)}}；人工/正式证据=${{text(payload.evidence.curated_available)}}；正式资料未接入=${{text(payload.evidence.proxy_only)}}；缺失=${{text(payload.evidence.missing)}}；可行动证据缺口=${{text(payload.evidence.actionable_gap_queue)}}；小仓试错=${{text(payload.research_action_counts.probe)}}；等确认=${{text(payload.research_action_counts.confirm)}}`;
     const topCards = document.getElementById('topCards');
     const renderTopCards = () => {{
       topCards.textContent = '';
@@ -692,13 +768,15 @@ def render_html(payload: dict[str, Any]) -> str:
       const action = researchAction(row);
       const status = document.createElement('div');
       status.appendChild(chip(action.label, researchKind(action.key)));
+      if (row.action_tier_label) status.appendChild(chip(row.action_tier_label, tierKind(row.action_tier)));
+      if (row.startup_candidate_label) status.appendChild(chip(row.startup_candidate_label, row.startup_watch_candidate ? 'watch' : ''));
       status.appendChild(chip(categoryText(row.category), row.category));
       const metric = document.createElement('div');
       metric.className = 'metric';
       metric.textContent = `研究优先级：${{text(row.score)}} / 100`;
       const gates = document.createElement('div');
       gates.className = 'small';
-      gates.textContent = `正式可行动=${{boolText(row.qualified_for_action)}}；观察=${{boolText(row.qualified_for_watch)}}；置信度=${{text(row.confidence)}}`;
+      gates.textContent = `正式可行动=${{boolText(row.qualified_for_action)}}；观察=${{boolText(row.qualified_for_watch)}}；分级=${{text(row.action_tier_label)}}；启动=${{text(row.startup_candidate_label)}}；MA20距离=${{text(row.ma20_distance_pct)}}%；置信度=${{text(row.confidence)}}`;
       const why = document.createElement('div');
       why.className = 'small';
       why.textContent = `为什么：${{text(action.reason)}}`;
@@ -717,7 +795,7 @@ def render_html(payload: dict[str, Any]) -> str:
     for (const row of payload.symbols) {{
       const tr = document.createElement('tr');
       const action = researchAction(row);
-      tr.dataset.search = [row.symbol, row.display_name, row.name, row.judgment, row.category, action.label, action.reason, action.upgrade, action.invalidation, ...(row.blockers || []), ...(row.blocker_labels || []), row.nontechnical_evidence && row.nontechnical_evidence.status].map(text).join(' ').toLowerCase();
+      tr.dataset.search = [row.symbol, row.display_name, row.name, row.judgment, row.category, row.action_tier, row.action_tier_label, row.startup_candidate_stage, row.startup_candidate_label, action.label, action.reason, action.upgrade, action.invalidation, ...(row.blockers || []), ...(row.blocker_labels || []), row.nontechnical_evidence && row.nontechnical_evidence.status].map(text).join(' ').toLowerCase();
       tr.dataset.researchAction = action.key;
       const title = document.createElement('div');
       const symbolStrong = document.createElement('strong');
@@ -730,11 +808,13 @@ def render_html(payload: dict[str, Any]) -> str:
       tr.appendChild(cell('代码/名称', title));
       const judgment = document.createElement('div');
       judgment.appendChild(chip(action.label, researchKind(action.key)));
+      if (row.action_tier_label) judgment.appendChild(chip(row.action_tier_label, tierKind(row.action_tier)));
+      if (row.startup_candidate_label) judgment.appendChild(chip(row.startup_candidate_label, row.startup_watch_candidate ? 'watch' : ''));
       judgment.appendChild(chip(judgmentText(row.judgment), row.category));
       judgment.appendChild(chip(categoryText(row.category), row.category));
       if (row.risk_cap) judgment.appendChild(chip('风险上限 ' + judgmentText(row.risk_cap), ''));
       tr.appendChild(cell('系统建议', judgment));
-      tr.appendChild(cell('正式关卡', `可行动=${{boolText(row.qualified_for_action)}}；观察=${{boolText(row.qualified_for_watch)}}`));
+      tr.appendChild(cell('正式关卡', `可行动=${{boolText(row.qualified_for_action)}}；观察=${{boolText(row.qualified_for_watch)}}；分级=${{text(row.action_tier_label)}}；启动=${{text(row.startup_candidate_label)}}；MA20距离=${{text(row.ma20_distance_pct)}}%；需人工确认=${{boolText(row.manual_confirmation_required)}}`));
       const priority = document.createElement('div');
       priority.textContent = text(row.score);
       const why = document.createElement('div');
@@ -802,6 +882,7 @@ def build_dashboard(
     close_report_md_path: pathlib.Path | None,
     ranking_path: pathlib.Path | None,
     nontechnical_evidence_path: pathlib.Path | None,
+    nontechnical_gap_queue_path: pathlib.Path | None,
     forward_evaluation_path: pathlib.Path | None,
     evidence_ledger_path: pathlib.Path | None,
     output_path: pathlib.Path = DEFAULT_OUTPUT,
@@ -810,6 +891,7 @@ def build_dashboard(
     close_markdown = load_close_markdown(close_report_md_path)
     ranking = load_json(ranking_path)
     nontechnical = load_json(nontechnical_evidence_path)
+    nontechnical_gap_queue = load_json(nontechnical_gap_queue_path)
     forward_eval = load_json(forward_evaluation_path)
     evidence_ledger = load_json(evidence_ledger_path)
     payload = build_payload(
@@ -819,6 +901,7 @@ def build_dashboard(
         close_markdown,
         ranking,
         nontechnical,
+        nontechnical_gap_queue,
         forward_eval,
         evidence_ledger,
         {
@@ -826,6 +909,7 @@ def build_dashboard(
             "close_report_markdown": close_report_md_path,
             "ranking": ranking_path,
             "nontechnical_evidence": nontechnical_evidence_path,
+            "nontechnical_gap_queue": nontechnical_gap_queue_path,
             "forward_evaluation": forward_evaluation_path,
             "evidence_ledger": evidence_ledger_path,
         },
@@ -843,6 +927,7 @@ def main() -> int:
     parser.add_argument("--close-report-md", default=None)
     parser.add_argument("--ranking", default=None)
     parser.add_argument("--nontechnical-evidence", default=str(ROOT / "research" / "evidence" / "nontechnical" / "latest.json"))
+    parser.add_argument("--nontechnical-gap-queue", default=str(DEFAULT_GAP_QUEUE))
     parser.add_argument("--forward-evaluation", default=str(ROOT / "research" / "shadow" / "latest_forward_evaluation.json"))
     parser.add_argument("--evidence-ledger", default=str(ROOT / "research" / "shadow" / "latest_evidence_ledger.json"))
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT))
@@ -859,6 +944,7 @@ def main() -> int:
         close_md,
         ranking,
         resolve_path(args.nontechnical_evidence),
+        resolve_path(args.nontechnical_gap_queue),
         resolve_path(args.forward_evaluation),
         resolve_path(args.evidence_ledger),
         resolve_path(args.output) or DEFAULT_OUTPUT,

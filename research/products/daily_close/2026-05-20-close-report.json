@@ -1,0 +1,2699 @@
+{
+  "date": "2026-05-20",
+  "session": "close",
+  "source_of_truth": "calls_json_with_risk_review_caps",
+  "research_only": true,
+  "no_execution": true,
+  "recommendations": [
+    {
+      "symbol": "688981.SH",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "china-a-semiconductors",
+      "confidence": 0.29,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 688981.SH.",
+      "risks": [
+        "symbol_risk_veto",
+        "cn_limit_up_chase_block",
+        "nontechnical_score_below_action_min"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.534, event_risk=policy, flags=['nontechnical_score_below_action_min', 'event_risk_policy']"
+    },
+    {
+      "symbol": "512480.SH",
+      "state": "avoid",
+      "effective_state": "avoid",
+      "theme": "china-a-semiconductors",
+      "confidence": 0.28,
+      "risk_cap": "avoid",
+      "risk_decision": "veto",
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 512480.SH.",
+      "risks": [
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "event_risk_policy"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.629, event_risk=policy, flags=['event_risk_policy']"
+    },
+    {
+      "symbol": "588000.SH",
+      "state": "watch_only",
+      "effective_state": "watch_only",
+      "theme": "china-a-hard-tech",
+      "confidence": 0.45,
+      "risk_cap": "watch_only",
+      "risk_decision": "pass",
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 588000.SH.",
+      "risks": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_layer_action_cap_watch_only"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.63, event_risk=policy, flags=['event_risk_policy']"
+    }
+  ],
+  "research_actions": [
+    {
+      "symbol": "588000.SH",
+      "state": "watch_only",
+      "confidence": 0.45,
+      "score": 85.95,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_layer_action_cap_watch_only"
+      ],
+      "why_source": "Draft watch_only generated from deterministic ranking and edge gate fields for 588000.SH.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.63, event_risk=policy, flags=['event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.63,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "9618.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 77.32,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.469,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0941.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 75.43,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.545,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "159915.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 71.03,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.616,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600900.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 62.18,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "none",
+        "total_score": 0.56,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "正式资料未接入或存在资料阻断，不能视为正式行动候选。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "515790.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 60.36,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.551,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "confirm",
+        "label": "等确认",
+        "why": "接近候选，但仍有关键确认项未满足。",
+        "upgrade": "阻断项清零、正式门槛通过、事件风险回落且正式资料接入后，可升级为「可考虑研究」。",
+        "invalidation": "若观察分数跌破门槛、状态转弱或新增硬阻断，移出重点跟踪。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "510500.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 69.34,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.579,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0857.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 67.57,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.539,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0006.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 67.53,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.538,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "510300.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 67.05,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.579,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0002.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 65.15,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.509,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "300750.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 56.23,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.635,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "observe",
+        "label": "继续观察",
+        "why": "有跟踪价值，但当前强度、证据或关卡状态不足。",
+        "upgrade": "分数进入观察线、状态改善且主要障碍减少后，可升级为「等确认」。",
+        "invalidation": "若出现硬阻断、状态失败或分数持续偏低，则降为「暂不碰」。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "688981.SH",
+      "state": "avoid",
+      "confidence": 0.29,
+      "score": 93.79,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "cn_limit_up_chase_block",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "symbol_risk_veto"
+      ],
+      "blockers": [
+        "cn_limit_up_chase_block",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "symbol_risk_veto"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 688981.SH.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.534, event_risk=policy, flags=['nontechnical_score_below_action_min', 'event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.534,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "512480.SH",
+      "state": "avoid",
+      "confidence": 0.28,
+      "score": 87.81,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto"
+      ],
+      "blockers": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto"
+      ],
+      "why_source": "Draft avoid generated from deterministic ranking and edge gate fields for 512480.SH.",
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "nontechnical_evidence": "nontechnical_evidence status=available, total_score=0.629, event_risk=policy, flags=['event_risk_policy']",
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.629,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "000333.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 72.58,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "symbol_risk_veto"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "symbol_risk_veto"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "unknown",
+        "total_score": 0.48,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0728.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 65.58,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.528,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0883.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 65.43,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.574,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0388.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 61.53,
+      "qualified_for_action": false,
+      "qualified_for_watch": true,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.536,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "3690.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 58.47,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.413,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0005.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 49.88,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "low_volume_ratio_20_below_0_6",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.541,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "2800.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 39.72,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "none",
+        "total_score": 0.575,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600030.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 37.51,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.65,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1299.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 36.49,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.585,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "3033.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 35.4,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "none",
+        "total_score": 0.562,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "9988.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 35.33,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "symbol_recent_adverse_breach",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "symbol_recent_adverse_breach",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.479,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "510880.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 34.35,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.548,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "3067.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 33.34,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "none",
+        "total_score": 0.559,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1024.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 27.56,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.567,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "信号不足或约束不通过，暂不投入研究时间。",
+        "upgrade": "重新通过观察门槛且无硬阻断后，可恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "002594.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 14.7,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "event_risk_unknown",
+        "nontechnical_source_missing",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "unknown",
+        "total_score": 0.521,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "601088.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 5.6,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.504,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "000858.SZ",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "nontechnical_source_missing",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_proxy_only",
+        "nontechnical_score_below_action_min",
+        "nontechnical_source_missing",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "proxy_only",
+        "evidence_mode": "automatic_local_proxy",
+        "proxy_only": true,
+        "event_risk": "none",
+        "total_score": 0.529,
+        "source_count": 0,
+        "proxy_source_count": 3
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0386.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.545,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "0700.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "symbol_recent_adverse_breach",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "symbol_recent_adverse_breach",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.531,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1093.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.531,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1177.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "event_risk_earnings_gap",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "earnings_gap",
+        "total_score": 0.481,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "1810.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "symbol_recent_adverse_breach",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "symbol_recent_adverse_breach",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.541,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "2020.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.547,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "2269.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "event_risk_policy",
+        "volume_ratio_20_below_1_0",
+        "downtrend_regime",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "policy",
+        "total_score": 0.581,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "2331.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.541,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600036.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_score_below_action_min",
+        "event_risk_elevated",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_score_below_action_min",
+        "event_risk_elevated",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "elevated",
+        "total_score": 0.547,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600276.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.601,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "600519.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.588,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "601318.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_score_below_action_min",
+        "event_risk_elevated",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_score_below_action_min",
+        "event_risk_elevated",
+        "volume_ratio_20_below_1_0",
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "elevated",
+        "total_score": 0.482,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "601899.SH",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "market_range_pos_60_above_action_limit",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.65,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "6862.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "nontechnical_score_below_action_min",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.536,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    },
+    {
+      "symbol": "9992.HK",
+      "state": "ranking_only",
+      "confidence": null,
+      "score": 0,
+      "qualified_for_action": false,
+      "qualified_for_watch": false,
+      "gate_blockers": [
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "blockers": [
+        "nontechnical_evidence_stale",
+        "volume_ratio_20_below_1_0",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "low_volume_ratio_20_below_0_6",
+        "downtrend_regime",
+        "range_pos_60_below_0_12",
+        "price_below_ma20_and_ma60",
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "cost_gate_failed"
+      ],
+      "why_source": null,
+      "invalidation": null,
+      "nontechnical_evidence": null,
+      "nontechnical_profile": {
+        "status": "available",
+        "evidence_mode": "formal_provider_point_in_time",
+        "proxy_only": false,
+        "event_risk": "low",
+        "total_score": 0.666,
+        "source_count": 1,
+        "proxy_source_count": 0
+      },
+      "research_action": {
+        "key": "avoid",
+        "label": "暂不碰",
+        "why": "状态或硬阻断不支持投入研究时间。",
+        "upgrade": "硬阻断解除并重新通过观察门槛后，才恢复观察。",
+        "invalidation": "硬性阻断未解除前不升级；若更多风险暴露，继续维持回避。",
+        "formal_actionable": false
+      }
+    }
+  ],
+  "ranking": {
+    "actionable_count": 0,
+    "diagnostic_count": 3,
+    "top_watch": [
+      {
+        "symbol": "688981.SH",
+        "name": "SMIC / 中芯国际",
+        "kind": "stock",
+        "theme": "china-a-semiconductors",
+        "currency": "CNY",
+        "exchange": "SSE",
+        "score": 93.79,
+        "trend_score": 100,
+        "momentum_score": 100,
+        "risk_penalty": 0.0,
+        "qualification_flags": [
+          "score_meets_watch_threshold",
+          "price_above_ma20",
+          "price_above_ma60",
+          "ma20_above_ma60",
+          "volume_confirmed",
+          "constructive_range_position",
+          "cost_gate_passed",
+          "market_specific_risk_gate_blocked",
+          "nontechnical_evidence_gate_blocked",
+          "score_meets_action_threshold",
+          "volume_meets_action_threshold",
+          "market_range_overextended",
+          "symbol_recent_adverse_breach_clear",
+          "same_theme_best_peer_evidence_passed",
+          "diagnostic_candidate"
+        ],
+        "disqualifiers": [
+          "symbol_risk_veto"
+        ],
+        "qualified_for_watch": true,
+        "diagnostic_only": true,
+        "latest_close": 133.81,
+        "pct_change_1d": 12.62,
+        "ma20": 115.7855,
+        "ma60": 108.3557,
+        "range_pos_60": 1.2524,
+        "volume_ratio_20": 2.9168,
+        "regime_flags": [
+          "uptrend",
+          "volume-expansion"
+        ],
+        "price_source": "quote",
+        "prev_close": 118.82,
+        "latest_open": 118.0,
+        "latest_high": 136.63,
+        "latest_low": 117.5,
+        "latest_volume": 224880056,
+        "as_of": "2026-05-20",
+        "quote_trade_time": "20260520161449",
+        "quote_trade_date": "2026-05-20",
+        "quote_last": 133.81,
+        "quote_volume": 224880056,
+        "ah_pair": null,
+        "ah_premium_pct": null,
+        "fx_reference": null,
+        "hkd_cny_reference": null,
+        "theme_rank": 1,
+        "theme_peer_count": 2,
+        "theme_leader": "688981.SH",
+        "theme_leader_score": 93.79,
+        "theme_score_gap_to_leader": 0.0,
+        "theme_top_peer_scores": [
+          {
+            "symbol": "688981.SH",
+            "score": 93.79,
+            "rank": 1
+          },
+          {
+            "symbol": "512480.SH",
+            "score": 87.81,
+            "rank": 2
+          }
+        ],
+        "same_theme_best_symbol": "688981.SH",
+        "same_theme_best_score": 93.79,
+        "same_theme_selected_vs_best_score_gap": 0.0,
+        "same_theme_next_best_symbol": "512480.SH",
+        "same_theme_selected_vs_next_best_score_gap": 5.98,
+        "is_theme_leader": true,
+        "same_theme_peer_evidence_passed": true,
+        "peer_relative_decision": "theme_leader",
+        "snapshot_as_of_date": "2026-05-20",
+        "snapshot_as_of_session": "close",
+        "market_proxy_symbol": "510300.SH",
+        "market_range_pos_60": 0.7513,
+        "market_pct_change_1d": 0.04,
+        "market_volume_ratio_20": 0.8406,
+        "market_proxy_available": true,
+        "max_market_range_for_action": 0.7,
+        "expected_edge_bps": 300.0,
+        "net_expected_edge_bps": 265.0,
+        "cost_gate_passed": true,
+        "edge_method": "technical_snapshot_score_v1",
+        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+        "symbol_risk": {
+          "action_veto": true,
+          "reasons": [
+            "backtest_max_adverse_pct<=-8.0% in 6 of 19 promotable samples"
+          ],
+          "tags": [
+            "backtest_adverse_breach"
+          ]
+        },
+        "market_specific_risk_flags": [
+          "cn_limit_up_chase_block",
+          "hkd_cny_cross_currency_exposure",
+          "hkd_cny_fx_reference_missing"
+        ],
+        "action_disqualifiers": [
+          "cn_limit_up_chase_block",
+          "nontechnical_score_below_action_min",
+          "event_risk_policy",
+          "market_range_pos_60_above_action_limit"
+        ],
+        "nontechnical_evidence": {
+          "status": "available",
+          "required_for_action": true,
+          "evidence_mode": "formal_provider_point_in_time",
+          "proxy_only": false,
+          "total_score": 0.534,
+          "min_total_score_for_action": 0.55,
+          "as_of_date": "2026-05-15",
+          "as_of_session": "close",
+          "source_count": 1,
+          "proxy_source_count": null,
+          "components": {
+            "fundamental_score": 0.522,
+            "valuation_score": 0.518,
+            "catalyst_score": 0.542,
+            "flow_score": 0.58,
+            "macro_score": 0.51
+          },
+          "event_risk": "policy",
+          "notes": [
+            "formal provider report_date=2026-03-31, notice_date=2026-05-15",
+            "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+          ]
+        },
+        "nontechnical_evidence_flags": [
+          "nontechnical_score_below_action_min",
+          "event_risk_policy"
+        ],
+        "qualified_for_action": false,
+        "source_layer": "diagnostic_candidates",
+        "eligible_for_action_from_layer": false,
+        "layer_action_cap": "watch_only"
+      },
+      {
+        "symbol": "512480.SH",
+        "name": "GuolianAn Semiconductor ETF / 国联安半导体ETF",
+        "kind": "etf",
+        "theme": "china-a-semiconductors",
+        "currency": "CNY",
+        "exchange": "SSE",
+        "score": 87.81,
+        "trend_score": 100,
+        "momentum_score": 86.02,
+        "risk_penalty": 0.0,
+        "qualification_flags": [
+          "score_meets_watch_threshold",
+          "price_above_ma20",
+          "price_above_ma60",
+          "ma20_above_ma60",
+          "volume_confirmed",
+          "constructive_range_position",
+          "same_theme_non_leader",
+          "cost_gate_passed",
+          "market_specific_risk_gate_clear",
+          "nontechnical_evidence_gate_blocked",
+          "score_meets_action_threshold",
+          "volume_meets_action_threshold",
+          "market_range_overextended",
+          "symbol_recent_adverse_breach_clear",
+          "same_theme_best_peer_evidence_failed",
+          "diagnostic_candidate"
+        ],
+        "disqualifiers": [
+          "not_theme_score_leader",
+          "symbol_risk_veto"
+        ],
+        "qualified_for_watch": false,
+        "diagnostic_only": true,
+        "latest_close": 2.227,
+        "pct_change_1d": 4.5,
+        "ma20": 1.8559,
+        "ma60": 1.6524,
+        "range_pos_60": 1.1337,
+        "volume_ratio_20": 1.0009,
+        "regime_flags": [
+          "uptrend"
+        ],
+        "price_source": "quote",
+        "prev_close": 2.131,
+        "latest_open": 2.118,
+        "latest_high": 2.228,
+        "latest_low": 2.116,
+        "latest_volume": 9620483,
+        "as_of": "2026-05-20",
+        "quote_trade_time": "20260520161439",
+        "quote_trade_date": "2026-05-20",
+        "quote_last": 2.227,
+        "quote_volume": 9620483,
+        "ah_pair": null,
+        "ah_premium_pct": null,
+        "fx_reference": null,
+        "hkd_cny_reference": null,
+        "theme_rank": 2,
+        "theme_peer_count": 2,
+        "theme_leader": "688981.SH",
+        "theme_leader_score": 93.79,
+        "theme_score_gap_to_leader": 5.98,
+        "theme_top_peer_scores": [
+          {
+            "symbol": "688981.SH",
+            "score": 93.79,
+            "rank": 1
+          },
+          {
+            "symbol": "512480.SH",
+            "score": 87.81,
+            "rank": 2
+          }
+        ],
+        "same_theme_best_symbol": "688981.SH",
+        "same_theme_best_score": 93.79,
+        "same_theme_selected_vs_best_score_gap": -5.98,
+        "same_theme_next_best_symbol": null,
+        "same_theme_selected_vs_next_best_score_gap": null,
+        "is_theme_leader": false,
+        "same_theme_peer_evidence_passed": false,
+        "peer_relative_decision": "blocked_by_same_theme_leader",
+        "snapshot_as_of_date": "2026-05-20",
+        "snapshot_as_of_session": "close",
+        "market_proxy_symbol": "510300.SH",
+        "market_range_pos_60": 0.7513,
+        "market_pct_change_1d": 0.04,
+        "market_volume_ratio_20": 0.8406,
+        "market_proxy_available": true,
+        "max_market_range_for_action": 0.7,
+        "expected_edge_bps": 254.07,
+        "net_expected_edge_bps": 219.07,
+        "cost_gate_passed": true,
+        "edge_method": "technical_snapshot_score_v1",
+        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+        "symbol_risk": {
+          "action_veto": true,
+          "reasons": [
+            "backtest_max_adverse_pct<=-8.0% in 1 of 8 promotable samples"
+          ],
+          "tags": [
+            "backtest_adverse_breach"
+          ]
+        },
+        "market_specific_risk_flags": [
+          "hkd_cny_cross_currency_exposure",
+          "hkd_cny_fx_reference_missing"
+        ],
+        "action_disqualifiers": [
+          "event_risk_policy",
+          "market_range_pos_60_above_action_limit",
+          "same_theme_best_peer_evidence_missing_or_failed"
+        ],
+        "nontechnical_evidence": {
+          "status": "available",
+          "required_for_action": true,
+          "evidence_mode": "formal_provider_point_in_time",
+          "proxy_only": false,
+          "total_score": 0.629,
+          "min_total_score_for_action": 0.55,
+          "as_of_date": "2026-05-20",
+          "as_of_session": "close",
+          "source_count": 1,
+          "proxy_source_count": null,
+          "components": {
+            "fundamental_score": 0.48,
+            "valuation_score": 0.8,
+            "catalyst_score": 0.796,
+            "flow_score": 0.5,
+            "macro_score": 0.51
+          },
+          "event_risk": "policy",
+          "notes": [
+            "formal provider fund_name=半导体ETF国联安, source_date=2026-05-20",
+            "scores derived from public fund return fields plus local liquidity context"
+          ]
+        },
+        "nontechnical_evidence_flags": [
+          "event_risk_policy"
+        ],
+        "qualified_for_action": false,
+        "source_layer": "diagnostic_candidates",
+        "eligible_for_action_from_layer": false,
+        "layer_action_cap": "watch_only"
+      },
+      {
+        "symbol": "588000.SH",
+        "name": "ChinaAMC STAR 50 ETF / 华夏上证科创板50ETF",
+        "kind": "etf",
+        "theme": "china-a-hard-tech",
+        "currency": "CNY",
+        "exchange": "SSE",
+        "score": 85.95,
+        "trend_score": 100,
+        "momentum_score": 81.01,
+        "risk_penalty": 0.0,
+        "qualification_flags": [
+          "score_meets_watch_threshold",
+          "price_above_ma20",
+          "price_above_ma60",
+          "ma20_above_ma60",
+          "volume_confirmed",
+          "constructive_range_position",
+          "cost_gate_passed",
+          "market_specific_risk_gate_clear",
+          "nontechnical_evidence_gate_blocked",
+          "score_meets_action_threshold",
+          "volume_meets_action_threshold",
+          "market_range_overextended",
+          "symbol_recent_adverse_breach_clear",
+          "same_theme_best_peer_evidence_passed",
+          "diagnostic_candidate"
+        ],
+        "disqualifiers": [],
+        "qualified_for_watch": true,
+        "diagnostic_only": true,
+        "latest_close": 1.931,
+        "pct_change_1d": 3.21,
+        "ma20": 1.6747,
+        "ma60": 1.5217,
+        "range_pos_60": 1.1097,
+        "volume_ratio_20": 1.2667,
+        "regime_flags": [
+          "uptrend"
+        ],
+        "price_source": "quote",
+        "prev_close": 1.871,
+        "latest_open": 1.857,
+        "latest_high": 1.933,
+        "latest_low": 1.856,
+        "latest_volume": 39558656,
+        "as_of": "2026-05-20",
+        "quote_trade_time": "20260520161439",
+        "quote_trade_date": "2026-05-20",
+        "quote_last": 1.931,
+        "quote_volume": 39558656,
+        "ah_pair": null,
+        "ah_premium_pct": null,
+        "fx_reference": null,
+        "hkd_cny_reference": null,
+        "theme_rank": 1,
+        "theme_peer_count": 1,
+        "theme_leader": "588000.SH",
+        "theme_leader_score": 85.95,
+        "theme_score_gap_to_leader": 0.0,
+        "theme_top_peer_scores": [
+          {
+            "symbol": "588000.SH",
+            "score": 85.95,
+            "rank": 1
+          }
+        ],
+        "same_theme_best_symbol": "588000.SH",
+        "same_theme_best_score": 85.95,
+        "same_theme_selected_vs_best_score_gap": 0.0,
+        "same_theme_next_best_symbol": null,
+        "same_theme_selected_vs_next_best_score_gap": null,
+        "is_theme_leader": true,
+        "same_theme_peer_evidence_passed": true,
+        "peer_relative_decision": "sole_theme_candidate",
+        "snapshot_as_of_date": "2026-05-20",
+        "snapshot_as_of_session": "close",
+        "market_proxy_symbol": "510300.SH",
+        "market_range_pos_60": 0.7513,
+        "market_pct_change_1d": 0.04,
+        "market_volume_ratio_20": 0.8406,
+        "market_proxy_available": true,
+        "max_market_range_for_action": 0.7,
+        "expected_edge_bps": 251.15,
+        "net_expected_edge_bps": 216.15,
+        "cost_gate_passed": true,
+        "edge_method": "technical_snapshot_score_v1",
+        "evidence_window": "1d_momentum_20d_volume_20d_60d_trend_60d_range",
+        "symbol_risk": {
+          "action_veto": false,
+          "reasons": [],
+          "tags": []
+        },
+        "market_specific_risk_flags": [
+          "hkd_cny_cross_currency_exposure",
+          "hkd_cny_fx_reference_missing"
+        ],
+        "action_disqualifiers": [
+          "event_risk_policy",
+          "market_range_pos_60_above_action_limit"
+        ],
+        "nontechnical_evidence": {
+          "status": "available",
+          "required_for_action": true,
+          "evidence_mode": "formal_provider_point_in_time",
+          "proxy_only": false,
+          "total_score": 0.63,
+          "min_total_score_for_action": 0.55,
+          "as_of_date": "2026-05-20",
+          "as_of_session": "close",
+          "source_count": 1,
+          "proxy_source_count": null,
+          "components": {
+            "fundamental_score": 0.48,
+            "valuation_score": 0.8,
+            "catalyst_score": 0.752,
+            "flow_score": 0.58,
+            "macro_score": 0.51
+          },
+          "event_risk": "policy",
+          "notes": [
+            "formal provider fund_name=科创50ETF华夏, source_date=2026-05-20",
+            "scores derived from public fund return fields plus local liquidity context"
+          ]
+        },
+        "nontechnical_evidence_flags": [
+          "event_risk_policy"
+        ],
+        "qualified_for_action": false,
+        "source_layer": "diagnostic_candidates",
+        "eligible_for_action_from_layer": false,
+        "layer_action_cap": "watch_only"
+      }
+    ]
+  },
+  "evidence": {
+    "forward_shadow_logs": 10,
+    "matured_forward_days": 1,
+    "forward_sample_count": 0,
+    "audit_passed": true
+  },
+  "calibration": {
+    "sample_count": 854,
+    "scored_sample_count": null,
+    "hit_rate": null,
+    "brier_score": null,
+    "calibration_error": null
+  },
+  "variants": {
+    "competition_id": "shadow_gate_variants_v1",
+    "scoreboard": [
+      {
+        "variant_id": "baseline_shadow",
+        "variant_label": "Baseline shadow policy",
+        "competition_id": "shadow_gate_variants_v1",
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
+        "log_count": 8,
+        "forward_like_log_count": 8,
+        "matured_forward_days": 0,
+        "no_execution_audit_passed": true,
+        "sample_count": 0,
+        "win_rate": null,
+        "avg_net_return_pct": null,
+        "median_net_return_pct": null,
+        "avg_alpha_pct": null,
+        "max_adverse_pct": null,
+        "adverse_breach_rate": null,
+        "stop_triggered_rate": null,
+        "scoreboard_note": "insufficient_forward_samples",
+        "diagnostic_rank": 1
+      },
+      {
+        "variant_id": "no_heat_filter",
+        "variant_label": "No heat filter diagnostic",
+        "competition_id": "shadow_gate_variants_v1",
+        "risk_filter": "off",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -4.0,
+        "horizon_days": 14,
+        "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
+        "log_count": 8,
+        "forward_like_log_count": 8,
+        "matured_forward_days": 0,
+        "no_execution_audit_passed": true,
+        "sample_count": 0,
+        "win_rate": null,
+        "avg_net_return_pct": null,
+        "median_net_return_pct": null,
+        "avg_alpha_pct": null,
+        "max_adverse_pct": null,
+        "adverse_breach_rate": null,
+        "stop_triggered_rate": null,
+        "scoreboard_note": "insufficient_forward_samples",
+        "diagnostic_rank": 2
+      },
+      {
+        "variant_id": "tighter_stop",
+        "variant_label": "Tighter daily stop diagnostic",
+        "competition_id": "shadow_gate_variants_v1",
+        "risk_filter": "combined_heat_mid_range_market_stall",
+        "exit_rule": "daily_close_stop",
+        "stop_loss_pct": -3.0,
+        "horizon_days": 14,
+        "config_sha256": "671148c530388654e24c8e7ea96e4e37567e3c4cc4d4fa4e647aa74ecfad1550",
+        "log_count": 8,
+        "forward_like_log_count": 8,
+        "matured_forward_days": 0,
+        "no_execution_audit_passed": true,
+        "sample_count": 0,
+        "win_rate": null,
+        "avg_net_return_pct": null,
+        "median_net_return_pct": null,
+        "avg_alpha_pct": null,
+        "max_adverse_pct": null,
+        "adverse_breach_rate": null,
+        "stop_triggered_rate": null,
+        "scoreboard_note": "insufficient_forward_samples",
+        "diagnostic_rank": 3
+      }
+    ]
+  },
+  "nontechnical": {
+    "evidence_summary": {
+      "symbol_count": 46,
+      "available_count": 39,
+      "curated_available_count": 39,
+      "formal_provider_count": 39,
+      "automatic_proxy_count": 7,
+      "proxy_only_count": 7,
+      "proxy_coverage_ratio": 0.152,
+      "missing_count": 0,
+      "coverage_ratio": 0.848,
+      "actionable_evidence_count": 11,
+      "finding_count": 86,
+      "critical_finding_count": 0,
+      "blocking_finding_count": 29
+    },
+    "attribution_summary": {
+      "outcome_count": 854,
+      "attributed_sample_count": 270,
+      "skipped_without_point_in_time_evidence": 584,
+      "sample_count": 270,
+      "scored_sample_count": 174,
+      "hit_rate": 0.511,
+      "avg_return_pct": -0.594,
+      "median_return_pct": -1.079
+    },
+    "score_buckets": [
+      {
+        "score_bucket": "0.40-0.55",
+        "sample_count": 264,
+        "scored_sample_count": 170,
+        "hit_rate": 0.524,
+        "avg_return_pct": -0.838,
+        "median_return_pct": -1.171
+      },
+      {
+        "score_bucket": "0.55-0.70",
+        "sample_count": 6,
+        "scored_sample_count": 4,
+        "hit_rate": 0.0,
+        "avg_return_pct": 10.151,
+        "median_return_pct": 11.207
+      }
+    ]
+  },
+  "sources": {
+    "calls": {
+      "path": "D:\\Code\\yoyo\\research\\calls\\2026-05-20-close-draft-policy.json",
+      "exists": true
+    },
+    "ranking": {
+      "path": "D:\\Code\\yoyo\\research\\rankings\\2026-05-20-close-ranking.json",
+      "exists": true
+    },
+    "risk_review": {
+      "path": "D:\\Code\\yoyo\\research\\risk\\2026-05-20-close-risk-review.json",
+      "exists": true
+    },
+    "evidence_ledger": {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\latest_evidence_ledger.json",
+      "exists": true
+    },
+    "calibration_scorecard": {
+      "path": "D:\\Code\\yoyo\\research\\evaluations\\latest_calibration_scorecard.json",
+      "exists": true
+    },
+    "forward_evaluation": {
+      "path": "D:\\Code\\yoyo\\research\\shadow\\latest_forward_evaluation.json",
+      "exists": true
+    },
+    "variant_competition": {
+      "path": "D:\\Code\\yoyo\\research\\shadow_variants\\shadow_gate_variants_v1\\latest_variant_competition.json",
+      "exists": true
+    },
+    "nontechnical_evidence": {
+      "path": "D:\\Code\\yoyo\\research\\evidence\\nontechnical\\latest.json",
+      "exists": true
+    },
+    "nontechnical_attribution": {
+      "path": "D:\\Code\\yoyo\\research\\evaluations\\latest_nontechnical_attribution.json",
+      "exists": true
+    }
+  }
+}

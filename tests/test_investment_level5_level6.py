@@ -36,8 +36,10 @@ import build_investment_dashboard as investment_dashboard  # noqa: E402
 import build_investment_evidence_ledger as evidence_ledger  # noqa: E402
 import build_investment_calibration_scorecard as calibration_scorecard  # noqa: E402
 import build_nontechnical_evidence as nontechnical_builder  # noqa: E402
+import build_nontechnical_evidence_gap_queue as nontechnical_gap_queue  # noqa: E402
 import evaluate_nontechnical_evidence as nontechnical_eval  # noqa: E402
 import generate_investment_focus_pool as focus_pool  # noqa: E402
+import discover_external_investment_candidates as external_discovery  # noqa: E402
 
 
 class InvestmentLevel5Level6Tests(unittest.TestCase):
@@ -1259,6 +1261,221 @@ confirming_symbols = []
         self.assertTrue(ranked[0]["qualified_for_action"])
         self.assertIn("same_theme_best_peer_evidence_passed", ranked[0]["qualification_flags"])
 
+    def test_ranker_surfaces_theme_startup_candidates_near_ma20(self):
+        items = [
+            {"symbol": "LEAD.HK", "theme": "ai", "kind": "stock", "latest_close": 10.4, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.55, "pct_change_1d": 2.0, "volume_ratio_20": 1.3, "regime_flags": []},
+            {"symbol": "PRE.HK", "theme": "ai", "kind": "stock", "latest_close": 9.8, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.45, "pct_change_1d": 0.5, "volume_ratio_20": 0.9, "regime_flags": []},
+            {"symbol": "REC.HK", "theme": "ai", "kind": "stock", "latest_close": 10.3, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.50, "pct_change_1d": 1.0, "volume_ratio_20": 1.0, "regime_flags": []},
+            {"symbol": "NEAR.HK", "theme": "ai", "kind": "stock", "latest_close": 9.9, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.35, "pct_change_1d": 0.1, "volume_ratio_20": 0.8, "regime_flags": []},
+            {"symbol": "HOT.HK", "theme": "ai", "kind": "stock", "latest_close": 10.9, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.30, "pct_change_1d": 0.0, "volume_ratio_20": 0.8, "regime_flags": []},
+        ]
+        ranked = ranker.annotate_theme_positions([ranker.item_score(item, ranker.DEFAULT_STRATEGY_WEIGHTS, min_watch_score=0) for item in items])
+        ranker.apply_theme_startup_context(ranked)
+        by_symbol = {row["symbol"]: row for row in ranked}
+
+        self.assertTrue(by_symbol["PRE.HK"]["theme_startup"]["qualified"])
+        self.assertEqual(by_symbol["PRE.HK"]["startup_candidate_stage"], "pre_breakout_watch")
+        self.assertEqual(by_symbol["PRE.HK"]["startup_candidate_label"], "启动前观察")
+        self.assertEqual(by_symbol["REC.HK"]["startup_candidate_stage"], "ma20_reclaim_candidate")
+        self.assertEqual(by_symbol["HOT.HK"]["startup_candidate_stage"], "extended_hot_candidate")
+        self.assertEqual(by_symbol["PRE.HK"]["theme_startup"]["near_or_above_ma20_count"], 4)
+
+    def test_draft_calls_include_startup_candidates_as_watch_only(self):
+        row = {
+            "symbol": "PRE.HK",
+            "theme": "ai",
+            "kind": "stock",
+            "score": 62,
+            "qualified_for_action": False,
+            "qualified_for_watch": False,
+            "diagnostic_only": True,
+            "startup_watch_candidate": True,
+            "startup_candidate_stage": "pre_breakout_watch",
+            "startup_candidate_label": "启动前观察",
+            "startup_candidate_reasons": ["theme_startup_breadth_confirmed", "price_near_ma20_before_breakout"],
+            "ma20_distance_pct": -2.0,
+            "theme_startup": {"qualified": True, "member_count": 5, "near_or_above_ma20_count": 4, "near_or_above_ma20_ratio": 0.8},
+            "disqualifiers": ["not_theme_score_leader"],
+            "action_disqualifiers": [],
+            "cost_gate_passed": True,
+            "same_theme_peer_evidence_passed": False,
+        }
+
+        calls = draft_calls.build_calls({"as_of_date": "2026-05-25", "startup_candidates": [row], "diagnostic_candidates": []}, include_diagnostics=True)
+
+        rec = calls["recommendations"][0]
+        self.assertEqual(rec["symbol"], "PRE.HK")
+        self.assertEqual(rec["state"], "watch_only")
+        self.assertEqual(rec["startup_candidate_label"], "启动前观察")
+        self.assertIn("source_layer=startup_candidates", rec["selection_reason"])
+        self.assertTrue(any("startup_candidate stage=pre_breakout_watch" in item for item in rec["evidence"]))
+
+    def test_ranker_assigns_manual_probe_only_for_soft_nontechnical_gaps(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-22"
+        ranked[0]["snapshot_as_of_session"] = "close"
+        evidence = {
+            "policy": {"require_for_action": True, "min_total_score_for_action": 0.55, "max_staleness_days": 30},
+            "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS,
+            "symbols": {
+                "0700.HK": {
+                    "evidence_mode": "formal_provider_point_in_time",
+                    "proxy_only": False,
+                    "as_of_date": "2026-05-22",
+                    "as_of_session": "close",
+                    "component_as_of_dates": {key: "2026-05-22" for key in ranker.DEFAULT_NONTECHNICAL_WEIGHTS},
+                    "event_risk_as_of_date": "2026-05-22",
+                    "event_risk": "low",
+                    "source_count": 1,
+                    "fundamental_score": 0.50,
+                    "valuation_score": 0.50,
+                    "catalyst_score": 0.50,
+                    "flow_score": 0.50,
+                    "macro_score": 0.50,
+                }
+            },
+        }
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={}, nontechnical_evidence=evidence)
+
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertEqual(ranked[0]["action_tier"], "manual_probe")
+        self.assertEqual(ranked[0]["action_tier_label"], "小仓试错需人工确认")
+        self.assertIn("nontechnical_score_below_action_min", ranked[0]["action_tier_reasons"])
+        self.assertTrue(ranked[0]["manual_confirmation_required"])
+
+    def test_ranker_suspends_manual_probe_when_formal_evidence_is_proxy_only(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-22"
+        evidence = {
+            "policy": {"require_for_action": True, "min_total_score_for_action": 0.55, "max_staleness_days": 30},
+            "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS,
+            "symbols": {
+                "0700.HK": {
+                    "evidence_mode": "automatic_local_proxy",
+                    "proxy_only": True,
+                    "as_of_date": "2026-05-22",
+                    "event_risk": "low",
+                    "source_count": 0,
+                    "fundamental_score": 0.70,
+                    "valuation_score": 0.70,
+                    "catalyst_score": 0.70,
+                    "flow_score": 0.70,
+                    "macro_score": 0.70,
+                }
+            },
+        }
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={}, nontechnical_evidence=evidence)
+
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertEqual(ranked[0]["action_tier"], "suspended")
+        self.assertEqual(ranked[0]["action_tier_label"], "暂停行动")
+        self.assertIn("nontechnical_proxy_only", ranked[0]["action_tier_reasons"])
+
+    def test_ranker_suspends_stale_quotes_without_chase_label(self):
+        item = ranker.item_score(
+            {
+                "symbol": "0700.HK",
+                "theme": "internet",
+                "kind": "stock",
+                "latest_close": 14.0,
+                "ma20": 10.0,
+                "ma60": 9.0,
+                "range_pos_60": 0.7,
+                "pct_change_1d": 2.0,
+                "volume_ratio_20": 1.8,
+                "regime_flags": [],
+                "price_source": "quote",
+                "quote_trade_date": "2026-05-21",
+            },
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-22"
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertEqual(ranked[0]["action_tier"], "suspended")
+        self.assertEqual(ranked[0]["action_tier_label"], "暂停行动")
+        self.assertIn("quote_trade_date_mismatch", ranked[0]["action_tier_reasons"])
+
+    def test_ranker_allows_previous_close_for_morning_premarket_plan(self):
+        item = ranker.item_score(
+            {
+                "symbol": "0700.HK",
+                "theme": "internet",
+                "kind": "stock",
+                "latest_close": 14.0,
+                "ma20": 10.0,
+                "ma60": 9.0,
+                "range_pos_60": 0.7,
+                "pct_change_1d": 2.0,
+                "volume_ratio_20": 1.8,
+                "regime_flags": [],
+                "price_source": "quote",
+                "quote_trade_date": "2026-05-21",
+            },
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-22"
+        ranked[0]["snapshot_as_of_session"] = "morning"
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertTrue(ranked[0]["qualified_for_action"])
+        self.assertEqual(ranked[0]["action_tier"], "formal_actionable")
+        self.assertIn("premarket_previous_close_reference", ranked[0]["market_specific_risk_flags"])
+        self.assertNotIn("quote_trade_date_mismatch", ranked[0]["action_disqualifiers"])
+
+    def test_ranker_keeps_limit_up_as_no_chase_block(self):
+        item = ranker.item_score(
+            {
+                "symbol": "000725.SZ",
+                "theme": "china-a-display-tech",
+                "kind": "stock",
+                "latest_close": 14.0,
+                "ma20": 10.0,
+                "ma60": 9.0,
+                "range_pos_60": 0.7,
+                "pct_change_1d": 9.8,
+                "volume_ratio_20": 1.8,
+                "regime_flags": [],
+                "price_source": "quote",
+                "quote_trade_date": "2026-05-22",
+            },
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-22"
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={})
+
+        self.assertFalse(ranked[0]["qualified_for_action"])
+        self.assertEqual(ranked[0]["action_tier"], "blocked")
+        self.assertEqual(ranked[0]["action_tier_label"], "禁止追入")
+        self.assertIn("cn_limit_up_chase_block", ranked[0]["action_tier_reasons"])
+
     def test_focus_pool_prioritizes_configured_industries_and_symbols(self):
         ranking = {
             "snapshot": "data/snapshots/test.json",
@@ -1460,6 +1677,38 @@ confirming_symbols = []
         self.assertIn("nontechnical_evidence_gate_clear", ranked[0]["qualification_flags"])
         self.assertGreaterEqual(ranked[0]["nontechnical_evidence"]["total_score"], 0.55)
 
+    def test_positive_nontechnical_evidence_does_not_override_cost_gate(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 12.0, "ma20": 10.0, "ma60": 10.0, "range_pos_60": 0.9, "pct_change_1d": 2.0, "volume_ratio_20": 1.5, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-13"
+        evidence = {
+            "policy": {"require_for_action": True, "max_staleness_days": 30, "min_total_score_for_action": 0.55, "block_unknown_event_risk": True},
+            "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS,
+            "symbols": {
+                "0700.HK": {
+                    "as_of_date": "2026-05-13",
+                    "fundamental_score": 0.9,
+                    "valuation_score": 0.9,
+                    "catalyst_score": 0.9,
+                    "flow_score": 0.9,
+                    "macro_score": 0.9,
+                    "event_risk": "none",
+                    "source_count": 3,
+                }
+            },
+        }
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=35, minimum_edge_bps=500)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={}, nontechnical_evidence=evidence)
+
+        self.assertIn("nontechnical_evidence_gate_clear", ranked[0]["qualification_flags"])
+        self.assertIn("cost_gate_failed", ranked[0]["disqualifiers"])
+        self.assertFalse(ranked[0]["qualified_for_action"])
+
     def test_nontechnical_evidence_blocks_stale_or_event_risk(self):
         item = ranker.item_score(
             {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
@@ -1480,6 +1729,63 @@ confirming_symbols = []
         self.assertFalse(ranked[0]["qualified_for_action"])
         self.assertIn("nontechnical_evidence_stale", ranked[0]["action_disqualifiers"])
         self.assertIn("event_risk_regulatory", ranked[0]["action_disqualifiers"])
+
+    def test_nontechnical_component_freshness_allows_quarterly_fundamentals_but_blocks_stale_event_risk(self):
+        item = ranker.item_score(
+            {"symbol": "0700.HK", "theme": "internet", "latest_close": 14.0, "ma20": 10.0, "ma60": 9.0, "range_pos_60": 0.7, "pct_change_1d": 2.0, "volume_ratio_20": 1.8, "regime_flags": []},
+            ranker.DEFAULT_STRATEGY_WEIGHTS,
+            min_watch_score=0,
+        )
+        ranked = ranker.annotate_theme_positions([item])
+        ranked[0]["snapshot_as_of_date"] = "2026-05-22"
+        evidence = {
+            "policy": {
+                "require_for_action": True,
+                "max_staleness_days": 30,
+                "min_total_score_for_action": 0.55,
+                "block_unknown_event_risk": True,
+                "component_max_staleness_days": {
+                    "fundamental_score": 120,
+                    "valuation_score": 45,
+                    "catalyst_score": 30,
+                    "flow_score": 5,
+                    "macro_score": 14,
+                    "event_risk": 7,
+                },
+            },
+            "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS,
+            "symbols": {
+                "0700.HK": {
+                    "as_of_date": "2026-03-31",
+                    "as_of_session": "close",
+                    "component_as_of_dates": {
+                        "fundamental_score": "2026-03-31",
+                        "valuation_score": "2026-05-20",
+                        "catalyst_score": "2026-05-20",
+                        "flow_score": "2026-05-22",
+                        "macro_score": "2026-05-22",
+                    },
+                    "event_risk_as_of_date": "2026-03-31",
+                    "fundamental_score": 0.7,
+                    "valuation_score": 0.7,
+                    "catalyst_score": 0.7,
+                    "flow_score": 0.7,
+                    "macro_score": 0.7,
+                    "event_risk": "low",
+                    "source_count": 2,
+                }
+            },
+        }
+
+        ranker.apply_edge_cost_fields(ranked, round_trip_bps=10, minimum_edge_bps=20)
+        ranker.apply_action_qualification(ranked, min_action_score=0, symbol_risk={}, nontechnical_evidence=evidence)
+
+        profile = ranked[0]["nontechnical_evidence"]
+        self.assertNotIn("nontechnical_evidence_stale", ranked[0]["action_disqualifiers"])
+        self.assertNotIn("nontechnical_component_stale", ranked[0]["action_disqualifiers"])
+        self.assertIn("event_risk_stale", ranked[0]["action_disqualifiers"])
+        self.assertEqual(profile["component_age_days"]["fundamental_score"], 52)
+        self.assertEqual(profile["event_risk_age_days"], 52)
 
     def test_nontechnical_evidence_blocks_missing_component_and_future_session(self):
         item = ranker.item_score(
@@ -1647,6 +1953,506 @@ theme = "hong-kong-broad-market"
             self.assertEqual(payload["summary"]["proxy_coverage_ratio"], 1.0)
             reasons = {finding["reason"] for finding in payload["findings"]}
             self.assertIn("nontechnical_proxy_only", reasons)
+
+    def test_nontechnical_evidence_builder_loads_curated_source_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            manual_dir = tmp_path / "manual"
+            manual_dir.mkdir()
+            config = tmp_path / "nontechnical.toml"
+            config.write_text(
+                f"""
+[policy]
+require_for_action = true
+max_staleness_days = 30
+min_total_score_for_action = 0.55
+block_unknown_event_risk = true
+
+[curated_sources]
+enabled = true
+paths = ["{manual_dir.as_posix()}/*.json"]
+
+[automatic_proxy]
+enabled = true
+""".lstrip(),
+                encoding="utf-8",
+            )
+            universe = tmp_path / "universe.toml"
+            universe.write_text(
+                """
+[[symbols]]
+symbol = "AAA.HK"
+name = "AAA"
+kind = "stock"
+theme = "growth"
+""".lstrip(),
+                encoding="utf-8",
+            )
+            (manual_dir / "growth.json").write_text(
+                json.dumps(
+                    {
+                        "symbols": {
+                            "AAA.HK": {
+                                "as_of_date": "2026-04-27",
+                                "as_of_session": "close",
+                                "fundamental_score": 0.70,
+                                "valuation_score": 0.60,
+                                "catalyst_score": 0.65,
+                                "flow_score": 0.62,
+                                "macro_score": 0.58,
+                                "event_risk": "none",
+                                "sources": [
+                                    {"label": "company filing reviewed", "kind": "filing"},
+                                    {"label": "southbound flow checked", "kind": "flow"},
+                                ],
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            payload = nontechnical_builder.build_evidence(config, "2026-04-27", universe, as_of_session="close")
+
+            row = payload["symbols"]["AAA.HK"]
+            self.assertEqual(row["evidence_mode"], "manual_point_in_time")
+            self.assertFalse(row["proxy_only"])
+            self.assertEqual(row["source_count"], 2)
+            self.assertGreaterEqual(row["total_score"], 0.55)
+            self.assertEqual(payload["summary"]["available_count"], 1)
+            self.assertEqual(payload["summary"]["actionable_evidence_count"], 1)
+            reasons = {finding["reason"] for finding in payload["findings"]}
+            self.assertNotIn("nontechnical_proxy_only", reasons)
+            self.assertNotIn("nontechnical_source_missing", reasons)
+            self.assertNotIn("event_risk_unknown", reasons)
+
+    def test_nontechnical_evidence_builder_uses_latest_point_in_time_curated_row(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            manual_dir = tmp_path / "manual"
+            manual_dir.mkdir()
+            config = tmp_path / "nontechnical.toml"
+            config.write_text(
+                f"""
+[curated_sources]
+enabled = true
+paths = ["{manual_dir.as_posix()}/*.json"]
+""".lstrip(),
+                encoding="utf-8",
+            )
+            universe = tmp_path / "universe.toml"
+            universe.write_text(
+                """
+[[symbols]]
+symbol = "AAA.HK"
+name = "AAA"
+kind = "stock"
+theme = "growth"
+""".lstrip(),
+                encoding="utf-8",
+            )
+            (manual_dir / "growth.json").write_text(
+                json.dumps(
+                    {
+                        "evidence": [
+                            {
+                                "symbol": "AAA.HK",
+                                "as_of_date": "2026-04-27",
+                                "as_of_session": "morning",
+                                "fundamental_score": 0.61,
+                                "valuation_score": 0.61,
+                                "catalyst_score": 0.61,
+                                "flow_score": 0.61,
+                                "macro_score": 0.61,
+                                "event_risk": "none",
+                                "sources": [{"label": "morning research note", "kind": "research_note"}],
+                            },
+                            {
+                                "symbol": "AAA.HK",
+                                "as_of_date": "2026-04-27",
+                                "as_of_session": "close",
+                                "fundamental_score": 0.90,
+                                "valuation_score": 0.90,
+                                "catalyst_score": 0.90,
+                                "flow_score": 0.90,
+                                "macro_score": 0.90,
+                                "event_risk": "none",
+                                "sources": [{"label": "close research note", "kind": "research_note"}],
+                            },
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            payload = nontechnical_builder.build_evidence(config, "2026-04-27", universe, as_of_session="morning")
+
+            row = payload["symbols"]["AAA.HK"]
+            self.assertEqual(row["as_of_session"], "morning")
+            self.assertEqual(row["fundamental_score"], 0.61)
+            self.assertFalse(row["proxy_only"])
+            reasons = {finding["reason"] for finding in payload["findings"]}
+            self.assertNotIn("nontechnical_evidence_from_future", reasons)
+
+    def test_nontechnical_evidence_builder_ignores_manual_gap_skeletons(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            manual_dir = tmp_path / "manual"
+            manual_dir.mkdir()
+            config = tmp_path / "nontechnical.toml"
+            config.write_text(
+                f"""
+[curated_sources]
+enabled = true
+paths = ["{manual_dir.as_posix()}/*.json"]
+
+[formal_provider]
+enabled = true
+current_date_only = false
+""".lstrip(),
+                encoding="utf-8",
+            )
+            universe = tmp_path / "universe.toml"
+            universe.write_text(
+                """
+[[symbols]]
+symbol = "600519.SH"
+name = "Kweichow Moutai / 贵州茅台"
+kind = "stock"
+theme = "china-a-consumer-staples"
+""".lstrip(),
+                encoding="utf-8",
+            )
+            (manual_dir / "actionable_gap_skeleton.json").write_text(
+                json.dumps(
+                    {
+                        "manual_review_required": True,
+                        "evidence": [
+                            {
+                                "symbol": "600519.SH",
+                                "as_of_date": "2026-05-16",
+                                "as_of_session": "close",
+                                "fundamental_score": None,
+                                "valuation_score": None,
+                                "catalyst_score": None,
+                                "flow_score": None,
+                                "macro_score": None,
+                                "event_risk": "unknown",
+                                "sources": [],
+                                "manual_review_required": True,
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            finance_row = {
+                "REPORT_DATE": "2026-03-31 00:00:00",
+                "NOTICE_DATE": "2026-04-25 00:00:00",
+                "TOTALOPERATEREVETZ": 10.0,
+                "PARENTNETPROFITTZ": 12.0,
+                "ROEJQ": 15.0,
+                "ZCFZL": 30.0,
+                "JYXJLYYSR": 0.4,
+                "XSJLL": 30.0,
+            }
+
+            with mock.patch.object(nontechnical_builder, "fetch_json", return_value={"data": [finance_row]}):
+                payload = nontechnical_builder.build_evidence(config, "2026-05-16", universe, as_of_session="close")
+
+            row = payload["symbols"]["600519.SH"]
+            self.assertEqual(row["evidence_mode"], "formal_provider_point_in_time")
+            self.assertFalse(row["proxy_only"])
+            self.assertEqual(row["source_count"], 1)
+
+    def test_external_discovery_flags_outside_major_move_candidate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            config = tmp_path / "external.toml"
+            config.write_text(
+                """
+[policy]
+min_score = 70
+min_pct_change_1d = 5
+min_recent_limit_up_count = 1
+min_catalyst_tags = 2
+min_source_count = 2
+
+[[symbols]]
+symbol = "603031.SH"
+name = "Anfu Technology / 安孚科技"
+kind = "stock"
+theme = "china-a-ai-optical-chip"
+trigger_tags = ["earnings_acceleration", "cpo_optical_chip"]
+source_count = 2
+""".lstrip(),
+                encoding="utf-8",
+            )
+            trade_universe = tmp_path / "trade_universe.toml"
+            trade_universe.write_text(
+                """
+[[symbols]]
+symbol = "300750.SZ"
+name = "CATL"
+kind = "stock"
+theme = "china-a-battery-ev"
+""".lstrip(),
+                encoding="utf-8",
+            )
+            snapshot = tmp_path / "snapshot.json"
+            snapshot.write_text(
+                json.dumps(
+                    {
+                        "as_of_date": "2026-05-29",
+                        "items": [
+                            {
+                                "symbol": "603031.SH",
+                                "name": "Anfu Technology / 安孚科技",
+                                "kind": "stock",
+                                "theme": "china-a-ai-optical-chip",
+                                "latest_close": 58.04,
+                                "ma20": 50.0,
+                                "ma60": 40.0,
+                                "range_pos_60": 1.0,
+                                "pct_change_1d": 10.01,
+                                "volume_ratio_20": 1.08,
+                                "regime_flags": ["uptrend"],
+                                "recent_limit_up_count": 1,
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            payload = external_discovery.build_discovery(config, trade_universe, "2026-05-29", "morning", snapshot, live_fetch=False)
+
+            self.assertEqual(payload["summary"]["external_candidate_count"], 1)
+            row = payload["external_candidates"][0]
+            self.assertEqual(row["symbol"], "603031.SH")
+            self.assertTrue(row["outside_trade_universe"])
+            self.assertIn("outside_trade_universe", row["discovery_reasons"])
+            self.assertIn("recent_limit_up_history", row["discovery_reasons"])
+            self.assertEqual(row["recommended_next_step"], "consider_adding_to_trade_universe")
+
+    def test_external_discovery_marks_trade_universe_candidates_as_covered(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            config = tmp_path / "external.toml"
+            config.write_text(
+                """
+[[symbols]]
+symbol = "603031.SH"
+name = "Anfu Technology / 安孚科技"
+kind = "stock"
+theme = "china-a-ai-optical-chip"
+trigger_tags = ["earnings_acceleration", "cpo_optical_chip"]
+source_count = 2
+""".lstrip(),
+                encoding="utf-8",
+            )
+            trade_universe = tmp_path / "trade_universe.toml"
+            trade_universe.write_text(
+                """
+[[symbols]]
+symbol = "603031.SH"
+name = "Anfu Technology / 安孚科技"
+kind = "stock"
+theme = "china-a-ai-optical-chip"
+""".lstrip(),
+                encoding="utf-8",
+            )
+            snapshot = tmp_path / "snapshot.json"
+            snapshot.write_text(
+                json.dumps(
+                    {
+                        "as_of_date": "2026-05-29",
+                        "items": [
+                            {
+                                "symbol": "603031.SH",
+                                "name": "Anfu Technology / 安孚科技",
+                                "kind": "stock",
+                                "theme": "china-a-ai-optical-chip",
+                                "latest_close": 58.04,
+                                "ma20": 50.0,
+                                "ma60": 40.0,
+                                "range_pos_60": 1.0,
+                                "pct_change_1d": 10.01,
+                                "volume_ratio_20": 1.08,
+                                "regime_flags": ["uptrend"],
+                                "recent_limit_up_count": 1,
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            payload = external_discovery.build_discovery(config, trade_universe, "2026-05-29", "morning", snapshot, live_fetch=False)
+
+            self.assertEqual(payload["summary"]["external_candidate_count"], 0)
+            self.assertEqual(payload["summary"]["covered_candidate_count"], 1)
+            row = payload["covered_candidates"][0]
+            self.assertFalse(row["outside_trade_universe"])
+            self.assertEqual(row["recommended_next_step"], "already_covered_by_trade_universe")
+
+    def test_nontechnical_gap_queue_detects_proxy_unknown_and_source_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            nontechnical_path = tmp_path / "nontechnical.json"
+            ranking_path = tmp_path / "ranking.json"
+            nontechnical_path.write_text(
+                json.dumps(
+                    {
+                        "as_of_date": "2026-04-27",
+                        "as_of_session": "close",
+                        "policy": {"max_staleness_days": 30, "min_total_score_for_action": 0.55, "block_unknown_event_risk": True},
+                        "weights": ranker.DEFAULT_NONTECHNICAL_WEIGHTS,
+                        "symbols": {
+                            "AAA.HK": {
+                                "name": "AAA",
+                                "kind": "stock",
+                                "theme": "growth",
+                                "evidence_mode": "automatic_local_proxy",
+                                "proxy_only": True,
+                                "as_of_date": "2026-04-27",
+                                "fundamental_score": 0.60,
+                                "valuation_score": 0.60,
+                                "catalyst_score": 0.60,
+                                "flow_score": 0.60,
+                                "macro_score": 0.60,
+                                "event_risk": "unknown",
+                                "source_count": 0,
+                                "proxy_source_count": 3,
+                            },
+                            "BBB.HK": {
+                                "name": "BBB",
+                                "kind": "stock",
+                                "theme": "defensive",
+                                "evidence_mode": "curated_point_in_time",
+                                "as_of_date": "2026-04-27",
+                                "fundamental_score": 0.70,
+                                "valuation_score": 0.70,
+                                "catalyst_score": 0.70,
+                                "flow_score": 0.70,
+                                "macro_score": 0.70,
+                                "event_risk": "unknown",
+                                "source_count": 0,
+                            },
+                            "CCC.HK": {"name": "CCC", "kind": "stock", "theme": "new", "evidence_mode": "missing_fail_closed"},
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            ranking_path.write_text(
+                json.dumps(
+                    {
+                        "as_of_date": "2026-04-27",
+                        "as_of_session": "close",
+                        "actionable_candidates": [],
+                        "diagnostic_candidates": [
+                            {
+                                "symbol": "AAA.HK",
+                                "name": "AAA",
+                                "kind": "stock",
+                                "theme": "growth",
+                                "score": 90,
+                                "qualified_for_watch": True,
+                                "diagnostic_only": True,
+                                "nontechnical_evidence_flags": ["nontechnical_proxy_only", "event_risk_unknown"],
+                                "nontechnical_evidence": {"status": "proxy_only", "event_risk": "unknown", "source_count": 0, "proxy_only": True},
+                            },
+                            {
+                                "symbol": "BBB.HK",
+                                "name": "BBB",
+                                "kind": "stock",
+                                "theme": "defensive",
+                                "score": 70,
+                                "qualified_for_watch": True,
+                                "nontechnical_evidence_flags": ["nontechnical_source_missing", "event_risk_unknown"],
+                                "nontechnical_evidence": {"status": "available", "event_risk": "unknown", "source_count": 0},
+                            },
+                        ],
+                        "all_ranked": [
+                            {"symbol": "AAA.HK", "score": 90},
+                            {"symbol": "BBB.HK", "score": 70},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            payload = nontechnical_gap_queue.build_gap_queue(nontechnical_path, ranking_path, "2026-04-27", "close")
+
+            by_symbol = {entry["symbol"]: entry for entry in payload["queue"]}
+            self.assertEqual(payload["summary"]["queue_count"], 3)
+            self.assertEqual(payload["queue"][0]["symbol"], "AAA.HK")
+            self.assertIn("nontechnical_proxy_only", by_symbol["AAA.HK"]["gap_reasons"])
+            self.assertIn("event_risk_unknown", by_symbol["BBB.HK"]["gap_reasons"])
+            self.assertIn("nontechnical_source_missing", by_symbol["BBB.HK"]["gap_reasons"])
+            self.assertIn("nontechnical_evidence_missing", by_symbol["CCC.HK"]["gap_reasons"])
+            skeleton_by_symbol = {row["symbol"]: row for row in payload["skeleton"]}
+            self.assertIsNone(skeleton_by_symbol["AAA.HK"]["fundamental_score"])
+            self.assertEqual(skeleton_by_symbol["AAA.HK"]["event_risk"], "unknown")
+            self.assertEqual(skeleton_by_symbol["AAA.HK"]["sources"], [])
+            self.assertTrue(skeleton_by_symbol["AAA.HK"]["manual_review_required"])
+
+    def test_nontechnical_gap_queue_excludes_positive_formal_manual_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            nontechnical_path = tmp_path / "nontechnical.json"
+            ranking_path = tmp_path / "ranking.json"
+            row = {
+                "name": "AAA",
+                "kind": "stock",
+                "theme": "growth",
+                "evidence_mode": "manual_point_in_time",
+                "as_of_date": "2026-04-27",
+                "as_of_session": "close",
+                "fundamental_score": 0.70,
+                "valuation_score": 0.70,
+                "catalyst_score": 0.70,
+                "flow_score": 0.70,
+                "macro_score": 0.70,
+                "event_risk": "none",
+                "source_count": 2,
+                "sources": [{"label": "manual note", "kind": "research_note"}, {"label": "filing", "kind": "filing"}],
+            }
+            nontechnical_path.write_text(
+                json.dumps({"as_of_date": "2026-04-27", "as_of_session": "close", "policy": {"max_staleness_days": 30, "min_total_score_for_action": 0.55}, "symbols": {"AAA.HK": row}}),
+                encoding="utf-8",
+            )
+            ranking_path.write_text(
+                json.dumps(
+                    {
+                        "as_of_date": "2026-04-27",
+                        "as_of_session": "close",
+                        "actionable_candidates": [
+                            {
+                                "symbol": "AAA.HK",
+                                "name": "AAA",
+                                "kind": "stock",
+                                "theme": "growth",
+                                "score": 88,
+                                "qualified_for_action": True,
+                                "qualified_for_watch": True,
+                                "nontechnical_evidence_flags": [],
+                                "action_disqualifiers": [],
+                                "nontechnical_evidence": {"status": "available", "event_risk": "none", "source_count": 2, "total_score": 0.70},
+                            }
+                        ],
+                        "diagnostic_candidates": [],
+                        "all_ranked": [{"symbol": "AAA.HK", "score": 88}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            payload = nontechnical_gap_queue.build_gap_queue(nontechnical_path, ranking_path, "2026-04-27", "close")
+
+            self.assertEqual(payload["summary"]["queue_count"], 0)
+            self.assertEqual(payload["skeleton"], [])
 
     def test_nontechnical_evidence_builder_can_generate_formal_provider_rows(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2670,7 +3476,7 @@ horizon_days = 14
                 runner=fake_runner,
             )
 
-            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "build_nontechnical_evidence", "rank_universe", "generate_focus_pool", "build_draft_calls", "build_risk_review", "validate_draft_calls", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard", "evaluate_nontechnical_attribution", "run_shadow_variants", "build_investment_dashboard"])
+            self.assertEqual([name for name, *_ in calls], ["build_snapshot_registry", "build_nontechnical_evidence", "rank_universe", "build_nontechnical_gap_queue", "generate_focus_pool", "build_draft_calls", "build_risk_review", "validate_draft_calls", "log_shadow", "evaluate_shadow", "build_evidence_ledger", "build_calibration_scorecard", "evaluate_nontechnical_attribution", "run_shadow_variants", "build_investment_dashboard"])
             self.assertTrue(all(command[0] == "python" for _, command, *_ in calls))
             self.assertFalse(any("bash" in part.lower() for _, command, *_ in calls for part in command))
             shadow_command = next(command for name, command, *_ in calls if name == "log_shadow")
@@ -2689,6 +3495,10 @@ horizon_days = 14
             self.assertTrue(rank_command[rank_command.index("--nontechnical-evidence") + 1].endswith("research\\evidence\\nontechnical\\latest.json") or rank_command[rank_command.index("--nontechnical-evidence") + 1].endswith("research/evidence/nontechnical/latest.json"))
             nontechnical_command = next(command for name, command, *_ in calls if name == "build_nontechnical_evidence")
             self.assertEqual(nontechnical_command[nontechnical_command.index("--as-of-date") + 1], "2026-04-27")
+            gap_command = next(command for name, command, *_ in calls if name == "build_nontechnical_gap_queue")
+            self.assertEqual(gap_command[gap_command.index("--as-of-date") + 1], "2026-04-27")
+            self.assertEqual(gap_command[gap_command.index("--as-of-session") + 1], "close")
+            self.assertTrue(gap_command[gap_command.index("--output-json") + 1].endswith("research\\evidence\\nontechnical\\latest_actionable_gap_queue.json") or gap_command[gap_command.index("--output-json") + 1].endswith("research/evidence/nontechnical/latest_actionable_gap_queue.json"))
             attribution_command = next(command for name, command, *_ in calls if name == "evaluate_nontechnical_attribution")
             self.assertEqual(attribution_command[attribution_command.index("--as-of-date") + 1], "2026-04-27")
             self.assertEqual(attribution_command[attribution_command.index("--as-of-session") + 1], "close")
@@ -2703,8 +3513,10 @@ horizon_days = 14
             dashboard_command = next(command for name, command, *_ in calls if name == "build_investment_dashboard")
             self.assertIn("--close-report-json", dashboard_command)
             self.assertIn("--ranking", dashboard_command)
+            self.assertIn("--nontechnical-gap-queue", dashboard_command)
             self.assertTrue(dashboard_command[dashboard_command.index("--output") + 1].endswith("research\\dashboard\\index.html") or dashboard_command[dashboard_command.index("--output") + 1].endswith("research/dashboard/index.html"))
             self.assertEqual(summary["paths"]["ranking"], str(tmp_path.resolve() / "research" / "rankings" / "2026-04-27-close-ranking.json"))
+            self.assertEqual(summary["paths"]["nontechnical_gap_queue"], str(tmp_path.resolve() / "research" / "evidence" / "nontechnical" / "latest_actionable_gap_queue.json"))
             self.assertEqual(summary["paths"]["dashboard"], str(tmp_path.resolve() / "research" / "dashboard" / "index.html"))
 
     def test_daily_shadow_runner_refreshes_live_snapshots_by_default(self):
@@ -2776,6 +3588,7 @@ horizon_days = 14
             close_md = tmp_path / "close-report.md"
             ranking_json = tmp_path / "ranking.json"
             nontechnical_json = tmp_path / "nontechnical.json"
+            gap_queue_json = tmp_path / "gap-queue.json"
             forward_json = tmp_path / "forward.json"
             ledger_json = tmp_path / "ledger.json"
             output = tmp_path / "dashboard" / "index.html"
@@ -2839,8 +3652,9 @@ horizon_days = 14
             )
             forward_json.write_text(json.dumps({"summary": {"forward_shadow_log_count": 5, "matured_forward_shadow_days": 3, "sample_count": 2}}), encoding="utf-8")
             ledger_json.write_text(json.dumps({"summary": {"forward_shadow_log_count": 6}, "shadow_evaluation_summary": {"matured_forward_shadow_days": 4, "sample_count": 3}}), encoding="utf-8")
+            gap_queue_json.write_text(json.dumps({"summary": {"queue_count": 1, "proxy_only_count": 1, "event_risk_unknown_count": 1}}), encoding="utf-8")
 
-            result = investment_dashboard.build_dashboard("2026-04-27", "close", close_json, close_md, ranking_json, nontechnical_json, forward_json, ledger_json, output)
+            result = investment_dashboard.build_dashboard("2026-04-27", "close", close_json, close_md, ranking_json, nontechnical_json, gap_queue_json, forward_json, ledger_json, output)
 
             html_text = output.read_text(encoding="utf-8")
             self.assertEqual(result["payload"]["counts"], {"action": 1, "watch": 1, "avoid": 0})
@@ -2867,6 +3681,9 @@ horizon_days = 14
             self.assertIn('"symbol": "AAA.HK"', html_text)
             self.assertIn('"symbol": "BBB.HK"', html_text)
             self.assertIn("正式资料未接入：尚未取得正式核验过", html_text)
+            self.assertIn("当前正式资料未接入=1", html_text)
+            self.assertIn("不等于全部缺正式资料", html_text)
+            self.assertEqual(result["payload"]["evidence"]["actionable_gap_queue"], 1)
             self.assertEqual(result["payload"]["symbols"][0]["research_action"]["label"], "可考虑研究")
             self.assertEqual(result["payload"]["symbols"][1]["research_action"]["label"], "等确认")
             self.assertEqual(result["payload"]["symbols"][0]["display_name"], "阿尔法")
@@ -2906,6 +3723,18 @@ horizon_days = 14
                         "action_disqualifiers": [],
                         "nontechnical_evidence": {"status": "available", "total_score": 0.8, "event_risk": "low", "source_count": 2},
                     },
+                    {
+                        "symbol": "PROBE.HK",
+                        "name": "Manual Probe",
+                        "score": 84,
+                        "qualified_for_action": False,
+                        "qualified_for_watch": True,
+                        "action_disqualifiers": ["nontechnical_score_below_action_min"],
+                        "action_tier": "manual_probe",
+                        "action_tier_label": "小仓试错需人工确认",
+                        "manual_confirmation_required": True,
+                        "nontechnical_evidence": {"status": "available", "total_score": 0.53, "event_risk": "low", "source_count": 2},
+                    },
                 ]
             },
             {
@@ -2927,6 +3756,7 @@ horizon_days = 14
         self.assertNotEqual(labels["RANK.HK"], "可考虑研究")
         self.assertNotEqual(labels["PROXY.HK"], "可考虑研究")
         self.assertNotEqual(labels["CAPPED.HK"], "可考虑研究")
+        self.assertEqual(labels["PROBE.HK"], "小仓试错需人工确认")
         self.assertEqual(statuses["PROXY.HK"], "proxy_only")
 
     def test_close_report_research_action_treats_proxy_risk_as_formal_blocker(self):
@@ -2944,6 +3774,26 @@ horizon_days = 14
         )
 
         self.assertEqual(action["label"], "等确认")
+        self.assertFalse(action["formal_actionable"])
+
+    def test_close_report_research_action_surfaces_manual_probe_tier(self):
+        action = close_report.research_action_for(
+            {
+                "symbol": "AAA.HK",
+                "state": "watch_only",
+                "score": 86,
+                "qualified_for_action": False,
+                "qualified_for_watch": True,
+                "action_tier": "manual_probe",
+                "action_tier_label": "小仓试错需人工确认",
+                "gate_blockers": ["nontechnical_score_below_action_min"],
+                "blockers": ["nontechnical_score_below_action_min"],
+                "nontechnical_profile": {"status": "available", "proxy_only": False, "event_risk": "low"},
+            }
+        )
+
+        self.assertEqual(action["key"], "probe")
+        self.assertEqual(action["label"], "小仓试错需人工确认")
         self.assertFalse(action["formal_actionable"])
 
     def test_daily_shadow_runner_plans_close_report_for_close_dry_run(self):
@@ -2969,9 +3819,14 @@ horizon_days = 14
             )
 
             names = [step["name"] for step in summary["steps"]]
+            self.assertIn("build_nontechnical_gap_queue", names)
             self.assertIn("run_shadow_variants", names)
             self.assertIn("build_chinese_close_report", names)
             self.assertIn("build_investment_dashboard", names)
+            gap_command = next(step["command"] for step in summary["steps"] if step["name"] == "build_nontechnical_gap_queue")
+            self.assertEqual(gap_command[gap_command.index("--as-of-session") + 1], "close")
+            self.assertEqual(gap_command[gap_command.index("--ranking") + 1], str(tmp_path.resolve() / "research" / "rankings" / "2026-04-27-close-ranking.json"))
+            self.assertEqual(summary["paths"]["nontechnical_gap_queue"], str(tmp_path.resolve() / "research" / "evidence" / "nontechnical" / "latest_actionable_gap_queue.json"))
             report_command = next(step["command"] for step in summary["steps"] if step["name"] == "build_chinese_close_report")
             self.assertEqual(report_command[report_command.index("--session") + 1], "close")
             self.assertIn("--nontechnical-evidence", report_command)
@@ -2982,6 +3837,7 @@ horizon_days = 14
             dashboard_command = next(step["command"] for step in summary["steps"] if step["name"] == "build_investment_dashboard")
             self.assertEqual(dashboard_command[dashboard_command.index("--session") + 1], "close")
             self.assertEqual(dashboard_command[dashboard_command.index("--close-report-json") + 1], str(tmp_path.resolve() / "research" / "products" / "daily_close" / "2026-04-27-close-report.json"))
+            self.assertEqual(dashboard_command[dashboard_command.index("--nontechnical-gap-queue") + 1], str(tmp_path.resolve() / "research" / "evidence" / "nontechnical" / "latest_actionable_gap_queue.json"))
             self.assertEqual(calls, [])
 
     def test_daily_shadow_runner_skip_dashboard_omits_dashboard_step(self):
@@ -3242,6 +4098,38 @@ horizon_days = 14
 
         self.assertEqual(calls["recommendations"][0]["state"], "watch_only")
         self.assertIn("source_layer=diagnostic_candidates", calls["recommendations"][0]["selection_reason"])
+
+    def test_draft_calls_surface_action_tier_fields(self):
+        ranking = {
+            "as_of_date": "2026-04-27",
+            "actionable_candidates": [],
+            "diagnostic_candidates": [
+                {
+                    "symbol": "AAA.HK",
+                    "theme": "growth",
+                    "kind": "stock",
+                    "score": 80,
+                    "trend_score": 90,
+                    "momentum_score": 70,
+                    "qualified_for_action": False,
+                    "qualified_for_watch": True,
+                    "diagnostic_only": True,
+                    "cost_gate_passed": True,
+                    "same_theme_peer_evidence_passed": True,
+                    "action_tier": "manual_probe",
+                    "action_tier_label": "小仓试错需人工确认",
+                    "action_tier_reasons": ["nontechnical_score_below_action_min"],
+                    "manual_confirmation_required": True,
+                }
+            ],
+        }
+
+        calls = draft_calls.build_calls(ranking, include_diagnostics=True)
+
+        self.assertEqual(calls["recommendations"][0]["action_tier"], "manual_probe")
+        self.assertEqual(calls["recommendations"][0]["action_tier_label"], "小仓试错需人工确认")
+        self.assertTrue(calls["recommendations"][0]["manual_confirmation_required"])
+        self.assertTrue(any("action_tier=manual_probe" in item for item in calls["recommendations"][0]["evidence"]))
 
     def test_draft_calls_require_same_theme_peer_evidence_for_buy_candidate(self):
         ranking = {

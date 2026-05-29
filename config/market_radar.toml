@@ -265,3 +265,9 @@ symbol = "300760.SZ"
 name = "Mindray Medical / 迈瑞医疗"
 kind = "stock"
 theme = "china-a-healthcare-device"
+
+[[symbols]]
+symbol = "603031.SH"
+name = "Anfu Technology / 安孚科技"
+kind = "stock"
+theme = "china-a-ai-optical-chip"

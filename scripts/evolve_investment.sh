@@ -129,6 +129,10 @@ OPTIMIZATION_CONFIG="$ROOT_DIR/config/optimization.toml"
 SYMBOL_RISK_FILE="$ROOT_DIR/research/experiments/symbol_risk_memory.json"
 NONTECHNICAL_EVIDENCE_CONFIG="$ROOT_DIR/config/nontechnical_evidence.toml"
 NONTECHNICAL_EVIDENCE_FILE="$ROOT_DIR/research/evidence/nontechnical/latest.json"
+NONTECHNICAL_GAP_QUEUE_FILE="$ROOT_DIR/research/evidence/nontechnical/latest_actionable_gap_queue.json"
+EXTERNAL_SIGNAL_CONFIG="$ROOT_DIR/config/external_signal_candidates.toml"
+EXTERNAL_DISCOVERY_FILE="$ROOT_DIR/research/evidence/external/$OUTPUT_STEM-candidates.json"
+EXTERNAL_DISCOVERY_MD="$ROOT_DIR/research/evidence/external/$OUTPUT_STEM-candidates.md"
 export RANKING_FILE
 WATCHLIST_CONFIG_PY="$(python_path "$WATCHLIST_CONFIG")"
 TRADE_UNIVERSE_CONFIG_PY="$(python_path "$TRADE_UNIVERSE_CONFIG")"
@@ -137,10 +141,12 @@ SNAPSHOT_FILE_PY="$(python_path "$SNAPSHOT_FILE")"
 RADAR_SNAPSHOT_FILE_PY="$(python_path "$RADAR_SNAPSHOT_FILE")"
 RANKING_FILE_PY="$(python_path "$RANKING_FILE")"
 FOCUS_FILE_PY="$(python_path "$FOCUS_FILE")"
+EXTERNAL_DISCOVERY_FILE_PY="$(python_path "$EXTERNAL_DISCOVERY_FILE")"
 export SNAPSHOT_FILE_PY
 export RADAR_SNAPSHOT_FILE_PY
 export RANKING_FILE_PY
 export FOCUS_FILE_PY
+export EXTERNAL_DISCOVERY_FILE_PY
 
 case "$SESSION" in
     morning)
@@ -157,7 +163,7 @@ case "$SESSION" in
         ;;
 esac
 
-mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations" "$ROOT_DIR/research/rankings" "$ROOT_DIR/research/focus" "$ROOT_DIR/research/experiments" "$ROOT_DIR/research/risk" "$ROOT_DIR/research/shadow"
+mkdir -p "$ROOT_DIR/data/snapshots" "$ROOT_DIR/research/daily" "$ROOT_DIR/research/theses" "$ROOT_DIR/research/calls" "$ROOT_DIR/research/evaluations" "$ROOT_DIR/research/rankings" "$ROOT_DIR/research/focus" "$ROOT_DIR/research/experiments" "$ROOT_DIR/research/risk" "$ROOT_DIR/research/shadow" "$ROOT_DIR/research/evidence/external"
 
 if [ -f "$ROOT_DIR/scripts/yoyo_context.sh" ]; then
     # shellcheck disable=SC1091
@@ -255,11 +261,33 @@ if [ -f "$NONTECHNICAL_EVIDENCE_CONFIG" ]; then
 fi
 "$PYTHON_BIN" "$ROOT_DIR/scripts/rank_investment_universe.py" --snapshot "$SNAPSHOT_FILE" --output "$RANKING_FILE" --strategy-config "$ACTIVE_STRATEGY_FILE" --as-of-session "$SESSION" "${SYMBOL_RISK_ARG[@]}" "${NONTECHNICAL_ARG[@]}" $RANK_ARGS
 
+if [ -f "$NONTECHNICAL_EVIDENCE_FILE" ]; then
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/build_nontechnical_evidence_gap_queue.py" \
+        --nontechnical-evidence "$NONTECHNICAL_EVIDENCE_FILE" \
+        --ranking "$RANKING_FILE" \
+        --as-of-date "$DATE" \
+        --as-of-session "$SESSION" \
+        --output-json "$NONTECHNICAL_GAP_QUEUE_FILE" \
+        --output-md "$ROOT_DIR/research/evidence/nontechnical/latest_actionable_gap_queue.md" \
+        --output-skeleton-json "$ROOT_DIR/research/evidence/nontechnical/manual/actionable_gap_skeleton.json"
+fi
+
 if [ -f "$FOCUS_INDUSTRIES_CONFIG" ]; then
     "$PYTHON_BIN" "$ROOT_DIR/scripts/generate_investment_focus_pool.py" \
         --ranking "$RANKING_FILE" \
         --config "$FOCUS_INDUSTRIES_CONFIG" \
         --output "$FOCUS_FILE"
+fi
+
+if [ -f "$EXTERNAL_SIGNAL_CONFIG" ]; then
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/discover_external_investment_candidates.py" \
+        --config "$EXTERNAL_SIGNAL_CONFIG" \
+        --trade-universe "$TRADE_UNIVERSE_CONFIG" \
+        --snapshot "$SNAPSHOT_FILE" \
+        --date "$DATE" \
+        --as-of-session "$SESSION" \
+        --output-json "$EXTERNAL_DISCOVERY_FILE" \
+        --output-md "$EXTERNAL_DISCOVERY_MD"
 fi
 
 if [ "$ENABLE_SHADOW_LOGGING" = "true" ]; then
@@ -376,6 +404,16 @@ PY
 FOCUS_POOL=$($PYTHON_BIN - <<'PY'
 import os, pathlib
 path = pathlib.Path(os.environ['FOCUS_FILE_PY'])
+if path.exists():
+    print(path.read_text(encoding='utf-8'))
+else:
+    print('{}')
+PY
+)
+
+EXTERNAL_DISCOVERY=$($PYTHON_BIN - <<'PY'
+import os, pathlib
+path = pathlib.Path(os.environ['EXTERNAL_DISCOVERY_FILE_PY'])
 if path.exists():
     print(path.read_text(encoding='utf-8'))
 else:
@@ -561,6 +599,8 @@ write_run_manifest() {
         --file trade_snapshot "$SNAPSHOT_FILE" \
         --file radar_snapshot "$RADAR_SNAPSHOT_FILE" \
         --file ranking "$RANKING_FILE" \
+        --file nontechnical_gap_queue "$NONTECHNICAL_GAP_QUEUE_FILE" \
+        --file external_discovery "$EXTERNAL_DISCOVERY_FILE" \
         --file focus_pool "$FOCUS_FILE" \
         --file draft_calls "$DRAFT_CALLS_FILE" \
         --file risk_review "$RISK_REVIEW_FILE" \
@@ -658,6 +698,8 @@ $SNAPSHOT
 $RANKING
 - Dynamic focus industries and symbols:
 $FOCUS_POOL
+- External out-of-universe discovery queue:
+$EXTERNAL_DISCOVERY
 - Stable rules:
 $RULES
 - Error patterns:
@@ -679,6 +721,7 @@ Output requirements:
 - If a radar theme is strong but not represented in the trade universe, say it is an external opportunity to consider adding later, not an immediate recommendation.
 - If a radar theme is represented in the trade universe, compare the available symbols and identify the best current expression of that theme.
 - Treat actionable_candidates as the only deterministic layer eligible for upgrade consideration; use diagnostic_candidates only for observation and explanation.
+- Treat external_discovery external_candidates as pool-expansion research only: list them as possible additions, not immediate recommendations, until they are added to trade_universe and reranked.
 - End with 3-5 high-priority research questions for today.
 - Save only markdown to $ASSESSMENT_REL.
 EOF
@@ -714,6 +757,8 @@ $SNAPSHOT
 $RANKING
 - Dynamic focus industries and symbols:
 $FOCUS_POOL
+- External out-of-universe discovery queue:
+$EXTERNAL_DISCOVERY
 - Stable rules:
 $RULES
 - Active learnings:
@@ -727,6 +772,7 @@ Plan requirements:
 - Write the markdown plan in Simplified Chinese.
 - Treat missing real holdings as recommendation-only mode: rank candidates for possible action, not as live portfolio management.
 - Start with a "市场雷达结论" section: strongest themes, weakest themes, and any opportunity not covered by the current trade universe.
+- Include any external_discovery external_candidates under "可考虑加入交易池" only; do not treat them as actionable candidates in this plan.
 - Include a "四大行业动态优先级" section using the focus pool. Prioritize active_focus_industries and active_focus_symbols, include watch_focus_symbols under observation, and preserve all deterministic action gates.
 - Pick at most 5 candidates from the configured trade universe, not only the focused watchlist.
 - For each strong theme, compare same-theme symbols in the trade universe and explain why the selected symbol is currently better than its peers.
@@ -767,6 +813,8 @@ $RADAR_SNAPSHOT
 $RANKING
 - Dynamic focus industries and symbols:
 $FOCUS_POOL
+- External out-of-universe discovery queue:
+$EXTERNAL_DISCOVERY
 - Stable rules:
 $RULES
 - Error patterns:
@@ -786,6 +834,7 @@ Report requirements:
 - Include a "市场雷达" section before top candidates. Name the strongest/weakest radar themes, and clearly separate "雷达发现" from "当前交易池内建议".
 - Include a "四大行业优先级" section. Use focus_industry, focus_industry_score, focus_industry_rank, focus_role, and focus_state when available; explain why active focus names are prioritized, why watch focus names remain observation-only, or why names are downgraded.
 - Do not recommend radar-only symbols as trades unless they are also present in the configured trade universe; instead list them under "可考虑加入交易池".
+- Do not recommend external_discovery-only symbols as trades; list external_candidates under "可考虑加入交易池" and covered_candidates only as already-covered context.
 - For dynamic symbol selection, include a "为什么选它而不是同主题其他标的" paragraph for each top candidate.
 - Use the deterministic ranking as the starting point. You may override it only if you explicitly explain the evidence-based reason.
 - Treat diagnostic_only=true or qualified_for_watch=false ranking rows as diagnostics only; do not upgrade them to actionable recommendations.
@@ -913,6 +962,8 @@ $SNAPSHOT
 $RANKING
 - Dynamic focus industries and symbols:
 $FOCUS_POOL
+- External out-of-universe discovery queue:
+$EXTERNAL_DISCOVERY
 - Stable rules:
 $RULES
 - Error patterns:
@@ -929,6 +980,7 @@ Reflection requirements:
 - Reflect on whether the four-industry focus priority improved or distorted today's selection; note industry-level mistakes separately from same-theme symbol-selection mistakes.
 - Record where confidence is weakest.
 - State what evidence is still missing.
+- Reflect on whether the external discovery queue found pool-expansion candidates or only already-covered names.
 - Name 1-3 likely failure modes for today's recommendations.
 - If any recommendation came from dynamic symbol selection, classify likely future errors as theme error, symbol-selection error, timing error, or risk-control error.
 - Suggest concrete priority shifts for the next cycle.

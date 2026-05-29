@@ -1,0 +1,114 @@
+{
+  "date": "2026-05-20",
+  "session": "close",
+  "generated_at": "2026-05-20T09:10:35Z",
+  "source_ranking": "D:\\Code\\yoyo\\research\\rankings\\2026-05-20-close-ranking.json",
+  "strategy_version": "l5_mvp_conservative_v1",
+  "strategy_weights": {
+    "trend_weight": 0.45,
+    "momentum_weight": 0.3,
+    "range_weight": 0.15,
+    "risk_penalty_weight": 1.15
+  },
+  "draft_policy": {
+    "source": "deterministic_ranking_edge_gate",
+    "actionable_rule": "buy_candidate requires qualified_for_action=true, cost_gate_passed=true, and same_theme_peer_evidence_passed=true",
+    "confidence_rule": "confidence is capped by score and reduced for adverse symbol risk, failed peer evidence, disqualifiers, and failed edge/cost gates"
+  },
+  "recommendations": [
+    {
+      "symbol": "688981.SH",
+      "state": "avoid",
+      "theme": "china-a-semiconductors",
+      "kind": "stock",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.29,
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 688981.SH.",
+      "evidence": [
+        "score=93.79, trend_score=100, momentum_score=100",
+        "expected_edge_bps=300.0, net_expected_edge_bps=265.0, cost_gate_passed=True",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=510300.SH, range_pos_60=0.7513, max_market_range_for_action=0.7, pct_change_1d=0.04",
+        "same_theme_peer_check theme_rank=1, theme_leader=688981.SH, is_theme_leader=True, theme_peer_count=2",
+        "same_theme_best_peer_evidence passed=True, best_symbol=688981.SH, best_score=93.79, selected_vs_best_score_gap=0.0, next_best_symbol=512480.SH, selected_vs_next_best_score_gap=5.98, peer_relative_decision=theme_leader",
+        "confidence_calibration penalty=0.1, symbol_risk_tags=['backtest_adverse_breach'], action_disqualifiers=['cn_limit_up_chase_block', 'nontechnical_score_below_action_min', 'event_risk_policy', 'market_range_pos_60_above_action_limit']",
+        "nontechnical_evidence status=available, total_score=0.534, event_risk=policy, flags=['nontechnical_score_below_action_min', 'event_risk_policy']",
+        "latest_close=133.81, ma20=115.7855, ma60=108.3557, range_pos_60=1.2524, volume_ratio_20=2.9168"
+      ],
+      "risks": [
+        "symbol_risk_veto",
+        "cn_limit_up_chase_block",
+        "nontechnical_score_below_action_min",
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_layer_action_cap_watch_only"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "china-a-semiconductors",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=93.79 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    },
+    {
+      "symbol": "512480.SH",
+      "state": "avoid",
+      "theme": "china-a-semiconductors",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.28,
+      "rationale": "Draft avoid generated from deterministic ranking and edge gate fields for 512480.SH.",
+      "evidence": [
+        "score=87.81, trend_score=100, momentum_score=86.02",
+        "expected_edge_bps=254.07, net_expected_edge_bps=219.07, cost_gate_passed=True",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=510300.SH, range_pos_60=0.7513, max_market_range_for_action=0.7, pct_change_1d=0.04",
+        "same_theme_peer_check theme_rank=2, theme_leader=688981.SH, is_theme_leader=False, theme_peer_count=2",
+        "same_theme_best_peer_evidence passed=False, best_symbol=688981.SH, best_score=93.79, selected_vs_best_score_gap=-5.98, next_best_symbol=None, selected_vs_next_best_score_gap=None, peer_relative_decision=blocked_by_same_theme_leader",
+        "confidence_calibration penalty=0.1, symbol_risk_tags=['backtest_adverse_breach'], action_disqualifiers=['event_risk_policy', 'market_range_pos_60_above_action_limit', 'same_theme_best_peer_evidence_missing_or_failed']",
+        "nontechnical_evidence status=available, total_score=0.629, event_risk=policy, flags=['event_risk_policy']",
+        "latest_close=2.227, ma20=1.8559, ma60=1.6524, range_pos_60=1.1337, volume_ratio_20=1.0009"
+      ],
+      "risks": [
+        "not_theme_score_leader",
+        "symbol_risk_veto",
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "same_theme_best_peer_evidence_missing_or_failed",
+        "diagnostic_layer_action_cap_watch_only",
+        "same_theme_non_leader_requires_peer_relative_confirmation"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "china-a-semiconductors",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=87.81 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    },
+    {
+      "symbol": "588000.SH",
+      "state": "watch_only",
+      "theme": "china-a-hard-tech",
+      "kind": "etf",
+      "horizon_days_min": 14,
+      "horizon_days_max": 90,
+      "confidence": 0.45,
+      "rationale": "Draft watch_only generated from deterministic ranking and edge gate fields for 588000.SH.",
+      "evidence": [
+        "score=85.95, trend_score=100, momentum_score=81.01",
+        "expected_edge_bps=251.15, net_expected_edge_bps=216.15, cost_gate_passed=True",
+        "source_layer=diagnostic_candidates, eligible_for_action_from_layer=False, layer_action_cap=watch_only",
+        "market_context proxy=510300.SH, range_pos_60=0.7513, max_market_range_for_action=0.7, pct_change_1d=0.04",
+        "same_theme_peer_check theme_rank=1, theme_leader=588000.SH, is_theme_leader=True, theme_peer_count=1",
+        "same_theme_best_peer_evidence passed=True, best_symbol=588000.SH, best_score=85.95, selected_vs_best_score_gap=0.0, next_best_symbol=None, selected_vs_next_best_score_gap=None, peer_relative_decision=sole_theme_candidate",
+        "confidence_calibration penalty=0.06, symbol_risk_tags=[], action_disqualifiers=['event_risk_policy', 'market_range_pos_60_above_action_limit']",
+        "nontechnical_evidence status=available, total_score=0.63, event_risk=policy, flags=['event_risk_policy']",
+        "latest_close=1.931, ma20=1.6747, ma60=1.5217, range_pos_60=1.1097, volume_ratio_20=1.2667"
+      ],
+      "risks": [
+        "event_risk_policy",
+        "market_range_pos_60_above_action_limit",
+        "diagnostic_layer_action_cap_watch_only"
+      ],
+      "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
+      "selection_source_theme": "china-a-hard-tech",
+      "selection_reason": "source_layer=diagnostic_candidates rank_score=85.95 edge_method=technical_snapshot_score_v1 evidence_window=1d_momentum_20d_volume_20d_60d_trend_60d_range"
+    }
+  ]
+}

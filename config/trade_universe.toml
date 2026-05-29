@@ -469,3 +469,9 @@ symbol = "300122.SZ"
 name = "Zhifei Biological / 智飞生物"
 kind = "stock"
 theme = "china-a-healthcare-pharma"
+
+[[symbols]]
+symbol = "603031.SH"
+name = "Anfu Technology / 安孚科技"
+kind = "stock"
+theme = "china-a-ai-optical-chip"

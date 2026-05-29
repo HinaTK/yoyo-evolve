@@ -51,6 +51,8 @@ def recommendation_state(row: dict[str, Any], source_layer: str) -> str:
         disqualifiers = {str(item) for item in row.get("disqualifiers", [])}
         if not disqualifiers or disqualifiers <= WATCH_COMPATIBLE_DISQUALIFIERS:
             return "watch_only"
+    if source_layer == "startup_candidates" and row.get("startup_watch_candidate") is True:
+        return "watch_only"
     return "avoid"
 
 
@@ -96,6 +98,8 @@ def evidence(row: dict[str, Any], state: str, focus_row: dict[str, Any] | None =
         f"market_context proxy={row.get('market_proxy_symbol')}, range_pos_60={row.get('market_range_pos_60')}, max_market_range_for_action={row.get('max_market_range_for_action')}, pct_change_1d={row.get('market_pct_change_1d')}",
         f"same_theme_peer_check theme_rank={row.get('theme_rank')}, theme_leader={row.get('theme_leader')}, is_theme_leader={row.get('is_theme_leader')}, theme_peer_count={row.get('theme_peer_count')}",
         f"same_theme_best_peer_evidence passed={row.get('same_theme_peer_evidence_passed')}, best_symbol={row.get('same_theme_best_symbol')}, best_score={row.get('same_theme_best_score')}, selected_vs_best_score_gap={row.get('same_theme_selected_vs_best_score_gap')}, next_best_symbol={row.get('same_theme_next_best_symbol')}, selected_vs_next_best_score_gap={row.get('same_theme_selected_vs_next_best_score_gap')}, peer_relative_decision={row.get('peer_relative_decision')}",
+        f"action_tier={row.get('action_tier')}, action_tier_label={row.get('action_tier_label')}, manual_confirmation_required={row.get('manual_confirmation_required')}",
+        f"startup_candidate stage={row.get('startup_candidate_stage')}, label={row.get('startup_candidate_label')}, ma20_distance_pct={row.get('ma20_distance_pct')}, theme_startup={row.get('theme_startup')}",
         f"confidence_calibration penalty={confidence_penalty(row, state)}, symbol_risk_tags={risk.get('tags', [])}, action_disqualifiers={row.get('action_disqualifiers', [])}",
         f"nontechnical_evidence status={nontechnical.get('status')}, total_score={nontechnical.get('total_score')}, event_risk={nontechnical.get('event_risk')}, flags={row.get('nontechnical_evidence_flags', [])}",
         f"latest_close={row.get('latest_close')}, ma20={row.get('ma20')}, ma60={row.get('ma60')}, range_pos_60={row.get('range_pos_60')}, volume_ratio_20={row.get('volume_ratio_20')}",
@@ -139,12 +143,24 @@ def make_recommendation(row: dict[str, Any], horizon_days_min: int, horizon_days
         "horizon_days_min": horizon_days_min,
         "horizon_days_max": horizon_days_max,
         "confidence": confidence(row, state),
+        "action_tier": row.get("action_tier"),
+        "action_tier_label": row.get("action_tier_label"),
+        "action_tier_description": row.get("action_tier_description"),
+        "action_tier_reasons": row.get("action_tier_reasons", []),
+        "startup_candidate_stage": row.get("startup_candidate_stage"),
+        "startup_candidate_label": row.get("startup_candidate_label"),
+        "startup_candidate_reasons": row.get("startup_candidate_reasons", []),
+        "startup_watch_candidate": row.get("startup_watch_candidate") is True,
+        "ma20_distance_pct": row.get("ma20_distance_pct"),
+        "theme_startup": row.get("theme_startup"),
+        "formal_actionable": bool(row.get("formal_actionable")),
+        "manual_confirmation_required": row.get("manual_confirmation_required") is not False,
         "rationale": f"Draft {state} generated from deterministic ranking and edge gate fields for {symbol}.",
         "evidence": evidence(row, state, focus_row),
         "risks": risks(row, horizon_days_min, horizon_days_max),
         "invalidation": "Invalidate if price loses MA20 support, volume confirmation fades, or the edge/cost gate is no longer met.",
         "selection_source_theme": row.get("theme") or "unknown",
-        "selection_reason": f"source_layer={source_layer} rank_score={row.get('score')} edge_method={method} evidence_window={row.get('evidence_window')}",
+        "selection_reason": f"source_layer={source_layer} rank_score={row.get('score')} edge_method={method} evidence_window={row.get('evidence_window')} startup_stage={row.get('startup_candidate_stage')}",
     }
     if focus_row:
         recommendation.update(
@@ -163,7 +179,7 @@ def make_recommendation(row: dict[str, Any], horizon_days_min: int, horizon_days
 
 def ranking_rows_by_symbol(ranking: dict[str, Any]) -> dict[str, dict[str, Any]]:
     rows: dict[str, dict[str, Any]] = {}
-    for key in ("all_ranked", "top_candidates", "diagnostic_candidates", "actionable_candidates"):
+    for key in ("all_ranked", "top_candidates", "startup_candidates", "diagnostic_candidates", "actionable_candidates"):
         for row in ranking.get(key, []):
             if isinstance(row, dict) and row.get("symbol"):
                 rows[str(row["symbol"])] = row
@@ -182,6 +198,10 @@ def build_calls(
     rows: list[tuple[dict[str, Any], str]] = [(row, "actionable_candidates") for row in ranking.get("actionable_candidates", [])]
     seen = {row.get("symbol") for row, _source_layer in rows}
     if include_diagnostics:
+        for row in ranking.get("startup_candidates", []):
+            if row.get("symbol") not in seen:
+                rows.append((row, "startup_candidates"))
+                seen.add(row.get("symbol"))
         for row in ranking.get("diagnostic_candidates", []):
             if row.get("symbol") not in seen:
                 rows.append((row, "diagnostic_candidates"))
@@ -207,6 +227,8 @@ def build_calls(
         "draft_policy": {
             "source": "deterministic_ranking_edge_gate",
             "actionable_rule": "buy_candidate requires qualified_for_action=true, cost_gate_passed=true, and same_theme_peer_evidence_passed=true",
+            "tier_rule": "action_tier separates formal_actionable, manual_probe, observe, suspended, and blocked; manual_probe is still research-only and requires human confirmation",
+            "startup_rule": "startup_candidates surface theme breadth plus near-MA20 or MA20-reclaim setups as watch_only research candidates, never as automatic buy candidates",
             "confidence_rule": "confidence is capped by score and reduced for adverse symbol risk, failed peer evidence, disqualifiers, and failed edge/cost gates",
         },
         "focus_policy": {

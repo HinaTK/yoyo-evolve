@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-19T01:43:05Z",
-  "as_of_date": "2026-05-19",
-  "as_of_session": "close",
+  "generated_at": "2026-05-29T04:10:55Z",
+  "as_of_date": "2026-05-29",
+  "as_of_session": "midday",
   "research_only": true,
   "no_execution": true,
   "evidence_mode": "point_in_time_curated_proxy_or_missing_fail_closed",
@@ -9,7 +9,15 @@
     "require_for_action": true,
     "max_staleness_days": 30,
     "min_total_score_for_action": 0.55,
-    "block_unknown_event_risk": true
+    "block_unknown_event_risk": true,
+    "component_max_staleness_days": {
+      "fundamental_score": 120,
+      "valuation_score": 45,
+      "catalyst_score": 30,
+      "flow_score": 5,
+      "macro_score": 14,
+      "event_risk": 7
+    }
   },
   "weights": {
     "fundamental_score": 0.3,
@@ -19,19 +27,19 @@
     "macro_score": 0.1
   },
   "summary": {
-    "symbol_count": 46,
-    "available_count": 41,
-    "curated_available_count": 41,
-    "formal_provider_count": 41,
-    "automatic_proxy_count": 5,
-    "proxy_only_count": 5,
-    "proxy_coverage_ratio": 0.109,
+    "symbol_count": 79,
+    "available_count": 71,
+    "curated_available_count": 71,
+    "formal_provider_count": 70,
+    "automatic_proxy_count": 8,
+    "proxy_only_count": 8,
+    "proxy_coverage_ratio": 0.101,
     "missing_count": 0,
-    "coverage_ratio": 0.891,
-    "actionable_evidence_count": 12,
-    "finding_count": 83,
+    "coverage_ratio": 0.899,
+    "actionable_evidence_count": 24,
+    "finding_count": 257,
     "critical_finding_count": 0,
-    "blocking_finding_count": 25
+    "blocking_finding_count": 106
   },
   "symbols": {
     "0002.HK": {
@@ -40,7 +48,15 @@
       "kind": "stock",
       "theme": "utilities-defensive",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -58,43 +74,74 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.502,
-      "valuation_score": 0.614,
+      "valuation_score": 0.613,
       "catalyst_score": 0.426,
       "flow_score": 0.44,
-      "macro_score": 0.54,
-      "total_score": 0.5,
-      "age_days": 139
+      "macro_score": 0.59,
+      "total_score": 0.505,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
     },
     "000333.SZ": {
       "symbol": "000333.SZ",
       "name": "Midea Group / 美的集团",
       "kind": "stock",
       "theme": "china-a-home-appliances",
-      "as_of_date": "2026-04-30",
-      "as_of_session": "close",
-      "event_risk": "low",
-      "source_count": 1,
-      "proxy_source_count": 0,
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "proxy_source_count": 3,
       "sources": [
         {
-          "label": "Eastmoney A-share F10 financial indicators",
-          "kind": "formal_public_f10",
-          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
         }
       ],
       "notes": [
-        "formal provider report_date=2026-03-31, notice_date=2026-04-30",
-        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-home-appliances, quote_fresh=True, risk_state=risk_off"
       ],
-      "evidence_mode": "formal_provider_point_in_time",
-      "proxy_only": false,
-      "fundamental_score": 0.522,
-      "valuation_score": 0.518,
-      "catalyst_score": 0.522,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.507,
-      "age_days": 19
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.44,
+      "flow_score": 0.53,
+      "macro_score": 0.42,
+      "total_score": 0.483,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
     "0005.HK": {
       "symbol": "0005.HK",
@@ -102,7 +149,15 @@
       "kind": "stock",
       "theme": "financials-bank",
       "as_of_date": "2026-03-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -120,12 +175,20 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.566,
-      "valuation_score": 0.613,
+      "valuation_score": 0.611,
       "catalyst_score": 0.494,
       "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.532,
-      "age_days": 49
+      "macro_score": 0.55,
+      "total_score": 0.536,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "0006.HK": {
       "symbol": "0006.HK",
@@ -133,7 +196,15 @@
       "kind": "stock",
       "theme": "utilities-defensive",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -151,12 +222,114 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.575,
-      "valuation_score": 0.616,
+      "valuation_score": 0.621,
       "catalyst_score": 0.454,
       "flow_score": 0.44,
-      "macro_score": 0.54,
-      "total_score": 0.529,
-      "age_days": 139
+      "macro_score": 0.59,
+      "total_score": 0.535,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
+    },
+    "000725.SZ": {
+      "symbol": "000725.SZ",
+      "name": "BOE Technology / 京东方A",
+      "kind": "stock",
+      "theme": "china-a-display-tech",
+      "as_of_date": "2026-04-30",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-30",
+        "valuation_score": "2026-04-30",
+        "catalyst_score": "2026-04-30",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-30",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-30",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.516,
+      "valuation_score": 0.482,
+      "catalyst_score": 0.533,
+      "flow_score": 0.58,
+      "macro_score": 0.42,
+      "total_score": 0.513,
+      "age_days": 29,
+      "component_age_days": {
+        "fundamental_score": 29,
+        "valuation_score": 29,
+        "catalyst_score": 29,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 29
+    },
+    "000776.SZ": {
+      "symbol": "000776.SZ",
+      "name": "GF Securities / 广发证券",
+      "kind": "stock",
+      "theme": "china-a-capital-markets",
+      "as_of_date": "2026-04-28",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-28",
+        "valuation_score": "2026-04-28",
+        "catalyst_score": "2026-04-28",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-28",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-28",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.717,
+      "valuation_score": 0.565,
+      "catalyst_score": 0.8,
+      "flow_score": 0.5,
+      "macro_score": 0.42,
+      "total_score": 0.645,
+      "age_days": 31,
+      "component_age_days": {
+        "fundamental_score": 31,
+        "valuation_score": 31,
+        "catalyst_score": 31,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 31
     },
     "000858.SZ": {
       "symbol": "000858.SZ",
@@ -164,7 +337,15 @@
       "kind": "stock",
       "theme": "china-a-consumer-staples",
       "as_of_date": "2026-04-30",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-30",
+        "valuation_score": "2026-04-30",
+        "catalyst_score": "2026-04-30",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-30",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -184,10 +365,253 @@
       "fundamental_score": 0.649,
       "valuation_score": 0.632,
       "catalyst_score": 0.8,
+      "flow_score": 0.5,
+      "macro_score": 0.46,
+      "total_score": 0.642,
+      "age_days": 29,
+      "component_age_days": {
+        "fundamental_score": 29,
+        "valuation_score": 29,
+        "catalyst_score": 29,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 29
+    },
+    "002050.SZ": {
+      "symbol": "002050.SZ",
+      "name": "Sanhua Intelligent Controls / 三花智控",
+      "kind": "stock",
+      "theme": "china-a-ai-thermal-management",
+      "as_of_date": "2026-04-30",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-30",
+        "valuation_score": "2026-04-30",
+        "catalyst_score": "2026-04-30",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-30",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-30",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.51,
+      "valuation_score": 0.542,
+      "catalyst_score": 0.52,
       "flow_score": 0.44,
-      "macro_score": 0.54,
-      "total_score": 0.641,
-      "age_days": 19
+      "macro_score": 0.42,
+      "total_score": 0.499,
+      "age_days": 29,
+      "component_age_days": {
+        "fundamental_score": 29,
+        "valuation_score": 29,
+        "catalyst_score": 29,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 29
+    },
+    "002335.SZ": {
+      "symbol": "002335.SZ",
+      "name": "Kehua Data / 科华数据",
+      "kind": "stock",
+      "theme": "china-a-ai-power-infrastructure",
+      "as_of_date": "2026-04-27",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-27",
+        "valuation_score": "2026-04-27",
+        "catalyst_score": "2026-04-27",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-27",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-27",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.564,
+      "valuation_score": 0.488,
+      "catalyst_score": 0.654,
+      "flow_score": 0.44,
+      "macro_score": 0.42,
+      "total_score": 0.538,
+      "age_days": 32,
+      "component_age_days": {
+        "fundamental_score": 32,
+        "valuation_score": 32,
+        "catalyst_score": 32,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 32
+    },
+    "002460.SZ": {
+      "symbol": "002460.SZ",
+      "name": "Ganfeng Lithium / 赣锋锂业",
+      "kind": "stock",
+      "theme": "china-a-lithium",
+      "as_of_date": "2026-04-30",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-30",
+        "valuation_score": "2026-04-30",
+        "catalyst_score": "2026-04-30",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-30",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-30",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.652,
+      "valuation_score": 0.545,
+      "catalyst_score": 0.8,
+      "flow_score": 0.44,
+      "macro_score": 0.42,
+      "total_score": 0.613,
+      "age_days": 29,
+      "component_age_days": {
+        "fundamental_score": 29,
+        "valuation_score": 29,
+        "catalyst_score": 29,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 29
+    },
+    "002466.SZ": {
+      "symbol": "002466.SZ",
+      "name": "Tianqi Lithium / 天齐锂业",
+      "kind": "stock",
+      "theme": "china-a-lithium",
+      "as_of_date": "2026-04-28",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-28",
+        "valuation_score": "2026-04-28",
+        "catalyst_score": "2026-04-28",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-28",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-28",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.65,
+      "valuation_score": 0.658,
+      "catalyst_score": 0.8,
+      "flow_score": 0.44,
+      "macro_score": 0.42,
+      "total_score": 0.635,
+      "age_days": 31,
+      "component_age_days": {
+        "fundamental_score": 31,
+        "valuation_score": 31,
+        "catalyst_score": 31,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 31
+    },
+    "002475.SZ": {
+      "symbol": "002475.SZ",
+      "name": "Luxshare Precision / 立讯精密",
+      "kind": "stock",
+      "theme": "china-a-consumer-electronics",
+      "as_of_date": "2026-04-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-29",
+        "valuation_score": "2026-04-29",
+        "catalyst_score": "2026-04-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-29",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-29",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.615,
+      "valuation_score": 0.486,
+      "catalyst_score": 0.751,
+      "flow_score": 0.5,
+      "macro_score": 0.42,
+      "total_score": 0.586,
+      "age_days": 30,
+      "component_age_days": {
+        "fundamental_score": 30,
+        "valuation_score": 30,
+        "catalyst_score": 30,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 30
     },
     "002594.SZ": {
       "symbol": "002594.SZ",
@@ -195,7 +619,15 @@
       "kind": "stock",
       "theme": "china-a-auto-ev",
       "as_of_date": "2026-04-29",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-29",
+        "valuation_score": "2026-04-29",
+        "catalyst_score": "2026-04-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-29",
       "event_risk": "earnings_gap",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -215,10 +647,18 @@
       "fundamental_score": 0.393,
       "valuation_score": 0.457,
       "catalyst_score": 0.316,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.404,
-      "age_days": 20
+      "flow_score": 0.5,
+      "macro_score": 0.42,
+      "total_score": 0.405,
+      "age_days": 30,
+      "component_age_days": {
+        "fundamental_score": 30,
+        "valuation_score": 30,
+        "catalyst_score": 30,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 30
     },
     "0386.HK": {
       "symbol": "0386.HK",
@@ -226,7 +666,15 @@
       "kind": "stock",
       "theme": "energy",
       "as_of_date": "2026-03-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -244,12 +692,20 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.505,
-      "valuation_score": 0.67,
+      "valuation_score": 0.673,
       "catalyst_score": 0.552,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.539,
-      "age_days": 49
+      "flow_score": 0.48,
+      "macro_score": 0.55,
+      "total_score": 0.551,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "0388.HK": {
       "symbol": "0388.HK",
@@ -257,7 +713,15 @@
       "kind": "stock",
       "theme": "financials-exchange",
       "as_of_date": "2026-03-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -275,12 +739,20 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.63,
-      "valuation_score": 0.477,
+      "valuation_score": 0.479,
       "catalyst_score": 0.543,
       "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.536,
-      "age_days": 49
+      "macro_score": 0.55,
+      "total_score": 0.542,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "0700.HK": {
       "symbol": "0700.HK",
@@ -288,7 +760,15 @@
       "kind": "stock",
       "theme": "internet-platform",
       "as_of_date": "2026-03-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -308,10 +788,18 @@
       "fundamental_score": 0.568,
       "valuation_score": 0.53,
       "catalyst_score": 0.534,
-      "flow_score": 0.44,
-      "macro_score": 0.46,
-      "total_score": 0.522,
-      "age_days": 49
+      "flow_score": 0.5,
+      "macro_score": 0.51,
+      "total_score": 0.536,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "0728.HK": {
       "symbol": "0728.HK",
@@ -319,7 +807,15 @@
       "kind": "stock",
       "theme": "telecom-dividend",
       "as_of_date": "2026-03-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -337,12 +833,20 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.469,
-      "valuation_score": 0.666,
+      "valuation_score": 0.673,
       "catalyst_score": 0.474,
-      "flow_score": 0.44,
-      "macro_score": 0.54,
-      "total_score": 0.512,
-      "age_days": 49
+      "flow_score": 0.48,
+      "macro_score": 0.59,
+      "total_score": 0.525,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "0857.HK": {
       "symbol": "0857.HK",
@@ -350,7 +854,15 @@
       "kind": "stock",
       "theme": "energy",
       "as_of_date": "2026-03-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -368,12 +880,20 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.492,
-      "valuation_score": 0.661,
+      "valuation_score": 0.663,
       "catalyst_score": 0.5,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.521,
-      "age_days": 49
+      "flow_score": 0.48,
+      "macro_score": 0.55,
+      "total_score": 0.532,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "0883.HK": {
       "symbol": "0883.HK",
@@ -381,7 +901,15 @@
       "kind": "stock",
       "theme": "energy",
       "as_of_date": "2026-03-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -399,12 +927,20 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.568,
-      "valuation_score": 0.67,
+      "valuation_score": 0.672,
       "catalyst_score": 0.522,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.551,
-      "age_days": 49
+      "flow_score": 0.5,
+      "macro_score": 0.55,
+      "total_score": 0.565,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "0941.HK": {
       "symbol": "0941.HK",
@@ -412,7 +948,15 @@
       "kind": "stock",
       "theme": "telecom-dividend",
       "as_of_date": "2026-03-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -433,17 +977,33 @@
       "valuation_score": 0.643,
       "catalyst_score": 0.497,
       "flow_score": 0.44,
-      "macro_score": 0.54,
-      "total_score": 0.521,
-      "age_days": 49
+      "macro_score": 0.59,
+      "total_score": 0.526,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
-    "1024.HK": {
-      "symbol": "1024.HK",
-      "name": "Kuaishou / 快手-W",
+    "0981.HK": {
+      "symbol": "0981.HK",
+      "name": "SMIC / 中芯国际",
       "kind": "stock",
-      "theme": "internet-platform",
-      "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "theme": "china-a-semiconductors",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -455,26 +1015,89 @@
         }
       ],
       "notes": [
-        "formal provider report_date=2025-12-31",
+        "formal provider report_date=2026-03-31",
         "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
-      "fundamental_score": 0.628,
-      "valuation_score": 0.599,
-      "catalyst_score": 0.551,
-      "flow_score": 0.44,
-      "macro_score": 0.46,
-      "total_score": 0.558,
-      "age_days": 139
+      "fundamental_score": 0.492,
+      "valuation_score": 0.415,
+      "catalyst_score": 0.511,
+      "flow_score": 0.56,
+      "macro_score": 0.51,
+      "total_score": 0.493,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
+    },
+    "1024.HK": {
+      "symbol": "1024.HK",
+      "name": "Kuaishou / 快手-W",
+      "kind": "stock",
+      "theme": "internet-platform",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "policy",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.486,
+      "valuation_score": 0.6,
+      "catalyst_score": 0.475,
+      "flow_score": 0.5,
+      "macro_score": 0.51,
+      "total_score": 0.511,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "1093.HK": {
       "symbol": "1093.HK",
       "name": "CSPC Pharma / 石药集团",
       "kind": "stock",
       "theme": "healthcare-pharma",
-      "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -486,18 +1109,26 @@
         }
       ],
       "notes": [
-        "formal provider report_date=2025-12-31",
+        "formal provider report_date=2026-03-31",
         "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
-      "fundamental_score": 0.54,
-      "valuation_score": 0.596,
-      "catalyst_score": 0.474,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.516,
-      "age_days": 139
+      "fundamental_score": 0.461,
+      "valuation_score": 0.599,
+      "catalyst_score": 0.41,
+      "flow_score": 0.48,
+      "macro_score": 0.55,
+      "total_score": 0.488,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "1177.HK": {
       "symbol": "1177.HK",
@@ -505,7 +1136,15 @@
       "kind": "stock",
       "theme": "healthcare-pharma",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "earnings_gap",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -523,12 +1162,67 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.483,
-      "valuation_score": 0.532,
+      "valuation_score": 0.534,
       "catalyst_score": 0.396,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.466,
-      "age_days": 139
+      "flow_score": 0.54,
+      "macro_score": 0.55,
+      "total_score": 0.487,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
+    },
+    "1211.HK": {
+      "symbol": "1211.HK",
+      "name": "BYD Company / 比亚迪股份",
+      "kind": "stock",
+      "theme": "hk-ev",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.431,
+      "valuation_score": 0.496,
+      "catalyst_score": 0.41,
+      "flow_score": 0.56,
+      "macro_score": 0.55,
+      "total_score": 0.47,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "1299.HK": {
       "symbol": "1299.HK",
@@ -536,7 +1230,15 @@
       "kind": "stock",
       "theme": "financials-insurance",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -554,20 +1256,36 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.619,
-      "valuation_score": 0.579,
+      "valuation_score": 0.583,
       "catalyst_score": 0.596,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.567,
-      "age_days": 139
+      "flow_score": 0.5,
+      "macro_score": 0.55,
+      "total_score": 0.581,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
     },
     "159915.SZ": {
       "symbol": "159915.SZ",
       "name": "E Fund ChiNext ETF / 易方达创业板ETF",
       "kind": "etf",
       "theme": "china-a-growth-tech",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -579,27 +1297,90 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=创业板ETF易方达, source_date=2026-05-19",
+        "formal provider fund_name=创业板ETF易方达, source_date=2026-05-29",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.52,
-      "valuation_score": 0.794,
-      "catalyst_score": 0.686,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.602,
-      "age_days": 0
+      "valuation_score": 0.8,
+      "catalyst_score": 0.734,
+      "flow_score": 0.54,
+      "macro_score": 0.42,
+      "total_score": 0.623,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
-    "1810.HK": {
-      "symbol": "1810.HK",
-      "name": "Xiaomi / 小米集团-W",
+    "1772.HK": {
+      "symbol": "1772.HK",
+      "name": "Ganfeng Lithium / 赣锋锂业",
       "kind": "stock",
-      "theme": "consumer-tech",
-      "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "theme": "china-a-lithium",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.661,
+      "valuation_score": 0.512,
+      "catalyst_score": 0.769,
+      "flow_score": 0.44,
+      "macro_score": 0.55,
+      "total_score": 0.614,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
+    },
+    "1801.HK": {
+      "symbol": "1801.HK",
+      "name": "Innovent Biologics / 信达生物",
+      "kind": "stock",
+      "theme": "healthcare-biotech",
+      "as_of_date": "2025-12-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
+      "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
       "sources": [
@@ -615,13 +1396,115 @@
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
-      "fundamental_score": 0.563,
+      "fundamental_score": 0.473,
+      "valuation_score": 0.35,
+      "catalyst_score": 0.446,
+      "flow_score": 0.6,
+      "macro_score": 0.51,
+      "total_score": 0.464,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
+    },
+    "1810.HK": {
+      "symbol": "1810.HK",
+      "name": "Xiaomi / 小米集团-W",
+      "kind": "stock",
+      "theme": "consumer-tech",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.437,
       "valuation_score": 0.59,
-      "catalyst_score": 0.481,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.523,
-      "age_days": 139
+      "catalyst_score": 0.412,
+      "flow_score": 0.5,
+      "macro_score": 0.55,
+      "total_score": 0.482,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
+    },
+    "2015.HK": {
+      "symbol": "2015.HK",
+      "name": "Li Auto / 理想汽车-W",
+      "kind": "stock",
+      "theme": "hk-ev",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "earnings_gap",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.357,
+      "valuation_score": 0.465,
+      "catalyst_score": 0.362,
+      "flow_score": 0.6,
+      "macro_score": 0.55,
+      "total_score": 0.436,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "2020.HK": {
       "symbol": "2020.HK",
@@ -629,7 +1512,15 @@
       "kind": "stock",
       "theme": "consumer-discretionary",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -647,12 +1538,20 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.603,
-      "valuation_score": 0.597,
+      "valuation_score": 0.598,
       "catalyst_score": 0.486,
       "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.538,
-      "age_days": 139
+      "macro_score": 0.55,
+      "total_score": 0.543,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
     },
     "2269.HK": {
       "symbol": "2269.HK",
@@ -660,7 +1559,15 @@
       "kind": "stock",
       "theme": "healthcare-biotech",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -678,12 +1585,20 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.636,
-      "valuation_score": 0.53,
+      "valuation_score": 0.59,
       "catalyst_score": 0.628,
-      "flow_score": 0.44,
-      "macro_score": 0.46,
-      "total_score": 0.566,
-      "age_days": 139
+      "flow_score": 0.48,
+      "macro_score": 0.51,
+      "total_score": 0.589,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
     },
     "2331.HK": {
       "symbol": "2331.HK",
@@ -691,7 +1606,15 @@
       "kind": "stock",
       "theme": "consumer-discretionary",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -709,20 +1632,83 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.554,
-      "valuation_score": 0.597,
+      "valuation_score": 0.598,
       "catalyst_score": 0.532,
       "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.535,
-      "age_days": 139
+      "macro_score": 0.55,
+      "total_score": 0.54,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
+    },
+    "2359.HK": {
+      "symbol": "2359.HK",
+      "name": "WuXi AppTec / 药明康德",
+      "kind": "stock",
+      "theme": "healthcare-cxo",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.599,
+      "valuation_score": 0.538,
+      "catalyst_score": 0.56,
+      "flow_score": 0.5,
+      "macro_score": 0.55,
+      "total_score": 0.557,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "2800.HK": {
       "symbol": "2800.HK",
       "name": "Tracker Fund of Hong Kong / 盈富基金",
       "kind": "etf",
       "theme": "hong-kong-broad-market",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "none",
       "source_count": 0,
       "proxy_source_count": 3,
@@ -742,17 +1728,314 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=hong-kong-broad-market, quote_fresh=True, risk_state=neutral"
+        "kind=etf, theme=hong-kong-broad-market, quote_fresh=True, risk_state=risk_on"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
       "fundamental_score": 0.62,
       "valuation_score": 0.58,
-      "catalyst_score": 0.53,
+      "catalyst_score": 0.57,
+      "flow_score": 0.52,
+      "macro_score": 0.58,
+      "total_score": 0.581,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
+    },
+    "300014.SZ": {
+      "symbol": "300014.SZ",
+      "name": "EVE Energy / 亿纬锂能",
+      "kind": "stock",
+      "theme": "china-a-battery-ev",
+      "as_of_date": "2026-04-25",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-25",
+        "valuation_score": "2026-04-25",
+        "catalyst_score": "2026-04-25",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-25",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-25",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.64,
+      "valuation_score": 0.489,
+      "catalyst_score": 0.8,
+      "flow_score": 0.44,
+      "macro_score": 0.42,
+      "total_score": 0.598,
+      "age_days": 34,
+      "component_age_days": {
+        "fundamental_score": 34,
+        "valuation_score": 34,
+        "catalyst_score": 34,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 34
+    },
+    "300015.SZ": {
+      "symbol": "300015.SZ",
+      "name": "Aier Eye Hospital / 爱尔眼科",
+      "kind": "stock",
+      "theme": "china-a-healthcare-services",
+      "as_of_date": "2026-04-24",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-24",
+        "valuation_score": "2026-04-24",
+        "catalyst_score": "2026-04-24",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-24",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-24",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.568,
+      "valuation_score": 0.582,
+      "catalyst_score": 0.593,
+      "flow_score": 0.44,
+      "macro_score": 0.42,
+      "total_score": 0.543,
+      "age_days": 35,
+      "component_age_days": {
+        "fundamental_score": 35,
+        "valuation_score": 35,
+        "catalyst_score": 35,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 35
+    },
+    "300059.SZ": {
+      "symbol": "300059.SZ",
+      "name": "East Money / 东方财富",
+      "kind": "stock",
+      "theme": "china-a-capital-markets",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
+      "event_risk": "unknown",
+      "source_count": 0,
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-capital-markets, quote_fresh=True, risk_state=risk_off"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.5,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.44,
       "flow_score": 0.47,
-      "macro_score": 0.53,
-      "total_score": 0.558,
-      "age_days": 0
+      "macro_score": 0.42,
+      "total_score": 0.488,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
+    },
+    "300122.SZ": {
+      "symbol": "300122.SZ",
+      "name": "Zhifei Biological / 智飞生物",
+      "kind": "stock",
+      "theme": "china-a-healthcare-pharma",
+      "as_of_date": "2026-04-28",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-28",
+        "valuation_score": "2026-04-28",
+        "catalyst_score": "2026-04-28",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-28",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-28",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.404,
+      "valuation_score": 0.405,
+      "catalyst_score": 0.363,
+      "flow_score": 0.44,
+      "macro_score": 0.42,
+      "total_score": 0.401,
+      "age_days": 31,
+      "component_age_days": {
+        "fundamental_score": 31,
+        "valuation_score": 31,
+        "catalyst_score": 31,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 31
+    },
+    "300124.SZ": {
+      "symbol": "300124.SZ",
+      "name": "Inovance Technology / 汇川技术",
+      "kind": "stock",
+      "theme": "china-a-ai-power-infrastructure",
+      "as_of_date": "2026-04-28",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-28",
+        "valuation_score": "2026-04-28",
+        "catalyst_score": "2026-04-28",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-28",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-28",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.464,
+      "valuation_score": 0.519,
+      "catalyst_score": 0.448,
+      "flow_score": 0.44,
+      "macro_score": 0.42,
+      "total_score": 0.463,
+      "age_days": 31,
+      "component_age_days": {
+        "fundamental_score": 31,
+        "valuation_score": 31,
+        "catalyst_score": 31,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 31
+    },
+    "300274.SZ": {
+      "symbol": "300274.SZ",
+      "name": "Sungrow / 阳光电源",
+      "kind": "stock",
+      "theme": "china-a-solar-inverter",
+      "as_of_date": "2026-04-28",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-28",
+        "valuation_score": "2026-04-28",
+        "catalyst_score": "2026-04-28",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-28",
+      "event_risk": "earnings_gap",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-28",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.397,
+      "valuation_score": 0.529,
+      "catalyst_score": 0.284,
+      "flow_score": 0.44,
+      "macro_score": 0.42,
+      "total_score": 0.404,
+      "age_days": 31,
+      "component_age_days": {
+        "fundamental_score": 31,
+        "valuation_score": 31,
+        "catalyst_score": 31,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 31
     },
     "300750.SZ": {
       "symbol": "300750.SZ",
@@ -760,7 +2043,15 @@
       "kind": "stock",
       "theme": "china-a-battery-ev",
       "as_of_date": "2026-04-16",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-16",
+        "valuation_score": "2026-04-16",
+        "catalyst_score": "2026-04-16",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-16",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -780,18 +2071,81 @@
       "fundamental_score": 0.674,
       "valuation_score": 0.539,
       "catalyst_score": 0.8,
+      "flow_score": 0.5,
+      "macro_score": 0.42,
+      "total_score": 0.627,
+      "age_days": 43,
+      "component_age_days": {
+        "fundamental_score": 43,
+        "valuation_score": 43,
+        "catalyst_score": 43,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 43
+    },
+    "300760.SZ": {
+      "symbol": "300760.SZ",
+      "name": "Mindray Medical / 迈瑞医疗",
+      "kind": "stock",
+      "theme": "china-a-healthcare-device",
+      "as_of_date": "2026-04-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-29",
+        "valuation_score": "2026-04-29",
+        "catalyst_score": "2026-04-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-29",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-29",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.492,
+      "valuation_score": 0.621,
+      "catalyst_score": 0.45,
       "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.626,
-      "age_days": 33
+      "macro_score": 0.42,
+      "total_score": 0.492,
+      "age_days": 30,
+      "component_age_days": {
+        "fundamental_score": 30,
+        "valuation_score": 30,
+        "catalyst_score": 30,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 30
     },
     "3033.HK": {
       "symbol": "3033.HK",
       "name": "CSOP Hang Seng TECH Index ETF / 南方东英恒生科技指数ETF",
       "kind": "etf",
       "theme": "hang-seng-tech",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "none",
       "source_count": 0,
       "proxy_source_count": 3,
@@ -811,25 +2165,41 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=hang-seng-tech, quote_fresh=True, risk_state=neutral"
+        "kind=etf, theme=hang-seng-tech, quote_fresh=True, risk_state=risk_on"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
       "fundamental_score": 0.58,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.53,
-      "flow_score": 0.47,
-      "macro_score": 0.53,
-      "total_score": 0.546,
-      "age_days": 0
+      "valuation_score": 0.51,
+      "catalyst_score": 0.57,
+      "flow_score": 0.58,
+      "macro_score": 0.58,
+      "total_score": 0.563,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
     "3067.HK": {
       "symbol": "3067.HK",
       "name": "iShares Hang Seng TECH ETF / 安硕恒生科技ETF",
       "kind": "etf",
       "theme": "hang-seng-tech",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "none",
       "source_count": 0,
       "proxy_source_count": 3,
@@ -849,17 +2219,25 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=etf, theme=hang-seng-tech, quote_fresh=True, risk_state=neutral"
+        "kind=etf, theme=hang-seng-tech, quote_fresh=True, risk_state=risk_on"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
       "fundamental_score": 0.58,
-      "valuation_score": 0.58,
-      "catalyst_score": 0.53,
-      "flow_score": 0.47,
-      "macro_score": 0.53,
-      "total_score": 0.546,
-      "age_days": 0
+      "valuation_score": 0.51,
+      "catalyst_score": 0.57,
+      "flow_score": 0.56,
+      "macro_score": 0.58,
+      "total_score": 0.56,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
     "3690.HK": {
       "symbol": "3690.HK",
@@ -867,7 +2245,15 @@
       "kind": "stock",
       "theme": "internet-platform",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -885,20 +2271,83 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.351,
-      "valuation_score": 0.415,
+      "valuation_score": 0.465,
       "catalyst_score": 0.378,
+      "flow_score": 0.56,
+      "macro_score": 0.51,
+      "total_score": 0.428,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
+    },
+    "3908.HK": {
+      "symbol": "3908.HK",
+      "name": "CICC / 中金公司",
+      "kind": "stock",
+      "theme": "hk-capital-markets",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.62,
+      "valuation_score": 0.633,
+      "catalyst_score": 0.616,
       "flow_score": 0.44,
-      "macro_score": 0.46,
-      "total_score": 0.395,
-      "age_days": 139
+      "macro_score": 0.55,
+      "total_score": 0.588,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "510300.SH": {
       "symbol": "510300.SH",
       "name": "Huatai-PineBridge CSI 300 ETF / 华泰柏瑞沪深300ETF",
       "kind": "etf",
       "theme": "china-a-broad-market",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -910,26 +2359,42 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=沪深300ETF华泰柏瑞, source_date=2026-05-19",
+        "formal provider fund_name=沪深300ETF华泰柏瑞, source_date=2026-05-29",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.58,
-      "valuation_score": 0.669,
-      "catalyst_score": 0.542,
+      "valuation_score": 0.696,
+      "catalyst_score": 0.557,
       "flow_score": 0.44,
       "macro_score": 0.54,
-      "total_score": 0.563,
-      "age_days": 0
+      "total_score": 0.572,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
     "510500.SH": {
       "symbol": "510500.SH",
       "name": "China Southern CSI 500 ETF / 南方中证500ETF",
       "kind": "etf",
       "theme": "china-a-midcap-market",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -941,26 +2406,42 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=中证500ETF南方, source_date=2026-05-19",
+        "formal provider fund_name=中证500ETF南方, source_date=2026-05-29",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.52,
-      "valuation_score": 0.75,
-      "catalyst_score": 0.591,
+      "valuation_score": 0.761,
+      "catalyst_score": 0.586,
       "flow_score": 0.44,
       "macro_score": 0.5,
-      "total_score": 0.57,
-      "age_days": 0
+      "total_score": 0.571,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
     "510880.SH": {
       "symbol": "510880.SH",
       "name": "Huatai-PineBridge Dividend ETF / 华泰柏瑞红利ETF",
       "kind": "etf",
       "theme": "china-a-dividend-value",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -972,26 +2453,42 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=红利ETF华泰柏瑞, source_date=2026-05-19",
+        "formal provider fund_name=红利ETF华泰柏瑞, source_date=2026-05-29",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.58,
-      "valuation_score": 0.555,
-      "catalyst_score": 0.517,
-      "flow_score": 0.44,
+      "valuation_score": 0.548,
+      "catalyst_score": 0.486,
+      "flow_score": 0.5,
       "macro_score": 0.54,
       "total_score": 0.534,
-      "age_days": 0
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
     "512480.SH": {
       "symbol": "512480.SH",
       "name": "GuolianAn Semiconductor ETF / 国联安半导体ETF",
       "kind": "etf",
       "theme": "china-a-semiconductors",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1003,26 +2500,42 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=半导体ETF国联安, source_date=2026-05-19",
+        "formal provider fund_name=半导体ETF国联安, source_date=2026-05-29",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.48,
       "valuation_score": 0.8,
-      "catalyst_score": 0.769,
+      "catalyst_score": 0.8,
       "flow_score": 0.44,
       "macro_score": 0.46,
-      "total_score": 0.608,
-      "age_days": 0
+      "total_score": 0.616,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
     "515790.SH": {
       "symbol": "515790.SH",
       "name": "Huatai-PineBridge Photovoltaic ETF / 华泰柏瑞光伏ETF",
       "kind": "etf",
       "theme": "china-a-renewable-energy",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1034,26 +2547,42 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=光伏ETF华泰柏瑞, source_date=2026-05-19",
+        "formal provider fund_name=光伏ETF华泰柏瑞, source_date=2026-05-29",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.48,
-      "valuation_score": 0.699,
-      "catalyst_score": 0.545,
+      "valuation_score": 0.739,
+      "catalyst_score": 0.584,
       "flow_score": 0.44,
       "macro_score": 0.46,
-      "total_score": 0.532,
-      "age_days": 0
+      "total_score": 0.55,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
     "588000.SH": {
       "symbol": "588000.SH",
       "name": "ChinaAMC STAR 50 ETF / 华夏上证科创板50ETF",
       "kind": "etf",
       "theme": "china-a-hard-tech",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1065,18 +2594,26 @@
         }
       ],
       "notes": [
-        "formal provider fund_name=科创50ETF华夏, source_date=2026-05-19",
+        "formal provider fund_name=科创50ETF华夏, source_date=2026-05-29",
         "scores derived from public fund return fields plus local liquidity context"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.48,
-      "valuation_score": 0.782,
-      "catalyst_score": 0.71,
-      "flow_score": 0.44,
+      "valuation_score": 0.8,
+      "catalyst_score": 0.76,
+      "flow_score": 0.48,
       "macro_score": 0.46,
-      "total_score": 0.59,
-      "age_days": 0
+      "total_score": 0.612,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
     "600030.SH": {
       "symbol": "600030.SH",
@@ -1084,7 +2621,15 @@
       "kind": "stock",
       "theme": "china-a-capital-markets",
       "as_of_date": "2026-04-25",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-25",
+        "valuation_score": "2026-04-25",
+        "catalyst_score": "2026-04-25",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-25",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1104,49 +2649,34 @@
       "fundamental_score": 0.717,
       "valuation_score": 0.569,
       "catalyst_score": 0.8,
-      "flow_score": 0.44,
+      "flow_score": 0.54,
       "macro_score": 0.5,
-      "total_score": 0.645,
-      "age_days": 24
+      "total_score": 0.66,
+      "age_days": 34,
+      "component_age_days": {
+        "fundamental_score": 34,
+        "valuation_score": 34,
+        "catalyst_score": 34,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 34
     },
     "600036.SH": {
       "symbol": "600036.SH",
       "name": "China Merchants Bank / 招商银行",
       "kind": "stock",
       "theme": "china-a-financials-bank",
-      "as_of_date": "2026-04-29",
-      "as_of_session": "close",
-      "event_risk": "elevated",
-      "source_count": 1,
-      "proxy_source_count": 0,
-      "sources": [
-        {
-          "label": "Eastmoney A-share F10 financial indicators",
-          "kind": "formal_public_f10",
-          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
-        }
-      ],
-      "notes": [
-        "formal provider report_date=2026-03-31, notice_date=2026-04-29",
-        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
-      ],
-      "evidence_mode": "formal_provider_point_in_time",
-      "proxy_only": false,
-      "fundamental_score": 0.58,
-      "valuation_score": 0.557,
-      "catalyst_score": 0.527,
-      "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.533,
-      "age_days": 20
-    },
-    "600276.SH": {
-      "symbol": "600276.SH",
-      "name": "Hengrui Medicine / 恒瑞医药",
-      "kind": "stock",
-      "theme": "china-a-healthcare-pharma",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "unknown",
       "source_count": 0,
       "proxy_source_count": 3,
@@ -1166,25 +2696,41 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-healthcare-pharma, quote_fresh=True, risk_state=neutral"
+        "kind=stock, theme=china-a-financials-bank, quote_fresh=True, risk_state=neutral"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
       "fundamental_score": 0.5,
-      "valuation_score": 0.53,
+      "valuation_score": 0.58,
       "catalyst_score": 0.5,
-      "flow_score": 0.47,
+      "flow_score": 0.53,
       "macro_score": 0.5,
-      "total_score": 0.502,
-      "age_days": 0
+      "total_score": 0.521,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
-    "600519.SH": {
-      "symbol": "600519.SH",
-      "name": "Kweichow Moutai / 贵州茅台",
+    "600276.SH": {
+      "symbol": "600276.SH",
+      "name": "Hengrui Medicine / 恒瑞医药",
       "kind": "stock",
-      "theme": "china-a-consumer-staples",
-      "as_of_date": "2026-04-25",
-      "as_of_session": "close",
+      "theme": "china-a-healthcare-pharma",
+      "as_of_date": "2026-04-23",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-23",
+        "valuation_score": "2026-04-23",
+        "catalyst_score": "2026-04-23",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-23",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1196,18 +2742,127 @@
         }
       ],
       "notes": [
-        "formal provider report_date=2026-03-31, notice_date=2026-04-25",
+        "formal provider report_date=2026-03-31, notice_date=2026-04-23",
         "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
-      "fundamental_score": 0.585,
-      "valuation_score": 0.721,
-      "catalyst_score": 0.539,
+      "fundamental_score": 0.59,
+      "valuation_score": 0.625,
+      "catalyst_score": 0.674,
       "flow_score": 0.44,
-      "macro_score": 0.54,
-      "total_score": 0.574,
-      "age_days": 24
+      "macro_score": 0.5,
+      "total_score": 0.587,
+      "age_days": 36,
+      "component_age_days": {
+        "fundamental_score": 36,
+        "valuation_score": 36,
+        "catalyst_score": 36,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 36
+    },
+    "600406.SH": {
+      "symbol": "600406.SH",
+      "name": "NARI Technology / 国电南瑞",
+      "kind": "stock",
+      "theme": "china-a-ai-power-grid",
+      "as_of_date": "2026-04-30",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-30",
+        "valuation_score": "2026-04-30",
+        "catalyst_score": "2026-04-30",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-30",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-30",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.504,
+      "valuation_score": 0.51,
+      "catalyst_score": 0.568,
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.511,
+      "age_days": 29,
+      "component_age_days": {
+        "fundamental_score": 29,
+        "valuation_score": 29,
+        "catalyst_score": 29,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 29
+    },
+    "600519.SH": {
+      "symbol": "600519.SH",
+      "name": "Kweichow Moutai / 贵州茅台",
+      "kind": "stock",
+      "theme": "china-a-consumer-staples",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
+      "event_risk": "none",
+      "source_count": 0,
+      "proxy_source_count": 3,
+      "sources": [
+        {
+          "label": "automatic_local_proxy_v1",
+          "kind": "automatic_proxy"
+        },
+        {
+          "label": "trade_universe.toml",
+          "kind": "static_metadata"
+        },
+        {
+          "label": "snapshot_quote_and_market_summary",
+          "kind": "local_snapshot"
+        }
+      ],
+      "notes": [
+        "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
+        "kind=stock, theme=china-a-consumer-staples, quote_fresh=True, risk_state=neutral"
+      ],
+      "evidence_mode": "automatic_local_proxy",
+      "proxy_only": true,
+      "fundamental_score": 0.56,
+      "valuation_score": 0.58,
+      "catalyst_score": 0.5,
+      "flow_score": 0.53,
+      "macro_score": 0.5,
+      "total_score": 0.539,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
     "600900.SH": {
       "symbol": "600900.SH",
@@ -1215,7 +2870,15 @@
       "kind": "stock",
       "theme": "china-a-utilities-defensive",
       "as_of_date": "2026-04-30",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-30",
+        "valuation_score": "2026-04-30",
+        "catalyst_score": "2026-04-30",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-30",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1235,10 +2898,65 @@
       "fundamental_score": 0.63,
       "valuation_score": 0.583,
       "catalyst_score": 0.682,
-      "flow_score": 0.44,
+      "flow_score": 0.5,
       "macro_score": 0.54,
-      "total_score": 0.596,
-      "age_days": 19
+      "total_score": 0.605,
+      "age_days": 29,
+      "component_age_days": {
+        "fundamental_score": 29,
+        "valuation_score": 29,
+        "catalyst_score": 29,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 29
+    },
+    "601012.SH": {
+      "symbol": "601012.SH",
+      "name": "LONGi Green Energy / 隆基绿能",
+      "kind": "stock",
+      "theme": "china-a-renewable-energy",
+      "as_of_date": "2026-04-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-29",
+        "valuation_score": "2026-04-29",
+        "catalyst_score": "2026-04-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-29",
+      "event_risk": "policy",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-29",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.333,
+      "valuation_score": 0.372,
+      "catalyst_score": 0.285,
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.358,
+      "age_days": 30,
+      "component_age_days": {
+        "fundamental_score": 30,
+        "valuation_score": 30,
+        "catalyst_score": 30,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 30
     },
     "601088.SH": {
       "symbol": "601088.SH",
@@ -1246,7 +2964,15 @@
       "kind": "stock",
       "theme": "china-a-energy-dividend",
       "as_of_date": "2026-04-25",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-25",
+        "valuation_score": "2026-04-25",
+        "catalyst_score": "2026-04-25",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-25",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1266,18 +2992,175 @@
       "fundamental_score": 0.482,
       "valuation_score": 0.563,
       "catalyst_score": 0.452,
-      "flow_score": 0.44,
+      "flow_score": 0.5,
       "macro_score": 0.54,
-      "total_score": 0.49,
-      "age_days": 24
+      "total_score": 0.499,
+      "age_days": 34,
+      "component_age_days": {
+        "fundamental_score": 34,
+        "valuation_score": 34,
+        "catalyst_score": 34,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 34
+    },
+    "601211.SH": {
+      "symbol": "601211.SH",
+      "name": "Guotai Junan / 国泰君安",
+      "kind": "stock",
+      "theme": "china-a-capital-markets",
+      "as_of_date": "2026-04-25",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-25",
+        "valuation_score": "2026-04-25",
+        "catalyst_score": "2026-04-25",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-25",
+      "event_risk": "earnings_gap",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-25",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.572,
+      "valuation_score": 0.548,
+      "catalyst_score": 0.525,
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.528,
+      "age_days": 34,
+      "component_age_days": {
+        "fundamental_score": 34,
+        "valuation_score": 34,
+        "catalyst_score": 34,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 34
     },
     "601318.SH": {
       "symbol": "601318.SH",
       "name": "Ping An Insurance / 中国平安",
       "kind": "stock",
       "theme": "china-a-financials-insurance",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "as_of_date": "2026-04-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-29",
+        "valuation_score": "2026-04-29",
+        "catalyst_score": "2026-04-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-29",
+      "event_risk": "elevated",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-29",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.499,
+      "valuation_score": 0.472,
+      "catalyst_score": 0.432,
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.468,
+      "age_days": 30,
+      "component_age_days": {
+        "fundamental_score": 30,
+        "valuation_score": 30,
+        "catalyst_score": 30,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 30
+    },
+    "601688.SH": {
+      "symbol": "601688.SH",
+      "name": "Huatai Securities / 华泰证券",
+      "kind": "stock",
+      "theme": "china-a-capital-markets",
+      "as_of_date": "2026-04-30",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-30",
+        "valuation_score": "2026-04-30",
+        "catalyst_score": "2026-04-30",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-30",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-30",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.713,
+      "valuation_score": 0.569,
+      "catalyst_score": 0.8,
+      "flow_score": 0.44,
+      "macro_score": 0.5,
+      "total_score": 0.644,
+      "age_days": 29,
+      "component_age_days": {
+        "fundamental_score": 29,
+        "valuation_score": 29,
+        "catalyst_score": 29,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 29
+    },
+    "601899.SH": {
+      "symbol": "601899.SH",
+      "name": "Zijin Mining / 紫金矿业",
+      "kind": "stock",
+      "theme": "china-a-metals-mining",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-29",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
       "event_risk": "unknown",
       "source_count": 0,
       "proxy_source_count": 3,
@@ -1297,7 +3180,7 @@
       ],
       "notes": [
         "automatic proxy evidence from local metadata, quote liquidity, and market summary; not a substitute for audited fundamentals",
-        "kind=stock, theme=china-a-financials-insurance, quote_fresh=True, risk_state=neutral"
+        "kind=stock, theme=china-a-metals-mining, quote_fresh=True, risk_state=neutral"
       ],
       "evidence_mode": "automatic_local_proxy",
       "proxy_only": true,
@@ -1307,15 +3190,99 @@
       "flow_score": 0.47,
       "macro_score": 0.5,
       "total_score": 0.502,
-      "age_days": 0
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 0,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
     },
-    "601899.SH": {
-      "symbol": "601899.SH",
-      "name": "Zijin Mining / 紫金矿业",
+    "603031.SH": {
+      "symbol": "603031.SH",
+      "name": "Anfu Technology / 安孚科技",
       "kind": "stock",
-      "theme": "china-a-metals-mining",
-      "as_of_date": "2026-04-22",
-      "as_of_session": "close",
+      "theme": "china-a-ai-optical-chip",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "morning",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-28",
+        "valuation_score": "2026-05-29",
+        "catalyst_score": "2026-05-29",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-29",
+      "event_risk": "none",
+      "source_count": 5,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "2026Q1 net profit +87.78%; Q1 net profit 134m yuan",
+          "kind": "announcement",
+          "url": "https://www.cls.cn/detail/2358198"
+        },
+        {
+          "label": "2025 attributable net profit +34.38%; Nanfu net profit 957m yuan and rights ratio rose to 46.02%",
+          "kind": "news",
+          "url": "https://news.qq.com/rain/a/20260311A03PLK00"
+        },
+        {
+          "label": "Suzhou Yilanwei optical-chip/CPO investor relation record; samples sent to mainstream optical module makers",
+          "kind": "filing",
+          "url": "https://pdf.dfcfw.com/pdf/H22_AN202512241807279074_1.pdf"
+        },
+        {
+          "label": "Nanfu and Gaoneng Times solid-state battery JV; 300MWh sulfide pilot line plan",
+          "kind": "news",
+          "url": "https://news.qq.com/rain/a/20250307A09N7J00"
+        },
+        {
+          "label": "Controlling shareholder partial pledge release disclosed on 2026-05-29",
+          "kind": "announcement",
+          "url": "https://finance.sina.com.cn/roll/2026-05-29/doc-inhznvke1126549.shtml"
+        }
+      ],
+      "notes": [
+        "Core cash-flow anchor is Nanfu consumer battery; the AI optical-chip exposure is a strategic investment, not consolidated core revenue yet.",
+        "Recent price action is hot and may require watch_only until technical, cost, volume, and risk gates clear after reranking.",
+        "Debt, goodwill, overseas margin, and theme-chase risks should be rechecked before any upgrade."
+      ],
+      "evidence_mode": "manual_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.76,
+      "valuation_score": 0.48,
+      "catalyst_score": 0.84,
+      "flow_score": 0.62,
+      "macro_score": 0.58,
+      "total_score": 0.685,
+      "age_days": 0,
+      "component_age_days": {
+        "fundamental_score": 31,
+        "valuation_score": 0,
+        "catalyst_score": 0,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 0
+    },
+    "603259.SH": {
+      "symbol": "603259.SH",
+      "name": "WuXi AppTec / 药明康德",
+      "kind": "stock",
+      "theme": "healthcare-cxo",
+      "as_of_date": "2026-04-28",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-28",
+        "valuation_score": "2026-04-28",
+        "catalyst_score": "2026-04-28",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-28",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1327,18 +3294,120 @@
         }
       ],
       "notes": [
-        "formal provider report_date=2026-03-31, notice_date=2026-04-22",
+        "formal provider report_date=2026-03-31, notice_date=2026-04-28",
         "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
       ],
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
-      "fundamental_score": 0.685,
-      "valuation_score": 0.605,
-      "catalyst_score": 0.774,
-      "flow_score": 0.44,
+      "fundamental_score": 0.664,
+      "valuation_score": 0.647,
+      "catalyst_score": 0.777,
+      "flow_score": 0.5,
       "macro_score": 0.5,
-      "total_score": 0.636,
-      "age_days": 27
+      "total_score": 0.648,
+      "age_days": 31,
+      "component_age_days": {
+        "fundamental_score": 31,
+        "valuation_score": 31,
+        "catalyst_score": 31,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 31
+    },
+    "603501.SH": {
+      "symbol": "603501.SH",
+      "name": "Will Semiconductor / 韦尔股份",
+      "kind": "stock",
+      "theme": "china-a-semiconductors",
+      "as_of_date": "2026-04-30",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-04-30",
+        "valuation_score": "2026-04-30",
+        "catalyst_score": "2026-04-30",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-04-30",
+      "event_risk": "policy",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney A-share F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31, notice_date=2026-04-30",
+        "scores derived from public F10 revenue, profit, ROE, margin, cash-flow and balance-sheet fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.427,
+      "valuation_score": 0.521,
+      "catalyst_score": 0.371,
+      "flow_score": 0.44,
+      "macro_score": 0.46,
+      "total_score": 0.437,
+      "age_days": 29,
+      "component_age_days": {
+        "fundamental_score": 29,
+        "valuation_score": 29,
+        "catalyst_score": 29,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 29
+    },
+    "6160.HK": {
+      "symbol": "6160.HK",
+      "name": "BeiGene / 百济神州",
+      "kind": "stock",
+      "theme": "healthcare-biotech",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "policy",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.647,
+      "valuation_score": 0.35,
+      "catalyst_score": 0.683,
+      "flow_score": 0.44,
+      "macro_score": 0.51,
+      "total_score": 0.552,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "6862.HK": {
       "symbol": "6862.HK",
@@ -1346,7 +3415,15 @@
       "kind": "stock",
       "theme": "consumer-discretionary",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1364,12 +3441,67 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.581,
-      "valuation_score": 0.561,
+      "valuation_score": 0.558,
       "catalyst_score": 0.472,
+      "flow_score": 0.48,
+      "macro_score": 0.55,
+      "total_score": 0.531,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
+    },
+    "6886.HK": {
+      "symbol": "6886.HK",
+      "name": "HTSC / 华泰证券",
+      "kind": "stock",
+      "theme": "hk-capital-markets",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.604,
+      "valuation_score": 0.677,
+      "catalyst_score": 0.568,
       "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.52,
-      "age_days": 139
+      "macro_score": 0.55,
+      "total_score": 0.58,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "688981.SH": {
       "symbol": "688981.SH",
@@ -1377,7 +3509,15 @@
       "kind": "stock",
       "theme": "china-a-semiconductors",
       "as_of_date": "2026-05-15",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-05-15",
+        "valuation_score": "2026-05-15",
+        "catalyst_score": "2026-05-15",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-05-15",
       "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1397,10 +3537,18 @@
       "fundamental_score": 0.522,
       "valuation_score": 0.518,
       "catalyst_score": 0.542,
-      "flow_score": 0.48,
+      "flow_score": 0.54,
       "macro_score": 0.46,
-      "total_score": 0.514,
-      "age_days": 4
+      "total_score": 0.523,
+      "age_days": 14,
+      "component_age_days": {
+        "fundamental_score": 14,
+        "valuation_score": 14,
+        "catalyst_score": 14,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 14
     },
     "9618.HK": {
       "symbol": "9618.HK",
@@ -1408,7 +3556,15 @@
       "kind": "stock",
       "theme": "internet-platform",
       "as_of_date": "2026-03-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
       "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1426,12 +3582,114 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.418,
-      "valuation_score": 0.595,
+      "valuation_score": 0.599,
       "catalyst_score": 0.381,
       "flow_score": 0.44,
-      "macro_score": 0.46,
-      "total_score": 0.452,
-      "age_days": 49
+      "macro_score": 0.51,
+      "total_score": 0.457,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
+    },
+    "9866.HK": {
+      "symbol": "9866.HK",
+      "name": "NIO / 蔚来-SW",
+      "kind": "stock",
+      "theme": "hk-ev",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "low",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.536,
+      "valuation_score": 0.35,
+      "catalyst_score": 0.727,
+      "flow_score": 0.44,
+      "macro_score": 0.55,
+      "total_score": 0.534,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
+    },
+    "9868.HK": {
+      "symbol": "9868.HK",
+      "name": "XPeng / 小鹏汽车-W",
+      "kind": "stock",
+      "theme": "hk-ev",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "earnings_gap",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.332,
+      "valuation_score": 0.415,
+      "catalyst_score": 0.357,
+      "flow_score": 0.54,
+      "macro_score": 0.55,
+      "total_score": 0.408,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     },
     "9988.HK": {
       "symbol": "9988.HK",
@@ -1439,7 +3697,15 @@
       "kind": "stock",
       "theme": "internet-platform",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "policy",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1457,12 +3723,20 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.472,
-      "valuation_score": 0.568,
+      "valuation_score": 0.569,
       "catalyst_score": 0.377,
-      "flow_score": 0.44,
-      "macro_score": 0.46,
-      "total_score": 0.461,
-      "age_days": 139
+      "flow_score": 0.5,
+      "macro_score": 0.51,
+      "total_score": 0.476,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
     },
     "9992.HK": {
       "symbol": "9992.HK",
@@ -1470,7 +3744,15 @@
       "kind": "stock",
       "theme": "consumer-discretionary",
       "as_of_date": "2025-12-31",
-      "as_of_session": "close",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2025-12-31",
+        "valuation_score": "2025-12-31",
+        "catalyst_score": "2025-12-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2025-12-31",
       "event_risk": "low",
       "source_count": 1,
       "proxy_source_count": 0,
@@ -1488,62 +3770,288 @@
       "evidence_mode": "formal_provider_point_in_time",
       "proxy_only": false,
       "fundamental_score": 0.798,
-      "valuation_score": 0.507,
+      "valuation_score": 0.501,
       "catalyst_score": 0.8,
+      "flow_score": 0.6,
+      "macro_score": 0.55,
+      "total_score": 0.685,
+      "age_days": 149,
+      "component_age_days": {
+        "fundamental_score": 149,
+        "valuation_score": 149,
+        "catalyst_score": 149,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 149
+    },
+    "9999.HK": {
+      "symbol": "9999.HK",
+      "name": "NetEase / 网易-S",
+      "kind": "stock",
+      "theme": "internet-platform",
+      "as_of_date": "2026-03-31",
+      "as_of_session": "midday",
+      "component_as_of_dates": {
+        "fundamental_score": "2026-03-31",
+        "valuation_score": "2026-03-31",
+        "catalyst_score": "2026-03-31",
+        "flow_score": "2026-05-29",
+        "macro_score": "2026-05-29"
+      },
+      "event_risk_as_of_date": "2026-03-31",
+      "event_risk": "policy",
+      "source_count": 1,
+      "proxy_source_count": 0,
+      "sources": [
+        {
+          "label": "Eastmoney HK F10 financial indicators",
+          "kind": "formal_public_f10",
+          "url": "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        }
+      ],
+      "notes": [
+        "formal provider report_date=2026-03-31",
+        "scores derived from public HK F10 revenue, profit, ROE, valuation and dividend fields"
+      ],
+      "evidence_mode": "formal_provider_point_in_time",
+      "proxy_only": false,
+      "fundamental_score": 0.576,
+      "valuation_score": 0.55,
+      "catalyst_score": 0.513,
       "flow_score": 0.44,
-      "macro_score": 0.5,
-      "total_score": 0.657,
-      "age_days": 139
+      "macro_score": 0.51,
+      "total_score": 0.528,
+      "age_days": 59,
+      "component_age_days": {
+        "fundamental_score": 59,
+        "valuation_score": 59,
+        "catalyst_score": 59,
+        "flow_score": 0,
+        "macro_score": 0
+      },
+      "event_risk_age_days": 59
     }
   },
   "findings": [
     {
       "symbol": "0002.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "0002.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "0002.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "0002.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
     },
     {
       "symbol": "0002.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.5
+      "total_score": 0.505
+    },
+    {
+      "symbol": "000333.SZ",
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
+    },
+    {
+      "symbol": "000333.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
     },
     {
       "symbol": "000333.SZ",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.507
+      "total_score": 0.483
+    },
+    {
+      "symbol": "000333.SZ",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "000333.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
     },
     {
       "symbol": "0005.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 49
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0005.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0005.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "0005.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.532
+      "total_score": 0.536
     },
     {
       "symbol": "0006.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "0006.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
     },
     {
       "symbol": "0006.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.529
+      "total_score": 0.535
+    },
+    {
+      "symbol": "000725.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 29
+    },
+    {
+      "symbol": "000725.SZ",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.513
+    },
+    {
+      "symbol": "000776.SZ",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 31
+    },
+    {
+      "symbol": "000776.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 31
+    },
+    {
+      "symbol": "000858.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 29
+    },
+    {
+      "symbol": "002050.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 29
+    },
+    {
+      "symbol": "002050.SZ",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.499
+    },
+    {
+      "symbol": "002335.SZ",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 32
+    },
+    {
+      "symbol": "002335.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 32
+    },
+    {
+      "symbol": "002335.SZ",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.538
+    },
+    {
+      "symbol": "002460.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 29
+    },
+    {
+      "symbol": "002466.SZ",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 31
+    },
+    {
+      "symbol": "002466.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 31
+    },
+    {
+      "symbol": "002475.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 30
+    },
+    {
+      "symbol": "002594.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 30
     },
     {
       "symbol": "002594.SZ",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.404
+      "total_score": 0.405
     },
     {
       "symbol": "002594.SZ",
@@ -1553,91 +4061,234 @@
     {
       "symbol": "0386.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 49
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
     },
     {
       "symbol": "0386.HK",
       "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.539
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0386.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "0388.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 49
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
     },
     {
       "symbol": "0388.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0388.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "0388.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.542
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0700.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "0700.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
       "total_score": 0.536
     },
     {
       "symbol": "0700.HK",
-      "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 49
-    },
-    {
-      "symbol": "0700.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.522
-    },
-    {
-      "symbol": "0700.HK",
       "severity": "warning",
       "reason": "event_risk_policy"
     },
     {
       "symbol": "0728.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 49
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0728.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0728.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "0728.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.512
+      "total_score": 0.525
     },
     {
       "symbol": "0857.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 49
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0857.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0857.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "0857.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.521
+      "total_score": 0.532
     },
     {
       "symbol": "0883.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 49
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0883.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0883.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "0941.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 49
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0941.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0941.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "0941.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.521
+      "total_score": 0.526
+    },
+    {
+      "symbol": "0981.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0981.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "0981.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "0981.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.493
+    },
+    {
+      "symbol": "0981.HK",
+      "severity": "warning",
+      "reason": "event_risk_policy"
     },
     {
       "symbol": "1024.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "1024.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.511
     },
     {
       "symbol": "1024.HK",
@@ -1647,26 +4298,61 @@
     {
       "symbol": "1093.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "1093.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "1093.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "1093.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.516
+      "total_score": 0.488
     },
     {
       "symbol": "1177.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "1177.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
     },
     {
       "symbol": "1177.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.466
+      "total_score": 0.487
     },
     {
       "symbol": "1177.HK",
@@ -1674,40 +4360,232 @@
       "reason": "event_risk_earnings_gap"
     },
     {
+      "symbol": "1211.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "1211.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "1211.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "1211.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.47
+    },
+    {
       "symbol": "1299.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "1299.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "1299.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "1299.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
+    },
+    {
+      "symbol": "1772.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "1772.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "1772.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "1801.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "1801.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "1801.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "1801.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
+    },
+    {
+      "symbol": "1801.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.464
+    },
+    {
+      "symbol": "1801.HK",
+      "severity": "warning",
+      "reason": "event_risk_policy"
     },
     {
       "symbol": "1810.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "1810.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "1810.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "1810.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.523
+      "total_score": 0.482
+    },
+    {
+      "symbol": "2015.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "2015.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "2015.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "2015.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.436
+    },
+    {
+      "symbol": "2015.HK",
+      "severity": "warning",
+      "reason": "event_risk_earnings_gap"
     },
     {
       "symbol": "2020.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "2020.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
     },
     {
       "symbol": "2020.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.538
+      "total_score": 0.543
     },
     {
       "symbol": "2269.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "2269.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
     },
     {
       "symbol": "2269.HK",
@@ -1717,14 +4595,55 @@
     {
       "symbol": "2331.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "2331.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
     },
     {
       "symbol": "2331.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.535
+      "total_score": 0.54
+    },
+    {
+      "symbol": "2359.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "2359.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "2359.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "2800.HK",
@@ -1742,12 +4661,153 @@
       "symbol": "2800.HK",
       "severity": "warning",
       "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "300014.SZ",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 34
+    },
+    {
+      "symbol": "300014.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 34
+    },
+    {
+      "symbol": "300015.SZ",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 35
+    },
+    {
+      "symbol": "300015.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 35
+    },
+    {
+      "symbol": "300015.SZ",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.543
+    },
+    {
+      "symbol": "300059.SZ",
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
+    },
+    {
+      "symbol": "300059.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "300059.SZ",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.488
+    },
+    {
+      "symbol": "300059.SZ",
+      "severity": "warning",
+      "reason": "event_risk_unknown"
+    },
+    {
+      "symbol": "300059.SZ",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "300122.SZ",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 31
+    },
+    {
+      "symbol": "300122.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 31
+    },
+    {
+      "symbol": "300122.SZ",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.401
+    },
+    {
+      "symbol": "300124.SZ",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 31
+    },
+    {
+      "symbol": "300124.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 31
+    },
+    {
+      "symbol": "300124.SZ",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.463
+    },
+    {
+      "symbol": "300274.SZ",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 31
+    },
+    {
+      "symbol": "300274.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 31
+    },
+    {
+      "symbol": "300274.SZ",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.404
+    },
+    {
+      "symbol": "300274.SZ",
+      "severity": "warning",
+      "reason": "event_risk_earnings_gap"
     },
     {
       "symbol": "300750.SZ",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 33
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 43
+    },
+    {
+      "symbol": "300750.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 43
+    },
+    {
+      "symbol": "300760.SZ",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 30
+    },
+    {
+      "symbol": "300760.SZ",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.492
     },
     {
       "symbol": "3033.HK",
@@ -1760,12 +4820,6 @@
       "severity": "warning",
       "reason": "nontechnical_proxy_only",
       "proxy_source_count": 3
-    },
-    {
-      "symbol": "3033.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.546
     },
     {
       "symbol": "3033.HK",
@@ -1786,31 +4840,66 @@
     },
     {
       "symbol": "3067.HK",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.546
-    },
-    {
-      "symbol": "3067.HK",
       "severity": "warning",
       "reason": "nontechnical_source_missing"
     },
     {
       "symbol": "3690.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "3690.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
     },
     {
       "symbol": "3690.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.395
+      "total_score": 0.428
     },
     {
       "symbol": "3690.HK",
       "severity": "warning",
       "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "3908.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "3908.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "3908.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "510880.SH",
@@ -1825,12 +4914,6 @@
     },
     {
       "symbol": "515790.SH",
-      "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.532
-    },
-    {
-      "symbol": "515790.SH",
       "severity": "warning",
       "reason": "event_risk_policy"
     },
@@ -1840,95 +4923,330 @@
       "reason": "event_risk_policy"
     },
     {
-      "symbol": "600036.SH",
+      "symbol": "600030.SH",
       "severity": "info",
-      "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.533
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 34
+    },
+    {
+      "symbol": "600030.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 34
     },
     {
       "symbol": "600036.SH",
-      "severity": "warning",
-      "reason": "event_risk_elevated"
-    },
-    {
-      "symbol": "600276.SH",
       "severity": "info",
       "reason": "automatic_proxy_evidence",
       "provider": "automatic_local_proxy_v1"
     },
     {
-      "symbol": "600276.SH",
+      "symbol": "600036.SH",
       "severity": "warning",
       "reason": "nontechnical_proxy_only",
       "proxy_source_count": 3
     },
     {
-      "symbol": "600276.SH",
+      "symbol": "600036.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.502
+      "total_score": 0.521
     },
     {
-      "symbol": "600276.SH",
+      "symbol": "600036.SH",
       "severity": "warning",
       "reason": "event_risk_unknown"
     },
     {
-      "symbol": "600276.SH",
+      "symbol": "600036.SH",
       "severity": "warning",
       "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 36
+    },
+    {
+      "symbol": "600276.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 36
+    },
+    {
+      "symbol": "600406.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 29
+    },
+    {
+      "symbol": "600406.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.511
+    },
+    {
+      "symbol": "600519.SH",
+      "severity": "info",
+      "reason": "automatic_proxy_evidence",
+      "provider": "automatic_local_proxy_v1"
+    },
+    {
+      "symbol": "600519.SH",
+      "severity": "warning",
+      "reason": "nontechnical_proxy_only",
+      "proxy_source_count": 3
+    },
+    {
+      "symbol": "600519.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.539
+    },
+    {
+      "symbol": "600519.SH",
+      "severity": "warning",
+      "reason": "nontechnical_source_missing"
+    },
+    {
+      "symbol": "600900.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 29
+    },
+    {
+      "symbol": "601012.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 30
+    },
+    {
+      "symbol": "601012.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.358
+    },
+    {
+      "symbol": "601012.SH",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "601088.SH",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 34
+    },
+    {
+      "symbol": "601088.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 34
     },
     {
       "symbol": "601088.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.49
+      "total_score": 0.499
+    },
+    {
+      "symbol": "601211.SH",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 34
+    },
+    {
+      "symbol": "601211.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 34
+    },
+    {
+      "symbol": "601211.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.528
+    },
+    {
+      "symbol": "601211.SH",
+      "severity": "warning",
+      "reason": "event_risk_earnings_gap"
     },
     {
       "symbol": "601318.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 30
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.468
+    },
+    {
+      "symbol": "601318.SH",
+      "severity": "warning",
+      "reason": "event_risk_elevated"
+    },
+    {
+      "symbol": "601688.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 29
+    },
+    {
+      "symbol": "601899.SH",
       "severity": "info",
       "reason": "automatic_proxy_evidence",
       "provider": "automatic_local_proxy_v1"
     },
     {
-      "symbol": "601318.SH",
+      "symbol": "601899.SH",
       "severity": "warning",
       "reason": "nontechnical_proxy_only",
       "proxy_source_count": 3
     },
     {
-      "symbol": "601318.SH",
+      "symbol": "601899.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
       "total_score": 0.502
     },
     {
-      "symbol": "601318.SH",
+      "symbol": "601899.SH",
       "severity": "warning",
       "reason": "event_risk_unknown"
     },
     {
-      "symbol": "601318.SH",
+      "symbol": "601899.SH",
       "severity": "warning",
       "reason": "nontechnical_source_missing"
     },
     {
+      "symbol": "603259.SH",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 31
+    },
+    {
+      "symbol": "603259.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 31
+    },
+    {
+      "symbol": "603501.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 29
+    },
+    {
+      "symbol": "603501.SH",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.437
+    },
+    {
+      "symbol": "603501.SH",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
+      "symbol": "6160.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "6160.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "6160.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "6160.HK",
+      "severity": "warning",
+      "reason": "event_risk_policy"
+    },
+    {
       "symbol": "6862.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "6862.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "6862.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "6862.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
     },
     {
       "symbol": "6862.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.52
+      "total_score": 0.531
+    },
+    {
+      "symbol": "6886.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "6886.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "6886.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "688981.SH",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 14
     },
     {
       "symbol": "688981.SH",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.514
+      "total_score": 0.523
     },
     {
       "symbol": "688981.SH",
@@ -1938,14 +5256,28 @@
     {
       "symbol": "9618.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 49
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "9618.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "9618.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
     },
     {
       "symbol": "9618.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.452
+      "total_score": 0.457
     },
     {
       "symbol": "9618.HK",
@@ -1953,16 +5285,94 @@
       "reason": "event_risk_policy"
     },
     {
+      "symbol": "9866.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "9866.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "9866.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "9866.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.534
+    },
+    {
+      "symbol": "9868.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "9868.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "9868.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "9868.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.408
+    },
+    {
+      "symbol": "9868.HK",
+      "severity": "warning",
+      "reason": "event_risk_earnings_gap"
+    },
+    {
       "symbol": "9988.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "9988.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
     },
     {
       "symbol": "9988.HK",
       "severity": "info",
       "reason": "nontechnical_score_below_action_min",
-      "total_score": 0.461
+      "total_score": 0.476
     },
     {
       "symbol": "9988.HK",
@@ -1972,14 +5382,66 @@
     {
       "symbol": "9992.HK",
       "severity": "info",
-      "reason": "nontechnical_evidence_stale",
-      "age_days": 139
+      "reason": "nontechnical_component_stale",
+      "component": "fundamental_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "9992.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "9992.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 149
+    },
+    {
+      "symbol": "9992.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 149
+    },
+    {
+      "symbol": "9999.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "valuation_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "9999.HK",
+      "severity": "info",
+      "reason": "nontechnical_component_stale",
+      "component": "catalyst_score",
+      "age_days": 59
+    },
+    {
+      "symbol": "9999.HK",
+      "severity": "warning",
+      "reason": "event_risk_stale",
+      "age_days": 59
+    },
+    {
+      "symbol": "9999.HK",
+      "severity": "info",
+      "reason": "nontechnical_score_below_action_min",
+      "total_score": 0.528
+    },
+    {
+      "symbol": "9999.HK",
+      "severity": "warning",
+      "reason": "event_risk_policy"
     }
   ],
   "sources": {
     "config": "D:\\Code\\yoyo\\config\\nontechnical_evidence.toml",
     "trade_universe": "D:\\Code\\yoyo\\config\\trade_universe.toml",
-    "snapshot": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-19.json",
+    "snapshot": "D:\\Code\\yoyo\\data\\snapshots\\2026-05-29-midday.json",
     "ranking": null
   }
 }

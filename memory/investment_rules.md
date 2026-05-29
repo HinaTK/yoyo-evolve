@@ -18,6 +18,7 @@
 - Dynamic ranking from non-date-aligned quotes may identify audit priorities only; it cannot supply triggers, ETF confirmation, or peer-relative strength for same-day action.
 - `focus_industries.toml` expresses stable user preference; `research/focus/*-focus.json` only changes daily attention and must not delete or auto-add durable trade-universe symbols without explicit confirmation.
 - Track four-industry mistakes separately: industry priority errors are not the same as same-theme symbol-selection errors.
+- Proxy-only nontechnical evidence is watch/audit-only; action requires point-in-time manual/formal evidence with real sources, known event risk, and still must pass cost and risk gates.
 
 ## Updating This File
 - Only add a rule after repeated evidence across multiple review windows.

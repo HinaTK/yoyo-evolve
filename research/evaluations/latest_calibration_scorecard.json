@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-19T01:43:06Z",
-  "as_of_date": "2026-05-19",
-  "as_of_session": "close",
+  "generated_at": "2026-05-29T04:10:57Z",
+  "as_of_date": "2026-05-29",
+  "as_of_session": "midday",
   "inputs": {
     "calls_dir": "D:\\Code\\yoyo\\research\\calls",
     "snapshot_dir": "D:\\Code\\yoyo\\data\\snapshots",
@@ -28,9 +28,9 @@
     "shadow_record_count": 0,
     "combined_record_count": 854,
     "call_summary": {
-      "generated_at": "2026-05-19T01:43:06Z",
-      "as_of_date": "2026-05-19",
-      "as_of_session": "close",
+      "generated_at": "2026-05-29T04:10:57Z",
+      "as_of_date": "2026-05-29",
+      "as_of_session": "midday",
       "evaluations": 854,
       "verdict_counts": {
         "fail": 219,
@@ -213,12 +213,12 @@
       ]
     },
     "shadow_summary": {
-      "total_shadow_log_count": 29,
-      "forward_shadow_log_count": 9,
+      "total_shadow_log_count": 48,
+      "forward_shadow_log_count": 28,
       "historical_replay_log_count": 20,
-      "evaluated_log_count": 9,
-      "matured_forward_shadow_days": 1,
-      "no_action_log_count": 9,
+      "evaluated_log_count": 28,
+      "matured_forward_shadow_days": 4,
+      "no_action_log_count": 28,
       "pending_sample_count": 0,
       "sample_count": 0,
       "win_rate": null,
