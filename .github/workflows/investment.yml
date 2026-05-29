@@ -1,21 +1,40 @@
-name: Investment Research
+name: Investment System Evolution
 
 on:
   schedule:
     - cron: '30 9 * * 1-5' # weekdays 17:30 HKT, after market close
   workflow_dispatch:
+    inputs:
+      session:
+        description: Investment session to run
+        required: true
+        default: close
+        type: choice
+        options:
+          - close
+          - morning
+          - midday
+      auto_implement:
+        description: Let yoyo implement bounded investment-system improvement tasks
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
-  group: investment-research
+  group: investment-system-evolution
   cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
-  research:
+  evolve-investment-system:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 120
+
+    env:
+      SESSION: ${{ github.event_name == 'workflow_dispatch' && inputs.session || 'close' }}
+      INVESTMENT_SYSTEM_AUTO_IMPLEMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.auto_implement || 'false' }}
 
     steps:
       - name: Generate bot token
@@ -29,8 +48,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ steps.bot-token.outputs.token }}
-          fetch-depth: 20
-          persist-credentials: false
+          fetch-depth: 50
+          persist-credentials: true
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -85,14 +104,48 @@ jobs:
           chmod +x scripts/evolve_investment.sh
           ./scripts/evolve_investment.sh
 
-      - name: Commit research outputs
+      - name: Commit investment research outputs
         run: |
-          git add research/daily research/calls research/evaluations journals/investment_journal.md memory/active_investment_learnings.md memory/investment_rules.md memory/investment_error_patterns.md
+          git add INVESTMENT_SYSTEM.md || true
+          git add config/active_strategy.toml config/focus_industries.toml config/investment_profile.toml config/market_radar.toml config/nontechnical_evidence.toml config/optimization.toml config/trade_universe.toml config/external_signal_candidates.toml || true
+          git add memory/active_investment_learnings.md memory/investment_rules.md memory/investment_error_patterns.md || true
+          git add journals/investment_journal.md || true
+          git add research/calls research/dashboard research/daily research/evaluations research/evidence research/experiments research/focus research/products/daily_close research/rankings research/readiness research/risk research/shadow/*.json research/shadow/*.md research/shadow_variants || true
           if git diff --cached --quiet; then
-            echo "No research changes to commit."
+            echo "No investment research changes to commit."
             exit 0
           fi
           git commit -m "Daily investment research update"
 
-      - name: Push research outputs
+      - name: Run investment system evolution loop
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+        run: |
+          chmod +x scripts/evolve_investment_system.sh
+          ./scripts/evolve_investment_system.sh
+
+      - name: Commit investment system evolution outputs
+        run: |
+          git add INVESTMENT_SYSTEM.md || true
+          git add config/active_strategy.toml config/focus_industries.toml config/investment_profile.toml config/market_radar.toml config/nontechnical_evidence.toml config/optimization.toml config/trade_universe.toml config/external_signal_candidates.toml || true
+          git add memory/active_investment_learnings.md memory/investment_rules.md memory/investment_error_patterns.md || true
+          git add journals/investment_journal.md || true
+          git add research/calls research/dashboard research/daily research/evaluations research/evidence research/experiments research/focus research/products/daily_close research/rankings research/readiness research/risk research/shadow/*.json research/shadow/*.md research/shadow_variants || true
+          git add scripts tests || true
+          if git diff --cached --quiet; then
+            echo "No investment system evolution changes to commit."
+            exit 0
+          fi
+          git commit -m "Run investment system evolution"
+
+      - name: Push investment outputs
         run: git push origin main
