@@ -36,6 +36,7 @@ PROVIDER_RETRY_SECONDS="${PROVIDER_RETRY_SECONDS:-120}"
 SKIP_EXISTING_OUTPUTS="${SKIP_EXISTING_OUTPUTS:-}"
 INVESTMENT_LIGHT_CONTEXT="${INVESTMENT_LIGHT_CONTEXT:-true}"
 ENABLE_SHADOW_LOGGING="${ENABLE_SHADOW_LOGGING:-true}"
+ALLOW_WEEKEND_INVESTMENT_RUN="${ALLOW_WEEKEND_INVESTMENT_RUN:-false}"
 if [ -z "${SNAPSHOT_FILE:-}" ]; then
     if [ "$SESSION" = "morning" ] || [ "$SESSION" = "midday" ]; then
         SNAPSHOT_FILE="$ROOT_DIR/data/snapshots/$DATE-$SESSION.json"
@@ -92,6 +93,19 @@ case "$SESSION" in
         exit 2
         ;;
 esac
+
+if [ "$SESSION" != "historical" ] && [ "$ALLOW_WEEKEND_INVESTMENT_RUN" != "true" ]; then
+    DAY_OF_WEEK=$("$PYTHON_BIN" - <<PY
+import datetime as dt
+print(dt.date.fromisoformat("$DATE").isoweekday())
+PY
+)
+    if [ "$DAY_OF_WEEK" = "6" ] || [ "$DAY_OF_WEEK" = "7" ]; then
+        echo "Skip investment $SESSION run for $DATE: weekend/non-trading day."
+        echo "Set ALLOW_WEEKEND_INVESTMENT_RUN=true to override for manual testing."
+        exit 0
+    fi
+fi
 
 if [ -z "${SKIP_EXISTING_OUTPUTS:-}" ]; then
     if [ "$SESSION" = "historical" ]; then
